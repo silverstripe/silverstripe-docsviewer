@@ -82,6 +82,29 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
+	 * @todo - This is nasty, ripped out of DebugView.
+	 */
+	function writeHeader() {
+		echo '<!DOCTYPE html>
+				<html>
+					<head>
+						<base href="'. Director::absoluteBaseURL() .'>	"
+						<title>' . htmlentities($_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI']) . '</title>
+						<link rel="stylesheet" href="sapphiredocs/css/DocumentationViewer.css" type="text/css">
+					</head>
+					<body>
+					<div class="header">SilverStripe</div>
+					<div class="info">
+					<h1>SilverStripe Documentation</h1>
+
+					<p class="breadcrumbs"><a href="dev/docs/">docs</a></p></div>';
+	}
+	
+	function writeFooter() {
+		echo "</body></html>";		
+	}
+
+	/**
 	 * Parse a given individual markdown page
 	 *
 	 * @param HTTPRequest
@@ -95,9 +118,8 @@ class DocumentationViewer extends Controller {
 		
 		if(!stripos($class, '.md')) $class .= '.md';
 		
-		$renderer = new DebugView();
-		$renderer->writeHeader();
-		$renderer->writeInfo("SilverStripe Documentation", '');
+		$this->writeHeader();
+
 		$base = Director::baseURL();
 		
 		// find page
@@ -117,7 +139,7 @@ class DocumentationViewer extends Controller {
 		<script type="text/javascript" src="'. Director::absoluteBaseURL() .'sapphiredocs/javascript/DocumentationViewer.js"></script>
 		';
 		
-		$renderer->writeFooter();
+		$this->writeFooter();
 	}
 	
 	/**
@@ -160,7 +182,6 @@ class DocumentationViewer extends Controller {
 	 */
 	private function generateNestedTree($module) {
 		$path = BASE_PATH . '/'. $module .'/docs/';
-		
 		return (is_dir($path)) ? $this->recursivelyGenerateTree($path, $module) : false;
 	}
 	

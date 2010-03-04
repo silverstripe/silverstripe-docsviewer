@@ -1,0 +1,135 @@
+/**
+ * Development Admin Styles
+ *
+ * @todo Remove cms references
+ */
+
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding: 0;}
+
+html { background: #eee;}
+body { font: 14px/1.1 Helvetica,Arial,sans-serif; color: #333; }
+
+p {
+	font-size: 14px;
+	line-height: 21px;
+	margin-bottom: 21px;
+}
+
+ul { margin: 0 0 21px 21px; }
+	li { font-size: 14px; line-height: 21px;}
+
+
+h1 { font-size: 18px; margin-bottom: 18px; }
+h2 { font-size: 16px; margin-bottom: 18px; }
+h3 { font-size: 14px; margin-bottom: 18px; }
+h4 { font-size: 12px; margin-bottom: 9px; }
+
+pre { 
+	margin-bottom: 18px; 
+	font-family:'Bitstream Vera Sans Mono',Monaco, 'Courier New', monospace; 
+	border-left: 4px solid #eee; 
+	background: #f4f4f4;
+	padding: 12px;
+}
+
+/* Header Banner */
+.info { 
+	border:1px solid #bbb; 
+	border-width: 1px 0;
+	background-color:#ccdef3; 
+	padding: 12px; 
+	margin-bottom: 18px;
+}
+
+	.info h1 { 
+		margin: 0; 
+		padding: 0;
+		color: #333; 
+		font-size: 30px;
+		letter-spacing: -2px; 
+	}
+	
+	.info h3 {
+		margin: 4px 0;
+		color: #333;
+		font-size: 14px;
+	}
+	
+	.info p {
+		color: #484f57;
+		margin: 0;
+
+	}
+	
+.header { 
+	margin:0; 
+	background-color:#666673; 
+	text-align: right;
+	font-size: 12px;
+	padding: 8px 12px;
+	color: #fff;
+	background-image:url(../../cms/images/mainmenu/top-bg.gif); 
+}
+	
+.trace { padding:6px 12px; }
+.trace li { font-size:14px; margin:6px 0; }
+
+pre span { color:#999;}
+pre .error { color:#f00; }
+
+/* Status Box */
+.status {
+	padding:10px 20px 10px 40px;
+	margin-bottom: 12px;
+}
+	.status h2 { margin: 0; }
+	.pass { 
+		color:#006600; 
+		background:#E2F9E3 url(../../cms/images/alert-good.gif) no-repeat scroll 7px 50%; 
+		border:1px solid #8DD38D; 
+	}
+	.fail { 
+		color:#C80700; 
+		background:#FFE9E9 url(../../cms/images/alert-bad.gif) no-repeat scroll 7px 50%; 
+		border:1px solid #C80700; 
+	}
+	.pending {
+		background: #fefcc5;
+		border: 1px solid #dedc51;
+	}
+	
+.buildCompleted { display: none; }
+	
+.failure span { color:#C80700; font-weight:bold; }
+
+#LeftColumn {
+	width: 60%;
+	float: left;
+}
+
+#RightColumn {
+	width: 40%; 
+	float: right;
+}
+
+.box {
+	background: #fff;
+	padding: 12px;
+	margin: 0 12px 12px 12px;
+	border: 1px solid #ddd;
+}
+	#RightColumn .box {
+		margin: 0 12px 12px 0;
+	}
+	
+
+	
+	/* Nested tree */
+	.box ul.tree {
+		
+	}
+		.box ul.tree li {
+			list-style: none;
+			font-size: 12px;
+		}
+
