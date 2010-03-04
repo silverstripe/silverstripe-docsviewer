@@ -62,7 +62,7 @@ class DocumentationViewer extends Controller {
 					// see if docs folder is present
 					$subfolders = scandir(BASE_PATH .'/'. $module);
 					
-					if($subfolders && in_array('docs', $subfolders)) {
+					if($subfolders && in_array('doc', $subfolders)) {
 						$this->generateNestedTree($module);
 					}
 					else {
@@ -121,7 +121,7 @@ class DocumentationViewer extends Controller {
 		$base = Director::baseURL();
 		
 		// find page
-		$path = BASE_PATH . '/'. $module .'/docs/';
+		$path = BASE_PATH . '/'. $module .'/doc/';
 		
 		echo "<div id='LeftColumn'><div class='box'>";
 		if($page = $this->findPage($path, $class)) {
@@ -179,7 +179,7 @@ class DocumentationViewer extends Controller {
 	 * @param String - module to generate
 	 */
 	private function generateNestedTree($module) {
-		$path = BASE_PATH . '/'. $module .'/docs/';
+		$path = BASE_PATH . '/'. $module .'/doc/';
 		return (is_dir($path)) ? $this->recursivelyGenerateTree($path, $module) : false;
 	}
 	

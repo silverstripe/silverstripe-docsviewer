@@ -2,13 +2,13 @@
 
 
 Your documentation needs to go in the specific modules doc folder which it refers mostly too. For example if you want to document
-a feature of your custom module 'MyModule' you need to create markdown files in mymodule/docs/.
+a feature of your custom module 'MyModule' you need to create markdown files in mymodule/doc/.
 
 The files have to end with the __.md__ extension. The documentation viewer will automatically replace hyphens (-) with spaces (since you cannot
 have spaces easily in some file systems).
 
 ## Syntax ##
-This uses a customized markdown extra parser. To view the syntax for page formatting check out [http://daringfireball.net/projects/markdown/syntax](Daring Fireball)
+This uses a customized markdown extra parser. To view the syntax for page formatting check out [http://daringfireball.net/projects/markdown/syntax][Daring Fireball]
 
 
 ## Creating Hierarchy ##
