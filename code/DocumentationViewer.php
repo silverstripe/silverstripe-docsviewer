@@ -6,11 +6,7 @@
  * Reads the bundled markdown files from doc/ folders and displays output in 
  * a formatted page
  *
- * @todo 
- * 		- We should move away from relying on DebugViewer. We could even use the actual
- *			standard template system for the layout
- *
- *		- Abstract html / css out from DebugViewer
+ * @todo Tidy up template / styling
  *  
  * @package sapphiredocs
  */
@@ -39,9 +35,11 @@ class DocumentationViewer extends Controller {
 		$this->writeHeader();
 		$base = Director::baseURL();
 		
+		$readme = ($this->readmeExists('sapphire')) ? "<a href=''>Read Me</a>" : false;
+		
 		// write the main content (sapphire) on the left
-		echo "<div id='LeftColumn'><div class='box'>";
-		echo "<h2>Sapphire</h2>";
+		echo "<div id='Home'><div id='LeftColumn'><div class='box'>";
+		echo "<h2>sapphire $readme</h2>";
 		
 		$this->generateNestedTree('sapphire');
 
@@ -50,6 +48,9 @@ class DocumentationViewer extends Controller {
 		
 		$modules = scandir(BASE_PATH);
 		
+		// modules which are not documented
+		$undocumented = array();
+		
 		// generate a list of module documentation (not core)
 		if($modules) {
 			foreach($modules as $module) {
@@ -57,51 +58,37 @@ class DocumentationViewer extends Controller {
 				$ignored_modules = array('sapphire', 'assets', 'themes');
 				
 				if(!in_array($module, $ignored_modules) && !in_array($module, self::$ignored_files) && is_dir(BASE_PATH .'/'. $module)) {
-					echo "<div class='box'><h2>". $module ."</h2>";
 					
 					// see if docs folder is present
 					$subfolders = scandir(BASE_PATH .'/'. $module);
 					
 					if($subfolders && in_array('doc', $subfolders)) {
+						$readme = ($filename = $this->readmeExists($module)) ? "<a href='todo'>Read Me</a>" : false;
+						echo "<div class='box'><h2>". $module .' '. $readme."</h2>";
 						$this->generateNestedTree($module);
+						echo "</div>";
 					}
 					else {
-						echo "<p class='noDocs'>No Documentation For Module</p>";
+						$undocumented[] = $module;
 					}
-					echo "</div>";
+
 				}
 			}
 		}
 		// for each of the modules. Display them here
 		
-		echo "</div>";
+		echo "</div></div><div class='undocumentedModules'>";
+		
+		if($undocumented) {
+			echo "<p>Undocumented Modules: ";
+			echo implode(', ', $undocumented);
+		}
+		
 		
 		$this->writeFooter();
 	}
 	
-	/**
-	 * @todo - This is nasty, ripped out of DebugView.
-	 */
-	function writeHeader() {
-		echo '<!DOCTYPE html>
-				<html>
-					<head>
-						<base href="'. Director::absoluteBaseURL() .'>	"
-						<title>' . htmlentities($_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI']) . '</title>
-						<link rel="stylesheet" href="sapphiredocs/css/DocumentationViewer.css" type="text/css">
-					</head>
-					<body>
-					<div class="header">SilverStripe</div>
-					<div class="info">
-					<h1>SilverStripe Documentation</h1>
-
-					<p class="breadcrumbs"><a href="dev/docs/">docs</a></p></div>';
-	}
 	
-	function writeFooter() {
-		echo "</body></html>";		
-	}
-
 	/**
 	 * Parse a given individual markdown page
 	 *
@@ -116,7 +103,7 @@ class DocumentationViewer extends Controller {
 		
 		if(!stripos($class, '.md')) $class .= '.md';
 		
-		$this->writeHeader();
+		$this->writeHeader($class, $module);
 
 		$base = Director::baseURL();
 		
@@ -139,6 +126,63 @@ class DocumentationViewer extends Controller {
 		
 		$this->writeFooter();
 	}
+	
+	/**
+	 * @todo - This is nasty, ripped out of DebugView.
+	 */
+	function writeHeader($class = "", $module = "") {
+		$breadcrumbs = false;
+		if($module) {
+			$parts = array();	
+			$parts[] = "<a href='dev/docs/'>Documentation Home</a>";
+			$parts[] = "<a href='dev/docs/$module'>$module</a>";
+		
+			if($class) $parts[] = $this->formatStringForTitle($class);
+		
+			$breadcrumbs = implode("&nbsp;&raquo;&nbsp;", $parts);
+			$breadcrumbs = '<p class="breadcrumbs">'. $breadcrumbs .'</p>';
+		}
+
+		echo '<!DOCTYPE html>
+				<html>
+					<head>
+						<base href="'. Director::absoluteBaseURL() .'>	"
+						<title>' . htmlentities($_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI']) . '</title>
+						<link rel="stylesheet" href="sapphiredocs/css/DocumentationViewer.css" type="text/css">
+					</head>
+					<body>
+					<div id="Container">
+						<div id="Header">
+							<h1><a href="dev/docs/">SilverStripe Documentation</a></h1>
+							'.$breadcrumbs.'
+						</div>
+					';
+	}
+	
+	function writeFooter() {
+		echo "</div></body></html>";		
+	}
+	
+	/**
+	 * Work out if a module contains a readme
+	 *
+	 * @param String - Module to check
+	 * @return bool|String - of path
+	 */
+	private function readmeExists($module) {
+		$children = scandir(BASE_PATH.'/'.$module);
+		
+		$readmeOptions = array('readme', 'readme.md', 'readme.txt');
+		
+		if($children) {
+			foreach($children as $i => $file) {
+				if(in_array(strtolower($file), $readmeOptions)) return $file;
+			}
+		}
+		
+		return false;
+	}
+
 	
 	/**
 	 * Find a documentation page within a given module. 
@@ -196,13 +240,13 @@ class DocumentationViewer extends Controller {
 		if($handle) {
 			while (false !== ($file = readdir($handle))) {
 				if(!in_array($file, self::$ignored_files)) {	
-					$newPath = $path.$file;
-				
+					$newPath = $path.'/'.$file;
+
 					// if the file is a dir nest the pages
 					if(is_dir($newPath)) {
 						
 						// if this has a number
-						echo "<li class='level'>". $this->formatStringForTitle($file) ."</li>";
+						echo "<li class='folder'>". $this->formatStringForTitle($file) ."</li>";
 						$this->recursivelyGenerateTree($newPath, $module);
 						
 					}
@@ -233,6 +277,9 @@ class DocumentationViewer extends Controller {
 		
 		// change - to spaces
 		$title = str_ireplace('-', ' ', $title);
+		
+		// remove extension 
+		$title = str_ireplace('.md', ' ', $title);
 		
 		return $title;
 	}

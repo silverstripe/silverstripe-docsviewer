@@ -6,23 +6,25 @@
 
 body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding: 0;}
 
-html { background: #eee;}
-body { font: 14px/1.1 Helvetica,Arial,sans-serif; color: #333; }
+html { background: #f4f4f4;}
+body { font: 14px/1.1 Arial,sans-serif; color: #444; }
 
+a { color: #1389ce; text-decoration: none; }
+	a:hover { text-decoration: underline;}
 p {
 	font-size: 14px;
-	line-height: 21px;
-	margin-bottom: 21px;
+	line-height: 22px;
+	margin-bottom: 22px;
 }
 
-ul { margin: 0 0 21px 21px; }
-	li { font-size: 14px; line-height: 21px;}
+ul { margin: 8px 16px 20px 20px; }
+	li { font-size: 12px; line-height: 18px; margin-bottom: 8px;}
 
 
-h1 { font-size: 18px; margin-bottom: 18px; }
-h2 { font-size: 16px; margin-bottom: 18px; }
-h3 { font-size: 14px; margin-bottom: 18px; }
-h4 { font-size: 12px; margin-bottom: 9px; }
+h1 { font-size: 24px; margin-bottom: 18px; }
+h2 { font-size: 18px; margin-bottom: 16px; }
+h3 { font-size: 16px; margin-bottom: 16px; }
+h4 { font-size: 14px; margin-bottom: 8px; }
 
 pre { 
 	margin-bottom: 18px; 
@@ -32,92 +34,50 @@ pre {
 	padding: 12px;
 }
 
-/* Header Banner */
-.info { 
-	border:1px solid #bbb; 
-	border-width: 1px 0;
-	background-color:#ccdef3; 
-	padding: 12px; 
-	margin-bottom: 18px;
-}
-
-	.info h1 { 
-		margin: 0; 
-		padding: 0;
-		color: #333; 
-		font-size: 30px;
-		letter-spacing: -2px; 
-	}
+#Container { width: 860px; margin: 20px auto; padding: 20px; background: #fff; overflow: hidden; }
 	
-	.info h3 {
-		margin: 4px 0;
-		color: #333;
-		font-size: 14px;
-	}
+#Header { border-bottom: 3px solid #535360; padding-top: 10px; margin-bottom: 30px; }
+	#Header h1 { margin-bottom: 9px;}
+		#Header h1 a { text-decoration: none; font-size: 30px; color: #333; letter-spacing: -1px;}
 	
-	.info p {
-		color: #484f57;
-		margin: 0;
-
-	}
-	
-.header { 
-	margin:0; 
-	background-color:#666673; 
-	text-align: right;
-	font-size: 12px;
-	padding: 8px 12px;
-	color: #fff;
-	background-image:url(../../cms/images/mainmenu/top-bg.gif); 
-}
-	
-.trace { padding:6px 12px; }
-.trace li { font-size:14px; margin:6px 0; }
-
-pre span { color:#999;}
-pre .error { color:#f00; }
-
-/* Status Box */
-.status {
-	padding:10px 20px 10px 40px;
-	margin-bottom: 12px;
-}
-	.status h2 { margin: 0; }
-	.pass { 
-		color:#006600; 
-		background:#E2F9E3 url(../../cms/images/alert-good.gif) no-repeat scroll 7px 50%; 
-		border:1px solid #8DD38D; 
-	}
-	.fail { 
-		color:#C80700; 
-		background:#FFE9E9 url(../../cms/images/alert-bad.gif) no-repeat scroll 7px 50%; 
-		border:1px solid #C80700; 
-	}
-	.pending {
-		background: #fefcc5;
-		border: 1px solid #dedc51;
-	}
-	
-.buildCompleted { display: none; }
-	
-.failure span { color:#C80700; font-weight:bold; }
-
+	#Header .breadcrumbs { font-size: 12px; }
 #LeftColumn {
-	width: 60%;
+	width: 600px;
 	float: left;
 }
 
 #RightColumn {
-	width: 40%; 
+	width: 240px; 
 	float: right;
 }
 
-.box {
-	background: #fff;
-	padding: 12px;
-	margin: 0 12px 12px 12px;
-	border: 1px solid #ddd;
+#Home #LeftColumn { width: 500px; }
+#Home #RightColumn { width: 340px; }
+#Home .box {
+	margin: 0 12px 12px 0px;
+	border: 1px solid #d8d8d8;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
 }
+	.box h2 {
+		background: #535360;
+		border: 1px solid #535360;
+		-moz-border-top-radius: 4px;
+		-webkit-border-top-left-radius: 4px;
+		-webkit-border-top-right-radius: 4px;
+		padding: 6px 8px;
+		font-weight: 500;
+		color: #fff;
+		font-size: 13px;
+	}
+		.box h2 a {
+			background: url(../images/readme.png) no-repeat right center;
+			padding: 2px 20px 0 0;
+			font-size: 11px;
+			color: #fff;
+			display: block;
+			float: right;
+		}
 	#RightColumn .box {
 		margin: 0 12px 12px 0;
 	}
@@ -130,6 +90,19 @@ pre .error { color:#f00; }
 	}
 		.box ul.tree li {
 			list-style: none;
-			font-size: 12px;
 		}
-
+			.box ul.tree li.folder {
+				background: #d5eefd;
+				font-size: 12px;
+				color: #29688c;
+				margin-bottom: 9px;
+				border: 1px solid #d5eefd;
+				padding: 2px 6px;
+				-moz-border-radius: 4px;
+				-webkit-border-radius: 4px;
+			}
+.undocumentedModules {
+	clear: both;
+	padding-top: 10px;
+	font-style: italic;
+}
