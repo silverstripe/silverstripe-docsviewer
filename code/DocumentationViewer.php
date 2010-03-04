@@ -36,9 +36,7 @@ class DocumentationViewer extends Controller {
 	 * installed modules
 	 */
 	function index() {
-		$renderer = new DebugView();
-		$renderer->writeHeader();
-		$renderer->writeInfo("SilverStripe Documentation", '');
+		$this->writeHeader();
 		$base = Director::baseURL();
 		
 		// write the main content (sapphire) on the left
@@ -78,7 +76,7 @@ class DocumentationViewer extends Controller {
 		
 		echo "</div>";
 		
-		$renderer->writeFooter();
+		$this->writeFooter();
 	}
 	
 	/**
