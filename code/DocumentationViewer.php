@@ -23,7 +23,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @var array
 	 */
-	static $ignored_files = array('.', '..', '.DS_Store', '.svn', '.git');
+	static $ignored_files = array('.', '..', '.DS_Store', '.svn', '.git', 'assets');
 	
 	/**
 	 * Documentation Home
@@ -101,14 +101,12 @@ class DocumentationViewer extends Controller {
 		$class = $request->param('Class');
 		$module = $request->param('Module');
 		
-		if(!stripos($class, '.md')) $class .= '.md';
-		
 		$this->writeHeader($class, $module);
 
 		$base = Director::baseURL();
 		
 		// find page
-		$path = BASE_PATH . '/'. $module .'/doc/';
+		$path = BASE_PATH . '/'. $module .'/doc';
 		
 		echo "<div id='LeftColumn'><div class='box'>";
 		if($page = $this->findPage($path, $class)) {
@@ -120,7 +118,7 @@ class DocumentationViewer extends Controller {
 		
 		echo "</div></div> <div id='RightColumn'></div>";
 		
-		echo '<script type="text/javascript" src="'. Director::absoluteBaseURL(). 'sapphire/thirdparty/jquery/jquery.min.js"></script>
+		echo '<script type="text/javascript" src="'. Director::absoluteBaseURL(). 'sapphire/thirdparty/jquery/jquery.js"></script>
 		<script type="text/javascript" src="'. Director::absoluteBaseURL() .'sapphiredocs/javascript/DocumentationViewer.js"></script>
 		';
 		
@@ -202,18 +200,22 @@ class DocumentationViewer extends Controller {
 
 		if($handle) {
 			while (false !== ($file = readdir($handle))) {
+				$newpath = $path .'/'. $file;
+
 				if(!in_array($file, self::$ignored_files)) {
-					if(is_dir($path.$file)) {
+
+					if(is_dir($newpath)) {
 						// keep looking down the tree
-						return $this->findPage($path.$file, $name);
+						return $this->findPage($newpath, $name);
 					}
-					elseif(strtolower($file) == strtolower($name)) {
-						return $path .'/'. $file;
+
+					elseif(strtolower($this->formatStringForTitle($file)) == strtolower($name)) {
+						return $newpath;
 					}
 				}
 			}
 		}
-		
+
 		return false;
 	}
 	
@@ -251,7 +253,9 @@ class DocumentationViewer extends Controller {
 						
 					}
 					else {	
-						$file  = str_ireplace('.md', '', $file);
+						$offset = (strpos($file,'-') > 0) ? strpos($file,'-') + 1 : 0;
+						
+						$file  = substr(str_ireplace('.md', '', $file), $offset);
 						
 						echo "<li class='page'><a href='". Director::absoluteBaseURL() . 'dev/docs/' . $module .'/'. $file . "'>". $this->formatStringForTitle($file) ."</a></li>";
 					}
@@ -279,7 +283,7 @@ class DocumentationViewer extends Controller {
 		$title = str_ireplace('-', ' ', $title);
 		
 		// remove extension 
-		$title = str_ireplace('.md', ' ', $title);
+		$title = str_ireplace('.md', '', $title);
 		
 		return $title;
 	}
