@@ -3,7 +3,7 @@
 /**
  * Documentation Handler.
  *
- * Reads the bundled markdown files from doc/ folders and displays output in 
+ * Reads the bundled markdown files from docs/ folders and displays output in 
  * a formatted page
  *
  * @todo Tidy up template / styling
@@ -62,7 +62,7 @@ class DocumentationViewer extends Controller {
 					// see if docs folder is present
 					$subfolders = scandir(BASE_PATH .'/'. $module);
 					
-					if($subfolders && in_array('doc', $subfolders)) {
+					if($subfolders && in_array('docs', $subfolders)) {
 						$readme = ($filename = $this->readmeExists($module)) ? "<a href='todo'>Read Me</a>" : false;
 						echo "<div class='box'><h2>". $module .' '. $readme."</h2>";
 						$this->generateNestedTree($module);
@@ -106,7 +106,7 @@ class DocumentationViewer extends Controller {
 		$base = Director::baseURL();
 		
 		// find page
-		$path = BASE_PATH . '/'. $module .'/doc';
+		$path = BASE_PATH . '/'. $module .'/docs';
 		
 		echo "<div id='LeftColumn'><div class='box'>";
 		if($page = $this->findPage($path, $class)) {
@@ -225,7 +225,7 @@ class DocumentationViewer extends Controller {
 	 * @param String - module to generate
 	 */
 	private function generateNestedTree($module) {
-		$path = BASE_PATH . '/'. $module .'/doc/';
+		$path = BASE_PATH . '/'. $module .'/docs/';
 		return (is_dir($path)) ? $this->recursivelyGenerateTree($path, $module) : false;
 	}
 	
