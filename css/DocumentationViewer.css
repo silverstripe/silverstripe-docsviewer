@@ -1,10 +1,9 @@
 /**
- * Development Admin Styles
+ * Documentation Viewer Styles.
  *
- * @todo Remove cms references
  */
 
-body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding: 0;}
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{ margin:0;padding: 0;}
 
 html { background: #f4f4f4;}
 body { font: 14px/1.1 Arial,sans-serif; color: #444; }
@@ -35,32 +34,32 @@ pre {
 	padding: 12px;
 }
 
-#Container { width: 860px; margin: 20px auto; padding: 20px; background: #fff; overflow: hidden; }
+#container { width: 860px; margin: 20px auto; padding: 20px; background: #fff; overflow: hidden; }
 	
-#Header { border-bottom: 3px solid #535360; padding-top: 10px; margin-bottom: 30px; }
-	#Header h1 { margin-bottom: 9px;}
-		#Header h1 a { text-decoration: none; font-size: 30px; color: #333; letter-spacing: -1px;}
+#header { border-bottom: 3px solid #535360; padding-top: 10px; margin-bottom: 30px; }
+	#header h1 { margin-bottom: 9px;}
+		#header h1 a { text-decoration: none; font-size: 30px; color: #333; letter-spacing: -1px;}
 	
-	#Header .breadcrumbs { font-size: 12px; }
-#LeftColumn {
+	#header .breadcrumbs { font-size: 12px; }
+#left-column {
 	width: 600px;
 	float: left;
 }
 
-#RightColumn {
+#right-column {
 	width: 240px; 
 	float: right;
 }
 
-#Home #LeftColumn { width: 500px; }
-#Home #RightColumn { width: 340px; }
-#Home .box {
+#home #left-column { width: 500px; }
+#home #right-column { width: 340px; }
+#home .box {
 	margin: 0 12px 12px 0px;
 	border: 1px solid #d8d8d8;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 }
-	#Home .box h2 {
+	#home .box h2 {
 		background: #535360;
 		border: 1px solid #535360;
 		-moz-border-top-radius: 4px;
@@ -71,7 +70,7 @@ pre {
 		color: #fff;
 		font-size: 13px;
 	}
-		#Home .box h2 a {
+		#home .box h2 a {
 			background: url(../images/readme.png) no-repeat right center;
 			padding: 2px 20px 0 0;
 			font-size: 11px;
@@ -79,16 +78,12 @@ pre {
 			display: block;
 			float: right;
 		}
-	#RightColumn .box {
+	#right-column .box {
 		margin: 0 12px 12px 0;
 	}
 	
-
-	
 	/* Nested tree */
-	.box ul.tree {
-		
-	}
+	.box ul.tree {}
 		.box ul.tree li {
 			list-style: none;
 		}
@@ -102,7 +97,7 @@ pre {
 				-moz-border-radius: 4px;
 				-webkit-border-radius: 4px;
 			}
-.undocumentedModules {
+.undocumented-modules {
 	clear: both;
 	padding-top: 10px;
 	font-style: italic;
@@ -119,16 +114,7 @@ ul#toc {
 	width: 220px;
 	position: fixed;
 }
-	ul#toc li {
-		list-style: none;
-		margin: 0 0 4px 0;
-	}
-		ul#toc li.h2 {
-			margin-left: 10px;
-		}
-		ul#toc li.h3 {
-			margin-left: 20px;
-		}
-		ul#toc li.h4 {
-			margin-right: 30px;
-		}
+	ul#toc li {	list-style: none; margin: 0 0 4px 0; }
+		ul#toc li.h2 { margin-left: 10px; }
+		ul#toc li.h3 { margin-left: 20px; }
+		ul#toc li.h4 { margin-right: 30px; }

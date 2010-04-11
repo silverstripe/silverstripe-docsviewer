@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Documentation Handler.
+ * Documentation Viewer.
  *
- * Reads the bundled markdown files from docs/ folders and displays output in 
- * a formatted page
+ * Reads the bundled markdown files from docs/ folders and displays output in a formatted page at /dev/docs/.
+ * For more documentation on how to use this class see the documentation online in /dev/docs/ or in the
+ * /sapphiredocs/docs folder
  *
- * @todo Tidy up template / styling
- *  
+ * @author Will Rossiter <will@silverstripe.com>
  * @package sapphiredocs
  */
 
@@ -15,7 +15,7 @@ class DocumentationViewer extends Controller {
 	
 	static $url_handlers = array(
 		'' => 'index',
-		'$Module/$Class' => 'parsePage'
+		'$Module/$Page/$OtherPage' => 'parse'
 	);
 	
 	/**
@@ -23,143 +23,133 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @var array
 	 */
-	static $ignored_files = array('.', '..', '.DS_Store', '.svn', '.git', 'assets');
+	static $ignored_files = array('.', '..', '.DS_Store', '.svn', '.git', 'assets', 'themes');
 	
 	/**
-	 * Documentation Home
+	 * An array of case insenstive values to use as readmes
 	 *
-	 * Displays a welcome message as well as links to the sapphire sections and the
-	 * installed modules
+	 * @var array
+	 */
+	static $readme_files = array('readme', 'readme.md', 'readme.txt', 'readme.markdown');
+
+
+	/**
+	 * Main documentation page
 	 */
 	function index() {
-		$this->writeHeader();
-		$base = Director::baseURL();
+		return $this->customise(array(
+			'DocumentedModules' => $this->DocumentedModules()
+		))->renderWith(array('DocumentationViewer_index', 'DocumentationViewer'));
+	}
+	
+	/**
+	 * Individual documentation page
+	 *
+	 * @param HTTPRequest 
+	 */
+	function parse($request) {	
+		require_once('../sapphiredocs/thirdparty/markdown.php');
 		
-		$readme = ($this->readmeExists('sapphire')) ? "<a href=''>Read Me</a>" : false;
+		$page =  $request->param('Page');
+		$module = $request->param('Module');
 		
-		// write the main content (sapphire) on the left
-		echo "<div id='Home'><div id='LeftColumn'><div class='box'>";
-		echo "<h2>sapphire $readme</h2>";
+		$path = BASE_PATH .'/'. $module .'/docs';
 		
-		$this->generateNestedTree('sapphire');
-
-		echo "</div></div>";
-		echo "<div id='RightColumn'>";
+		if($content = $this->findPage($path, $page)) {
+			$title = $page;
+			$content = Markdown(file_get_contents($content));
+		}
+		else {
+			$title = 'Page not Found';
+			$content = false;
+		}
 		
+		return $this->customise(array(
+			'Title' 	=> $title,
+			'Content' 	=> $content
+		))->renderWith('DocumentationViewer');
+	}
+	
+	/**
+	 * Returns an array of the modules installed. Currently to determine if a module is
+	 * installed look at all the folders and check is a _config file.
+	 *
+	 * @return array
+	 */
+	function getModules() {
 		$modules = scandir(BASE_PATH);
 		
-		// modules which are not documented
-		$undocumented = array();
-		
-		// generate a list of module documentation (not core)
 		if($modules) {
-			foreach($modules as $module) {
-				// skip sapphire since this is on the left
-				$ignored_modules = array('sapphire', 'assets', 'themes');
-				
-				if(!in_array($module, $ignored_modules) && !in_array($module, self::$ignored_files) && is_dir(BASE_PATH .'/'. $module)) {
-					
-					// see if docs folder is present
-					$subfolders = scandir(BASE_PATH .'/'. $module);
-					
-					if($subfolders && in_array('docs', $subfolders)) {
-						$readme = ($filename = $this->readmeExists($module)) ? "<a href='todo'>Read Me</a>" : false;
-						echo "<div class='box'><h2>". $module .' '. $readme."</h2>";
-						$this->generateNestedTree($module);
-						echo "</div>";
-					}
-					else {
-						$undocumented[] = $module;
-					}
-
+			foreach($modules as $key => $module) {
+				if(!is_dir(BASE_PATH .'/'. $module) || in_array($module, self::$ignored_files, true) || !file_exists(BASE_PATH . '/'. $module .'/_config.php')) {
+					unset($modules[$key]);
 				}
 			}
 		}
-		// for each of the modules. Display them here
-		
-		echo "</div></div><div class='undocumentedModules'>";
-		
-		if($undocumented) {
-			echo "<p>Undocumented Modules: ";
-			echo implode(', ', $undocumented);
-		}
-		
-		
-		$this->writeFooter();
+
+		return $modules;
 	}
-	
+
 	
 	/**
-	 * Parse a given individual markdown page
+	 * Generate a set of modules for the home page
 	 *
-	 * @param HTTPRequest
+	 * @return DataObjectSet
 	 */
-	function parsePage($request) {
+	function DocumentedModules() {
 		
-		require_once('../sapphiredocs/thirdparty/markdown.php');
+		$modules = new DataObjectSet();
 		
-		$class = $request->param('Class');
-		$module = $request->param('Module');
+		// include sapphire first
+		$modules->push(new ArrayData(array(
+			'Title' 	=> 'sapphire',
+			'Content'	=> $this->generateNestedTree('sapphire'),
+			'Readme' 	=> $this->readmeExists('sapphire')
+		)));
 		
-		$this->writeHeader($class, $module);
-
-		$base = Director::baseURL();
+		$extra_ignore = array('sapphire');
 		
-		// find page
-		$path = BASE_PATH . '/'. $module .'/docs';
-		
-		echo "<div id='LeftColumn'><div class='box'>";
-		if($page = $this->findPage($path, $class)) {
-			echo Markdown(file_get_contents($page));
+		foreach($this->getModules() as $module) {
+			if(!in_array($module, $extra_ignore) && $this->moduleHasDocs($module)) {
+				$modules->push(new ArrayData(array(
+					'Title'		=> $module,
+					'Content'	=> $this->generateNestedTree($module),
+					'Readme'	=> $this->readmeExists($module)
+				)));
+			}
 		}
-		else {
-			echo "<p>Documentation Page Not Found</p>";
-		}
 		
-		echo "</div></div> <div id='RightColumn'></div>";
-		
-		echo '<script type="text/javascript" src="'. Director::absoluteBaseURL(). 'sapphire/thirdparty/jquery/jquery.js"></script>
-		<script type="text/javascript" src="'. Director::absoluteBaseURL() .'sapphiredocs/javascript/DocumentationViewer.js"></script>
-		';
-		
-		$this->writeFooter();
+		return $modules;
 	}
 	
 	/**
-	 * @todo - This is nasty, ripped out of DebugView.
+	 * Generate a list of modules (folder which has a _config) which have no /docs/ folder
+	 *
+	 * @return DataObjectSet
 	 */
-	function writeHeader($class = "", $module = "") {
-		$breadcrumbs = false;
-		if($module) {
-			$parts = array();	
-			$parts[] = "<a href='dev/docs/'>Documentation Home</a>";
-			$parts[] = "<a href='dev/docs/$module'>$module</a>";
+	function UndocumentedModules() {
+		$modules = $this->getModules();
+		$undocumented = array();
 		
-			if($class) $parts[] = $this->formatStringForTitle($class);
-		
-			$breadcrumbs = implode("&nbsp;&raquo;&nbsp;", $parts);
-			$breadcrumbs = '<p class="breadcrumbs">'. $breadcrumbs .'</p>';
+		if($modules) {
+			foreach($modules as $module) {
+				if(!$this->moduleHasDocs($module)) $undocumented[] = $module;
+			}
 		}
-
-		echo '<!DOCTYPE html>
-				<html>
-					<head>
-						<base href="'. Director::absoluteBaseURL() .'>	"
-						<title>' . htmlentities($_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI']) . '</title>
-						<link rel="stylesheet" href="sapphiredocs/css/DocumentationViewer.css" type="text/css">
-					</head>
-					<body>
-					<div id="Container">
-						<div id="Header">
-							<h1><a href="dev/docs/">SilverStripe Documentation</a></h1>
-							'.$breadcrumbs.'
-						</div>
-					';
+		
+		return implode(',', $undocumented);
 	}
 	
-	function writeFooter() {
-		echo "</div></body></html>";		
+	/**
+	 * Helper function to determine whether a module has documentation
+	 *
+	 * @param String - Module folder name
+	 * @return bool - Has docs folder
+	 */
+	function moduleHasDocs($module) {
+		return is_dir(BASE_PATH .'/'. $module .'/docs/');
 	}
+	
 	
 	/**
 	 * Work out if a module contains a readme
@@ -170,7 +160,7 @@ class DocumentationViewer extends Controller {
 	private function readmeExists($module) {
 		$children = scandir(BASE_PATH.'/'.$module);
 		
-		$readmeOptions = array('readme', 'readme.md', 'readme.txt');
+		$readmeOptions = self::$readme_files;
 		
 		if($children) {
 			foreach($children as $i => $file) {
@@ -185,10 +175,7 @@ class DocumentationViewer extends Controller {
 	/**
 	 * Find a documentation page within a given module. 
 	 *
-	 * @todo Currently this only works on pages - eg if you go /dev/docs/Forms/ it won't show the 
-	 * 			overall forms page
-	 *
-	 * @param String - Name of Module
+	 * @param String - Path to Module
 	 * @param String - Name of doc page
 	 *
 	 * @return String|false - File path
@@ -204,10 +191,7 @@ class DocumentationViewer extends Controller {
 
 				if(!in_array($file, self::$ignored_files)) {
 
-					if(is_dir($newpath)) {
-						// keep looking down the tree
-						return $this->findPage($newpath, $name);
-					}
+					if(is_dir($newpath)) return $this->findPage($newpath, $name);
 
 					elseif(strtolower($this->formatStringForTitle($file)) == strtolower($name)) {
 						return $newpath;
@@ -226,6 +210,7 @@ class DocumentationViewer extends Controller {
 	 */
 	private function generateNestedTree($module) {
 		$path = BASE_PATH . '/'. $module .'/docs/';
+		
 		return (is_dir($path)) ? $this->recursivelyGenerateTree($path, $module) : false;
 	}
 	
@@ -235,8 +220,8 @@ class DocumentationViewer extends Controller {
 	 * @param String - folder to work through 
 	 * @param String - module we're working through
 	 */
-	private function recursivelyGenerateTree($path, $module) {
-		echo "<ul class='tree'>";			
+	private function recursivelyGenerateTree($path, $module, $output = '') {
+		$output .= "<ul class='tree'>";			
 		$handle = opendir($path);
 		
 		if($handle) {
@@ -248,8 +233,9 @@ class DocumentationViewer extends Controller {
 					if(is_dir($newPath)) {
 						
 						// if this has a number
-						echo "<li class='folder'>". $this->formatStringForTitle($file) ."</li>";
-						$this->recursivelyGenerateTree($newPath, $module);
+						$output .= "<li class='folder'>". $this->formatStringForTitle($file) ."</li>";
+						
+						$output = $this->recursivelyGenerateTree($newPath, $module, $output);
 						
 					}
 					else {	
@@ -257,23 +243,25 @@ class DocumentationViewer extends Controller {
 						
 						$file  = substr(str_ireplace('.md', '', $file), $offset);
 						
-						echo "<li class='page'><a href='". Director::absoluteBaseURL() . 'dev/docs/' . $module .'/'. $file . "'>". $this->formatStringForTitle($file) ."</a></li>";
+						$output .= "<li class='page'><a href='". Director::absoluteBaseURL() . 'dev/docs/' . $module .'/'. $file . "'>". $this->formatStringForTitle($file) ."</a></li>";
 					}
 				}
 		    }
 		}
-		closedir($handle);
-		echo "</ul>";
 
+		closedir($handle);
+		$output .= "</ul>";
+
+		return $output;
 	}
 	
 	/**
-	 * Take a file name and generate a 'nice' title for it
+	 * Take a file name and generate a 'nice' title for it.
 	 *
-	 * @todo find a nicer way of removing the numbers.
+	 * example. 01-Getting-Started -> Getting Started
 	 *
-	 * @param String
-	 * @return String
+	 * @param String - raw title
+	 * @return String - nicely formatted one
 	 */
 	private function formatStringForTitle($title) {
 		// remove numbers if used. 
@@ -283,8 +271,9 @@ class DocumentationViewer extends Controller {
 		$title = str_ireplace('-', ' ', $title);
 		
 		// remove extension 
-		$title = str_ireplace('.md', '', $title);
+		$title = str_ireplace(array('.md', '.markdown'), '', $title);
 		
 		return $title;
 	}
+	
 }
