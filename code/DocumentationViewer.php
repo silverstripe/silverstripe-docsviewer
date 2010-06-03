@@ -137,7 +137,7 @@ class DocumentationViewer extends Controller {
 			}
 		}
 		
-		return implode(',', $undocumented);
+		return implode(', ', $undocumented);
 	}
 	
 	/**
