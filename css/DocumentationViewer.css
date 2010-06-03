@@ -20,9 +20,9 @@ ul { margin: 8px 16px 20px 20px; }
 	li { font-size: 12px; line-height: 18px; margin-bottom: 8px;}
 
 
-h1 { font-size: 30px; margin-bottom: 18px; }
-h2 { font-size: 24px; margin-bottom: 16px; }
-h3 { font-size: 18px; margin-bottom: 16px; }
+h1 { font-size: 30px; margin-bottom: 18px; color: #111; }
+h2 { font-size: 24px; margin-bottom: 16px; color: #111; }
+h3 { font-size: 18px; margin-bottom: 16px; color: #111; }
 h4 { font-size: 16px; margin-bottom: 6px; line-height: 16px;}
 h5 { font-size: 14px; line-height: 18px; margin-bottom: 6px;}
 
@@ -34,7 +34,7 @@ pre {
 	padding: 12px;
 }
 
-#container { width: 860px; margin: 20px auto; padding: 20px; background: #fff; overflow: hidden; }
+#container { width: 960px; margin: 20px auto; padding: 20px; background: #fff; overflow: hidden; }
 	
 #header { border-bottom: 3px solid #535360; padding-top: 10px; margin-bottom: 30px; }
 	#header h1 { margin-bottom: 9px;}
@@ -42,12 +42,12 @@ pre {
 	
 	#header .breadcrumbs { font-size: 12px; }
 #left-column {
-	width: 600px;
+	width: 640px;
 	float: left;
 }
 
 #right-column {
-	width: 240px; 
+	width: 260px; 
 	float: right;
 }
 
@@ -109,12 +109,13 @@ pre {
 
 ul#toc {
 	margin: 0;
-	padding: 10px;
+	padding: 20px;
 	background: #f4f4f4;
 	width: 220px;
-	position: fixed;
 }
+	ul#toc h4 { font-size: 12px; margin-bottom: 0px;}
 	ul#toc li {	list-style: none; margin: 0 0 4px 0; }
-		ul#toc li.h2 { margin-left: 10px; }
-		ul#toc li.h3 { margin-left: 20px; }
-		ul#toc li.h4 { margin-right: 30px; }
+		ul#toc li.h1 { margin-top: 10px; font-weight: bold;}
+		ul#toc li.h2 { margin: 0 0 0px 10px; font-size: 11px;}
+		ul#toc li.h3 { margin-left: 20px; font-size: 10px; }
+		ul#toc li.h4 { margin-right: 30px; font-size: 10px; }
