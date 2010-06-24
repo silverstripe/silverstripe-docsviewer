@@ -21,5 +21,16 @@
 	
 			$('#table-of-contents').prepend(toc);
 		}
+		
+		/** ---------------------------------------------
+		 * LANGAUGE SELECTER
+		 *
+		 * Hide the change button and do it onclick
+		 */
+		$("#Form_LanguageForm .Actions").hide();
+		
+		$("#Form_LanguageForm select").change(function() {
+			$("#Form_LanguageForm").submit();
+		});
 	});
 })(jQuery);

@@ -3,277 +3,420 @@
 /**
  * Documentation Viewer.
  *
- * Reads the bundled markdown files from docs/ folders and displays output in a formatted page at /dev/docs/.
- * For more documentation on how to use this class see the documentation online in /dev/docs/ or in the
- * /sapphiredocs/docs folder
+ * Reads the bundled markdown files from documentation folders and displays the output (either
+ * via markdown or plain text)
  *
- * @author Will Rossiter <will@silverstripe.com>
+ * For more documentation on how to use this class see the documentation in /sapphiredocs/docs folder
+ *
+ * To view the documentation in the browser use:
+ * 	
+ * 	http://yoursite.com/dev/docs/ Which is locked to ADMIN only
+ *
+ * @todo 	- Add ability to have docs on the front end as the main site.
+ * 			- Fix Language Selector (enabling it troubles the handleRequest when submitting)
+ *			- SS_HTTPRequest when we ask for 10 params it gives us 10. Could be 10 blank ones.
+ *				It would mean I could save alot of code if it only gave back an array of size X
+ * 				up to a maximum of 10...
+ *
  * @package sapphiredocs
  */
 
 class DocumentationViewer extends Controller {
-	
-	static $url_handlers = array(
-		'' => 'index',
-		'$Module/$Page/$OtherPage' => 'parse'
+
+	static $allowed_actions = array(
+		'LanguageForm',
+		'doLanguageForm',
+		'handleRequest',
+		'fr', // better way of handling this?
+		'en'
 	);
 	
-	/**
-	 * An array of files to ignore from the listing
-	 *
-	 * @var array
-	 */
-	static $ignored_files = array('.', '..', '.DS_Store', '.svn', '.git', 'assets', 'themes');
+	static $casting = array(
+		'Version'			=> 'Text',
+		'Lang'				=> 'Text',
+		'Module' 			=> 'Text',
+		'LanguageTitle'		=> 'Text'
+	);
 	
-	/**
-	 * An array of case insenstive values to use as readmes
-	 *
-	 * @var array
-	 */
-	static $readme_files = array('readme', 'readme.md', 'readme.txt', 'readme.markdown');
+	
+	function init() {
+		parent::init();
+		
+		$canAccess = (Director::isDev() || Director::is_cli() || Permission::check("ADMIN"));
 
-
-	/**
-	 * Main documentation page
-	 */
-	function index() {
-		return $this->customise(array(
-			'DocumentedModules' => $this->DocumentedModules()
-		))->renderWith(array('DocumentationViewer_index', 'DocumentationViewer'));
+		if(!$canAccess) return Security::permissionFailure($this);
 	}
 	
 	/**
-	 * Individual documentation page
+	 * Handle the url parsing for the documentation. In order to make this
+	 * user friendly this does some tricky things..
 	 *
-	 * @param HTTPRequest 
+	 * The urls which should work
+	 * / - index page
+	 * /en/sapphire - the index page of sapphire (shows versions)
+	 * /2.4/en/sapphire - the docs for 2.4 sapphire.
+	 * /2.4/en/sapphire/installation/
+	 *
+	 * @return SS_HTTPResponse
 	 */
-	function parse($request) {	
-		require_once('../sapphiredocs/thirdparty/markdown.php');
+	public function handleRequest(SS_HTTPRequest $request) {
+
+		$this->Version 	= $request->shift();
+		$this->Lang 	= $request->shift();
+	
+		$this->Remaining = $request->shift(10);
+	
+		DocumentationService::load_automatic_registration();
+	
+		if(isset($this->Version)) {
+			// check to see if its a valid version. If its not a float then its not actually a version 
+			// its actually a language and it needs to change. So this means we support 2 structures
+			// /2.4/en/sapphire/page and
+			// /en/sapphire/page which is a link to the latest one
 		
-		$page =  $request->param('Page');
-		$module = $request->param('Module');
-		
-		$path = BASE_PATH .'/'. $module .'/docs';
-		
-		if($content = $this->findPage($path, $page)) {
-			$title = $page;
-			$content = Markdown(file_get_contents($content));
+			if(!is_numeric($this->Version)) {
+				// not numeric so /en/sapphire/folder/page
+				if(isset($this->Lang) && $this->Lang)
+					array_unshift($this->Remaining, $this->Lang);
+			
+				$this->Lang = $this->Version;
+				$this->Version = null;
+			}
+			else {
+				// if(!DocumentationService::is_registered_version($this->Version)) {
+				//	$this->httpError(404, 'The requested version could not be found.');
+				// }
+			}
+		}
+		if(isset($this->Lang)) {
+			// check to see if its a valid language
+			// if(!DocumentationService::is_registered_language($this->Lang)) {	
+			//	$this->httpError(404, 'The requested language could not be found.');
+			// }
 		}
 		else {
-			$title = 'Page not Found';
-			$content = false;
+			$this->Lang = 'en';
 		}
 		
-		return $this->customise(array(
-			'Title' 	=> $title,
-			'Content' 	=> $content
-		))->renderWith('DocumentationViewer');
+		return parent::handleRequest($request);
 	}
 	
 	/**
-	 * Returns an array of the modules installed. Currently to determine if a module is
-	 * installed look at all the folders and check is a _config file.
-	 *
-	 * @return array
+	 * Custom templates for each of the sections. 
 	 */
-	function getModules() {
-		$modules = scandir(BASE_PATH);
+	function getViewer($action) {
+		// count the number of parameters after the language, version are taken
+		// into account. This automatically includes ' ' so all the counts
+		// are 1 more than what you would expect
 		
-		if($modules) {
-			foreach($modules as $key => $module) {
-				if(!is_dir(BASE_PATH .'/'. $module) || in_array($module, self::$ignored_files, true) || !file_exists(BASE_PATH . '/'. $module .'/_config.php')) {
-					unset($modules[$key]);
-				}
+		if($this->Remaining) {
+			$params = count(array_unique($this->Remaining));
+
+			switch($params) {
+				case '1':
+					return parent::getViewer('home');
+				case '2':
+					return parent::getViewer('folder');
+				default:
+					if($module = $this->getModule()) {
+						$params = $this->Remaining;
+						array_shift($params);
+						
+						$path = implode('/', array_unique($params));
+					}
+					
+					if(is_dir($module->getPath() . $path)) return parent::getViewer('folder');
 			}
 		}
-
-		return $modules;
+		
+		return parent::getViewer($action);
 	}
-
 	
 	/**
-	 * Generate a set of modules for the home page
+	 * Return all the available languages. Optionally the languages which are
+	 * available for a given module
 	 *
+	 * @param String - The name of the module
 	 * @return DataObjectSet
 	 */
-	function DocumentedModules() {
+	function getLanguages($module = false) {
+		$output = new DataObjectSet();
 		
-		$modules = new DataObjectSet();
-		
-		// include sapphire first
-		$modules->push(new ArrayData(array(
-			'Title' 	=> 'sapphire',
-			'Content'	=> $this->generateNestedTree('sapphire'),
-			'Readme' 	=> $this->readmeExists('sapphire')
-		)));
-		
-		$extra_ignore = array('sapphire');
-		
-		foreach($this->getModules() as $module) {
-			if(!in_array($module, $extra_ignore) && $this->moduleHasDocs($module)) {
-				$modules->push(new ArrayData(array(
-					'Title'		=> $module,
-					'Content'	=> $this->generateNestedTree($module),
-					'Readme'	=> $this->readmeExists($module)
-				)));
+		if($module) {
+			// lookup the module for the available languages
+			
+			// @todo
+		}
+		else {
+			$languages = DocumentationService::get_registered_languages();
+
+			if($languages) {
+				foreach($languages as $key => $lang) {
+	
+					if(stripos($_SERVER['REQUEST_URI'], '/'. $this->Lang .'/') === false) {
+						// no language is in the URL currently. It needs to insert the language 
+						// into the url like /sapphire/install to /en/sapphire/install
+						//
+						// @todo
+					} 
+					
+					$link = str_ireplace('/'.$this->Lang .'/', '/'. $lang .'/', $_SERVER['REQUEST_URI']);
+
+					$output->push(new ArrayData(array(
+						'Title' => $lang,
+						'Link' => $link
+					)));
+				}
 			}
 		}
-		
-		return $modules;
+			
+		return $output;
 	}
-	
+
 	/**
-	 * Generate a list of modules (folder which has a _config) which have no /docs/ folder
+	 * Get all the versions loaded into the module. If the project is only displaying from 
+	 * the filesystem then they are loaded under the 'Current' namespace.
 	 *
+	 * @todo Only show 'core' versions (2.3, 2.4) versions of the modules are going
+	 *		to spam this
+	 *
+	 * @param String $module name of module to limit it to eg sapphire
 	 * @return DataObjectSet
 	 */
-	function UndocumentedModules() {
-		$modules = $this->getModules();
-		$undocumented = array();
+	function getVersions($module = false) {
+		$versions = DocumentationService::get_registered_versions($module);
+		$output = new DataObjectSet();
 		
-		if($modules) {
-			foreach($modules as $module) {
-				if(!$this->moduleHasDocs($module)) $undocumented[] = $module;
-			}
+		foreach($versions as $key => $version) {
+			// work out the link to this version of the documentation. 
+			// 
+			// @todo Keep the user on their given page rather than redirecting to module.
+			// @todo Get links working
+			$linkingMode = ($this->Version == $version) ? 'current' : 'link';
+			
+			if(!$version) $version = 'Current';
+			$major = (in_array($version, DocumentationService::get_major_versions())) ? true : false;
+			
+			$output->push(new ArrayData(array(
+				'Title' => $version,
+				'Link' => $_SERVER['REQUEST_URI'],
+				'LinkingMode' => $linkingMode,
+				'MajorRelease' => $major
+			)));
 		}
 		
-		return implode(', ', $undocumented);
-	}
-	
-	/**
-	 * Helper function to determine whether a module has documentation
-	 *
-	 * @param String - Module folder name
-	 * @return bool - Has docs folder
-	 */
-	function moduleHasDocs($module) {
-		return is_dir(BASE_PATH .'/'. $module .'/docs/');
-	}
-	
-	
-	/**
-	 * Work out if a module contains a readme
-	 *
-	 * @param String - Module to check
-	 * @return bool|String - of path
-	 */
-	private function readmeExists($module) {
-		$children = scandir(BASE_PATH.'/'.$module);
-		
-		$readmeOptions = self::$readme_files;
-		
-		if($children) {
-			foreach($children as $i => $file) {
-				if(in_array(strtolower($file), $readmeOptions)) return $file;
-			}
-		}
-		
-		return false;
-	}
-
-	
-	/**
-	 * Find a documentation page within a given module. 
-	 *
-	 * @param String - Path to Module
-	 * @param String - Name of doc page
-	 *
-	 * @return String|false - File path
-	 */
-	private function findPage($path, $name) {
-
-		// open docs folder
-		$handle = opendir($path);
-
-		if($handle) {
-			while (false !== ($file = readdir($handle))) {
-				$newpath = $path .'/'. $file;
-
-				if(!in_array($file, self::$ignored_files)) {
-
-					if(is_dir($newpath)) return $this->findPage($newpath, $name);
-
-					elseif(strtolower($this->formatStringForTitle($file)) == strtolower($name)) {
-						return $newpath;
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-	
-	/**
-	 * Generate a nested tree for a given folder via recursion 
-	 *
-	 * @param String - module to generate
-	 */
-	private function generateNestedTree($module) {
-		$path = BASE_PATH . '/'. $module .'/docs/';
-		
-		return (is_dir($path)) ? $this->recursivelyGenerateTree($path, $module) : false;
-	}
-	
-	/**
-	 * Recursive method to generate the tree
-	 *
-	 * @param String - folder to work through 
-	 * @param String - module we're working through
-	 */
-	private function recursivelyGenerateTree($path, $module, $output = '') {
-		$output .= "<ul class='tree'>";			
-		$handle = opendir($path);
-		
-		if($handle) {
-			while (false !== ($file = readdir($handle))) {
-				if(!in_array($file, self::$ignored_files)) {	
-					$newPath = $path.'/'.$file;
-
-					// if the file is a dir nest the pages
-					if(is_dir($newPath)) {
-						
-						// if this has a number
-						$output .= "<li class='folder'>". $this->formatStringForTitle($file) ."</li>";
-						
-						$output = $this->recursivelyGenerateTree($newPath, $module, $output);
-						
-					}
-					else {	
-						$offset = (strpos($file,'-') > 0) ? strpos($file,'-') + 1 : 0;
-						
-						$file  = substr(str_ireplace('.md', '', $file), $offset);
-						
-						$output .= "<li class='page'><a href='". Director::absoluteBaseURL() . 'dev/docs/' . $module .'/'. $file . "'>". $this->formatStringForTitle($file) ."</a></li>";
-					}
-				}
-		    }
-		}
-
-		closedir($handle);
-		$output .= "</ul>";
-
 		return $output;
 	}
 	
 	/**
-	 * Take a file name and generate a 'nice' title for it.
+	 * Generate the module which are to be documented. It filters
+	 * the list based on the current head version. It displays the contents
+	 * from the index.md file on the page to use.
 	 *
-	 * example. 01-Getting-Started -> Getting Started
-	 *
-	 * @param String - raw title
-	 * @return String - nicely formatted one
-	 */
-	private function formatStringForTitle($title) {
-		// remove numbers if used. 
-		if(substr($title, 2, 1) == '-') $title = substr($title, 3);
+	 * @return DataObject
+	 */ 
+	function getModules($version = false, $lang = false) {
+		if(!$version) $version = $this->Version;
+		if(!$lang) $lang = $this->Lang;
 		
-		// change - to spaces
-		$title = str_ireplace('-', ' ', $title);
+		$modules = DocumentationService::get_registered_modules($version, $lang);
+		$output = new DataObjectSet();
 		
-		// remove extension 
-		$title = str_ireplace(array('.md', '.markdown'), '', $title);
+		if($modules) {
+			foreach($modules as $module) {
+				// build the dataset. Load the $Content from an index.md
+				$output->push(new ArrayData(array(
+					'Title' 	=> $module->getTitle(),
+					'Code'		=> $module,
+					'Content' 	=> DocumentationParser::parse($module->getPath(), array('index'))
+				)));
+			}
+		}
 		
-		return $title;
+		return $output;
 	}
 	
+	/**
+	 * Get the currently accessed entity from the site.
+	 *
+	 * @return false|DocumentationEntity
+	 */
+	function getModule() {
+		if($this->Remaining && is_array($this->Remaining)) {	
+			return DocumentationService::is_registered_module($this->Remaining[0], $this->Version, $this->Lang);
+		}
+
+		return false;
+	}
+	
+	/**
+	 * Get the related pages to this module and the children to those pages
+	 *
+	 * @todo this only handles 2 levels. Could make it recursive
+	 *
+	 * @return false|DataObjectSet
+	 */
+	function getModulePages() {
+		if($module = $this->getModule()) {
+			$pages = DocumentationParser::get_pages_from_folder($module->getPath());
+			
+			if($pages) {
+				foreach($pages as $page) {
+					$linkParts = array($module->getModuleFolder());
+					
+					// don't include the 'index in the url
+					if($page->Title != "Index") $linkParts[] = $page->Filename;
+
+					$page->Link = $this->Link($linkParts);
+					
+					$page->LinkingMode = 'link';
+					$page->Children = false;
+			
+					if(isset($this->Remaining[1])) {
+						if(strtolower($this->Remaining[1]) == $page->Filename) {
+							$page->LinkingMode = 'current';
+							
+							if(is_dir($page->Path)) {
+								$children = DocumentationParser::get_pages_from_folder($page->Path);
+								$segments = array($module->getModuleFolder(), $this->Remaining[1]);
+								
+								foreach($children as $child) {								
+									$child->Link = $this->Link(array_merge($segments, array($child->Filename)));
+								}
+								
+								$page->Children = $children;
+							}
+						}
+					}
+				}
+			}
+			
+			return $pages;
+		}
+		
+		return false;
+	}
+	/**
+	 * Return the content for the page. If its an actual documentation page then
+	 * display the content from the page, otherwise display the contents from
+	 * the index.md file if its a folder
+	 *
+	 * @return HTMLText
+	 */
+	function getContent() {
+		if($module = $this->getModule()) {
+			// name of the module. Throw it away since we already have the module path.
+			$filepath = $this->Remaining;
+			array_shift($filepath); 
+			
+			return DocumentationParser::parse($module->getPath(), $filepath);
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Generate a list of breadcrumbs for the user. Based off the remaining params
+	 * in the url
+	 *
+	 * @return DataObjectSet
+	 */
+	function getBreadcrumbs() {
+		$pages = $this->Remaining;
+		
+		$output = new DataObjectSet();
+		$output->push(new ArrayData(array(
+			'Title' => ($this->Version) ? $this->Version : _t('DocumentationViewer.DOCUMENTATION', 'Documentation'),
+			'Link' => $this->Link()
+		)));
+		
+		if($pages) {
+			$path = array();
+			
+			foreach($pages as $page => $title) {
+				if($title) {
+					$path[] = $title;
+					
+					$output->push(new ArrayData(array(
+						'Title' => DocumentationParser::clean_page_name($title),
+						'Link' => $this->Link($path)
+					)));
+				}
+			}
+		}
+		
+		return $output;
+	}
+	
+	/**
+	 * Return the base link to this documentation location
+	 *
+	 * @todo Make this work on non /dev/ 
+	 * @return String
+	 */
+	public function Link($path = false) {
+		$base = Director::absoluteBaseURL();
+		
+		// @todo 
+		$loc = 'dev/docs/';
+		
+		$version = ($this->Version) ? $this->Version . '/' : false;
+		$lang = ($this->Lang) ? $this->Lang .'/' : false;
+		
+		$action = '';
+		if(is_string($path)) $action = $path . '/';
+		
+		if(is_array($path)) {
+			foreach($path as $key => $value) {
+				if($value) {
+					$action .= $value .'/';
+				}
+			}
+		}
+		
+		return $base . $loc . $version . $lang . $action;
+	} 
+	
+	/**
+	 * Build the language dropdown.
+	 *
+	 * @todo do this on a page by page rather than global
+	 *
+	 * @return Form
+	 */
+	function LanguageForm() {
+		if($module = $this->getModule()) {
+			$langs = DocumentationService::get_registered_languages($module->getModuleFolder());
+		}
+		else {
+			$langs = DocumentationService::get_registered_languages();
+		}
+		
+		$fields = new FieldSet(
+			$dropdown = new DropdownField(
+				'LangCode', 
+				_t('DocumentationViewer.LANGUAGE', 'Language'),
+				$langs,
+				$this->Lang
+			)
+		);
+		
+		$actions = new FieldSet(
+			new FormAction('doLanguageForm', _t('DocumentationViewer.CHANGE', 'Change'))
+		);
+		
+		$dropdown->setDisabled(true);
+		
+		return new Form($this, 'LanguageForm', $fields, $actions);
+	}
+	
+	/**
+	 * Process the language change
+	 *
+	 */
+	function doLanguageForm($data, $form) {
+		$this->Lang = (isset($data['LangCode'])) ? $data['LangCode'] : 'en';
+
+		return $this->redirect($this->Link());
+	}
 }
