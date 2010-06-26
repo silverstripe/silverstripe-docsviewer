@@ -108,25 +108,25 @@ class DocumentationViewer extends Controller {
 		// count the number of parameters after the language, version are taken
 		// into account. This automatically includes ' ' so all the counts
 		// are 1 more than what you would expect
-		
 		if($this->Remaining) {
-			$params = count(array_unique($this->Remaining));
 
-			switch($params) {
-				case '1':
-					return parent::getViewer('home');
-				case '2':
-					return parent::getViewer('folder');
-				default:
-					if($module = $this->getModule()) {
-						$params = $this->Remaining;
-						array_shift($params);
-						
-						$path = implode('/', array_unique($params));
-					}
-					
-					if(is_dir($module->getPath() . $path)) return parent::getViewer('folder');
+			$paramCount = count($this->Remaining);
+			
+			if($paramCount == 1) {
+				return parent::getViewer('folder');
 			}
+			else if($module = $this->getModule()) {
+				$params = $this->Remaining;
+				
+				array_shift($params); // module name
+					
+				$path = implode('/', array_unique($params));
+				
+				if(is_dir($module->getPath() . $path)) return parent::getViewer('folder');
+			}
+		}
+		else {
+			return parent::getViewer('home');
 		}
 		
 		return parent::getViewer($action);
@@ -221,7 +221,7 @@ class DocumentationViewer extends Controller {
 		
 		$modules = DocumentationService::get_registered_modules($version, $lang);
 		$output = new DataObjectSet();
-		
+
 		if($modules) {
 			foreach($modules as $module) {
 				// build the dataset. Load the $Content from an index.md
@@ -232,7 +232,7 @@ class DocumentationViewer extends Controller {
 				)));
 			}
 		}
-		
+
 		return $output;
 	}
 	
