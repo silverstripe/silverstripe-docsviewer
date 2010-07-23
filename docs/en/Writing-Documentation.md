@@ -13,7 +13,7 @@ in a 'en' subfolder
 
 ## Syntax ##
 
-This uses a customized markdown extra parser. To view the syntax for page formatting check out [http://daringfireball.net/projects/markdown/syntax][Daring Fireball]
+This uses a customized markdown extra parser. To view the syntax for page formatting check out [Daring Fireball](http://daringfireball.net/projects/markdown/syntax)
 
 ## Creating Hierarchy ##
 
