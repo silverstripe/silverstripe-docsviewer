@@ -18,8 +18,11 @@ a { color: #1389ce; text-decoration: none; }
 p { font-size: 14px; line-height: 22px; margin-bottom: 22px; }
 
 ul { margin: 11px 0 22px 20px; }
-	li { font-size: 12px; line-height: 13px; margin-bottom: 8px;}
+	li, dd { font-size: 12px; line-height: 13px; margin-bottom: 8px;}
 
+dl { margin: 11px 0 22px 0; }
+	dt { font-weight: bold; }
+	dd { margin: 5px 0 8px 20px; }
 
 h1 { font-size: 33px; line-height: 33px; margin-bottom: 22px; color: #111; letter-spacing: -1px;}
 h2 { font-size: 24px; line-height: 33px; margin-bottom: 11px; color: #111; }
