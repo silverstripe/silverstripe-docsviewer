@@ -29,7 +29,7 @@ class DocumentationParser {
 	 * @param String $baselink Link relative to webroot, up until the "root" of the module.  
 	 *  Necessary to rewrite relative links
 	 *
-	 * @return HTMLText
+	 * @return String
 	 */
 	public static function parse(DocumentationPage $page, $baselink = null) {
 		require_once('../sapphiredocs/thirdparty/markdown.php');
@@ -37,12 +37,60 @@ class DocumentationParser {
 			$md = $page->getMarkdown();
 			
 			// Pre-processing
+			$md = self::rewrite_image_links($md, $page);
 			$md = self::rewrite_relative_links($md, $page, $baselink);
 			$md = self::rewrite_api_links($md, $page);
 			
+			
 			$html = Markdown($md);
 
-			return DBField::create('HTMLText', $html);
+			return $html;
+	}
+	
+	static function rewrite_image_links($md, $page) {
+		// Links with titles
+		$re = '/
+			!
+			\[
+				(.*?) # image title (non greedy)
+			\] 
+			\(
+				(.*?) # image url (non greedy)
+			\)
+		/x';
+		preg_match_all($re, $md, $images);
+		if($images) foreach($images[0] as $i => $match) {
+			$title = $images[1][$i];
+			$url = $images[2][$i];
+			
+			// Don't process absolute links (based on protocol detection)
+			$urlParts = parse_url($url);
+			if($urlParts && isset($urlParts['scheme'])) continue;
+			
+			// Rewrite URL (relative or absolute)
+			$baselink = Director::makeRelative(dirname($page->getPath()));
+			$relativeUrl = rtrim($baselink, '/') . '/' . ltrim($url, '/');
+			
+			// Resolve relative paths
+			while(strpos($relativeUrl, '/..') !== FALSE) {
+				$relativeUrl = preg_replace('/\w+\/\.\.\//', '', $relativeUrl);
+			}
+			
+			// Replace any double slashes (apart from protocol)
+			$relativeUrl = preg_replace('/([^:])\/{2,}/', '$1/', $relativeUrl);
+			
+			// Make it absolute again
+			$absoluteUrl = Director::absoluteBaseURL() . $relativeUrl;
+			
+			// Replace in original content
+			$md = str_replace(
+				$match, 
+				sprintf('![%s](%s)', $title, $absoluteUrl),
+				$md
+			);
+		}
+		
+		return $md;
 	}
 		
 	/**
@@ -114,6 +162,7 @@ class DocumentationParser {
 	 */
 	static function rewrite_relative_links($md, $page, $baselink) {
 		$re = '/
+			([^\!]?) # exclude image format
 			\[
 				(.*?) # link title (non greedy)
 			\] 
@@ -128,8 +177,8 @@ class DocumentationParser {
 		if($relativePath == '.') $relativePath = '';
 		
 		if($matches) foreach($matches[0] as $i => $match) {
-			$title = $matches[1][$i];
-			$url = $matches[2][$i];
+			$title = $matches[2][$i];
+			$url = $matches[3][$i];
 			
 			// Don't process API links
 			if(preg_match('/^api:/', $url)) continue;
@@ -156,7 +205,7 @@ class DocumentationParser {
 			// Replace in original content
 			$md = str_replace(
 				$match, 
-				sprintf('[%s](%s)', $title, $relativeUrl),
+				sprintf('%s[%s](%s)', $matches[1][$i], $title, $relativeUrl),
 				$md
 			);
 		}

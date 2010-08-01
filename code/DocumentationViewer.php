@@ -286,7 +286,7 @@ class DocumentationViewer extends Controller {
 				$output->push(new ArrayData(array(
 					'Title' 	=> $module->getTitle(),
 					'Code'		=> $module,
-					'Content' 	=> $content
+					'Content' 	=> DBField::create("HTMLText", $content)
 				)));
 			}
 		}
@@ -384,7 +384,8 @@ class DocumentationViewer extends Controller {
 	function getContent() {
 		if($page = $this->getPage()) {
 			// Remove last portion of path (filename), we want a link to the folder base
-			return DocumentationParser::parse($page, $this->Link(array_slice($this->Remaining, -1, -1)));
+			$html = DocumentationParser::parse($page, $this->Link(array_slice($this->Remaining, -1, -1)));
+			return DBField::create("HTMLText", $html);
 		}
 		
 		return false;

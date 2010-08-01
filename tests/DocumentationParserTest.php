@@ -4,6 +4,30 @@
  */
 class DocumentationParserTest extends SapphireTest {
 	
+	function testImageRewrites() {
+		// Page on toplevel
+		$page = new DocumentationPage(
+			'subfolder/subpage.md',
+			new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'),
+			'en',
+			'2.4'
+		);
+		$result = DocumentationParser::rewrite_image_links($page->getMarkdown(), $page, 'mycontroller/cms/2.4/en/');
+		$this->assertContains(
+			'[relative image link](' . Director::absoluteBaseURL() . '/sapphiredocs/tests/docs/en/subfolder/_images/image.png)',
+			$result
+		);
+		$this->assertContains(
+			'[parent image link](' . Director::absoluteBaseURL() . '/sapphiredocs/tests/docs/en/_images/image.png)',
+			$result
+		);
+		// TODO Fix absolute image references
+		// $this->assertContains(
+		// 	'[absolute image link](' . Director::absoluteBaseURL() . '/sapphiredocs/tests/docs/en/_images/image.png)',
+		// 	$result
+		// );
+	}
+	
 	function testApiLinks() {
 		// Page on toplevel
 		$page = new DocumentationPage(
