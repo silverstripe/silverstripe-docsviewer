@@ -290,16 +290,16 @@ class DocumentationService {
 	 *
 	 * @return bool
 	 */
-	public static function unregister($module, $version = '') {
-		if(isset(self::$registered_modules[$module])) {
-			$module = self::$registered_modules[$module];
+	public static function unregister($moduleName, $version = '') {
+		if(isset(self::$registered_modules[$moduleName])) {
+			$module = self::$registered_modules[$moduleName];
 			
 			if($version) {
 				$module->removeVersion($version);
 			}
 			else {
 				// only given a module so unset the whole module
-				unset(self::$registered_modules[$module]);	
+				unset(self::$registered_modules[$moduleName]);	
 			}
 			
 			return true;
