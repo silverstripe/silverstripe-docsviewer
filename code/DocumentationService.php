@@ -31,7 +31,7 @@ class DocumentationService {
 	 *
 	 * @var Array
 	 */
-	private static $ignored_files = array('.', '..', '.DS_Store', '.svn', '.git', 'assets', 'themes');
+	private static $ignored_files = array('.', '..', '.DS_Store', '.svn', '.git', 'assets', 'themes', '_images');
 	
 	/**
 	 * Set the ignored files list
@@ -227,12 +227,9 @@ class DocumentationService {
 	 * @return DocumentationEntity $module the registered module
 	 */
 	public static function is_registered_module($module, $version = false, $lang = false) {
-		
 		if(isset(self::$registered_modules[$module])) {
 			$module = self::$registered_modules[$module];
-			
 			if($lang && !$module->hasLanguage($lang)) return false;
-			
 			if($version && !$module->hasVersion($version)) return false;
 			
 			return $module;
@@ -257,7 +254,7 @@ class DocumentationService {
 		if(!isset(self::$registered_modules[$module])) {
 			// module is completely new
 			$entity = new DocumentationEntity($module, $version, $path, $title);
-			
+
 			self::$registered_modules[$module] = $entity;
 		}
 		else {
