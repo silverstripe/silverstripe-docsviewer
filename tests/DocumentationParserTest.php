@@ -4,6 +4,24 @@
  */
 class DocumentationParserTest extends SapphireTest {
 	
+	// function testRewriteCodeBlocks() {
+	// 		$page = new DocumentationPage(
+	// 			'test.md',
+	// 			new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'),
+	// 			'en',
+	// 			'2.4'
+	// 		);
+	// 		$result = DocumentationParser::rewrite_code_blocks($page->getMarkdown());
+	// 		$expected = <<<HTML
+	// <pre class="brush: php">
+	// code block
+	// with multiple
+	// lines
+	// </pre>
+	// HTML;
+	// 		$this->assertContains($expected, $result);		
+	// 	}
+	
 	function testImageRewrites() {
 		// Page on toplevel
 		$page = new DocumentationPage(

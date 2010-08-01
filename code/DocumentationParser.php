@@ -1,9 +1,5 @@
 <?php
-
 /**
- * Wrapper for MarkdownUltra parsing in the template and related functionality for
- * parsing paths and documents
- *
  * @package sapphiredocs
  */
 
@@ -32,20 +28,52 @@ class DocumentationParser {
 	 * @return String
 	 */
 	public static function parse(DocumentationPage $page, $baselink = null) {
-		require_once('../sapphiredocs/thirdparty/markdown.php');
-
 			$md = $page->getMarkdown();
 			
 			// Pre-processing
 			$md = self::rewrite_image_links($md, $page);
 			$md = self::rewrite_relative_links($md, $page, $baselink);
 			$md = self::rewrite_api_links($md, $page);
+			$md = self::rewrite_code_blocks($md, $page);
 			
-			
+			require_once('../sapphiredocs/thirdparty/markdown.php');
 			$html = Markdown($md);
 
 			return $html;
 	}
+	
+	// function rewrite_code_blocks($md) {
+	// 		$tabwidth = (defined('MARKDOWN_TAB_WIDTH')) ? MARKDOWN_TAB_WIDTH : 4;
+	// 		$md = preg_replace_callback('{
+	// 				(?:\n\n|\A\n?)
+	// 				[ ]*(\{[a-zA-Z]*\})? # lang
+	// 				[ ]* \n # Whitespace and newline following marker.
+	// 				(	 # $1 = the code block -- one or more lines, starting with a space/tab
+	// 				  (?>
+	// 					[ ]{'.$tabwidth.'}  # Lines must start with a tab or a tab-width of spaces
+	// 					.*\n+
+	// 				  )+
+	// 				)
+	// 				((?=^[ ]{0,'.$tabwidth.'}\S)|\Z)	# Lookahead for non-space at line-start, or end of doc
+	// 			}xm',
+	// 			array('DocumentationParser', '_do_code_blocks'), $md);
+	// 
+	// 		return $md;
+	// 	}
+	// 	static function _do_code_blocks($matches) {
+	// 		$tabwidth = (defined('MARKDOWN_TAB_WIDTH')) ? MARKDOWN_TAB_WIDTH : 4;
+	// 		$codeblock = $matches[2];
+	// 
+	// 		// outdent
+	// 		$codeblock = preg_replace('/^(\t|[ ]{1,'.$tabwidth.'})/m', '', $codeblock);
+	// 		$codeblock = htmlspecialchars($codeblock, ENT_NOQUOTES);
+	// 
+	// 		# trim leading newlines and trailing newlines
+	// 		$codeblock = preg_replace('/\A\n+|\n+\z/', '', $codeblock);
+	// 
+	// 		$codeblock = "<pre><code>$codeblock\n</code></pre>";
+	// 		return "\n\n".$this->hashBlock($codeblock)."\n\n";
+	// 	}
 	
 	static function rewrite_image_links($md, $page) {
 		// Links with titles

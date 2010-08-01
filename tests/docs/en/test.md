@@ -10,3 +10,13 @@ test
 [link: http](http://silverstripe.org)
 [link: api](api:DataObject)
 [api:DataObject::$has_one]
+
+	:::php
+	code block
+	with multiple
+	lines
+	
+Normal text after code block
+
+	code block
+	without formatting prefix
