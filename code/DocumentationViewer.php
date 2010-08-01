@@ -99,7 +99,7 @@ class DocumentationViewer extends Controller {
 			// /2.4/en/sapphire/page and
 			// /en/sapphire/page which is a link to the latest one
 		
-			if(!is_numeric($this->Version)) {
+			if(!is_numeric($this->Version) && $this->Version != 'current') {
 				array_unshift($this->Remaining, $this->ModuleName);
 				
 				// not numeric so /en/sapphire/folder/page
@@ -124,6 +124,25 @@ class DocumentationViewer extends Controller {
 		else {
 			$this->Lang = 'en';
 		}
+
+		// 'current' version mapping
+		$module = DocumentationService::is_registered_module($this->ModuleName, null, $this->Lang);
+		if($this->Version && $module) {
+			$current = $module->getCurrentVersion();
+			if($this->Version == 'current') {
+				$this->Version = $current;
+			} else {
+				if($current == $this->Version) {
+					$this->Version = 'current';
+					$link = $this->Link($this->Remaining);
+					$this->response = new SS_HTTPResponse();
+					$this->redirect($link, 301); // permanent redirect
+					return $this->response;
+				}
+			}
+			
+		}
+		
 		
 		return parent::handleRequest($request);
 	}

@@ -10,6 +10,8 @@
 class DocumentationViewerTests extends FunctionalTest {
 
 	static $fixture_file = 'sapphiredocs/tests/DocumentTests.yml';
+
+	protected $autoFollowRedirection = false;
 	
 	function setUpOnce() {
 		parent::setUpOnce();
@@ -17,10 +19,16 @@ class DocumentationViewerTests extends FunctionalTest {
 		$this->origEnabled = DocumentationService::automatic_registration_enabled();
 		DocumentationService::set_automatic_registration(false);
 		$this->origModules = DocumentationService::get_registered_modules();
+		$this->origLinkBase = DocumentationViewer::get_link_base();
+		DocumentationViewer::set_link_base('dev/docs/');
 		foreach($this->origModules as $module) {
 			DocumentationService::unregister($module->getModuleFolder());
 		}
+		
+		// We set 3.0 as current, and test most assertions against 2.4 - to avoid 'current' rewriting issues
 		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs/", '2.4');
+		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs-2/", '2.3');
+		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs-3/", '3.0');
 	}
 	
 	function tearDownOnce() {
@@ -28,17 +36,39 @@ class DocumentationViewerTests extends FunctionalTest {
 		
 		DocumentationService::unregister("DocumentationViewerTests");
 		DocumentationService::set_automatic_registration($this->origEnabled);
+		DocumentationViewer::set_link_base($this->origLinkBase);
 		// $this->origModules = Documentation::get_registered_modules();
 		// foreach($this->origModules as $name => $module) {
 		// 	DocumentationService::register($name);
 		// }
 	}
 	
+	function testCurrentRedirection() {
+		$response = $this->get('dev/docs/3.0/en/DocumentationViewerTests/test');
+		$this->assertEquals(301, $response->getStatusCode());
+		$this->assertEquals(
+			Director::absoluteBaseURL() . 'dev/docs/current/en/DocumentationViewerTests/test/',
+			$response->getHeader('Location'),
+			'Redirection to current on page'
+		);
+		
+		$response = $this->get('dev/docs/3.0/en/DocumentationViewerTests/');
+		$this->assertEquals(301, $response->getStatusCode());
+		$this->assertEquals(
+			Director::absoluteBaseURL() . 'dev/docs/current/en/DocumentationViewerTests/',
+			$response->getHeader('Location'),
+			'Redirection to current on index'
+		);
+		
+		$response = $this->get('dev/docs/2.3/en/DocumentationViewerTests/');
+		$this->assertEquals(200, $response->getStatusCode(), 'No redirection on older versions');
+	}
+	
 	function testUrlParsing() {
 		// Module index
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.4/en/DocumentationViewerTests/test'));
-		$this->assertEquals('2.4', $v->Version);
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.3/en/DocumentationViewerTests/test'));
+		$this->assertEquals('2.3', $v->Version);
 		$this->assertEquals('en', $v->Lang);
 		$this->assertEquals('DocumentationViewerTests', $v->ModuleName);
 		$this->assertEquals(array('test'), $v->Remaining);
