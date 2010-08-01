@@ -30,8 +30,7 @@ class DocumentationPage extends ViewableData {
 		
 		if(!file_exists($this->getPath())) {
 			throw new InvalidArgumentException(sprintf(
-				'Path could not be found: "%s" (module path: %s, file path: %s)', 
-				$this->getPath(),
+				'Path could not be found. Module path: %s, file path: %s', 
 				$this->entity->getPath(),
 				$this->relativePath
 			));
@@ -61,7 +60,8 @@ class DocumentationPage extends ViewableData {
 	 *  @return String 
 	 */
 	function getPath() {
-		return realpath($this->entity->getPath($this->version, $this->lang) . '/' . $this->getRelativePath());
+		$path = rtrim($this->entity->getPath($this->version, $this->lang), '/') . '/' . $this->getRelativePath();
+		return realpath($path);
 	}
 		
 	function getLang() {

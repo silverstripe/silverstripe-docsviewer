@@ -221,6 +221,10 @@ class DocumentationEntity extends ViewableData {
 			$path = $this->versions[$versions[0]];
 		} 
 
-		return $path . '/' . $lang .'/';
+		return rtrim($path, '/') . '/' . rtrim($lang, '/') .'/';
+	}
+	
+	function __toString() {
+		return sprintf('DocumentationEntity: %s)', $this->getPath());
 	}
 }
