@@ -8,6 +8,10 @@
  * 
  * Each folder must have at least one language subfolder, which is automatically
  * determined through {@link addVersion()} and should not be included in the $path argument.
+ * 
+ * Versions are assumed to be in numeric format (e.g. '2.4'),
+ * mainly as an easy way to distinguish them from language codes in the routing logic.
+ * They're also parsed through version_compare() in {@link getCurrentVersion()} which assumes a certain format. 
  *
  * @package sapphiredocs
  */
@@ -32,6 +36,11 @@ class DocumentationEntity extends ViewableData {
 	 * @var Array $version version numbers and the paths to each
 	 */
 	private $versions = array();
+	
+	/**
+	 * @var Array
+	 */
+	private $currentVersion;
 	
 	/**
 	 * @var Array $langs a list of available langauges
@@ -112,6 +121,30 @@ class DocumentationEntity extends ViewableData {
 	}
 	
 	/**
+	 * @return String|Boolean
+	 */
+	public function getCurrentVersion() {
+		if(!$this->hasVersions()) return false;
+		
+		if($this->currentVersion) {
+			return $this->currentVersion;
+		} else {
+			$sortedVersions = $this->getVersions();
+			usort($sortedVersions, create_function('$a,$b', 'return version_compare($a,$b);'));
+			return array_pop($sortedVersions);
+		}
+	}
+	
+	/**
+	 * @param String $version
+	 */
+	public function setCurrentVersion($version) {
+		if(!$this->hasVersion($version)) throw new InvalidArgumentException(sprintf('Version "%s" does not exist', $version));
+
+		$this->currentVersion = $version;
+	}
+	
+	/**
 	 * Return whether we have a given version of this entity
 	 *
 	 * @return bool
@@ -134,8 +167,9 @@ class DocumentationEntity extends ViewableData {
 	 *
 	 * @param Float $version Version number
 	 * @param String $path path to folder
+	 * @param Boolean $current
 	 */
-	public function addVersion($version = '', $path) {
+	public function addVersion($version = '', $path, $current = false) {
 		// determine the langs in this path
 		
 		$langs = scandir($path);
@@ -154,6 +188,8 @@ class DocumentationEntity extends ViewableData {
 		
 		$this->addLanguage($available);
 		$this->versions[$version] = $path;
+		
+		if($current) $this->setCurrentVersion($version);
 	}
 	
 	/**

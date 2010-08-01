@@ -18,4 +18,17 @@ class DocumentationEntityTest extends SapphireTest {
 		$this->assertTrue($entity->hasLanguage('en'));
 		$this->assertFalse($entity->hasLanguage('fr'));
 	}
+	
+	function testGetCurrentVersion() {
+		$entity = new DocumentationEntity('docs', '1.0', '../sapphiredocs/tests/docs/', 'My Test');
+		$entity->addVersion('1.1', '../sapphiredocs/tests/docs-2/');
+		$entity->addVersion('0.0', '../sapphiredocs/tests/docs-3/');
+		$this->assertEquals('1.1', $entity->getCurrentVersion(), 'Automatic version sorting');
+		
+		$entity = new DocumentationEntity('docs', '1.0', '../sapphiredocs/tests/docs/', 'My Test');
+		$entity->addVersion('1.1.', '../sapphiredocs/tests/docs-2/');
+		$entity->setCurrentVersion('1.0');
+		$this->assertEquals('1.0', $entity->getCurrentVersion(), 'Manual setting');
+		
+	}
 }
