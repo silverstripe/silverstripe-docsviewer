@@ -41,10 +41,15 @@ class DocumentationViewer extends Controller {
 	 */
 	protected static $link_base = 'dev/docs/';
 	
+	/**
+	 * @var String|array Optional permssion check
+	 */
+	static $check_permission = 'ADMIN';
+	
 	function init() {
 		parent::init();
 		
-		$canAccess = (Director::isDev() || Director::is_cli() || Permission::check("ADMIN"));
+		$canAccess = (Director::isDev() || Director::is_cli() || !self::$check_permission || Permission::check(self::$check_permission));
 
 		if(!$canAccess) return Security::permissionFailure($this);
 	}
