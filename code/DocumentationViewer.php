@@ -27,8 +27,6 @@ class DocumentationViewer extends Controller {
 		'LanguageForm',
 		'doLanguageForm',
 		'handleRequest',
-		'fr', // better way of handling this?
-		'en'
 	);
 	
 	static $casting = array(
@@ -38,12 +36,35 @@ class DocumentationViewer extends Controller {
 		'LanguageTitle'		=> 'Text'
 	);	
 	
+	/**
+	 * @var String Same as the routing pattern set through Director::addRules().
+	 */
+	protected static $link_base = 'dev/docs/';
+	
 	function init() {
 		parent::init();
 		
 		$canAccess = (Director::isDev() || Director::is_cli() || Permission::check("ADMIN"));
 
 		if(!$canAccess) return Security::permissionFailure($this);
+	}
+
+	/**
+	 * Overloaded to avoid "action doesnt exist" errors - all URL parts in this
+	 * controller are virtual and handled through handleRequest(), not controller methods.
+	 */
+	public function handleAction($request) {
+		try{
+			$response = parent::handleAction($request);
+		} catch(SS_HTTPResponse_Exception $e) {
+			if(strpos($e->getMessage(), 'does not exist') !== FALSE) {
+				return $this;
+			} else {
+				throw $e;
+			}
+		}
+		
+		return $response;
 	}
 	
 	/**
@@ -59,8 +80,8 @@ class DocumentationViewer extends Controller {
 	 * @return SS_HTTPResponse
 	 */
 	public function handleRequest(SS_HTTPRequest $request) {
-
-		$this->Version = $request->shift();
+		// Workaround for root routing, e.g. Director::addRules(10, array('$Action' => 'DocumentationViewer'))
+		$this->Version = ($request->param('Action')) ? $request->param('Action') : $request->shift();		
 		$this->Lang = $request->shift();
 		$this->ModuleName = $request->shift();
 		$this->Remaining = $request->shift(10);
@@ -223,10 +244,11 @@ class DocumentationViewer extends Controller {
 
 		if($modules) {
 			foreach($modules as $module) {
-				$filepath = $module->getPath() . '/index.md';
-				if(file_exists($filepath)) {
+				$absFilepath = $module->getPath() . '/index.md';
+				$relativeFilePath = str_replace($module->getPath(), '', $absFilepath);
+				if(file_exists($absFilepath)) {
 					$page = new DocumentationPage(
-						$filepath,
+						$relativeFilePath,
 						$module,
 						$this->Lang,
 						$this->Version
@@ -388,9 +410,6 @@ class DocumentationViewer extends Controller {
 	public function Link($path = false) {
 		$base = Director::absoluteBaseURL();
 		
-		// @todo 
-		$loc = 'dev/docs/';
-		
 		$version = ($this->Version) ? $this->Version . '/' : false;
 		$lang = ($this->Lang) ? $this->Lang .'/' : false;
 		$module = ($this->ModuleName) ? $this->ModuleName .'/' : false;
@@ -406,7 +425,7 @@ class DocumentationViewer extends Controller {
 			}
 		}
 		
-		return $base . $loc . $version . $lang . $module . $action;
+		return $base . self::$link_base . $version . $lang . $module . $action;
 	} 
 	
 	/**
@@ -450,5 +469,19 @@ class DocumentationViewer extends Controller {
 		$this->Lang = (isset($data['LangCode'])) ? $data['LangCode'] : 'en';
 
 		return $this->redirect($this->Link());
+	}
+	
+	/**
+	 * @param String
+	 */
+	static function set_link_base($base) {
+		self::$link_base = $base;
+	}
+	
+	/**
+	 * @return String
+	 */
+	static function get_link_base() {
+		return self::$link_base;
 	}
 }
