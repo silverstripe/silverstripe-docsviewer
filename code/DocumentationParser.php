@@ -8,6 +8,11 @@
  */
 
 class DocumentationParser {
+	
+	/**
+	 * @var String Rewriting of api links in the format "[api:MyClass]" or "[api:MyClass::$my_property]".
+	 */
+	static $api_link_base = 'http://api.silverstripe.org/search/lookup/?q=%s&version=%s&module=%s';
 		
 	/**
 	 * Parse a given path to the documentation for a file. Performs a case insensitive 
@@ -33,10 +38,58 @@ class DocumentationParser {
 			
 			// Pre-processing
 			$md = self::rewrite_relative_links($md, $page, $baselink);
+			$md = self::rewrite_api_links($md, $page);
 			
 			$html = Markdown($md);
 
 			return DBField::create('HTMLText', $html);
+	}
+	
+	/**
+	 * @param String $md
+	 * @param DocumentationPage $page
+	 * @return String
+	 */
+	static function rewrite_api_links($md, $page) {
+		// Links with titles
+		$re = '/
+			\[
+				(.*?) # link title (non greedy)
+			\] 
+			\(
+				api:(.*?) # link url (non greedy)
+			\)
+		/x';
+		preg_match_all($re, $md, $linksWithTitles);
+		if($linksWithTitles) foreach($linksWithTitles[0] as $i => $match) {
+			$title = $linksWithTitles[1][$i];
+			$subject = $linksWithTitles[2][$i];
+			$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getModuleFolder());
+			$md = str_replace(
+				$match, 
+				sprintf('[%s](%s)', $title, $url),
+				$md
+			);
+		}
+		
+		// Bare links
+		$re = '/
+			\[
+				api:(.*?)
+			\]
+		/x';
+		preg_match_all($re, $md, $links);
+		if($links) foreach($links[0] as $i => $match) {
+			$subject = $links[1][$i];
+			$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getModuleFolder());
+			$md = str_replace(
+				$match, 
+				sprintf('[%s](%s)', $subject, $url),
+				$md
+			);
+		}
+		
+		return $md;
 	}
 	
 	/**

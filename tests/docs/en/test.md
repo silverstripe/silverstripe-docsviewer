@@ -9,3 +9,4 @@ test
 [link: with anchor](/test#anchor)
 [link: http](http://silverstripe.org)
 [link: api](api:DataObject)
+[api:DataObject::$has_one]

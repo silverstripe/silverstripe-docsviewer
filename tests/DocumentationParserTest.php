@@ -3,6 +3,24 @@
  * @package sapphiredocs
  */
 class DocumentationParserTest extends SapphireTest {
+	
+	function testApiLinks() {
+		// Page on toplevel
+		$page = new DocumentationPage(
+			'test.md',
+			new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'),
+			'en',
+			'2.4'
+		);
+		$result = DocumentationParser::rewrite_api_links($page->getMarkdown(), $page, 'mycontroller/cms/2.4/en/');
+		$this->assertContains(
+			'[link: api](http://api.silverstripe.org/search/lookup/?q=DataObject&version=2.4&module=mymodule)',
+			$result
+		);
+		$this->assertContains(	'[DataObject::$has_one](http://api.silverstripe.org/search/lookup/?q=DataObject::$has_one&version=2.4&module=mymodule)',
+			$result
+		);
+	}
 		
 	function testRelativeLinks() {
 		// Page on toplevel
