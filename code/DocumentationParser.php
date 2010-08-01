@@ -44,8 +44,16 @@ class DocumentationParser {
 
 			return DBField::create('HTMLText', $html);
 	}
-	
+		
 	/**
+	 * Rewrite links with special "api:" prefix, from two possible formats:
+	 * 1. [api:DataObject]
+	 * 2. (My Title)(api:DataObject)
+	 * 
+	 * Hack: Replaces any backticks with "<code>" blocks,
+	 * as the currently used markdown parser doesn't resolve links in backticks,
+	 * but does resolve in "<code>" blocks.
+	 * 
 	 * @param String $md
 	 * @param DocumentationPage $page
 	 * @return String
@@ -53,12 +61,14 @@ class DocumentationParser {
 	static function rewrite_api_links($md, $page) {
 		// Links with titles
 		$re = '/
+			`?
 			\[
 				(.*?) # link title (non greedy)
 			\] 
 			\(
 				api:(.*?) # link url (non greedy)
 			\)
+			`?
 		/x';
 		preg_match_all($re, $md, $linksWithTitles);
 		if($linksWithTitles) foreach($linksWithTitles[0] as $i => $match) {
@@ -67,16 +77,18 @@ class DocumentationParser {
 			$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getModuleFolder());
 			$md = str_replace(
 				$match, 
-				sprintf('[%s](%s)', $title, $url),
+				sprintf('<code>[%s](%s)</code>', $title, $url),
 				$md
 			);
 		}
 		
 		// Bare links
 		$re = '/
+			`?
 			\[
 				api:(.*?)
 			\]
+			`?
 		/x';
 		preg_match_all($re, $md, $links);
 		if($links) foreach($links[0] as $i => $match) {
@@ -84,7 +96,7 @@ class DocumentationParser {
 			$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getModuleFolder());
 			$md = str_replace(
 				$match, 
-				sprintf('[%s](%s)', $subject, $url),
+				sprintf('<code>[%s](%s)</code>', $subject, $url),
 				$md
 			);
 		}
