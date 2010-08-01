@@ -8,27 +8,95 @@
  */
 
 class DocumentationParser {
-	
+		
 	/**
 	 * Parse a given path to the documentation for a file. Performs a case insensitive 
 	 * lookup on the file system. Automatically appends the file extension to one of the markdown
 	 * extensions as well so /install/ in a web browser will match /install.md or /INSTALL.md
-	 *
-	 * @param String $module path to a module
-	 * @param Array path of urls. Should be folders, last one is a page
+	 * 
+	 * Filepath: /var/www/myproject/src/cms/en/folder/subfolder/page.md
+	 * URL: http://myhost/mywebroot/dev/docs/2.4/cms/en/folder/subfolder/page
+	 * Webroot: http://myhost/mywebroot/
+	 * Baselink: dev/docs/2.4/cms/en/
+	 * Pathparts: folder/subfolder/page
+	 * 
+	 * @param DocumentationPage $page
+	 * @param String $baselink Link relative to webroot, up until the "root" of the module.  
+	 *  Necessary to rewrite relative links
 	 *
 	 * @return HTMLText
 	 */
-	public static function parse($module, $path) {
+	public static function parse(DocumentationPage $page, $baselink = null) {
 		require_once('../sapphiredocs/thirdparty/markdown.php');
 
-		if($content = self::find_page($module, $path)) {
-			$content = Markdown(file_get_contents($content));
+			$md = $page->getMarkdown();
+			
+			// Pre-processing
+			$md = self::rewrite_relative_links($md, $page, $baselink);
+			
+			$html = Markdown($md);
 
-			return DBField::create('HTMLText', $content);
+			return DBField::create('HTMLText', $html);
+	}
+	
+	/**
+	 * Resolves all relative links within markdown.
+	 * 
+	 * @param String $md Markdown content
+	 * @param DocumentationPage $page
+	 * @param String $baselink
+	 * @return String Markdown
+	 */
+	static function rewrite_relative_links($md, $page, $baselink) {
+		$re = '/
+			\[
+				(.*?) # link title (non greedy)
+			\] 
+			\(
+				(.*?) # link url (non greedy)
+			\)
+		/x';
+		preg_match_all($re, $md, $matches);
+		
+		// relative path (to module base folder), without the filename
+		$relativePath = dirname($page->getRelativePath());
+		if($relativePath == '.') $relativePath = '';
+		
+		if($matches) foreach($matches[0] as $i => $match) {
+			$title = $matches[1][$i];
+			$url = $matches[2][$i];
+			
+			// Don't process API links
+			if(preg_match('/^api:/', $url)) continue;
+			
+			// Don't process absolute links (based on protocol detection)
+			$urlParts = parse_url($url);
+			if($urlParts && isset($urlParts['scheme'])) continue;
+			
+			// Rewrite URL (relative or absolute)
+			if(preg_match('/^\//', $url)) {
+				$relativeUrl = $baselink . $url;
+			} else {
+				$relativeUrl = $baselink . '/' . $relativePath . '/' . $url;
+			}
+			
+			// Resolve relative paths
+			while(strpos($relativeUrl, '..') !== FALSE) {
+				$relativeUrl = preg_replace('/\w+\/\.\.\//', '', $relativeUrl);
+			}
+			
+			// Replace any double slashes (apart from protocol)
+			$relativeUrl = preg_replace('/([^:])\/{2,}/', '$1/', $relativeUrl);
+			
+			// Replace in original content
+			$md = str_replace(
+				$match, 
+				sprintf('[%s](%s)', $title, $relativeUrl),
+				$md
+			);
 		}
 		
-		return false;
+		return $md;
 	}
 	
 	/**
@@ -37,13 +105,13 @@ class DocumentationParser {
 	 *
 	 * Name may also be a path /install/foo/bar.
 	 *
-	 * @param String $entity path to the entity
+	 * @param String $modulePath Absolute path to the entity
 	 * @param Array $path path to the file in the entity
 	 *
 	 * @return String|false - File path
 	 */
-	private static function find_page($entity, $path) {	
-		return self::find_page_recursive($entity, $path);
+	static function find_page($modulePath, $path) {	
+		return self::find_page_recursive($modulePath, $path);
 	}
 	
 	/**

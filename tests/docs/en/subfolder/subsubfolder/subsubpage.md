@@ -1,0 +1,5 @@
+[link: absolute index](/)
+[link: relative index](../)
+[link: relative parent page](../subpage)
+[link: relative grandparent page](../../test)
+[link: absolute page](/test)

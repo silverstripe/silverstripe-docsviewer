@@ -5,6 +5,9 @@
  * path with {@link DocumentationService::register()}. This refers to a whole package
  * rather than a specific page but if we need page options we may need to introduce 
  * a class for that.
+ * 
+ * Each folder must have at least one language subfolder, which is automatically
+ * determined through {@link addVersion()} and should not be included in the $path argument.
  *
  * @package sapphiredocs
  */
@@ -41,7 +44,7 @@ class DocumentationEntity extends ViewableData {
 	 *
 	 * @param String $module name of module
 	 * @param String $version version of this module
-	 * @param String $path path to this module
+	 * @param String $path Absolute path to this module (excluding language folders)
 	 */
 	function __construct($module, $version = '', $path, $title = false) {
 		$this->addVersion($version, $path);
@@ -165,7 +168,7 @@ class DocumentationEntity extends ViewableData {
 	}
 	
 	/**
-	 * Return the path to this documentation entity
+	 * Return the absolute path to this documentation entity.
 	 *
 	 * @return String
 	 */
@@ -174,9 +177,14 @@ class DocumentationEntity extends ViewableData {
 		if(!$version) $version = '';
 		if(!$lang) $lang = 'en';
 		
-		if(!$this->hasVersion($version)) $path = array_pop($this->versions);
-		else $path = $this->versions[$version];
+		// Get version, or fall back to first available
+		if($this->hasVersion($version)) {
+			$path = $this->versions[$version];
+		}	else {
+			$versions = $this->getVersions();
+			$path = $this->versions[$versions[0]];
+		} 
 
-		return $path . $lang .'/';
+		return $path . '/' . $lang .'/';
 	}
 }

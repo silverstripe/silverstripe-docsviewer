@@ -36,8 +36,7 @@ class DocumentationViewer extends Controller {
 		'Lang'				=> 'Text',
 		'Module' 			=> 'Text',
 		'LanguageTitle'		=> 'Text'
-	);
-	
+	);	
 	
 	function init() {
 		parent::init();
@@ -61,9 +60,9 @@ class DocumentationViewer extends Controller {
 	 */
 	public function handleRequest(SS_HTTPRequest $request) {
 
-		$this->Version 	= $request->shift();
-		$this->Lang 	= $request->shift();
-	
+		$this->Version = $request->shift();
+		$this->Lang = $request->shift();
+		$this->ModuleName = $request->shift();
 		$this->Remaining = $request->shift(10);
 	
 		DocumentationService::load_automatic_registration();
@@ -75,9 +74,11 @@ class DocumentationViewer extends Controller {
 			// /en/sapphire/page which is a link to the latest one
 		
 			if(!is_numeric($this->Version)) {
+				array_unshift($this->Remaining, $this->ModuleName);
+				
 				// not numeric so /en/sapphire/folder/page
 				if(isset($this->Lang) && $this->Lang)
-					array_unshift($this->Remaining, $this->Lang);
+					$this->ModuleName = $this->Lang;
 			
 				$this->Lang = $this->Version;
 				$this->Version = null;
@@ -108,18 +109,16 @@ class DocumentationViewer extends Controller {
 		// count the number of parameters after the language, version are taken
 		// into account. This automatically includes ' ' so all the counts
 		// are 1 more than what you would expect
-		if($this->Remaining) {
+		if($this->ModuleName || $this->Remaining) {
 
 			$paramCount = count($this->Remaining);
 			
-			if($paramCount == 1) {
+			if($paramCount == 0) {
 				return parent::getViewer('folder');
 			}
 			else if($module = $this->getModule()) {
 				$params = $this->Remaining;
 				
-				array_shift($params); // module name
-					
 				$path = implode('/', array_unique($params));
 				
 				if(is_dir($module->getPath() . $path)) return parent::getViewer('folder');
@@ -224,11 +223,24 @@ class DocumentationViewer extends Controller {
 
 		if($modules) {
 			foreach($modules as $module) {
+				$filepath = $module->getPath() . '/index.md';
+				if(file_exists($filepath)) {
+					$page = new DocumentationPage(
+						$filepath,
+						$module,
+						$this->Lang,
+						$this->Version
+					);
+					$content = DocumentationParser::parse($page, $this->Link(array_slice($this->Remaining, -1, -1)));
+				} else {
+					$content = '';
+				}
+				
 				// build the dataset. Load the $Content from an index.md
 				$output->push(new ArrayData(array(
 					'Title' 	=> $module->getTitle(),
 					'Code'		=> $module,
-					'Content' 	=> DocumentationParser::parse($module->getPath(), array('index'))
+					'Content' 	=> $content
 				)));
 			}
 		}
@@ -242,11 +254,32 @@ class DocumentationViewer extends Controller {
 	 * @return false|DocumentationEntity
 	 */
 	function getModule() {
-		if($this->Remaining && is_array($this->Remaining)) {	
-			return DocumentationService::is_registered_module($this->Remaining[0], $this->Version, $this->Lang);
+		if($this->ModuleName) {
+			return DocumentationService::is_registered_module($this->ModuleName, $this->Version, $this->Lang);
 		}
 
 		return false;
+	}
+	
+	/**
+	 * @return DocumentationPage
+	 */
+	function getPage() {
+		$module = $this->getModule();
+		if(!$module) return false;
+		
+		$absFilepath = DocumentationParser::find_page($module->getPath(), $this->Remaining);
+		if($absFilepath) {
+			$relativeFilePath = str_replace($module->getPath(), '', $absFilepath);
+			return new DocumentationPage(
+				$relativeFilePath,
+				$module,
+				$this->Lang,
+				$this->Version
+			);
+		} else {
+			return false;
+		}
 	}
 	
 	/**
@@ -262,7 +295,7 @@ class DocumentationViewer extends Controller {
 			
 			if($pages) {
 				foreach($pages as $page) {
-					$linkParts = array($module->getModuleFolder());
+					$linkParts = array();
 					
 					// don't include the 'index in the url
 					if($page->Title != "Index") $linkParts[] = $page->Filename;
@@ -272,16 +305,14 @@ class DocumentationViewer extends Controller {
 					$page->LinkingMode = 'link';
 					$page->Children = false;
 			
-					if(isset($this->Remaining[1])) {
-						if(strtolower($this->Remaining[1]) == $page->Filename) {
+					if(isset($this->Remaining[0])) {
+						if(strtolower($this->Remaining[0]) == $page->Filename) {
 							$page->LinkingMode = 'current';
 							
 							if(is_dir($page->Path)) {
 								$children = DocumentationParser::get_pages_from_folder($page->Path);
-								$segments = array($module->getModuleFolder(), $this->Remaining[1]);
-								
-								foreach($children as $child) {								
-									$child->Link = $this->Link(array_merge($segments, array($child->Filename)));
+								foreach($children as $child) {
+									$child->Link = $this->Link(array($this->Remaining[0], $child->Filename));
 								}
 								
 								$page->Children = $children;
@@ -296,6 +327,7 @@ class DocumentationViewer extends Controller {
 		
 		return false;
 	}
+	
 	/**
 	 * Return the content for the page. If its an actual documentation page then
 	 * display the content from the page, otherwise display the contents from
@@ -304,12 +336,9 @@ class DocumentationViewer extends Controller {
 	 * @return HTMLText
 	 */
 	function getContent() {
-		if($module = $this->getModule()) {
-			// name of the module. Throw it away since we already have the module path.
-			$filepath = $this->Remaining;
-			array_shift($filepath); 
-			
-			return DocumentationParser::parse($module->getPath(), $filepath);
+		if($page = $this->getPage()) {
+			// Remove last portion of path (filename), we want a link to the folder base
+			return DocumentationParser::parse($page, $this->Link(array_slice($this->Remaining, -1, -1)));
 		}
 		
 		return false;
@@ -322,21 +351,23 @@ class DocumentationViewer extends Controller {
 	 * @return DataObjectSet
 	 */
 	function getBreadcrumbs() {
-		$pages = $this->Remaining;
+		$pages = array_merge(array($this->ModuleName), $this->Remaining);;
 		
 		$output = new DataObjectSet();
-		$output->push(new ArrayData(array(
-			'Title' => ($this->Version) ? $this->Version : _t('DocumentationViewer.DOCUMENTATION', 'Documentation'),
-			'Link' => $this->Link()
-		)));
+		
+		// $output->push(new ArrayData(array(
+		// 	'Title' => ($this->Version) ? $this->Version : _t('DocumentationViewer.DOCUMENTATION', 'Documentation'),
+		// 	'Link' => $this->Link()
+		// )));
 		
 		if($pages) {
 			$path = array();
 			
-			foreach($pages as $page => $title) {
+			foreach($pages as $i => $title) {
 				if($title) {
-					$path[] = $title;
-					
+					// Don't add module name, already present in Link()
+					if($i > 0) $path[] = $title;
+
 					$output->push(new ArrayData(array(
 						'Title' => DocumentationParser::clean_page_name($title),
 						'Link' => $this->Link($path)
@@ -362,6 +393,7 @@ class DocumentationViewer extends Controller {
 		
 		$version = ($this->Version) ? $this->Version . '/' : false;
 		$lang = ($this->Lang) ? $this->Lang .'/' : false;
+		$module = ($this->ModuleName) ? $this->ModuleName .'/' : false;
 		
 		$action = '';
 		if(is_string($path)) $action = $path . '/';
@@ -374,7 +406,7 @@ class DocumentationViewer extends Controller {
 			}
 		}
 		
-		return $base . $loc . $version . $lang . $action;
+		return $base . $loc . $version . $lang . $module . $action;
 	} 
 	
 	/**
