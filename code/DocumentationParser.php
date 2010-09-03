@@ -1,8 +1,13 @@
 <?php
 /**
+ * Parser wrapping the Markdown Extra parser (see http://michelf.com/projects/php-markdown/extra/).
+ * As it parses files in context 
+ * 
+ * @todo Abstract code that doesn't require DocumentationPage context into standalone parser
+ *  extending the Markdown_Extra class.
+ * 
  * @package sapphiredocs
  */
-
 class DocumentationParser {
 	
 	/**
