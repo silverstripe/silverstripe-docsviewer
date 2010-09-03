@@ -20,3 +20,17 @@ Normal text after code block
 
 	code block
 	without formatting prefix
+	
+# Heading one
+
+# Heading with custom anchor {#custom-anchor}
+
+## Heading two
+
+### Heading three
+
+## Heading duplicate
+
+## Heading duplicate
+
+## Heading duplicate

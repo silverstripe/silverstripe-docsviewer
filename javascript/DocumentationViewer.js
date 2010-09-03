@@ -13,7 +13,6 @@
 
 			$('#left-column h1, #left-column h2, #left-column h3, #left-column h4').each(function(i) {
 				var current = $(this);
-				current.attr('id', 'title' + i);
 				toc += '<li class="' + current.attr("tagName").toLowerCase() + '"><a id="link' + i + '" href="'+ window.location.href +'#title' + i + '" title="' + current.html() + '">' + current.html() + '</a></li>';
 			});
 		

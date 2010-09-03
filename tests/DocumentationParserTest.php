@@ -63,6 +63,44 @@ class DocumentationParserTest extends SapphireTest {
 			$result
 		);
 	}
+	
+	function testHeadlineAnchors() {
+		$page = new DocumentationPage(
+			'test.md',
+			new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'),
+			'en',
+			'2.4'
+		);
+		
+		$result = DocumentationParser::rewrite_heading_anchors($page->getMarkdown(), $page);
+		
+		/*
+		# Heading one {#Heading-one}
+
+		# Heading with custom anchor {#custom-anchor} {#Heading-with-custom-anchor-custom-anchor}
+
+		## Heading two {#Heading-two}
+
+		### Heading three {#Heading-three}
+
+		## Heading duplicate {#Heading-duplicate}
+
+		## Heading duplicate {#Heading-duplicate-2}
+
+		## Heading duplicate {#Heading-duplicate-3}
+		
+		*/
+
+		$this->assertContains('# Heading one {#Heading-one}', $result);
+		$this->assertContains('# Heading with custom anchor {#custom-anchor}', $result);
+		$this->assertNotContains('# Heading with custom anchor {#custom-anchor} {#Heading', $result);
+		$this->assertContains('# Heading two {#Heading-two}', $result);
+		$this->assertContains('# Heading three {#Heading-three}', $result);
+		$this->assertContains('## Heading duplicate {#Heading-duplicate}', $result);
+		$this->assertContains('## Heading duplicate {#Heading-duplicate-2}', $result);
+		$this->assertContains('## Heading duplicate {#Heading-duplicate-3}', $result);
+		
+	}
 		
 	function testRelativeLinks() {
 		// Page on toplevel
