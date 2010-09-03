@@ -249,6 +249,7 @@ class DocumentationService {
 	 * @param bool $major is this a major release
 	 */
 	public static function register($module, $path, $version = '', $title = false, $major = false) {
+		if(!file_exists($path)) throw new InvalidArgumentException(sprintf('Path "%s" doesn\'t exist', $path));
 		
 		// add the module to the registered array
 		if(!isset(self::$registered_modules[$module])) {
