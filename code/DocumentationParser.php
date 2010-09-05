@@ -384,7 +384,8 @@ class DocumentationParser {
 	
 	
 	/**
-	 * Return the children from a given module. Used for building the tree of the page
+	 * Return the children from a given module sorted by Title using natural ordering. 
+	 * It is used for building the tree of the page.
 	 *
 	 * @param String module name
 	 *
@@ -393,6 +394,7 @@ class DocumentationParser {
 	public static function get_pages_from_folder($folder) {
 		$handle = opendir($folder);
 		$output = new DataObjectSet();
+		$files = array(); 
 		
 		if($handle) {
 			$extensions = DocumentationService::get_valid_extensions();
@@ -400,16 +402,22 @@ class DocumentationParser {
 			
 			while (false !== ($file = readdir($handle))) {	
 				if(!in_array($file, $ignore)) {
-					$file = strtolower($file);
-					
-					$clean = ($pos = strrpos($file, '.')) ? substr($file, 0, $pos) : $file;
-
-					$output->push(new ArrayData(array(
-						'Title' 	=> self::clean_page_name($file),
-						'Filename'	=> $clean,
-						'Path'		=> $folder . $file .'/'
-					)));
+					$files[] = $file;
 				}
+			}
+			
+			natsort($files);
+			
+			foreach($files as $file) {
+				$file = strtolower($file);
+				
+				$clean = ($pos = strrpos($file, '.')) ? substr($file, 0, $pos) : $file;
+
+				$output->push(new ArrayData(array(
+					'Title' 	=> self::clean_page_name($file),
+					'Filename'	=> $clean,
+					'Path'		=> $folder . $file .'/'
+				)));
 			}
 		}
 		

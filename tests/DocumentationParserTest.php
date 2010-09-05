@@ -211,6 +211,14 @@ class DocumentationParserTest extends SapphireTest {
 		$this->assertContains('subfolder', $pages->column('Filename'), 'Foldername');
 		$this->assertContains('test', $pages->column('Filename'), 'Filename');
 		$this->assertNotContains('_images', $pages->column('Filename'), 'Ignored files');
+		
+		// test the order of pages
+		$pages = DocumentationParser::get_pages_from_folder(BASE_PATH . '/sapphiredocs/tests/docs/en/sort');
+		$this->assertEquals(
+			array('1 basic', '2 intermediate', '3 advanced', '10 some page', '21 another page'),
+			$pages->column('Title')
+		);
+		
 	}
 	
 }
