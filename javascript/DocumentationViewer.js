@@ -7,7 +7,6 @@
 		 *
 		 * Transform a #table-of-contents div to a nested list
 		 */
-		
 		if($("#table-of-contents").length > 0) {
 			var toc = '<div class="box"><ul id="toc"><h4>In this document:</h4>';
 
@@ -20,6 +19,24 @@
 	
 			$('#table-of-contents').prepend(toc);
 		}
+		
+		/** ---------------------------------------------
+		 * HEADING ANCHOR LINKS
+		 *
+		 * Automatically adds anchor links to headings that have IDs
+		 */
+		$("h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]").each(function() {
+			var link = '<a class="heading-anchor-link" title="Link to this section" href="#' + $(this).attr('id') + '">&para;</a>';
+			$(this).append(' ' + link);
+		}); 
+		
+		$("h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]").mouseenter(function() {
+			$(this).addClass('hover');
+		});
+		
+		$("h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]").mouseleave(function() {
+			$(this).removeClass('hover');
+		});
 		
 		/** ---------------------------------------------
 		 * LANGAUGE SELECTER
