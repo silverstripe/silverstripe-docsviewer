@@ -124,24 +124,27 @@ class DocumentationViewerTests extends FunctionalTest {
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.4/en/DocumentationViewerTests/subfolder/'));
 		$pages = $v->getModulePages();
 		$this->assertEquals(
-			array('index', 'subfolder', 'test'),
+			array('index', 'sort', 'subfolder', 'test'),
 			$pages->column('Filename')
 		);
 		$this->assertEquals(
-			array('link', 'current', 'link'),
+			array('link', 'link','current', 'link'),
 			$pages->column('LinkingMode')
 		);
 		$links = $pages->column('Link');
 		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/', $links[0]);
-		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/subfolder/', $links[1]);
-		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/test/', $links[2]);
+		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/sort/', $links[1]);
+		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/subfolder/', $links[2]);
+		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/test/', $links[3]);
 		
 		// Children
 		$pagesArr = $pages->toArray();
 		$child1 = $pagesArr[0];
+
 		$this->assertFalse($child1->Children);
 		
-		$child2 = $pagesArr[1];
+		$child2 = $pagesArr[2];
+
 		$this->assertType('DataObjectSet', $child2->Children);
 		$this->assertEquals(
 			array('subpage', 'subsubfolder'),

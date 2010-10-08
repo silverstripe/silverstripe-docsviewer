@@ -388,40 +388,56 @@ class DocumentationParser {
 	 * It is used for building the tree of the page.
 	 *
 	 * @param String module name
+	 * @param bool Recursive search
+	 * @param DataObjectSet set of pages matched so far
 	 *
 	 * @return DataObjectSet
 	 */
-	public static function get_pages_from_folder($folder) {
-		$handle = opendir($folder);
+	public static function get_pages_from_folder($folder, $recursive = false, &$pages = false) {
 		$output = new DataObjectSet();
-		$files = array(); 
+		
+		if(!$pages) $pages = new DataObjectSet();
+
+		$handle = opendir($folder);
 		
 		if($handle) {
 			$extensions = DocumentationService::get_valid_extensions();
 			$ignore = DocumentationService::get_ignored_files();
+			$files = array();
 			
 			while (false !== ($file = readdir($handle))) {	
 				if(!in_array($file, $ignore)) {
-					$files[] = $file;
+					$file = trim(strtolower($file), '/');
+					$path = rtrim($folder, '/') . '/'. $file;
+					
+					if($recursive && is_dir($path)) {
+						self::get_pages_from_folder($path, true, $pages);
+					} 
+					else {
+						$files[] = $file;
+					}
 				}
 			}
 			
 			natsort($files);
 			
-			foreach($files as $file) {
-				$file = strtolower($file);
-				
-				$clean = ($pos = strrpos($file, '.')) ? substr($file, 0, $pos) : $file;
-
-				$output->push(new ArrayData(array(
-					'Title' 	=> self::clean_page_name($file),
-					'Filename'	=> $clean,
-					'Path'		=> $folder . $file .'/'
-				)));
+			if($files) {
+				foreach($files as $file) {
+					$clean = ($pos = strrpos($file, '.')) ? substr($file, 0, $pos) : $file;
+					$path = rtrim($folder, '/') . '/'. $file;
+					
+					$pages->push(new ArrayData(array(
+						'Title' 	=> self::clean_page_name($file),
+						'Filename'	=> $clean,
+						'Path'		=> $path
+					)));
+				}
 			}
+			
 		}
 		
-		return $output;
+		closedir($handle);
+		
+		return $pages;
 	}
-
 }
