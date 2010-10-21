@@ -24,12 +24,12 @@ class DocumentationParserTest extends SapphireTest {
 	
 	function testImageRewrites() {
 		// Page on toplevel
-		$page = new DocumentationPage(
-			'subfolder/subpage.md',
-			new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'),
-			'en',
-			'2.4'
-		);
+		$page = new DocumentationPage();
+		$page->setRelativePath('subfolder/subpage.md');
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'));
+		$page->setLang('en');
+		$page->setVersion('2.4');
+		
 		$result = DocumentationParser::rewrite_image_links($page->getMarkdown(), $page, 'mycontroller/cms/2.4/en/');
 		$this->assertContains(
 			'[relative image link](' . Director::absoluteBaseURL() . '/sapphiredocs/tests/docs/en/subfolder/_images/image.png)',
@@ -48,12 +48,13 @@ class DocumentationParserTest extends SapphireTest {
 	
 	function testApiLinks() {
 		// Page on toplevel
-		$page = new DocumentationPage(
-			'test.md',
-			new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'),
-			'en',
-			'2.4'
-		);
+		$page = new DocumentationPage();
+		$page->setRelativePath('test.md');
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'));
+		$page->setLang('en');
+		$page->setVersion('2.4');
+		
+		
 		$result = DocumentationParser::rewrite_api_links($page->getMarkdown(), $page, 'mycontroller/cms/2.4/en/');
 		$this->assertContains(
 			'[link: api](http://api.silverstripe.org/search/lookup/?q=DataObject&version=2.4&module=mymodule)',
@@ -65,12 +66,11 @@ class DocumentationParserTest extends SapphireTest {
 	}
 	
 	function testHeadlineAnchors() {
-		$page = new DocumentationPage(
-			'test.md',
-			new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'),
-			'en',
-			'2.4'
-		);
+		$page = new DocumentationPage();
+		$page->setRelativePath('test.md');
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'));
+		$page->setLang('en');
+		$page->setVersion('2.4');
 		
 		$result = DocumentationParser::rewrite_heading_anchors($page->getMarkdown(), $page);
 		
@@ -104,11 +104,12 @@ class DocumentationParserTest extends SapphireTest {
 		
 	function testRelativeLinks() {
 		// Page on toplevel
-		$page = new DocumentationPage(
-			'test.md',
-			new DocumentationEntity('mymodule', null, BASE_PATH . '/sapphiredocs/tests/docs/')
-		);
+		$page = new DocumentationPage();
+		$page->setRelativePath('test.md');
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'));
+
 		$result = DocumentationParser::rewrite_relative_links($page->getMarkdown(), $page, 'mycontroller/cms/2.4/en/');
+
 		$this->assertContains(
 			'[link: subfolder index](mycontroller/cms/2.4/en/subfolder/)',
 			$result
@@ -127,11 +128,12 @@ class DocumentationParserTest extends SapphireTest {
 		);
 		
 		// Page in subfolder
-		$page = new DocumentationPage(
-			'subfolder/subpage.md',
-			new DocumentationEntity('mymodule', null, BASE_PATH . '/sapphiredocs/tests/docs/')
-		);
+		$page = new DocumentationPage();
+		$page->setRelativePath('subfolder/subpage.md');
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'));
+		
 		$result = DocumentationParser::rewrite_relative_links($page->getMarkdown(), $page, 'mycontroller/cms/2.4/en/');
+
 		$this->assertContains(
 			'[link: absolute index](mycontroller/cms/2.4/en/)',
 			$result
@@ -154,11 +156,12 @@ class DocumentationParserTest extends SapphireTest {
 		);
 		
 		// Page in nested subfolder
-		$page = new DocumentationPage(
-			'subfolder/subsubfolder/subsubpage.md',
-			new DocumentationEntity('mymodule', null, BASE_PATH . '/sapphiredocs/tests/docs/')
-		);
+		$page = new DocumentationPage();
+		$page->setRelativePath('subfolder/subsubfolder/subsubpage.md');
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'));
+		
 		$result = DocumentationParser::rewrite_relative_links($page->getMarkdown(), $page, 'mycontroller/cms/2.4/en/');
+		
 		$this->assertContains(
 			'[link: absolute index](mycontroller/cms/2.4/en/)',
 			$result

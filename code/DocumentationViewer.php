@@ -27,6 +27,7 @@ class DocumentationViewer extends Controller {
 		'LanguageForm',
 		'doLanguageForm',
 		'handleRequest',
+		'DocumentationSearchForm'
 	);
 	
 	static $casting = array(
@@ -85,7 +86,10 @@ class DocumentationViewer extends Controller {
 	 * @return SS_HTTPResponse
 	 */
 	public function handleRequest(SS_HTTPRequest $request) {
-		// Workaround for root routing, e.g. Director::addRules(10, array('$Action' => 'DocumentationViewer'))
+		
+		// if we submitted a form, let that pass
+		if($request->httpMethod() != "GET") return parent::handleRequest($request);
+		
 		$this->Version = ($request->param('Action')) ? $request->param('Action') : $request->shift();		
 		$this->Lang = $request->shift();
 		$this->ModuleName = $request->shift();
@@ -139,10 +143,8 @@ class DocumentationViewer extends Controller {
 					$this->redirect($link, 301); // permanent redirect
 					return $this->response;
 				}
-			}
-			
-		}
-		
+			}	
+		}		
 		
 		return parent::handleRequest($request);
 	}
@@ -271,12 +273,12 @@ class DocumentationViewer extends Controller {
 				$absFilepath = $module->getPath() . '/index.md';
 				$relativeFilePath = str_replace($module->getPath(), '', $absFilepath);
 				if(file_exists($absFilepath)) {
-					$page = new DocumentationPage(
-						$relativeFilePath,
-						$module,
-						$this->Lang,
-						$this->Version
-					);
+					$page = new DocumentationPage();
+					$page->setRelativePath($relativeFilePath);
+					$page->setEntity($module);
+					$page->setLang($this->Lang);
+					$page->setVersion($this->Version);
+					
 					$content = DocumentationParser::parse($page, $this->Link(array_slice($this->Remaining, -1, -1)));
 				} else {
 					$content = '';
@@ -317,12 +319,14 @@ class DocumentationViewer extends Controller {
 		$absFilepath = DocumentationParser::find_page($module->getPath(), $this->Remaining);
 		if($absFilepath) {
 			$relativeFilePath = str_replace($module->getPath(), '', $absFilepath);
-			return new DocumentationPage(
-				$relativeFilePath,
-				$module,
-				$this->Lang,
-				$this->Version
-			);
+			
+			$page = new DocumentationPage();
+			$page->setRelativePath($relativeFilePath);
+			$page->setEntity($module);
+			$page->setLang($this->Lang);
+			$page->setVersion($this->Version);
+			
+			return $page;
 		} else {
 			return false;
 		}
@@ -398,7 +402,9 @@ class DocumentationViewer extends Controller {
 	 * @return DataObjectSet
 	 */
 	function getBreadcrumbs() {
-		$pages = array_merge(array($this->ModuleName), $this->Remaining);;
+		if(!$this->Remaining) $this->Remaining = array();
+		
+		$pages = array_merge(array($this->ModuleName), $this->Remaining);
 		
 		$output = new DataObjectSet();
 		
@@ -508,5 +514,40 @@ class DocumentationViewer extends Controller {
 	 */
 	static function get_link_base() {
 		return self::$link_base;
+	}
+	
+	/**
+	 * @see {@link Form::FormObjectLink()}
+	 */
+	function FormObjectLink($name) {
+		return $name;
+	}
+	
+	/**
+	 * Documentation Basic Search Form
+	 *
+	 * Integrates with sphinx
+	 * @return Form
+	 */
+	function DocumentationSearchForm() {
+		
+		$fields = new FieldSet(
+			new TextField('Search')
+		);
+		
+		$actions = new FieldSet(
+			new FormAction('doDocumentationSearchForm', 'Search')
+		);
+		
+		return new Form($this, 'DocumentationSearchForm', $fields, $actions);
+	}
+	
+	/**
+	 * Past straight to results, display and encode the query
+	 */
+	function doDocumentationSearchForm($data, $form) {
+		$query = (isset($data['Search'])) ? urlencode($data['Search']) : "";
+		
+		$this->redirect('DocumentationSearch/search/'. $query);
 	}
 }

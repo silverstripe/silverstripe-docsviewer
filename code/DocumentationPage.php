@@ -1,4 +1,5 @@
 <?php
+
 /**
  * A specific page within a {@link DocumentationEntity}.
  * Has to represent an actual file, please use {@link DocumentationViewer}
@@ -18,32 +19,25 @@ class DocumentationPage extends ViewableData {
 	 */
 	protected $relativePath;
 	
+	/**
+	 * @var String
+	 */
 	protected $lang = 'en';
 	
+	/**
+	 * @var String
+	 */
 	protected $version;
-	
-	function __construct($relativePath, $entity, $lang = null, $version = null) {
-		$this->entity = $entity;
-		$this->relativePath = $relativePath;
-		if($lang) $this->lang = $lang;
-		if($version) $this->version = $version;
-		
-		if(!file_exists($this->getPath())) {
-			throw new InvalidArgumentException(sprintf(
-				'Path could not be found. Module path: %s, file path: %s', 
-				$this->entity->getPath(),
-				$this->relativePath
-			));
-		}
-		
-		parent::__construct();
-	}
 	
 	/**
 	 * @return DocumentationEntity
 	 */
 	function getEntity() {
 		return $this->entity;
+	}
+	
+	function setEntity($entity) {
+		$this->entity = $entity;
 	}
 		
 	/**
@@ -54,22 +48,43 @@ class DocumentationPage extends ViewableData {
 		return $this->relativePath;
 	}
 	
+	function setRelativePath($path) {
+		$this->relativePath = $path;
+	}
+	
 	/**
 	 * Absolute path including version and lang folder.
 	 * 
 	 *  @return String 
 	 */
 	function getPath() {
-		$path = rtrim($this->entity->getPath($this->version, $this->lang), '/') . '/' . $this->getRelativePath();
-		return realpath($path);
+		$path = realpath(rtrim($this->entity->getPath($this->version, $this->lang), '/') . '/' . $this->getRelativePath());
+
+		if(!file_exists($path)) {
+			throw new InvalidArgumentException(sprintf(
+				'Path could not be found. Module path: %s, file path: %s', 
+				$this->entity->getPath(),
+				$this->relativePath
+			));
+		}
+		
+		return $path;
 	}
 		
 	function getLang() {
 		return $this->lang;
 	}
 	
+	function setLang($lang) {
+		$this->lang = $lang;
+	}
+	
 	function getVersion() {
 		return $this->version;
+	}
+	
+	function setVersion($version) {
+		$this->version = $version;
 	}
 		
 	/**
@@ -86,5 +101,4 @@ class DocumentationPage extends ViewableData {
 	function getHTML($baselink = null) {
 		return DocumentationParser::parse($this, $baselink);
 	}
-	
 }

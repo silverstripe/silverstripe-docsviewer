@@ -391,6 +391,7 @@ class DocumentationParser {
 	 * @param bool Recursive search
 	 * @param DataObjectSet set of pages matched so far
 	 *
+	 * @throws Exception
 	 * @return DataObjectSet
 	 */
 	public static function get_pages_from_folder($folder, $recursive = false, &$pages = false) {
@@ -398,6 +399,8 @@ class DocumentationParser {
 		
 		if(!$pages) $pages = new DataObjectSet();
 
+		if(!is_dir($folder)) throw new Exception(sprintf('%s is not a folder', $folder));
+		
 		$handle = opendir($folder);
 		
 		if($handle) {
@@ -435,7 +438,7 @@ class DocumentationParser {
 			}
 			
 		}
-		
+
 		closedir($handle);
 		
 		return $pages;
