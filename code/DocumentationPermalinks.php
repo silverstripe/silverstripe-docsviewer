@@ -20,7 +20,7 @@ class DocumentationPermalinks {
 	 * Add a mapping of nice short permalinks to a full long path
 	 *
 	 * 		DocumentationPermalinks::add(array(
-	 *			'debugging' => 'sapphire/topics/debugging.md'
+	 *			'debugging' => 'current/en/sapphire/topics/debugging'
 	 *		));
 	 *
 	 *
