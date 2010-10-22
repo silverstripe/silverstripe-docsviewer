@@ -58,8 +58,8 @@ class DocumentationPage extends ViewableData {
 	 *  @return String 
 	 */
 	function getPath() {
-		$path = realpath(rtrim($this->entity->getPath($this->version, $this->lang), '/') . '/' . $this->getRelativePath());
-
+		$path = realpath(rtrim($this->entity->getPath($this->version, $this->lang), '/') . '/' . trim($this->getRelativePath(), '/'));
+		
 		if(!file_exists($path)) {
 			throw new InvalidArgumentException(sprintf(
 				'Path could not be found. Module path: %s, file path: %s', 
@@ -91,7 +91,14 @@ class DocumentationPage extends ViewableData {
 	 * @return String
 	 */
 	function getMarkdown() {
-		return file_get_contents($this->getPath());
+		try {
+			$path = $this->getPath();
+			
+			return file_get_contents($path);
+		}
+		catch(InvalidArgumentException $e) {}
+		
+		return null;
 	}
 	
 	/**
