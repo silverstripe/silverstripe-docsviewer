@@ -382,28 +382,52 @@ class DocumentationViewer extends Controller {
 					if($page->Title != "Index") $linkParts[] = $page->Filename;
 
 					$page->Link = $this->Link($linkParts);
-					
 					$page->LinkingMode = 'link';
-					$page->Children = false;
-			
-					if(isset($this->Remaining[0])) {
-						if(strtolower($this->Remaining[0]) == $page->Filename) {
-							$page->LinkingMode = 'current';
-							
-							if(is_dir($page->Path)) {
-								$children = DocumentationParser::get_pages_from_folder($page->Path);
-								foreach($children as $child) {
-									$child->Link = $this->Link(array($this->Remaining[0], $child->Filename));
-								}
-								
-								$page->Children = $children;
-							}
-						}
-					}
+					
+					$page->Children = $this->_getModulePagesNested($page);
 				}
 			}
 			
 			return $pages;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Get the module pages under a given page. Recursive call for {@link getModulePages()}
+	 *
+	 * @param ArrayData CurrentPage
+	 * @param int Depth of page in the tree
+	 *
+	 * @return DataObjectSet|false
+	 */
+	private function _getModulePagesNested(&$page, $level = 0) {
+		// only support 2 more levels
+		if(isset($this->Remaining[$level])) {
+
+			if(strtolower($this->Remaining[$level]) == $page->Filename) {
+				
+				// its either in this section or is the actual link
+				$page->LinkingMode = (isset($this->Remaining[$level + 1])) ? 'section' : 'current';
+				
+				if(is_dir($page->Path)) {
+					$children = DocumentationParser::get_pages_from_folder($page->Path);
+					
+					$segments = array();
+					for($x = 0; $x <= $level; $x++) {
+						$segments[] = $this->Remaining[$x];
+					}
+					
+					foreach($children as $child) {
+						$child->Link = $this->Link(array_merge($segments, array($child->Filename)));
+						$child->LinkingMode = 'link';
+						$child->Children = $this->_getModulePagesNested($child, $level + 1);
+					}
+					
+					return $children;
+				}
+			}
 		}
 		
 		return false;
