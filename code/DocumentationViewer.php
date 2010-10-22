@@ -123,7 +123,7 @@ class DocumentationViewer extends Controller {
 				return $this->response;
 				
 			}
-			else if(is_numeric($firstParam)) {
+			else if(is_numeric($firstParam) || $firstParam == "current") {
 				// its a version number first in the form 2.4/en/sapphire
 				$this->version = $firstParam;
 				$this->lang = $secondParam;
@@ -137,7 +137,7 @@ class DocumentationViewer extends Controller {
 				$this->module = $secondParam;
 			}
 		}
-
+		
 		// 'current' version mapping
 		$module = DocumentationService::is_registered_module($this->module, null, $this->getLang());
 	
@@ -443,7 +443,6 @@ class DocumentationViewer extends Controller {
 		// 	'Title' => ($this->Version) ? $this->Version : _t('DocumentationViewer.DOCUMENTATION', 'Documentation'),
 		// 	'Link' => $this->Link()
 		// )));
-		
 		if($pages) {
 			$path = array();
 			
