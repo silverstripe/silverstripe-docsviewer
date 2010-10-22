@@ -45,6 +45,7 @@ class DocumentationViewerTests extends FunctionalTest {
 	
 	function testCurrentRedirection() {
 		$response = $this->get('dev/docs/3.0/en/DocumentationViewerTests/test');
+
 		$this->assertEquals(301, $response->getStatusCode());
 		$this->assertEquals(
 			Director::absoluteBaseURL() . 'dev/docs/current/en/DocumentationViewerTests/test/',
@@ -68,26 +69,27 @@ class DocumentationViewerTests extends FunctionalTest {
 		// Module index
 		$v = new DocumentationViewer();
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.3/en/DocumentationViewerTests/test'));
-		$this->assertEquals('2.3', $v->Version);
-		$this->assertEquals('en', $v->Lang);
-		$this->assertEquals('DocumentationViewerTests', $v->ModuleName);
+		$this->assertEquals('2.3', $v->getVersion());
+		$this->assertEquals('en', $v->getLang());
+		$this->assertEquals('DocumentationViewerTests', $v->module);
 		$this->assertEquals(array('test'), $v->Remaining);
 		
-		// Module index without version and language
-		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/DocumentationViewerTests/test'));
-		$this->assertEquals(null, $v->Version);
-		$this->assertEquals('en', $v->Lang);
-		$this->assertEquals('DocumentationViewerTests', $v->ModuleName);
-		$this->assertEquals(array('test'), $v->Remaining);
-		
+		// Module index without version and language. Should pick up the defaults
+		$v2 = new DocumentationViewer();
+		$response = $v2->handleRequest(new SS_HTTPRequest('GET', 'en/DocumentationViewerTests/test'));
+
+		$this->assertEquals('3.0', $v2->getVersion());
+		$this->assertEquals('en', $v2->getLang());
+		$this->assertEquals('DocumentationViewerTests', $v2->module);
+		$this->assertEquals(array('test'), $v2->Remaining);
+
 		// Overall index
-		// $v = new DocumentationViewer();
-		// $response = $v->handleRequest(new SS_HTTPRequest('GET', ''));
-		// $this->assertEquals(null, $v->Version);
-		// $this->assertEquals(null, $v->Lang);
-		// $this->assertEquals(null, $v->ModuleName);
-		// $this->assertEquals(array(), $v->Remaining);
+		$v = new DocumentationViewer();
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', ''));
+		$this->assertEquals('current', $v->getVersion());
+		$this->assertEquals('en', $v->getLang());
+		$this->assertEquals('', $v->module);
+		$this->assertEquals(array(), $v->Remaining);
 	}
 	
 	function testBreadcrumbs() {
@@ -95,6 +97,7 @@ class DocumentationViewerTests extends FunctionalTest {
 		$v = new DocumentationViewer();
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.4/en/DocumentationViewerTests/'));
 		$crumbs = $v->getBreadcrumbs();
+		
 		$this->assertEquals(1, $crumbs->Count());
 		$crumbLinks = $crumbs->column('Link');
 		$this->assertStringEndsWith('DocumentationViewerTests/', $crumbLinks[0]);

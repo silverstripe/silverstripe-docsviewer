@@ -30,12 +30,25 @@ class DocumentationViewer extends Controller {
 		'DocumentationSearchForm'
 	);
 	
-	static $casting = array(
-		'Version'			=> 'Text',
-		'Lang'				=> 'Text',
-		'Module' 			=> 'Text',
-		'LanguageTitle'		=> 'Text'
-	);	
+	/**
+	 * @var string
+	 */
+	public $version = "current";
+	
+	/**
+	 * @var string
+	 */
+	public $language = "en";
+	
+	/**
+	 * @var string
+	 */
+	public $module = '';
+	
+	/**
+	 * @var array
+	 */
+	public $remaining = array();
 	
 	/**
 	 * @var String Same as the routing pattern set through Director::addRules().
@@ -88,63 +101,63 @@ class DocumentationViewer extends Controller {
 	public function handleRequest(SS_HTTPRequest $request) {
 		
 		// if we submitted a form, let that pass
-		if($request->httpMethod() != "GET") return parent::handleRequest($request);
+		if(!$request->isGET()) return parent::handleRequest($request);
 		
-		$this->Version = ($request->param('Action')) ? $request->param('Action') : $request->shift();		
-		$this->Lang = $request->shift();
-		$this->ModuleName = $request->shift();
+		$firstParam = ($request->param('Action')) ? $request->param('Action') : $request->shift();		
+		$secondParam = $request->shift();
+		$thirdParam = $request->shift();
+		
 		$this->Remaining = $request->shift(10);
 	
 		DocumentationService::load_automatic_registration();
-	
-		if(isset($this->Version)) {
-			// check to see if its a valid version. If its not a float then its not actually a version 
-			// its actually a language and it needs to change. So this means we support 2 structures
-			// /2.4/en/sapphire/page and
-			// /en/sapphire/page which is a link to the latest one
+
+		if(isset($firstParam)) {
+			if($link = DocumentationPermalinks::map($firstParam)) {
+				// the first param is a shortcode for a page so redirect the user to
+				// the short code.
+				$this->response = new SS_HTTPResponse();
 		
-			if(!is_numeric($this->Version) && $this->Version != 'current') {
-				array_unshift($this->Remaining, $this->ModuleName);
+				$this->redirect($link, 301); // permanent redirect
 				
-				// not numeric so /en/sapphire/folder/page
-				if(isset($this->Lang) && $this->Lang)
-					$this->ModuleName = $this->Lang;
-			
-				$this->Lang = $this->Version;
-				$this->Version = null;
+
+				return $this->response;
+				
+			}
+			else if(is_numeric($firstParam)) {
+				// its a version number first in the form 2.4/en/sapphire
+				$this->version = $firstParam;
+				$this->lang = $secondParam;
+				$this->module = $thirdParam;
 			}
 			else {
-				// if(!DocumentationService::is_registered_version($this->Version)) {
-				//	$this->httpError(404, 'The requested version could not be found.');
-				// }
+				// we have a language first in the form /en/sapphire
+				array_unshift($this->Remaining, $thirdParam);
+
+				$this->lang = $firstParam;
+				$this->module = $secondParam;
 			}
-		}
-		if(isset($this->Lang)) {
-			// check to see if its a valid language
-			// if(!DocumentationService::is_registered_language($this->Lang)) {	
-			//	$this->httpError(404, 'The requested language could not be found.');
-			// }
-		}
-		else {
-			$this->Lang = 'en';
 		}
 
 		// 'current' version mapping
-		$module = DocumentationService::is_registered_module($this->ModuleName, null, $this->Lang);
-		if($this->Version && $module) {
+		$module = DocumentationService::is_registered_module($this->module, null, $this->getLang());
+	
+		if($module && $this->getVersion()) {
 			$current = $module->getCurrentVersion();
-			if($this->Version == 'current') {
-				$this->Version = $current;
-			} else {
-				if($current == $this->Version) {
-					$this->Version = 'current';
-					$link = $this->Link($this->Remaining);
-					$this->response = new SS_HTTPResponse();
-					$this->redirect($link, 301); // permanent redirect
-					return $this->response;
-				}
+			
+			$version = $this->getVersion();
+
+			if($version == 'current') {
+				$this->version = $current;
+			} else if($current == $version) {
+				$this->version = 'current';
+				$link = $this->Link($this->Remaining);
+				$this->response = new SS_HTTPResponse();
+				$this->redirect($link, 301); // permanent redirect
+			
+				return $this->response;
 			}	
 		}		
+
 		
 		return parent::handleRequest($request);
 	}
@@ -156,7 +169,7 @@ class DocumentationViewer extends Controller {
 		// count the number of parameters after the language, version are taken
 		// into account. This automatically includes ' ' so all the counts
 		// are 1 more than what you would expect
-		if($this->ModuleName || $this->Remaining) {
+		if($this->module || $this->Remaining) {
 
 			$paramCount = count($this->Remaining);
 			
@@ -176,6 +189,24 @@ class DocumentationViewer extends Controller {
 		}
 		
 		return parent::getViewer($action);
+	}
+	
+	/**
+	 * Returns the current version
+	 *
+	 * @return String
+	 */
+	function getVersion() {
+		return $this->version;
+	}
+	
+	/**
+	 * Returns the current language
+	 *
+	 * @return String
+	 */
+	function getLang() {
+		return $this->language;
 	}
 	
 	/**
@@ -302,8 +333,8 @@ class DocumentationViewer extends Controller {
 	 * @return false|DocumentationEntity
 	 */
 	function getModule() {
-		if($this->ModuleName) {
-			return DocumentationService::is_registered_module($this->ModuleName, $this->Version, $this->Lang);
+		if($this->module) {
+			return DocumentationService::is_registered_module($this->module, $this->version, $this->lang);
 		}
 
 		return false;
@@ -404,7 +435,7 @@ class DocumentationViewer extends Controller {
 	function getBreadcrumbs() {
 		if(!$this->Remaining) $this->Remaining = array();
 		
-		$pages = array_merge(array($this->ModuleName), $this->Remaining);
+		$pages = array_merge(array($this->module), $this->Remaining);
 		
 		$output = new DataObjectSet();
 		
@@ -441,14 +472,16 @@ class DocumentationViewer extends Controller {
 	public function Link($path = false) {
 		$base = Director::absoluteBaseURL();
 		
-		$version = ($this->Version) ? $this->Version . '/' : false;
-		$lang = ($this->Lang) ? $this->Lang .'/' : false;
-		$module = ($this->ModuleName) ? $this->ModuleName .'/' : false;
+		$version = ($this->version) ? $this->version . '/' : false;
+		$lang = ($this->language) ? $this->language  .'/' : false;
+		$module = ($this->module) ? $this->module .'/' : false;
 		
 		$action = '';
-		if(is_string($path)) $action = $path . '/';
 		
-		if(is_array($path)) {
+		if(is_string($path)) {
+			$action = $path . '/';
+		}
+		else if(is_array($path)) {
 			foreach($path as $key => $value) {
 				if($value) {
 					$action .= $value .'/';
