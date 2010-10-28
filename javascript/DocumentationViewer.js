@@ -27,8 +27,10 @@
 		 *
 		 * Automatically adds anchor links to headings that have IDs
 		 */
+		var url = window.location.href;
+		
 		$("#left-column h1[id], #left-column h2[id], #left-column h3[id], #left-column h4[id], #left-column h5[id], #left-column h6[id]").each(function() {
-			var link = '<a class="heading-anchor-link" title="Link to this section" href="#' + $(this).attr('id') + '">&para;</a>';
+			var link = '<a class="heading-anchor-link" title="Link to this section" href="'+ url + '#' + $(this).attr('id') + '">&para;</a>';
 			$(this).append(' ' + link);
 		}); 
 		

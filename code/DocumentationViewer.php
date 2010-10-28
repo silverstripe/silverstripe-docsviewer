@@ -66,6 +66,9 @@ class DocumentationViewer extends Controller {
 		$canAccess = (Director::isDev() || Director::is_cli() || !self::$check_permission || Permission::check(self::$check_permission));
 
 		if(!$canAccess) return Security::permissionFailure($this);
+
+		Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');
+		Requirements::javascript('sapphiredocs/javascript/DocumentationViewer.js');
 	}
 
 	/**
@@ -112,6 +115,9 @@ class DocumentationViewer extends Controller {
 		DocumentationService::load_automatic_registration();
 
 		if(isset($firstParam)) {
+			// allow assets
+			if($firstParam == "assets") return parent::handleRequest($request);
+			
 			if($link = DocumentationPermalinks::map($firstParam)) {
 				// the first param is a shortcode for a page so redirect the user to
 				// the short code.
