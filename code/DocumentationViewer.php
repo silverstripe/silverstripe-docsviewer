@@ -102,7 +102,6 @@ class DocumentationViewer extends Controller {
 	 * @return SS_HTTPResponse
 	 */
 	public function handleRequest(SS_HTTPRequest $request) {
-		
 		// if we submitted a form, let that pass
 		if(!$request->isGET()) return parent::handleRequest($request);
 		
@@ -111,7 +110,7 @@ class DocumentationViewer extends Controller {
 		$thirdParam = $request->shift();
 		
 		$this->Remaining = $request->shift(10);
-	
+
 		DocumentationService::load_automatic_registration();
 
 		if(isset($firstParam)) {
@@ -146,7 +145,7 @@ class DocumentationViewer extends Controller {
 		
 		// 'current' version mapping
 		$module = DocumentationService::is_registered_module($this->module, null, $this->getLang());
-	
+
 		if($module && $this->getVersion()) {
 			$current = $module->getCurrentVersion();
 			
@@ -158,6 +157,7 @@ class DocumentationViewer extends Controller {
 				$this->version = 'current';
 				$link = $this->Link($this->Remaining);
 				$this->response = new SS_HTTPResponse();
+
 				$this->redirect($link, 301); // permanent redirect
 			
 				return $this->response;
@@ -392,7 +392,7 @@ class DocumentationViewer extends Controller {
 					$linkParts = array();
 					
 					// don't include the 'index in the url
-					if($page->Title != "Index") $linkParts[] = $page->Filename;
+					if(strtolower($page->Title) != "index") $linkParts[] = $page->Filename;
 
 					$page->Link = $this->Link($linkParts);
 					$page->LinkingMode = 'link';
