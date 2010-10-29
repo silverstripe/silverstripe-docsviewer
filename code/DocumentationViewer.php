@@ -354,6 +354,7 @@ class DocumentationViewer extends Controller {
 		if(!$module) return false;
 		
 		$absFilepath = DocumentationParser::find_page($module->getPath(), $this->Remaining);
+		
 		if($absFilepath) {
 			$relativeFilePath = str_replace($module->getPath(), '', $absFilepath);
 			
@@ -382,6 +383,12 @@ class DocumentationViewer extends Controller {
 			
 			if($pages) {
 				foreach($pages as $page) {
+					if(strtolower($page->Title) == "index") {
+						$pages->remove($page);
+						
+						continue;
+					}
+					
 					$linkParts = array();
 					
 					// don't include the 'index in the url
@@ -426,6 +433,12 @@ class DocumentationViewer extends Controller {
 					}
 					
 					foreach($children as $child) {
+						if(strtolower($child->Title) == "index") {
+							$children->remove($child);
+							
+							continue;
+						}
+						
 						$child->Link = $this->Link(array_merge($segments, array($child->Filename)));
 						$child->LinkingMode = 'link';
 						$child->Children = $this->_getModulePagesNested($child, $level + 1);

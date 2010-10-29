@@ -320,7 +320,7 @@ class DocumentationParser {
 		$name = strtolower(array_shift($goal));
 		
 		if(!$name) $name = 'index';
-		
+
 		if($handle) {
 			$extensions = DocumentationService::get_valid_extensions();
 
@@ -331,11 +331,10 @@ class DocumentationParser {
 
 				// if the name has a . then take the substr 
 				$formatted = ($pos = strrpos($formatted, '.')) ? substr($formatted, 0, $pos) : $formatted;
-				$name = ($dot = strrpos($formatted, '.')) ? substr($name, 0, $dot) : $name;
-				
-				// the folder is the one that we are looking for.
-				if($name == $formatted) {
+				$name = ($dot = strrpos($name, '.')) ? substr($name, 0, $dot) : $name;
 
+				// the folder is the one that we are looking for.
+				if(strtolower($name) == strtolower($formatted)) {
 					if(is_dir($base . $file)) {
 						// if this is a directory check that there is any more states to get
 						// to in the goal. If none then what we want is the 'index.md' file
@@ -350,13 +349,13 @@ class DocumentationParser {
 					else {
 						// goal state. End of recursion
 						$result = $base .'/'. $file;
-
+						
 						return $result;
 					}
 				}
 			}
 		}
-		
+
 		closedir($handle);
 	}
 	
