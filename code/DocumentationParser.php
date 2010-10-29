@@ -369,17 +369,17 @@ class DocumentationParser {
 	 */
 	public static function clean_page_name($name) {
 		// remove dashs and _
-		$name = str_ireplace(array('-', '_'), ' ', $name);
+		$name = str_replace(array('-', '_'), ' ', $name);
 		
 		// remove extension
-		$hasExtension = strpos($name, '.');
+		$hasExtension = strrpos($name, '.');
 
 		if($hasExtension !== false && $hasExtension > 0) {
 			$name = substr($name, 0, $hasExtension);
 		}
 		
 		// convert first letter
-		return ucfirst($name);
+		return ucfirst(trim($name));
 	}
 	
 	

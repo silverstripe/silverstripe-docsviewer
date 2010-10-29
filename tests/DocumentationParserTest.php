@@ -199,7 +199,7 @@ class DocumentationParserTest extends SapphireTest {
 			'Documentation Page',
 			'Documentation',
 			'Documentation',
-			'Documentation',
+			'Documentation.file',
 			'.hidden' // don't display something without a title
 		);
 		
