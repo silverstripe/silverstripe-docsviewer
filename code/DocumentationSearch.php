@@ -116,7 +116,8 @@ class DocumentationSearch {
 				'Title' => DBField::create('Varchar', $data->Title),
 				'Link' => DBField::create('Varchar',$data->Path),
 				'Language' => DBField::create('Varchar',$data->Language),
-				'Version' => DBField::create('Varchar',$data->Version)
+				'Version' => DBField::create('Varchar',$data->Version),
+				'Content' => DBField::create('Text', $data->content)
 			)));
 		}
 	}
@@ -172,14 +173,22 @@ class DocumentationSearch {
 			foreach($pages as $page) {
 				$count++;
 				
+				// iconv complains about all the markdown formatting
+				// turn off notices while we parse
+				$error = error_reporting();
+				error_reporting('E_ALL ^ E_NOTICE');
+				
 				if(!is_dir($page->getPath())) {
-					$doc = Zend_Search_Lucene_Document_Html::loadHTML($page->getHtml());
+					$doc = new Zend_Search_Lucene_Document();
+					$doc->addField(Zend_Search_Lucene_Field::Text('content', $page->getMarkdown()));
 					$doc->addField(Zend_Search_Lucene_Field::Text('Title', $page->getTitle()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Version', $page->getVersion()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Language', $page->getLang()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Path', $page->getPath()));
 					$index->addDocument($doc);
 				}
+				
+				error_reporting($error);
 			}
 		}
 	
