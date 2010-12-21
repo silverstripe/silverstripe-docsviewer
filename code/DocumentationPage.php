@@ -68,42 +68,24 @@ class DocumentationPage extends ViewableData {
 	 * 
 	 * @throws InvalidArgumentException
 	 *
+	 * @param bool $defaultFile - If this is a folder and this is set to true then getPath
+	 *				will return the path of the first file in the folder
 	 * @return string 
 	 */
-	function getPath() {
+	function getPath($defaultFile = false) {
 		if($this->fullPath) {
-			return $this->fullPath;
+			$path = $this->fullPath;
 		}
 		elseif($this->entity) {
 			$path = realpath(rtrim($this->entity->getPath($this->version, $this->lang), '/') . '/' . trim($this->getRelativePath(), '/'));
-		
-			if(!file_exists($path)) {
-				throw new InvalidArgumentException(sprintf(
-					'Path could not be found. Module path: %s, file path: %s', 
-					$this->entity->getPath(),
-					$this->relativePath
-				));
-			}
 		}
 		else {
 			$path = $this->relativePath;
 		}
 		
-		return $path;
-	}
-	
-	/**
-	 * Absolute path including version and lang to the file to read
-	 * off the file system. In the case of a folder this is the index.md file
-	 *
-	 * @return string
-	 */
-	function getFilePath() {
-		$path = $this->getPath();
-		
 		if(!is_dir($path)) return $path;
-		
-		if($entity = $this->getEntity()) {
+
+		if($defaultFile && ($entity = $this->getEntity())) {
 			if($relative = $this->getRelativePath()) {
 				return DocumentationService::find_page($entity, explode($relative, '/'));
 			}
@@ -113,8 +95,27 @@ class DocumentationPage extends ViewableData {
 				return DocumentationService::find_page($entity, explode($parts, '/'));
 			}
 		}
-
-		return rtrim($path, '/') . '/index.md';
+		
+		if(!file_exists($path)) {
+			throw new InvalidArgumentException(sprintf(
+				'Path could not be found. Module path: %s, file path: %s', 
+				$this->entity->getPath(),
+				$this->relativePath
+			));
+		}
+		
+		return $path;
+	}
+	
+	/**
+	 * Returns the link for the webbrowser
+	 *
+	 * @return string
+	 */
+	function getLink() {
+		$web = Director::absoluteBaseUrl() . DocumentationViewer::get_link_base();
+		
+		return (str_replace(BASE_PATH, $web , $this->getPath(true)));
 	}
 	
 	function setFullPath($path) {
@@ -146,13 +147,22 @@ class DocumentationPage extends ViewableData {
 	}
 	
 	/**
+	 * @return bool
+	 */
+	function isFolder() {
+		return (is_dir($this->getPath()));
+	}
+	
+	/**
 	 * @return String
 	 */
 	function getMarkdown() {
 		try {
-			$path = $this->getFilePath();
-		
-			return file_get_contents($path);
+			$path = $this->getPath(true);
+
+			if($path) {
+				return file_get_contents($path);
+			}
 		}
 		catch(InvalidArgumentException $e) {}
 		
@@ -165,6 +175,6 @@ class DocumentationPage extends ViewableData {
 	 */
 	function getHTML($baselink = null) {
 		// if this is not a directory then we can to parse the file
-		return DocumentationParser::parse($this->getFilePath(), $baselink);
+		return DocumentationParser::parse($this->getPath(true), $baselink);
 	}
 }

@@ -508,7 +508,8 @@ class DocumentationService {
 				
 				$page = new DocumentationPage();
 				$page->setTitle(self::clean_page_name($file));
-				$page->setFullPath($path);
+				$page->setFullPath($path); 
+
 				$page->Filename = self::trim_extension_off($file);
 
 				if($module instanceof DocumentationEntity) {

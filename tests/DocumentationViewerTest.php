@@ -144,7 +144,7 @@ class DocumentationViewerTests extends FunctionalTest {
 		$this->assertFalse($child1->Children);
 		
 		$child2 = $pagesArr[2];
-	
+		
 		$this->assertType('DataObjectSet', $child2->Children);
 		
 		$this->assertEquals(

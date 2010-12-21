@@ -1,6 +1,10 @@
 <?php
 
 /**
+ * Documentation Search powered by Lucene. You will need Zend_Lucene installed on your path
+ * to rebuild the indexes run the {@link RebuildLuceneDocsIndex} task. You may wish to setup
+ * a cron job to remake the indexes on a regular basis
+ *
  * @package sapphiredocs
  */
 
@@ -30,7 +34,7 @@ class DocumentationSearch {
 	 *
 	 * @return DataObjectSet
 	 */
-	static function get_all_documentation_pages() {
+	public static function get_all_documentation_pages() {
 		DocumentationService::load_automatic_registration();
 		
 		$modules = DocumentationService::get_registered_modules();
@@ -99,7 +103,6 @@ class DocumentationSearch {
 	 * Rebuilds the index if it out of date
 	 */
 	public function performSearch($query) {
-		$this->buildindex();
 		$index = Zend_Search_Lucene::open(self::get_index_location());
 		
 		Zend_Search_Lucene::setResultSetLimit(200);
@@ -114,7 +117,7 @@ class DocumentationSearch {
 			
 			$this->results->push(new ArrayData(array(
 				'Title' => DBField::create('Varchar', $data->Title),
-				'Link' => DBField::create('Varchar',$data->Path),
+				'Link' => DBField::create('Varchar',$data->Link),
 				'Language' => DBField::create('Varchar',$data->Language),
 				'Version' => DBField::create('Varchar',$data->Version),
 				'Content' => DBField::create('Text', $data->content)
@@ -134,65 +137,6 @@ class DocumentationSearch {
 	 */
 	public function getTotalResults() {
 		return (int) $this->totalResults;
-	}
-	
-	/**
-	 * Builds the document index
-	 */
-	public function buildIndex() {
-		ini_set("memory_limit", -1);
-		ini_set('max_execution_time', 0);
-		
-		// only rebuild the index if we have to. Check for either flush or the time write.lock.file
-		// was last altered
-		$lock = self::get_index_location() .'/write.lock.file';
-		$lockFileFresh = (file_exists($lock) && filemtime($lock) > (time() - (60 * 60 * 24)));
-		
-		if($lockFileFresh && !isset($_REQUEST['flush'])) return true;
-		
-		try {
-			$index = Zend_Search_Lucene::open(self::get_index_location());
-			$index->removeReference();
-		}
-		catch (Zend_Search_Lucene_Exception $e) {
-			
-		}
-
-		try {
-			$index = Zend_Search_Lucene::create(self::get_index_location());
-		}
-		catch(Zend_Search_Lucene_Exception $c) {
-			user_error($c);
-		}
-			
-		// includes registration
-		$pages = self::get_all_documentation_pages();
-
-		if($pages) {
-			$count = 0;
-			foreach($pages as $page) {
-				$count++;
-				
-				// iconv complains about all the markdown formatting
-				// turn off notices while we parse
-				$error = error_reporting();
-				error_reporting('E_ALL ^ E_NOTICE');
-				
-				if(!is_dir($page->getPath())) {
-					$doc = new Zend_Search_Lucene_Document();
-					$doc->addField(Zend_Search_Lucene_Field::Text('content', $page->getMarkdown()));
-					$doc->addField(Zend_Search_Lucene_Field::Text('Title', $page->getTitle()));
-					$doc->addField(Zend_Search_Lucene_Field::Keyword('Version', $page->getVersion()));
-					$doc->addField(Zend_Search_Lucene_Field::Keyword('Language', $page->getLang()));
-					$doc->addField(Zend_Search_Lucene_Field::Keyword('Path', $page->getPath()));
-					$index->addDocument($doc);
-				}
-				
-				error_reporting($error);
-			}
-		}
-	
-		$index->commit();
 	}
 
 	public function optimizeIndex() {

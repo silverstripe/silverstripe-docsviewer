@@ -389,7 +389,6 @@ class DocumentationViewer extends Controller {
 
 					$page->Link = $this->Link($linkParts);
 					$page->LinkingMode = 'link';
-					
 					$page->Children = $this->_getModulePagesNested($page);
 				}
 			}
@@ -416,10 +415,10 @@ class DocumentationViewer extends Controller {
 				
 				// its either in this section or is the actual link
 				$page->LinkingMode = (isset($this->Remaining[$level + 1])) ? 'section' : 'current';
-				
-				if(is_dir($page->Path)) {
-					$children = DocumentationService::get_pages_from_folder($page->Path, false);
-					
+	
+				if(is_dir($page->getPath())) {
+					$children = DocumentationService::get_pages_from_folder($page->getPath(), false);
+
 					$segments = array();
 					for($x = 0; $x <= $level; $x++) {
 						$segments[] = $this->Remaining[$x];
