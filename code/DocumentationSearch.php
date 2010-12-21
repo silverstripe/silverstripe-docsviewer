@@ -173,16 +173,12 @@ class DocumentationSearch {
 				$count++;
 				
 				if(!is_dir($page->getPath())) {
-					var_dump("Indexing ". $page->getPath());
 					$doc = Zend_Search_Lucene_Document_Html::loadHTML($page->getHtml());
 					$doc->addField(Zend_Search_Lucene_Field::Text('Title', $page->getTitle()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Version', $page->getVersion()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Language', $page->getLang()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Path', $page->getPath()));
 					$index->addDocument($doc);
-				}
-				else {
-					var_dump("Not Indexing ". $page->getPath());
 				}
 			}
 		}
