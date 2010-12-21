@@ -1,149 +1,198 @@
 <?php
 
 /**
- * @todo caching?
+ * @package sapphiredocs
  */
 
-class DocumentationSearch extends DocumentationViewer {
+class DocumentationSearch {
+
+	private static $enabled = false;
+
+	private $results;
 	
-	static $casting = array(
-		'Query' => 'Text'
-	);
+	private $totalResults;
 	
-	static $allowed_actions = array('xml', 'search');
-	
-	/**
-	 * @var array Cached search results
-	 */
-	private $searchCache = array();
 	
 	/**
-	 * @var Int Page Length
-	 */
-	private $pageLength = 10;
-	
-	/**
-	 * Generates the XML tree for {@link Sphinx} XML Pipes
+	 * Folder name for indexes (in the temp folder). You can override it using
+	 * {@link DocumentationSearch::set_index_location($)}
 	 *
-	 * @uses DomDocument
+	 * @var string 
 	 */
-	function xml() {
-		DocumentationService::load_automatic_registration();
-		
-		$dom = new DomDocument('1.0');
-		$dom->encoding = "utf-8";
-		$dom->formatOutput = true;
- 		$root = $dom->appendChild($dom->createElementNS('http://sphinxsearch.com', 'sphinx:docset'));
-
-		$schema = $dom->createElement('sphinx:schema');
-
-		$field = $dom->createElement('sphinx:field');
-	    $attr  = $dom->createElement('sphinx:attr');
-
-		foreach(array('Title','Content', 'Language', 'Module', 'Path') as $field) {
-			$node = $dom->createElement('sphinx:field');
-			$node->setAttribute('name', strtolower($field));
-			
-			$schema->appendChild($node);
-	    }
-
-		$root->appendChild($schema);
-
-		// go through each documentation page and add it to index
-		$pages = $this->getAllDocumentationPages();
-		
-		if($pages) {
-			foreach($pages as $doc) {
-				$node = $dom->createElement('sphinx:document');
-			
-				$node->setAttribute('id', $doc->ID);
-				
-				foreach($doc->getArray() as $key => $value) {
-					$key = strtolower($key);
-					if($key == 'id') continue;
-				
-					$tmp = $dom->createElement($key);
-					$tmp->appendChild($dom->createTextNode($value));
-
-					$node->appendChild($tmp);
-				}
-
-				$root->appendChild($node);
-			}
-		}
-		
-		return $dom->saveXML();
-	}
+	private static $index_location = 'sapphiredocs';
+	
+	static $allowed_actions = array(
+		'buildindex'
+	);
 	
 	/**
 	 * Generate an array of every single documentation page installed on the system. 
 	 *
-	 * @todo Add version support
-	 *
-	 * @return array 
+	 * @return DataObjectSet
 	 */
-	private function getAllDocumentationPages() {
+	static function get_all_documentation_pages() {
+		DocumentationService::load_automatic_registration();
+		
 		$modules = DocumentationService::get_registered_modules();
 		$output = new DataObjectSet();
 
-		
 		if($modules) {
 			foreach($modules as $module) {
+				
 				foreach($module->getLanguages() as $language) {
 					try {
-						$pages = DocumentationParser::get_pages_from_folder($module->getPath(false, $language));
-					
+						$pages = DocumentationService::get_pages_from_folder($module);
+						
 						if($pages) {
 							foreach($pages as $page) {
-								$output->push(new ArrayData(array(
-									'Title' => $page->Title,
-									'Content' => file_get_contents($page->Path),
-									'Path' => $page->Path,
-									'Language' => $language,
-									'ID' => base_convert(substr(md5($page->Path), -8), 16, 10)
-								)));
+								$output->push($page);
 							}
 						}
 					}
-					catch(Exception $e) {}
+					catch(Exception $e) {
+						user_error($e, E_USER_WARNING);
+					}
 				}
 			}
 		}
-		
+
 		return $output;
+	}
+
+	/**
+	 * Enable searching documentation 
+	 */
+	public static function enable() {
+		if(!class_exists('ZendSearchLuceneSearchable')) {
+			return user_error('DocumentationSearch requires the ZendSearchLucene library', E_ERROR);
+		}
+		
+		self::$enabled = true;
+
+		ZendSearchLuceneSearchable::enable(array());
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function enabled() {
+		return self::$enabled;
+	}
+
+	/**
+	 * @param string
+	 */
+	public function set_index($index) {
+		self::$index_location = $index;
 	}
 	
 	/**
-	 * Takes a search from the URL, performs a sphinx search and displays a search results
-	 * template.
-	 *
-	 * @todo Add additional language / version filtering
+	 * @return string
 	 */
-	function search() {
-		$query = (isset($this->urlParams['ID'])) ? $this->urlParams['ID'] : false;
-		$results = false;
-		$keywords = "";
+	public function get_index_location() {
+		return TEMP_FOLDER . '/'. trim(self::$index_location, '/');
+	}
+	
+	/**
+	 * Perform a search query on the index
+	 *
+	 * Rebuilds the index if it out of date
+	 */
+	public function performSearch($query) {
+		$this->buildindex();
+		$index = Zend_Search_Lucene::open(self::get_index_location());
 		
-		if($query) {
-			$keywords = urldecode($query);
+		Zend_Search_Lucene::setResultSetLimit(200);
+		
+		$results = $index->find($query);
 
-			$start = isset($_GET['start']) ? (int)$_GET['start'] : 0;
-
-			$cachekey = $query.':'.$start;
+		$this->results = new DataObjectSet();
+		$this->totalResults = $index->numDocs();
+		
+		foreach($results as $result) {			
+			$data = $result->getDocument();
 			
-			if(!isset($this->searchCache[$cachekey])) {
-				$this->searchCache[$cachekey] = SphinxSearch::search('DocumentationPage', $keywords, array_merge_recursive(array(
-					'start' => $start,
-					'pagesize' => $this->pageLength
-				)));
-			}
-
-			$results = $this->searchCache[$cachekey];
+			$this->results->push(new ArrayData(array(
+				'Title' => DBField::create('Varchar', $data->Title),
+				'Link' => DBField::create('Varchar',$data->Path),
+				'Language' => DBField::create('Varchar',$data->Language),
+				'Version' => DBField::create('Varchar',$data->Version)
+			)));
 		}
+	}
+	
+	/**
+	 * @return DataObjectSet
+	 */
+	public function getResults($start) {
+		return $this->results;
+	}
+	
+	/**
+	 * @return int
+	 */
+	public function getTotalResults() {
+		return (int) $this->totalResults;
+	}
+	
+	/**
+	 * Builds the document index
+	 */
+	public function buildIndex() {
+		ini_set("memory_limit", -1);
+		ini_set('max_execution_time', 0);
 		
-		return array(
-			'Query' => DBField::create('Text', $keywords),
-			'Results' => $results
-		);
+		// only rebuild the index if we have to. Check for either flush or the time write.lock.file
+		// was last altered
+		$lock = self::get_index_location() .'/write.lock.file';
+		$lockFileFresh = (file_exists($lock) && filemtime($lock) > (time() - (60 * 60 * 24)));
+		
+		if($lockFileFresh && !isset($_REQUEST['flush'])) return true;
+		
+		try {
+			$index = Zend_Search_Lucene::open(self::get_index_location());
+			$index->removeReference();
+		}
+		catch (Zend_Search_Lucene_Exception $e) {
+			
+		}
+
+		try {
+			$index = Zend_Search_Lucene::create(self::get_index_location());
+		}
+		catch(Zend_Search_Lucene_Exception $c) {
+			user_error($c);
+		}
+			
+		// includes registration
+		$pages = self::get_all_documentation_pages();
+
+		if($pages) {
+			$count = 0;
+			foreach($pages as $page) {
+				$count++;
+				
+				if(!is_dir($page->getPath())) {
+					var_dump("Indexing ". $page->getPath());
+					$doc = Zend_Search_Lucene_Document_Html::loadHTML($page->getHtml());
+					$doc->addField(Zend_Search_Lucene_Field::Text('Title', $page->getTitle()));
+					$doc->addField(Zend_Search_Lucene_Field::Keyword('Version', $page->getVersion()));
+					$doc->addField(Zend_Search_Lucene_Field::Keyword('Language', $page->getLang()));
+					$doc->addField(Zend_Search_Lucene_Field::Keyword('Path', $page->getPath()));
+					$index->addDocument($doc);
+				}
+				else {
+					var_dump("Not Indexing ". $page->getPath());
+				}
+			}
+		}
+	
+		$index->commit();
+	}
+
+	public function optimizeIndex() {
+		$index = Zend_Search_Lucene::open(self::get_index_location());
+
+		if($index) $index->optimize();
 	}
 }

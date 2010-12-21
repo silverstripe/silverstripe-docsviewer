@@ -23,22 +23,22 @@ class DocumentationEntity extends ViewableData {
 	);
 	
 	/**
-	 * @var String $module folder name
+	 * @var string $module folder name
 	 */
 	private $moduleFolder;
 	
 	/**
-	 * @var String $title nice title
+	 * @var string $title nice title
 	 */
 	private $title;
 
 	/**
-	 * @var Array $version version numbers and the paths to each
+	 * @var array $version version numbers and the paths to each
 	 */
 	private $versions = array();
 	
 	/**
-	 * @var Array
+	 * @var array
 	 */
 	private $currentVersion;
 	
@@ -51,13 +51,14 @@ class DocumentationEntity extends ViewableData {
 	 * Constructor. You do not need to pass the langs to this as
 	 * it will work out the languages from the filesystem
 	 *
-	 * @param String $module name of module
-	 * @param String $version version of this module
-	 * @param String $path Absolute path to this module (excluding language folders)
+	 * @param string $module name of module
+	 * @param string $version version of this module
+	 * @param string $path Absolute path to this module (excluding language folders)
+	 * @param string $title
 	 */
-	function __construct($module, $version = '', $path, $title = false) {
+	function __construct($module, $version, $path, $title = false) {
 		$this->addVersion($version, $path);
-		$this->title = (!$title) ? $this->module : $title;
+		$this->title = (!$title) ? $module : $title;
 		$this->moduleFolder = $module;
 	}
 	
@@ -224,6 +225,9 @@ class DocumentationEntity extends ViewableData {
 		return rtrim($path, '/') . '/' . rtrim($lang, '/') .'/';
 	}
 	
+	/**
+	 * @return string
+	 */
 	function __toString() {
 		return sprintf('DocumentationEntity: %s)', $this->getPath());
 	}

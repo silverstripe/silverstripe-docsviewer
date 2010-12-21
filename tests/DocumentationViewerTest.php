@@ -37,10 +37,6 @@ class DocumentationViewerTests extends FunctionalTest {
 		DocumentationService::unregister("DocumentationViewerTests");
 		DocumentationService::set_automatic_registration($this->origEnabled);
 		DocumentationViewer::set_link_base($this->origLinkBase);
-		// $this->origModules = Documentation::get_registered_modules();
-		// foreach($this->origModules as $name => $module) {
-		// 	DocumentationService::register($name);
-		// }
 	}
 	
 	function testCurrentRedirection() {
@@ -148,12 +144,14 @@ class DocumentationViewerTests extends FunctionalTest {
 		$this->assertFalse($child1->Children);
 		
 		$child2 = $pagesArr[2];
-
+	
 		$this->assertType('DataObjectSet', $child2->Children);
+		
 		$this->assertEquals(
 			array('subpage', 'subsubfolder'),
 			$child2->Children->column('Filename')
 		);
+		
 		$child2Links = $child2->Children->column('Link');
 		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/subfolder/subpage/', $child2Links[0]);
 		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/subfolder/subsubfolder/', $child2Links[1]);

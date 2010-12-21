@@ -25,47 +25,19 @@ class DocumentationService {
 		'de' => 'German'
 	);
 	
-	
 	/**
 	 * Files to ignore from any documentation listing.
 	 *
-	 * @var Array
+	 * @var array
 	 */
 	private static $ignored_files = array('.', '..', '.DS_Store', '.svn', '.git', 'assets', 'themes', '_images');
-	
-	/**
-	 * Set the ignored files list
-	 *
-	 * @param Array
-	 */
-	public function set_ignored_files($files) {
-		self::$ignored_files = $files;
-	}
-	
-	/**
-	 * Return the list of files which are ignored
-	 *
-	 * @return Array
-	 */
-	public function get_ignored_files() {
-		return self::$ignored_files;
-	} 
-	
+
 	/**
 	 * Case insenstive values to use as extensions on markdown pages.
 	 *
-	 * @var Array
+	 * @var array
 	 */
 	public static $valid_markdown_extensions = array('.md', '.txt', '.markdown');
-
-	/**
-	 * Return the allowed extensions
-	 *
-	 * @return Array
-	 */
-	public static function get_valid_extensions() {
-		return self::$valid_markdown_extensions;
-	}
 	
 	/**
 	 * Registered modules to include in the documentation. Either pre-filled by the
@@ -74,7 +46,7 @@ class DocumentationService {
 	 *
 	 * You can remove registered modules using {@link DocumentationService::unregister()}
 	 *
-	 * @var Array
+	 * @var array
 	 */
 	private static $registered_modules = array();
 	
@@ -83,17 +55,44 @@ class DocumentationService {
 	 * the documentation but for sapphire/cms and overall we need to register major
 	 * versions via {@link DocumentationService::register}
 	 *
-	 * @var Array
+	 * @var array
 	 */
 	private static $major_versions = array();
 	
 	/**
 	 * Return the major versions
 	 *
-	 * @return Array
+	 * @return array
 	 */
 	public static function get_major_versions() {
 		return self::$major_versions;
+	}
+	
+	/**
+	 * Return the allowed extensions
+	 *
+	 * @return array
+	 */
+	public static function get_valid_extensions() {
+		return self::$valid_markdown_extensions;
+	}
+	
+	/**
+	 * Set the ignored files list
+	 *
+	 * @param array
+	 */
+	public function set_ignored_files($files) {
+		self::$ignored_files = $files;
+	}
+	
+	/**
+	 * Return the list of files which are ignored
+	 *
+	 * @return array
+	 */
+	public function get_ignored_files() {
+		return self::$ignored_files;
 	}
 	
 	/**
@@ -181,6 +180,12 @@ class DocumentationService {
 	 */
 	public static function set_automatic_registration($bool = true) {
 		self::$automatic_registration = $bool;
+		
+		if(!$bool) {
+			// remove current registed modules when disabling automatic registration
+			// needed to avoid caching issues when running all the tests
+			self::$registered_modules = array();
+		}
 	}
 	
 	/**
@@ -227,8 +232,11 @@ class DocumentationService {
 	 * @return DocumentationEntity $module the registered module
 	 */
 	public static function is_registered_module($module, $version = false, $lang = false) {
-		if(isset(self::$registered_modules[$module])) {
-			$module = self::$registered_modules[$module];
+		
+		$check = ($module instanceof DocumentationEntity) ? $module->getModuleFolder() : (string) $module;
+		
+		if(isset(self::$registered_modules[$check])) {
+			$module = self::$registered_modules[$check];
 			if($lang && !$module->hasLanguage($lang)) return false;
 			if($version && !$module->hasVersion($version)) return false;
 			
@@ -250,7 +258,7 @@ class DocumentationService {
 	 */
 	public static function register($module, $path, $version = '', $title = false, $major = false) {
 		if(!file_exists($path)) throw new InvalidArgumentException(sprintf('Path "%s" doesn\'t exist', $path));
-		
+
 		// add the module to the registered array
 		if(!isset(self::$registered_modules[$module])) {
 			// module is completely new
@@ -315,7 +323,7 @@ class DocumentationService {
 
 			if($modules) {
 				foreach($modules as $key => $module) {
-					if(is_dir(BASE_PATH .'/'. $module) && !in_array($module, self::$ignored_files, true)) {
+					if(is_dir(BASE_PATH .'/'. $module) && !in_array($module, self::get_ignored_files(), true)) {
 						// check to see if it has docs
 						$docs = BASE_PATH .'/'. $module .'/docs/';
 	
@@ -336,5 +344,214 @@ class DocumentationService {
 	 */
 	public static function get_language_title($lang) {
 		return (isset(self::$language_mapping[$lang])) ? _t("DOCUMENTATIONSERVICE.LANG-$lang", self::$language_mapping[$lang]) : $lang;
+	}
+	
+	
+	/**
+	 * Find a documentation page given a path and a file name. It ignores the extensions
+	 * and simply compares the title.
+	 *
+	 * Name may also be a path /install/foo/bar.
+	 *
+	 * @param DocumentationEntity 
+	 * @param array exploded url string
+	 *
+	 * @return String|false - File path
+	 */
+	static function find_page($module, $path) {	
+		if($module = self::is_registered_module($module)) {
+			return self::find_page_recursive($module->getPath(), $path);
+		}
+
+		return false;
+	}
+	
+	/**
+	 * Recursive function for finding the goal of a path to a documentation
+	 * page
+	 *
+	 * @return string
+	 */
+	private static function find_page_recursive($base, $goal) {
+		$handle = opendir($base);
+
+		$name = strtolower(array_shift($goal));
+		if(!$name || $name == '/') $name = 'index';
+
+		if($handle) {
+			$extensions = DocumentationService::get_valid_extensions();
+			$firstFile = false;
+					
+			// ensure we end with a slash
+			$base = rtrim($base, '/') .'/';
+			
+			while (false !== ($file = readdir($handle))) {
+				
+				if(in_array($file, DocumentationService::get_valid_extensions())) continue;
+				
+				if(!$firstFile && !is_dir($base . $file)) $firstFile = $file;
+				
+				$formatted = strtolower($file);
+				
+				// if the name has a . then take the substr 
+				$formatted = ($pos = strrpos($formatted, '.')) ? substr($formatted, 0, $pos) : $formatted;
+				$name = ($dot = strrpos($name, '.')) ? substr($name, 0, $dot) : $name;
+
+				// the folder is the one that we are looking for.
+				if(strtolower($name) == strtolower($formatted)) {
+					
+					// if this file is a directory we could be displaying that
+					// or simply moving towards the goal.
+					if(is_dir($base . $file)) {
+						
+						$base = $base . trim($file, '/') .'/';
+						
+						// if this is a directory check that there is any more states to get
+						// to in the goal. If none then what we want is the 'index.md' file
+						if(count($goal) > 0) {
+							return self::find_page_recursive($base, $goal);
+						}
+						else {
+							// recurse but check for an index.md file next time around
+							return self::find_page_recursive($base, array('index'));
+						}
+					}
+					else {
+						// goal state. End of recursion.
+						// tidy up the URLs with single trailing slashes
+						$result =  $base . ltrim($file, '/');
+
+						if(is_dir($result)) $result = (rtrim($result, '/') . '/');
+
+						return $result;
+					}
+				}
+			}
+		}
+		
+		closedir($handle);
+		
+		// if goal has not been found and the index.md file does not exist then the next
+		// option is to pick the first file in the folder
+		return $base . ltrim($file, '/');
+	}
+	
+	/**
+	 * String helper for cleaning a file name to a readable version. 
+	 *
+	 * @param String $name to convert
+	 *
+	 * @return String $name output
+	 */
+	public static function clean_page_name($name) {
+		// remove dashs and _
+		$name = str_replace(array('-', '_'), ' ', $name);
+		
+		// remove extension
+		$name = self::trim_extension_off($name);
+		
+		// convert first letter
+		return ucfirst(trim($name));
+	}
+	
+	/**
+	 * Helper function to strip the extension off 
+	 *
+	 * @param string
+	 *
+	 * @return string
+	 */
+	public static function trim_extension_off($name) {
+		$hasExtension = strrpos($name, '.');
+
+		if($hasExtension !== false && $hasExtension > 0) {
+			$name = substr($name, 0, $hasExtension);
+		}
+		
+		return $name;
+	}
+	
+	
+	/**
+	 * Return the children from a given module sorted by Title using natural ordering. 
+	 * It is used for building the tree of the page.
+	 *
+	 * @param string|DocumentationEntity path
+	 * @param bool enable several recursive calls (more than 1 level)
+	 * @throws Exception
+	 * @return DataObjectSet
+	 */
+	public static function get_pages_from_folder($module, $recursive = true) {
+		$output = new DataObjectSet();
+		
+		$pages = array();
+		if($module instanceof DocumentationEntity) {
+			if(self::is_registered_module($module)) {
+				self::get_pages_from_folder_recursive($module->getPath(), $module, $recursive, $pages);
+			}
+			else {
+				return user_error("$module is not registered", E_USER_WARNING);
+			}
+		}
+		else {
+			self::get_pages_from_folder_recursive($module, false, $recursive, $pages);
+		}
+
+		if(count($pages) > 0) {
+			natsort($pages);
+			
+			foreach($pages as $key => $path) {
+				// get file name from the path
+				$file = ($pos = strrpos($path, '/')) ? substr($path, $pos + 1) : $path;
+					
+				// trim off the extension
+				
+				$page = new DocumentationPage();
+				$page->setTitle(self::clean_page_name($file));
+				$page->setFullPath($path);
+				$page->Filename = self::trim_extension_off($file);
+
+				if($module instanceof DocumentationEntity) {
+					$page->setEntity($module);
+				}
+					
+				$output->push($page);
+			}
+		}
+		
+		return $output;
+	}
+	
+	/**
+	 * Recursively search through $folder
+	 */ 
+	private static function get_pages_from_folder_recursive($folder, $module = false, $recusive, &$pages) {
+		if(!is_dir($folder)) throw new Exception(sprintf('%s is not a folder', $folder));
+
+		$handle = opendir($folder);
+		
+		if($handle) {
+			$extensions = self::get_valid_extensions();
+			$ignore = self::get_ignored_files();
+			$files = array();
+			
+			while (false !== ($file = readdir($handle))) {	
+				if(!in_array($file, $ignore)) {
+					$file = trim(strtolower($file), '/');
+					$path = rtrim($folder, '/') . '/'. $file;
+					
+					if(is_dir($path)) {
+						$pages[] = $path;
+						
+						if($recusive) self::get_pages_from_folder_recursive($path, $module, $recusive, $pages);
+					} 
+					else if(in_array(substr($file, (strrpos($file, '.'))), $extensions)) {
+						$pages[] = $path;
+					}
+				}
+			}
+		}
+
+		closedir($handle);
 	}
 }

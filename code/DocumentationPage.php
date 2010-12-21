@@ -1,9 +1,8 @@
 <?php
 
 /**
- * A specific page within a {@link DocumentationEntity}.
- * Has to represent an actual file, please use {@link DocumentationViewer}
- * to generate "virtual" index views.
+ * A specific page within a {@link DocumentationEntity}. Maps 1 to 1 to a file on the 
+ * filesystem.
  * 
  * @package sapphiredocs
  */
@@ -18,6 +17,7 @@ class DocumentationPage extends ViewableData {
 	 * @var String 
 	 */
 	protected $relativePath;
+	protected $fullPath; // needed for the search
 	
 	/**
 	 * @var String
@@ -25,9 +25,15 @@ class DocumentationPage extends ViewableData {
 	protected $lang = 'en';
 	
 	/**
+	 * @var string
+	 */
+	protected $title;
+	
+	/**
 	 * @var String
 	 */
 	protected $version;
+	
 	
 	/**
 	 * @return DocumentationEntity
@@ -36,18 +42,23 @@ class DocumentationPage extends ViewableData {
 		return $this->entity;
 	}
 	
+	/**
+	 * @param DocumentationEntity
+	 */
 	function setEntity($entity) {
 		$this->entity = $entity;
 	}
 		
 	/**
-	 * @return String Relative path to file or folder within the entity (including file extension),
-	 * but excluding version or language folders.
+	 * @return string
 	 */
 	function getRelativePath() {
 		return $this->relativePath;
 	}
 	
+	/**
+	 * @param string
+	 */
 	function setRelativePath($path) {
 		$this->relativePath = $path;
 	}
@@ -55,20 +66,59 @@ class DocumentationPage extends ViewableData {
 	/**
 	 * Absolute path including version and lang folder.
 	 * 
-	 *  @return String 
+	 * @throws InvalidArgumentException
+	 *
+	 * @return string 
 	 */
 	function getPath() {
-		$path = realpath(rtrim($this->entity->getPath($this->version, $this->lang), '/') . '/' . trim($this->getRelativePath(), '/'));
+		if($this->fullPath) {
+			return $this->fullPath;
+		}
+		elseif($this->entity) {
+			$path = realpath(rtrim($this->entity->getPath($this->version, $this->lang), '/') . '/' . trim($this->getRelativePath(), '/'));
 		
-		if(!file_exists($path)) {
-			throw new InvalidArgumentException(sprintf(
-				'Path could not be found. Module path: %s, file path: %s', 
-				$this->entity->getPath(),
-				$this->relativePath
-			));
+			if(!file_exists($path)) {
+				throw new InvalidArgumentException(sprintf(
+					'Path could not be found. Module path: %s, file path: %s', 
+					$this->entity->getPath(),
+					$this->relativePath
+				));
+			}
+		}
+		else {
+			$path = $this->relativePath;
 		}
 		
 		return $path;
+	}
+	
+	/**
+	 * Absolute path including version and lang to the file to read
+	 * off the file system. In the case of a folder this is the index.md file
+	 *
+	 * @return string
+	 */
+	function getFilePath() {
+		$path = $this->getPath();
+		
+		if(!is_dir($path)) return $path;
+		
+		if($entity = $this->getEntity()) {
+			if($relative = $this->getRelativePath()) {
+				return DocumentationService::find_page($entity, explode($relative, '/'));
+			}
+			else {
+				$parts = str_replace($entity->getPath($this->version, $this->lang), '', $this->fullPath);
+
+				return DocumentationService::find_page($entity, explode($parts, '/'));
+			}
+		}
+
+		return rtrim($path, '/') . '/index.md';
+	}
+	
+	function setFullPath($path) {
+		$this->fullPath = $path;
 	}
 		
 	function getLang() {
@@ -86,14 +136,22 @@ class DocumentationPage extends ViewableData {
 	function setVersion($version) {
 		$this->version = $version;
 	}
-		
+	
+	function setTitle($title) {
+		$this->title = $title;
+	}
+	
+	function getTitle() {
+		return $this->title;
+	}
+	
 	/**
 	 * @return String
 	 */
 	function getMarkdown() {
 		try {
-			$path = $this->getPath();
-			
+			$path = $this->getFilePath();
+		
 			return file_get_contents($path);
 		}
 		catch(InvalidArgumentException $e) {}
@@ -106,6 +164,7 @@ class DocumentationPage extends ViewableData {
 	 * @return String
 	 */
 	function getHTML($baselink = null) {
-		return DocumentationParser::parse($this, $baselink);
+		// if this is not a directory then we can to parse the file
+		return DocumentationParser::parse($this->getFilePath(), $baselink);
 	}
 }

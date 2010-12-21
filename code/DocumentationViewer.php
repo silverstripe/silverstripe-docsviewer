@@ -8,26 +8,18 @@
  *
  * For more documentation on how to use this class see the documentation in /sapphiredocs/docs folder
  *
- * To view the documentation in the browser use:
- * 	
- * 	http://yoursite.com/dev/docs/ Which is locked to ADMIN only
- *
- * @todo 	- Add ability to have docs on the front end as the main site.
- * 			- Fix Language Selector (enabling it troubles the handleRequest when submitting)
- *			- SS_HTTPRequest when we ask for 10 params it gives us 10. Could be 10 blank ones.
- *				It would mean I could save alot of code if it only gave back an array of size X
- * 				up to a maximum of 10...
- *
  * @package sapphiredocs
  */
 
 class DocumentationViewer extends Controller {
 
 	static $allowed_actions = array(
+		'home',
 		'LanguageForm',
 		'doLanguageForm',
 		'handleRequest',
-		'DocumentationSearchForm'
+		'DocumentationSearchForm',
+		'results'
 	);
 	
 	/**
@@ -104,7 +96,7 @@ class DocumentationViewer extends Controller {
 	public function handleRequest(SS_HTTPRequest $request) {
 		// if we submitted a form, let that pass
 		if(!$request->isGET()) return parent::handleRequest($request);
-		
+
 		$firstParam = ($request->param('Action')) ? $request->param('Action') : $request->shift();		
 		$secondParam = $request->shift();
 		$thirdParam = $request->shift();
@@ -351,10 +343,11 @@ class DocumentationViewer extends Controller {
 	 */
 	function getPage() {
 		$module = $this->getModule();
+		
 		if(!$module) return false;
 		
-		$absFilepath = DocumentationParser::find_page($module->getPath(), $this->Remaining);
-		
+		$absFilepath = DocumentationService::find_page($module, $this->Remaining);
+
 		if($absFilepath) {
 			$relativeFilePath = str_replace($module->getPath(), '', $absFilepath);
 			
@@ -365,9 +358,9 @@ class DocumentationViewer extends Controller {
 			$page->setVersion($this->Version);
 			
 			return $page;
-		} else {
-			return false;
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -379,7 +372,7 @@ class DocumentationViewer extends Controller {
 	 */
 	function getModulePages() {
 		if($module = $this->getModule()) {
-			$pages = DocumentationParser::get_pages_from_folder($module->getPath());
+			$pages = DocumentationService::get_pages_from_folder($module, false);
 			
 			if($pages) {
 				foreach($pages as $page) {
@@ -425,7 +418,7 @@ class DocumentationViewer extends Controller {
 				$page->LinkingMode = (isset($this->Remaining[$level + 1])) ? 'section' : 'current';
 				
 				if(is_dir($page->Path)) {
-					$children = DocumentationParser::get_pages_from_folder($page->Path);
+					$children = DocumentationService::get_pages_from_folder($page->Path, false);
 					
 					$segments = array();
 					for($x = 0; $x <= $level; $x++) {
@@ -495,7 +488,7 @@ class DocumentationViewer extends Controller {
 					if($i > 0) $path[] = $title;
 
 					$output->push(new ArrayData(array(
-						'Title' => DocumentationParser::clean_page_name($title),
+						'Title' => DocumentationService::clean_page_name($title),
 						'Link' => $this->Link($path)
 					)));
 				}
@@ -605,24 +598,44 @@ class DocumentationViewer extends Controller {
 	 * @return Form
 	 */
 	function DocumentationSearchForm() {
+		if(!DocumentationSearch::enabled()) return false;
+		
+		$query = (isset($_REQUEST['Search'])) ? Convert::raw2xml($_REQUEST['Search']) : "";
 		
 		$fields = new FieldSet(
-			new TextField('Search')
+			new TextField('Search', _t('DocumentationViewer.SEARCH', 'Search'), $query)
 		);
 		
 		$actions = new FieldSet(
-			new FormAction('doDocumentationSearchForm', 'Search')
+			new FormAction('results', 'Search')
 		);
 		
-		return new Form($this, 'DocumentationSearchForm', $fields, $actions);
+		$form = new Form($this, 'DocumentationSearchForm', $fields, $actions);
+		$form->disableSecurityToken();
+
+		$form->setFormAction('home/DocumentationSearchForm');
+		
+		return $form;
 	}
 	
 	/**
 	 * Past straight to results, display and encode the query
 	 */
-	function doDocumentationSearchForm($data, $form) {
+	function results($data, $form) {
 		$query = (isset($data['Search'])) ? urlencode($data['Search']) : "";
+		$start = (isset($_GET['start'])) ? (int) $_GET['start'] : 0;
 		
-		$this->redirect('DocumentationSearch/search/'. $query);
+		$search = new DocumentationSearch();
+		$search->performSearch($query);
+		
+		$results = $search->getResults($start);
+		$total = $search->getTotalResults();
+		
+		echo $this->customise(array(
+			'Results' => $results,
+			'Query' => DBField::create('HTMLVarchar', $query),
+			'Start' => DBField::create('HTMLVarchar', $start),
+			'TotalResults' 
+		))->renderWith(array('DocumentationViewer_results', 'DocumentationViewer'));
 	}
 }

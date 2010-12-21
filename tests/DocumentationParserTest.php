@@ -204,37 +204,7 @@ class DocumentationParserTest extends SapphireTest {
 		);
 		
 		foreach($names as $key => $value) {
-			$this->assertEquals(DocumentationParser::clean_page_name($value), $should[$key]);
+			$this->assertEquals(DocumentationService::clean_page_name($value), $should[$key]);
 		}
 	}
-	
-	function testGetPagesFromFolder() {
-		$pages = DocumentationParser::get_pages_from_folder(BASE_PATH . '/sapphiredocs/tests/docs/en/');
-		$this->assertContains('index', $pages->column('Filename'), 'Index');
-		$this->assertContains('subfolder', $pages->column('Filename'), 'Foldername');
-		$this->assertContains('test', $pages->column('Filename'), 'Filename');
-		$this->assertNotContains('_images', $pages->column('Filename'), 'Ignored files');
-		
-		// test the order of pages
-		$pages = DocumentationParser::get_pages_from_folder(BASE_PATH . '/sapphiredocs/tests/docs/en/sort');
-
-		$this->assertEquals(
-			array('1 basic', '2 intermediate', '3 advanced', '10 some page', '21 another page'),
-			$pages->column('Title')
-		);
-
-	}
-	
-	function testGetPagesFromFolderRecursive() {
-		$pages = DocumentationParser::get_pages_from_folder(BASE_PATH . '/sapphiredocs/tests/docs-recursive/en/', true);
-		// check to see all the pages are found, we don't care about order
-		$this->assertEquals($pages->Count(), 6);
-
-		$pages = $pages->column('Title');
-		
-		foreach(array('Index', 'Subfolder testfile', 'Subsubfolder testfile', 'Testfile') as $expected) {
-			$this->assertContains($expected, $pages);
-		}
-	}
-	
 }
