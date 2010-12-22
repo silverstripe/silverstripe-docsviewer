@@ -12,6 +12,8 @@ class DocumentationSearch {
 
 	private static $enabled = false;
 
+	private $query;
+	
 	private $results;
 	
 	private $totalResults;
@@ -103,33 +105,121 @@ class DocumentationSearch {
 	 * Rebuilds the index if it out of date
 	 */
 	public function performSearch($query) {
+		$this->query = $query;
+		
 		$index = Zend_Search_Lucene::open(self::get_index_location());
 		
 		Zend_Search_Lucene::setResultSetLimit(200);
 		
-		$results = $index->find($query);
-
-		$this->results = new DataObjectSet();
+		$this->results = $index->find($query);
 		$this->totalResults = $index->numDocs();
-		
-		foreach($results as $result) {			
-			$data = $result->getDocument();
-			
-			$this->results->push(new ArrayData(array(
-				'Title' => DBField::create('Varchar', $data->Title),
-				'Link' => DBField::create('Varchar',$data->Link),
-				'Language' => DBField::create('Varchar',$data->Language),
-				'Version' => DBField::create('Varchar',$data->Version),
-				'Content' => DBField::create('Text', $data->content)
-			)));
-		}
 	}
 	
 	/**
 	 * @return DataObjectSet
 	 */
-	public function getResults($start) {
-		return $this->results;
+	public function getDataArrayFromHits($start) {
+		$data = array(
+			'Results' => null,
+			'Query' => null,
+			'Title' => _t('DocumentationSearch.SEARCHRESULTS', 'Search Results'),
+			'TotalResults' => null,
+			'TotalPages' => null,
+			'ThisPage' => null,
+			'StartResult' => null,
+			'EndResult' => null,
+			'PrevUrl' => DBField::create('Text', 'false'),
+			'NextUrl' => DBField::create('Text', 'false'),
+			'SearchPages' => new DataObjectSet()
+		);
+
+		$pageLength = 10;
+		$currentPage = floor( $start / $pageLength ) + 1;
+		
+		$totalPages = ceil(count($this->results) / $pageLength );
+		
+		if ($totalPages == 0) $totalPages = 1;
+		if ($currentPage > $totalPages) $currentPage = $totalPages;
+
+		$results = new DataObjectSet();
+		
+		foreach($this->results as $k => $hit) {
+			if($k < ($currentPage-1)*$pageLength || $k >= ($currentPage*$pageLength)) continue;
+			
+			$doc = $hit->getDocument();
+			
+			$content = $hit->content;
+			
+			// do a simple markdown parse of the file
+			$obj = new ArrayData(array(
+				'Title' => DBField::create('Varchar', $doc->getFieldValue('Title')),
+				'Link' => DBField::create('Varchar',$doc->getFieldValue('Link')),
+				'Language' => DBField::create('Varchar',$doc->getFieldValue('Language')),
+				'Version' => DBField::create('Varchar',$doc->getFieldValue('Version')),
+				'Content' => DBField::create('HTMLText', $content),
+				'Score' => $hit->score,
+				'Number' => $k + 1
+			));
+
+			$results->push($obj);
+		}
+
+		$data['Results'] = $results;
+		$data['Query']   = DBField::create('Text', $this->query);
+		$data['TotalResults'] = DBField::create('Text', count($this->results));
+		$data['TotalPages'] = DBField::create('Text', $totalPages);
+		$data['ThisPage'] = DBField::create('Text', $currentPage);
+		$data['StartResult'] = $start + 1;
+		$data['EndResult'] = $start + count($results);
+
+		// Pagination links
+		if($currentPage > 1) {
+			$data['PrevUrl'] = DBField::create('Text', 
+				$this->buildQueryUrl(array('start' => ($currentPage - 2) * $pageLength))
+			);
+		}
+
+		if($currentPage < $totalPages) {
+			$data['NextUrl'] = DBField::create('Text', 
+				$this->buildQueryUrl(array('start' => $currentPage * $pageLength))
+			);
+		}
+		
+		if($totalPages > 1) {
+			// Always show a certain number of pages at the start
+			for ( $i = 1; $i <= $totalPages; $i++ ) {
+				$obj = new DataObject();
+				$obj->IsEllipsis = false;
+				$obj->PageNumber = $i;
+				$obj->Link = $this->buildQueryUrl(array(
+					'start' => ($i - 1) * $pageLength
+				));
+				
+				$obj->Current = false;
+				if ( $i == $currentPage ) $obj->Current = true;
+				$data['SearchPages']->push($obj);
+			}
+		}
+
+		return $data;
+	}
+	
+	/**
+	 * @return string
+	 */
+	private function buildQueryUrl($params) {
+		$url = parse_url($_SERVER['REQUEST_URI']);
+		if ( ! array_key_exists('query', $url) ) $url['query'] = '';
+		parse_str($url['query'], $url['query']);
+		if ( ! is_array($url['query']) ) $url['query'] = array();
+		// Remove 'start parameter if it exists
+		if ( array_key_exists('start', $url['query']) ) unset( $url['query']['start'] );
+		// Add extra parameters from argument
+		$url['query'] = array_merge($url['query'], $params);
+		$url['query'] = http_build_query($url['query']);
+		$url = $url['path'] . ($url['query'] ? '?'.$url['query'] : '');
+		
+		return $url;
 	}
 	
 	/**

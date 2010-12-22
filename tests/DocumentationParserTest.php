@@ -31,6 +31,7 @@ class DocumentationParserTest extends SapphireTest {
 		$page->setVersion('2.4');
 		
 		$result = DocumentationParser::rewrite_image_links($page->getMarkdown(), $page, 'mycontroller/cms/2.4/en/');
+
 		$this->assertContains(
 			'[relative image link](' . Director::absoluteBaseURL() . '/sapphiredocs/tests/docs/en/subfolder/_images/image.png)',
 			$result
@@ -182,29 +183,5 @@ class DocumentationParserTest extends SapphireTest {
 			'[link: absolute page](mycontroller/cms/2.4/en/test)',
 			$result
 		);
-	}
-	
-	function testCleanPageNames() {
-		$names = array(
-			'documentation-Page',
-			'documentation_Page',
-			'documentation.md',
-			'documentation.pdf',
-			'documentation.file.txt',
-			'.hidden'
-		);
-		
-		$should = array(
-			'Documentation Page',
-			'Documentation Page',
-			'Documentation',
-			'Documentation',
-			'Documentation.file',
-			'.hidden' // don't display something without a title
-		);
-		
-		foreach($names as $key => $value) {
-			$this->assertEquals(DocumentationService::clean_page_name($value), $should[$key]);
-		}
 	}
 }

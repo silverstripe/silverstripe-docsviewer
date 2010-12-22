@@ -14,7 +14,7 @@ class RebuildLuceneDocsIndex extends BuildTask {
 	 * based on the user. It's a 
 	 */
 	function run($request) {
-
+		require_once('../sapphiredocs/thirdparty/markdown.php');
 		ini_set("memory_limit", -1);
 		ini_set('max_execution_time', 0);
 
@@ -55,11 +55,14 @@ class RebuildLuceneDocsIndex extends BuildTask {
 
 				if(!is_dir($page->getPath())) {
 					$doc = new Zend_Search_Lucene_Document();
-					$doc->addField(Zend_Search_Lucene_Field::Text('content', $page->getMarkdown()));
+					$content = $page->getMarkdown();
+					if($content) $content = Markdown($content);
+
+					$doc->addField(Zend_Search_Lucene_Field::Text('content', $content));
 					$doc->addField(Zend_Search_Lucene_Field::Text('Title', $page->getTitle()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Version', $page->getVersion()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Language', $page->getLang()));
-					$doc->addField(Zend_Search_Lucene_Field::Keyword('Link', $page->getLink()));
+					$doc->addField(Zend_Search_Lucene_Field::Keyword('Link', $page->Link()));
 					$index->addDocument($doc);
 				}
 

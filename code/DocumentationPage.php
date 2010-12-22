@@ -14,10 +14,12 @@ class DocumentationPage extends ViewableData {
 	protected $entity;
 	
 	/**
+	 * Stores the relative path (from the {@link DocumentationEntity} to
+	 * this page. The actual file name can be accessed via {@link $this->getFilename()}
+	 *
 	 * @var String 
 	 */
 	protected $relativePath;
-	protected $fullPath; // needed for the search
 	
 	/**
 	 * @var String
@@ -73,49 +75,54 @@ class DocumentationPage extends ViewableData {
 	 * @return string 
 	 */
 	function getPath($defaultFile = false) {
-		if($this->fullPath) {
-			$path = $this->fullPath;
-		}
-		elseif($this->entity) {
-			$path = realpath(rtrim($this->entity->getPath($this->version, $this->lang), '/') . '/' . trim($this->getRelativePath(), '/'));
+		if($this->entity) {
+			$path = rtrim($this->entity->getPath($this->version, $this->lang), '/') . '/' . trim($this->getRelativePath(), '/');
+			
+			if(!is_dir($path)) $path = realpath($path);
+			else if($defaultFile) {
+				$file = DocumentationService::find_page($this->entity, explode('/', $this->getRelativePath()));
+
+				if($file) $path = $file;
+			}
 		}
 		else {
-			$path = $this->relativePath;
-		}
-		
-		if(!is_dir($path)) return $path;
-
-		if($defaultFile && ($entity = $this->getEntity())) {
-			if($relative = $this->getRelativePath()) {
-				return DocumentationService::find_page($entity, explode($relative, '/'));
-			}
-			else {
-				$parts = str_replace($entity->getPath($this->version, $this->lang), '', $this->fullPath);
-
-				return DocumentationService::find_page($entity, explode($parts, '/'));
-			}
+			$path = $this->getRelativePath();
 		}
 		
 		if(!file_exists($path)) {
 			throw new InvalidArgumentException(sprintf(
 				'Path could not be found. Module path: %s, file path: %s', 
 				$this->entity->getPath(),
-				$this->relativePath
+				$this->getRelativePath()
 			));
 		}
 		
-		return $path;
+		
+		return (is_dir($path)) ? rtrim($path, '/') . '/' : $path;
 	}
 	
 	/**
-	 * Returns the link for the webbrowser
+	 * Returns the link for the web browser
 	 *
 	 * @return string
 	 */
-	function getLink() {
-		$web = Director::absoluteBaseUrl() . DocumentationViewer::get_link_base();
-		
-		return (str_replace(BASE_PATH, $web , $this->getPath(true)));
+	function Link() {
+		if($entity = $this->getEntity()) {
+			$link = Controller::join_links($entity->Link($this->version, $this->lang), $this->getRelativePath());
+
+			$link = rtrim(DocumentationService::trim_extension_off($link), '/');
+			
+			// folders should have a / on them. Looks nicer
+			try {
+				if(is_dir($this->getPath())) $link .= '/';
+			}
+			catch (Exception $e) {}
+		}
+		else {
+			$link = $this->getPath(true);
+		}
+
+		return $link;
 	}
 	
 	function setFullPath($path) {
@@ -147,10 +154,17 @@ class DocumentationPage extends ViewableData {
 	}
 	
 	/**
-	 * @return bool
+	 * @return string
 	 */
-	function isFolder() {
-		return (is_dir($this->getPath()));
+	function getFilename() {
+		$path = rtrim($this->relativePath, '/');
+		
+		try {
+			return (is_dir($this->getPath())) ? $path . '/' : $path;
+		}
+		catch (Exception $e) {}
+		
+		return $path;
 	}
 	
 	/**

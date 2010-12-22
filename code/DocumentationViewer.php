@@ -343,14 +343,14 @@ class DocumentationViewer extends Controller {
 	 */
 	function getPage() {
 		$module = $this->getModule();
-		
+
 		if(!$module) return false;
 		
 		$absFilepath = DocumentationService::find_page($module, $this->Remaining);
 
 		if($absFilepath) {
 			$relativeFilePath = str_replace($module->getPath(), '', $absFilepath);
-			
+
 			$page = new DocumentationPage();
 			$page->setRelativePath($relativeFilePath);
 			$page->setEntity($module);
@@ -372,7 +372,7 @@ class DocumentationViewer extends Controller {
 	 */
 	function getModulePages() {
 		if($module = $this->getModule()) {
-			$pages = DocumentationService::get_pages_from_folder($module, false);
+			$pages = DocumentationService::get_pages_from_folder($module, null, false);
 			
 			if($pages) {
 				foreach($pages as $page) {
@@ -382,14 +382,9 @@ class DocumentationViewer extends Controller {
 						continue;
 					}
 					
-					$linkParts = array();
-					
-					// don't include the 'index in the url
-					if(strtolower($page->Title) != "index") $linkParts[] = $page->Filename;
-
-					$page->Link = $this->Link($linkParts);
 					$page->LinkingMode = 'link';
-					$page->Children = $this->_getModulePagesNested($page);
+				
+					$page->Children = $this->_getModulePagesNested($page, $module);
 				}
 			}
 			
@@ -403,21 +398,21 @@ class DocumentationViewer extends Controller {
 	 * Get the module pages under a given page. Recursive call for {@link getModulePages()}
 	 *
 	 * @param ArrayData CurrentPage
+	 * @param DocumentationEntity 
 	 * @param int Depth of page in the tree
 	 *
 	 * @return DataObjectSet|false
 	 */
-	private function _getModulePagesNested(&$page, $level = 0) {
+	private function _getModulePagesNested(&$page, $module, $level = 0) {
 		// only support 2 more levels
 		if(isset($this->Remaining[$level])) {
-
-			if(strtolower($this->Remaining[$level]) == $page->Filename) {
+			if(strtolower($this->Remaining[$level]) == trim($page->Filename, '/')) {
 				
 				// its either in this section or is the actual link
 				$page->LinkingMode = (isset($this->Remaining[$level + 1])) ? 'section' : 'current';
 	
 				if(is_dir($page->getPath())) {
-					$children = DocumentationService::get_pages_from_folder($page->getPath(), false);
+					$children = DocumentationService::get_pages_from_folder($module, $page->getRelativePath(), false);
 
 					$segments = array();
 					for($x = 0; $x <= $level; $x++) {
@@ -430,10 +425,9 @@ class DocumentationViewer extends Controller {
 							
 							continue;
 						}
-						
-						$child->Link = $this->Link(array_merge($segments, array($child->Filename)));
+
 						$child->LinkingMode = 'link';
-						$child->Children = $this->_getModulePagesNested($child, $level + 1);
+						$child->Children = $this->_getModulePagesNested($child, $module, $level + 1);
 					}
 					
 					return $children;
@@ -453,6 +447,7 @@ class DocumentationViewer extends Controller {
 	 */
 	function getContent() {
 		if($page = $this->getPage()) {
+			
 			// Remove last portion of path (filename), we want a link to the folder base
 			$html = DocumentationParser::parse($page, $this->Link(array_slice($this->Remaining, -1, -1)));
 			return DBField::create("HTMLText", $html);
@@ -523,7 +518,9 @@ class DocumentationViewer extends Controller {
 			}
 		}
 		
-		return $base . self::$link_base . $version . $lang . $module . $action;
+		$link = Controller::join_links($base, self::get_link_base(), $version, $lang, $module, $action);
+
+		return $link;
 	} 
 	
 	/**
@@ -627,14 +624,8 @@ class DocumentationViewer extends Controller {
 		$search = new DocumentationSearch();
 		$search->performSearch($query);
 		
-		$results = $search->getResults($start);
-		$total = $search->getTotalResults();
+		$data = $search->getDataArrayFromHits($start);
 		
-		echo $this->customise(array(
-			'Results' => $results,
-			'Query' => DBField::create('HTMLVarchar', $query),
-			'Start' => DBField::create('HTMLVarchar', $start),
-			'TotalResults' 
-		))->renderWith(array('DocumentationViewer_results', 'DocumentationViewer'));
+		return $this->customise($data)->renderWith(array('DocumentationViewer_results', 'DocumentationViewer'));
 	}
 }

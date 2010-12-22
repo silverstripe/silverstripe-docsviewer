@@ -255,6 +255,10 @@ class DocumentationService {
 	 * @param Float $version Version of module.
 	 * @param String $title Nice title to use
 	 * @param bool $major is this a major release
+	 *
+	 * @throws InvalidArgumentException
+	 *
+	 * @return DocumentationEntity
 	 */
 	public static function register($module, $path, $version = '', $title = false, $major = false) {
 		if(!file_exists($path)) throw new InvalidArgumentException(sprintf('Path "%s" doesn\'t exist', $path));
@@ -270,7 +274,7 @@ class DocumentationService {
 			// module exists so add the version to it
 			$entity = self::$registered_modules[$module];
 			
-			$entity->addVersion($version, $path);
+			$entity->addVersion($version, $path, true);
 		}
 		
 		if($major) {
@@ -280,6 +284,8 @@ class DocumentationService {
 				self::$major_versions[] = $version;
 			}
 		}
+		
+		return $entity;
 	}
 	
 	/**
@@ -450,6 +456,16 @@ class DocumentationService {
 		// remove extension
 		$name = self::trim_extension_off($name);
 		
+		// if it starts with a number strip and contains a space strip it off
+		if(strpos($name, ' ') !== false) {
+			$space = strpos($name, ' ');
+			$short = substr($name, 0, $space);
+
+			if(is_numeric($short)) {
+				$name = substr($name, $space);
+			}
+		}
+		
 		// convert first letter
 		return ucfirst(trim($name));
 	}
@@ -465,7 +481,13 @@ class DocumentationService {
 		$hasExtension = strrpos($name, '.');
 
 		if($hasExtension !== false && $hasExtension > 0) {
-			$name = substr($name, 0, $hasExtension);
+			$shorted = substr($name, $hasExtension);
+			
+			// can remove the extension only if we know how
+			// to read it again
+			if(in_array(rtrim($shorted, '/'), self::get_valid_extensions())) {
+				$name = substr($name, 0, $hasExtension);
+			}
 		}
 		
 		return $name;
@@ -476,61 +498,60 @@ class DocumentationService {
 	 * Return the children from a given module sorted by Title using natural ordering. 
 	 * It is used for building the tree of the page.
 	 *
-	 * @param string|DocumentationEntity path
+	 * @param DocumentationEntity path
+	 * @param string - an optional path within a module
 	 * @param bool enable several recursive calls (more than 1 level)
+	 *
 	 * @throws Exception
 	 * @return DataObjectSet
 	 */
-	public static function get_pages_from_folder($module, $recursive = true) {
+	public static function get_pages_from_folder($module, $relativePath = false, $recursive = true) {
+		// var_dump("START: get pages from $module | $relativePath");
 		$output = new DataObjectSet();
 		
 		$pages = array();
-		if($module instanceof DocumentationEntity) {
-			if(self::is_registered_module($module)) {
-				self::get_pages_from_folder_recursive($module->getPath(), $module, $recursive, $pages);
-			}
-			else {
-				return user_error("$module is not registered", E_USER_WARNING);
-			}
+		if(!$module instanceof DocumentationEntity) user_error("get_pages_from_folder must be passed a module", E_USER_ERROR);
+		
+		if(self::is_registered_module($module)) {
+			self::get_pages_from_folder_recursive($module->getPath(), $relativePath, $recursive, $pages);
 		}
 		else {
-			self::get_pages_from_folder_recursive($module, false, $recursive, $pages);
+			return user_error("$module is not registered", E_USER_WARNING);
 		}
 
 		if(count($pages) > 0) {
 			natsort($pages);
 			
 			foreach($pages as $key => $path) {
+				
 				// get file name from the path
 				$file = ($pos = strrpos($path, '/')) ? substr($path, $pos + 1) : $path;
-					
-				// trim off the extension
 				
 				$page = new DocumentationPage();
 				$page->setTitle(self::clean_page_name($file));
-				$page->setFullPath($path); 
-
-				$page->Filename = self::trim_extension_off($file);
-
-				if($module instanceof DocumentationEntity) {
-					$page->setEntity($module);
-				}
-					
+				$relative = str_replace($module->getPath(), '', $path);
+				
+				$page->setEntity($module);
+				$page->setRelativePath($relative);
+				// var_dump("ADDING FILE: ". $relative . " [$path]");
 				$output->push($page);
 			}
 		}
-		
+		// var_dump("END get pages");
 		return $output;
 	}
 	
 	/**
 	 * Recursively search through $folder
+	 *
 	 */ 
-	private static function get_pages_from_folder_recursive($folder, $module = false, $recusive, &$pages) {
-		if(!is_dir($folder)) throw new Exception(sprintf('%s is not a folder', $folder));
+	private static function get_pages_from_folder_recursive($base, $relative, $recusive, &$pages) {
+		if(!is_dir($base)) throw new Exception(sprintf('%s is not a folder', $folder));
 
-		$handle = opendir($folder);
+		$folder = Controller::join_links($base, $relative);
 		
+		$handle = opendir($folder);
+
 		if($handle) {
 			$extensions = self::get_valid_extensions();
 			$ignore = self::get_ignored_files();
@@ -538,16 +559,17 @@ class DocumentationService {
 			
 			while (false !== ($file = readdir($handle))) {	
 				if(!in_array($file, $ignore)) {
-					$file = trim(strtolower($file), '/');
-					$path = rtrim($folder, '/') . '/'. $file;
 					
+					$path = Controller::join_links($folder, $file);
+					$relativeFilePath = Controller::join_links($relative, $file);
+
 					if(is_dir($path)) {
-						$pages[] = $path;
+						$pages[] = $relativeFilePath;
 						
-						if($recusive) self::get_pages_from_folder_recursive($path, $module, $recusive, $pages);
+						if($recusive) self::get_pages_from_folder_recursive($base, $relativeFilePath, $recusive, $pages);
 					} 
 					else if(in_array(substr($file, (strrpos($file, '.'))), $extensions)) {
-						$pages[] = $path;
+						$pages[] = $relativeFilePath;
 					}
 				}
 			}

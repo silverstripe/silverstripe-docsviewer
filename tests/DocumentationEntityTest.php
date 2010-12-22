@@ -29,6 +29,5 @@ class DocumentationEntityTest extends SapphireTest {
 		$entity->addVersion('1.1.', '../sapphiredocs/tests/docs-2/');
 		$entity->setCurrentVersion('1.0');
 		$this->assertEquals('1.0', $entity->getCurrentVersion(), 'Manual setting');
-		
 	}
 }

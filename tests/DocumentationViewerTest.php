@@ -7,7 +7,7 @@
  * @package sapphiredocs
  */
 
-class DocumentationViewerTests extends FunctionalTest {
+class DocumentationViewerTest extends FunctionalTest {
 
 	static $fixture_file = 'sapphiredocs/tests/DocumentTests.yml';
 
@@ -37,6 +37,67 @@ class DocumentationViewerTests extends FunctionalTest {
 		DocumentationService::unregister("DocumentationViewerTests");
 		DocumentationService::set_automatic_registration($this->origEnabled);
 		DocumentationViewer::set_link_base($this->origLinkBase);
+	}
+	
+	function testGetModulePagesShort() {
+		$v = new DocumentationViewer();
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.4/en/DocumentationViewerTests/subfolder/'));
+		$pages = $v->getModulePages();
+		
+		$arr = $pages->toArray();
+		$page = $arr[2];
+		
+		$this->assertEquals('Subfolder', $page->Title);
+	}
+	
+	function testGetModulePages() {
+		$v = new DocumentationViewer();
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.4/en/DocumentationViewerTests/subfolder/'));
+		$pages = $v->getModulePages();
+		$this->assertEquals(
+			array('sort/', 'subfolder/', 'test.md'),
+			$pages->column('Filename')
+		);
+		$this->assertEquals(
+			array('link','current', 'link'),
+			$pages->column('LinkingMode')
+		);
+		
+		foreach($pages as $page) {
+			$page->setVersion('2.4');
+		}
+		
+		$links = $pages->column('Link');
+		
+		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/sort/', $links[0]);
+		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/subfolder/', $links[1]);
+		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/test', $links[2]);
+		
+		// Children
+		$pagesArr = $pages->toArray();
+		$child1 = $pagesArr[1];
+
+		$this->assertFalse($child1->Children);
+		$child2 = $pagesArr[2];
+		
+		$this->assertType('DataObjectSet', $child2->Children);
+	
+		$this->assertEquals(
+			array('subfolder/subpage.md', 'subfolder/subsubfolder/'),
+			$child2->Children->column('Filename')
+		);
+
+		$children = $child2->Children;
+		
+		foreach($children as $child) {
+			$child->setVersion('2.4');
+		}
+		
+		$child2Links = $children->column('Link');
+		$subpage = $children->First();
+
+		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/subfolder/subpage', $child2Links[0]);
+		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/subfolder/subsubfolder/', $child2Links[1]);
 	}
 	
 	function testCurrentRedirection() {
@@ -116,45 +177,6 @@ class DocumentationViewerTests extends FunctionalTest {
 		$this->assertStringEndsWith('DocumentationViewerTests/', $crumbLinks[0]);
 		$this->assertStringEndsWith('DocumentationViewerTests/subfolder/', $crumbLinks[1]);
 		$this->assertStringEndsWith('DocumentationViewerTests/subfolder/subpage/', $crumbLinks[2]);
-	}
-	
-	function testGetModulePages() {
-		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.4/en/DocumentationViewerTests/subfolder/'));
-		$pages = $v->getModulePages();
-		$this->assertEquals(
-			array('sort', 'subfolder', 'test'),
-			$pages->column('Filename')
-		);
-		$this->assertEquals(
-			array('link','current', 'link'),
-			$pages->column('LinkingMode')
-		);
-		$links = $pages->column('Link');
-
-		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/sort/', $links[0]);
-		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/subfolder/', $links[1]);
-		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/test/', $links[2]);
-		
-		// Children
-		$pagesArr = $pages->toArray();
-		
-		$child1 = $pagesArr[1];
-
-		$this->assertFalse($child1->Children);
-		
-		$child2 = $pagesArr[2];
-		
-		$this->assertType('DataObjectSet', $child2->Children);
-		
-		$this->assertEquals(
-			array('subpage', 'subsubfolder'),
-			$child2->Children->column('Filename')
-		);
-		
-		$child2Links = $child2->Children->column('Link');
-		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/subfolder/subpage/', $child2Links[0]);
-		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/subfolder/subsubfolder/', $child2Links[1]);
 	}
 	
 	function testRouting() {

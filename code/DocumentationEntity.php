@@ -205,24 +205,43 @@ class DocumentationEntity extends ViewableData {
 	}
 	
 	/**
-	 * Return the absolute path to this documentation entity.
+	 * Return the absolute path to this documentation entity on the
+	 * filesystem
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getPath($version = false, $lang = false) {
 		
 		if(!$version) $version = '';
 		if(!$lang) $lang = 'en';
 		
-		// Get version, or fall back to first available
 		if($this->hasVersion($version)) {
 			$path = $this->versions[$version];
-		}	else {
+		}	
+		else {
 			$versions = $this->getVersions();
-			$path = $this->versions[$versions[0]];
-		} 
-
+			$path = $this->versions[$versions[0]]; 
+		}
+		
 		return rtrim($path, '/') . '/' . rtrim($lang, '/') .'/';
+	}
+	
+	/**
+	 * Returns the web accessible link to this Entity
+	 *
+	 * @return string
+	 */
+	public function Link($version = false, $lang = false) {
+		if(!$version) $version = '';
+		if(!$lang) $lang = 'en';
+		
+		return Controller::join_links(
+			Director::absoluteBaseURL(),
+			DocumentationViewer::get_link_base(), 
+			$version,
+			$lang,
+			$this->moduleFolder
+		);
 	}
 	
 	/**
