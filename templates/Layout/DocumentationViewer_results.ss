@@ -6,7 +6,7 @@
 	    	<p>Showing page $ThisPage of $TotalPages</p>
 			<% control Results %>
 				<h2><a href="$Link">$Title</a></h2>
-				$Content.LimitWordCountXML
+				<p>$Content.LimitCharacters(200)</p>
 			<% end_control %>
 			
 			<% if SearchPages %>

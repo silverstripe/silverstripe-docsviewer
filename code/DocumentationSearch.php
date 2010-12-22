@@ -11,8 +11,6 @@
 class DocumentationSearch {
 
 	private static $enabled = false;
-
-	private $query;
 	
 	private $results;
 	
@@ -104,9 +102,7 @@ class DocumentationSearch {
 	 *
 	 * Rebuilds the index if it out of date
 	 */
-	public function performSearch($query) {
-		$this->query = $query;
-		
+	public function performSearch($query) {	
 		$index = Zend_Search_Lucene::open(self::get_index_location());
 		
 		Zend_Search_Lucene::setResultSetLimit(200);
@@ -118,7 +114,7 @@ class DocumentationSearch {
 	/**
 	 * @return DataObjectSet
 	 */
-	public function getDataArrayFromHits($start) {
+	public function getDataArrayFromHits($request) {
 		$data = array(
 			'Results' => null,
 			'Query' => null,
@@ -132,7 +128,10 @@ class DocumentationSearch {
 			'NextUrl' => DBField::create('Text', 'false'),
 			'SearchPages' => new DataObjectSet()
 		);
-
+	
+		$start = ($request->requestVar('start')) ? (int)$request->requestVar('start') : 0;
+		$query = ($request->requestVar('Search')) ? $request->requestVar('Search') : '';
+		
 		$pageLength = 10;
 		$currentPage = floor( $start / $pageLength ) + 1;
 		
@@ -165,7 +164,7 @@ class DocumentationSearch {
 		}
 
 		$data['Results'] = $results;
-		$data['Query']   = DBField::create('Text', $this->query);
+		$data['Query']   = DBField::create('Text', $query);
 		$data['TotalResults'] = DBField::create('Text', count($this->results));
 		$data['TotalPages'] = DBField::create('Text', $totalPages);
 		$data['ThisPage'] = DBField::create('Text', $currentPage);

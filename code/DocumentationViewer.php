@@ -95,7 +95,7 @@ class DocumentationViewer extends Controller {
 	 */
 	public function handleRequest(SS_HTTPRequest $request) {
 		// if we submitted a form, let that pass
-		if(!$request->isGET()) return parent::handleRequest($request);
+		if(!$request->isGET() || isset($_GET['action_results'])) return parent::handleRequest($request);
 
 		$firstParam = ($request->param('Action')) ? $request->param('Action') : $request->shift();		
 		$secondParam = $request->shift();
@@ -608,7 +608,7 @@ class DocumentationViewer extends Controller {
 		
 		$form = new Form($this, 'DocumentationSearchForm', $fields, $actions);
 		$form->disableSecurityToken();
-
+		$form->setFormMethod('get');
 		$form->setFormAction('home/DocumentationSearchForm');
 		
 		return $form;
@@ -617,14 +617,11 @@ class DocumentationViewer extends Controller {
 	/**
 	 * Past straight to results, display and encode the query
 	 */
-	function results($data, $form) {
-		$query = (isset($data['Search'])) ? urlencode($data['Search']) : "";
-		$start = (isset($_GET['start'])) ? (int) $_GET['start'] : 0;
-		
+	function results($data, $form, $request) {
 		$search = new DocumentationSearch();
-		$search->performSearch($query);
+		$search->performSearch($form->dataFieldByName('Search')->dataValue());
 		
-		$data = $search->getDataArrayFromHits($start);
+		$data = $search->getDataArrayFromHits($request);
 		
 		return $this->customise($data)->renderWith(array('DocumentationViewer_results', 'DocumentationViewer'));
 	}
