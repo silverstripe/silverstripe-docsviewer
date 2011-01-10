@@ -16,7 +16,8 @@ test
 	with multiple
 	lines
 		and tab indent
-
+		and escaped < brackets
+		
 Normal text after code block
 
 	code block

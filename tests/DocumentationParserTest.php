@@ -17,10 +17,21 @@ code block
 with multiple
 lines
 	and tab indent
+	and escaped &lt; brackets
 </pre>
+
+Normal text after code block
 HTML;
 
-			$this->assertContains($expected, $result);		
+			$this->assertContains($expected, $result, 'Custom code blocks with ::: prefix');		
+			
+			$expected = <<<HTML
+<pre>
+code block
+without formatting prefix
+</pre>
+HTML;
+			$this->assertContains($expected, $result, 'Traditional markdown code blocks');
 		}
 	
 	function testImageRewrites() {

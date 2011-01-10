@@ -54,17 +54,29 @@ class DocumentationParser {
 		
 		$lines = split("\n", $md);
 		foreach($lines as $i => $line) {
-			if(preg_match('/^\t*:::\s*(.*)/', $line, $matches)) {
-				// first line
+			if(!$started && preg_match('/^\t*:::\s*(.*)/', $line, $matches)) {
+				// first line with custom formatting
 				$started = true;
 				$lines[$i] = sprintf('<pre class="brush: %s">', $matches[1]);
-			} elseif($started && preg_match('/^\t(.*)/', $line, $matches)) {
-				// remove first tab (subsequent tabs are part of the code)
-				$lines[$i] = $matches[1];
+			} elseif(preg_match('/^\t(.*)/', $line, $matches)) {
+				// inner line of ::: block, or first line of standard markdown code block
+				// regex removes first tab (any following tabs are part of the code).
+				$lines[$i] = ($started) ? '' : '<pre>' . "\n";
+				$lines[$i] .= htmlentities($matches[1], ENT_COMPAT, 'UTF-8');
 				$inner = true;
+				$started = true;
 			} elseif($started && $inner) {
+				// remove any previous blank lines
+				$j = $i-1;
+				while(isset($lines[$j]) && preg_match('/^[\t\s]*$/', $lines[$j])) {
+					unset($lines[$j]);
+					$j--;
+				}
+				
 				// last line, close pre
-				$lines[$i] = '</pre>' . "\n" . $line;
+				$lines[$i] = '</pre>' . "\n\n" . $line;
+				
+				// reset state
 				$started = $inner = false;
 			}
 		}
