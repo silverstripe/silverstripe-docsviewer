@@ -40,7 +40,7 @@ class DocumentationParser {
 		$md = self::rewrite_relative_links($md, $page, $baselink);
 		$md = self::rewrite_api_links($md, $page);
 		$md = self::rewrite_heading_anchors($md, $page);
-		// $md = self::rewrite_code_blocks($md, $page);
+		$md = self::rewrite_code_blocks($md, $page);
 		
 		require_once('../sapphiredocs/thirdparty/markdown/markdown.php');
 		$html = Markdown($md);

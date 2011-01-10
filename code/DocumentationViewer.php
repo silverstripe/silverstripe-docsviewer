@@ -59,8 +59,30 @@ class DocumentationViewer extends Controller {
 
 		if(!$canAccess) return Security::permissionFailure($this);
 
+		// javascript
 		Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');
+		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shCore.js');
+		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushJScript.js');
+		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushPHP.js');
+		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushXML.js');
+		Requirements::combine_files(
+			'syntaxhighlighter.js',
+			array(
+				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shCore.js',
+				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushJScript.js',
+				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushPHP.js',
+				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushXML.js'
+			)
+		);
+		
 		Requirements::javascript('sapphiredocs/javascript/DocumentationViewer.js');
+
+		// css
+		Requirements::css('sapphiredocs/thirdparty/syntaxhighlighter/styles/shCore.css');
+		Requirements::css('sapphiredocs/thirdparty/syntaxhighlighter/styles/shCoreDefault.css');
+		Requirements::css('sapphiredocs/thirdparty/syntaxhighlighter/styles/shThemeRDark.css');
+		
+		Requirements::customScript('jQuery(document).ready(function() {SyntaxHighlighter.all();});');
 	}
 
 	/**
