@@ -65,6 +65,7 @@ class DocumentationViewer extends Controller {
 		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushJScript.js');
 		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushPHP.js');
 		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushXML.js');
+		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushCSS.js');
 		Requirements::javascript('sapphiredocs/javascript/shBrushSS.js');
 		Requirements::combine_files(
 			'syntaxhighlighter.js',
@@ -72,7 +73,8 @@ class DocumentationViewer extends Controller {
 				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shCore.js',
 				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushJScript.js',
 				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushPHP.js',
-				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushXML.js'
+				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushXML.js',
+				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushCSS.js',
 				'sapphiredocs/javascript/shBrushSS.js'
 			)
 		);
