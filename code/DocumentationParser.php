@@ -48,40 +48,30 @@ class DocumentationParser {
 		return $html;
 	}
 	
-	/*
 	function rewrite_code_blocks($md) {
-		$tabwidth = (defined('MARKDOWN_TAB_WIDTH')) ? MARKDOWN_TAB_WIDTH : 4;
-		$md = preg_replace_callback('{
-				(?:\n\n|\A\n?)
-				[ ]*(\{[a-zA-Z]*\})? # lang
-				[ ]* \n # Whitespace and newline following marker.
-				(	 # $1 = the code block -- one or more lines, starting with a space/tab
-				  (?>
-					[ ]{'.$tabwidth.'}  # Lines must start with a tab or a tab-width of spaces
-					.*\n+
-				  )+
-				)
-				((?=^[ ]{0,'.$tabwidth.'}\S)|\Z)	# Lookahead for non-space at line-start, or end of doc
-			}xm',
-			array('DocumentationParser', '_do_code_blocks'), $md);
+		$started = false;
+		$inner = false;
+		
+		$lines = split("\n", $md);
+		foreach($lines as $i => $line) {
+			if(preg_match('/^\t*:::\s*(.*)/', $line, $matches)) {
+				// first line
+				$started = true;
+				$lines[$i] = sprintf('<pre class="brush: %s">', $matches[1]);
+			} elseif($started && preg_match('/^\t(.*)/', $line, $matches)) {
+				// remove first tab (subsequent tabs are part of the code)
+				$lines[$i] = $matches[1];
+				$inner = true;
+			} elseif($started && $inner) {
+				// last line, close pre
+				$lines[$i] = '</pre>' . "\n" . $line;
+				$started = $inner = false;
+			}
+		}
+		
+		return join("\n", $lines);
 
-		return $md;
 	}
-	static function _do_code_blocks($matches) {
-		$tabwidth = (defined('MARKDOWN_TAB_WIDTH')) ? MARKDOWN_TAB_WIDTH : 4;
-		$codeblock = $matches[2];
-
-		// outdent
-		$codeblock = preg_replace('/^(\t|[ ]{1,'.$tabwidth.'})/m', '', $codeblock);
-		$codeblock = htmlspecialchars($codeblock, ENT_NOQUOTES);
-
-		# trim leading newlines and trailing newlines
-		$codeblock = preg_replace('/\A\n+|\n+\z/', '', $codeblock);
-
-		$codeblock = "<pre><code>$codeblock\n</code></pre>";
-		return "\n\n".$this->hashBlock($codeblock)."\n\n";
-	}
-	*/
 	
 	static function rewrite_image_links($md, $page) {
 		// Links with titles

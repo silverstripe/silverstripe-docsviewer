@@ -15,7 +15,8 @@ test
 	code block
 	with multiple
 	lines
-	
+		and tab indent
+
 Normal text after code block
 
 	code block
