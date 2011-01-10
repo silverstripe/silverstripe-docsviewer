@@ -14,7 +14,7 @@ class RebuildLuceneDocsIndex extends BuildTask {
 	 * based on the user. It's a 
 	 */
 	function run($request) {
-		require_once('../sapphiredocs/thirdparty/markdown.php');
+		require_once('../sapphiredocs/thirdparty/markdown/markdown.php');
 		ini_set("memory_limit", -1);
 		ini_set('max_execution_time', 0);
 
