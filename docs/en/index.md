@@ -11,6 +11,20 @@ page.
 
 ## Setup
 
+### Enabling Search
+
+The module provides automatic search functionality via [Lucene Search](http://lucene.apache.org/java/docs/index.html). To enable search
+you need to add the following to your applications _config.php file:
+
+	DocumentationSearch::enable();
+	
+After adding that line you will also need to build the indexes of the search. You can run the following from your webbrowser or via sake
+
+	
+
+
+### Using a URL other than /dev/docs/
+
 By default, the documentation is available in `dev/docs`. If you want it to live on the webroot instead of a subfolder,
 add the following configuration to your `mysite/_config.php`:
 
@@ -19,3 +33,4 @@ add the following configuration to your `mysite/_config.php`:
 		'$Action' => 'DocumentationViewer',
 		'' => 'DocumentationViewer'
 	));
+	

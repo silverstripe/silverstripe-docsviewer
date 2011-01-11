@@ -1,17 +1,20 @@
 # Documentation Viewer Module
 
-## Maintainer Content
-* Will Rossiter (Nickname: willr, wrossiter) <will@silverstripe.com>
+## Maintainer Contact
+
+* Will Rossiter (Nickname: willr, wrossiter) 
+ <will@silverstripe.com>
 
 ## Requirements
-* Tested on 2.4 and trunk
+
+* SilverStripe 2.4
 
 ## Summary
-Read nested documentation files from the /docs/ folder in modules. To read documentation go to yoursite.com/dev/docs/.
 
-It is likely this will be integrated into the core in future versions once it is polished.
+Reads markdown documentation files from the /docs/ folder in . To read documentation go to yoursite.com/dev/docs/.
 
-For more documentation on how to use the module please read /docs/Writing-Documentation.md (or via this in /dev/docs/sapphiredocs/Writing-Documentation)
+For more documentation on how to use the module please read /docs/Writing-Documentation.md 
+(or via this in /dev/docs/sapphiredocs/Writing-Documentation in your webbrowser)
 
 ## Syntax Highlighting ##
 
@@ -55,4 +58,4 @@ To include the syntax highlighter source, add the following to your `Documentati
 	Requirements::css('sapphiredocs/thirdparty/syntaxhighlighter/styles/shThemeRDark.css');
 	
 You can overload the `DocumentationViewer` class and add a custom route through `Director::addRule()`
-if you prefer not to modify the module file.
+if you prefer not to modify the module file.>>>>>>> .r115400

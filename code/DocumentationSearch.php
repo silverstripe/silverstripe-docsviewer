@@ -67,13 +67,10 @@ class DocumentationSearch {
 	 * Enable searching documentation 
 	 */
 	public static function enable() {
-		if(!class_exists('ZendSearchLuceneSearchable')) {
-			return user_error('DocumentationSearch requires the ZendSearchLucene library', E_ERROR);
-		}
-		
 		self::$enabled = true;
-
-		ZendSearchLuceneSearchable::enable(array());
+		
+		// include the zend search functionality
+		set_include_path(get_include_path() . PATH_SEPARATOR . dirname(dirname(__FILE__)) . '/thirdparty/');
 	}
 
 	/**
@@ -103,12 +100,19 @@ class DocumentationSearch {
 	 * Rebuilds the index if it out of date
 	 */
 	public function performSearch($query) {	
-		$index = Zend_Search_Lucene::open(self::get_index_location());
+		try {
+			$index = Zend_Search_Lucene::open(self::get_index_location());
 		
-		Zend_Search_Lucene::setResultSetLimit(200);
+			Zend_Search_Lucene::setResultSetLimit(200);
 		
-		$this->results = $index->find($query);
-		$this->totalResults = $index->numDocs();
+			$this->results = $index->find($query);
+			$this->totalResults = $index->numDocs();
+		}
+		catch(Zend_Search_Lucene_Exception $e) {
+			// the reindexing task has not been run
+			user_error('DocumentationSearch::performSearch() could not perform search as index does not exist. 
+				Please run /dev/tasks/RebuildLuceneDocsIndex', E_USER_ERROR);
+		}
 	}
 	
 	/**
