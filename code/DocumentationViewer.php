@@ -63,18 +63,18 @@ class DocumentationViewer extends Controller {
 		Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');
 		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shCore.js');
 		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushJScript.js');
-		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushPHP.js');
-		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushXML.js');
-		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushCSS.js');
+		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushPhp.js');
+		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushXml.js');
+		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushCss.js');
 		Requirements::javascript('sapphiredocs/javascript/shBrushSS.js');
 		Requirements::combine_files(
 			'syntaxhighlighter.js',
 			array(
 				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shCore.js',
 				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushJScript.js',
-				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushPHP.js',
-				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushXML.js',
-				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushCSS.js',
+				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushPhp.js',
+				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushXml.js',
+				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushCss.js',
 				'sapphiredocs/javascript/shBrushSS.js'
 			)
 		);
