@@ -53,4 +53,7 @@
 			$("#Form_LanguageForm").submit();
 		});
 	});
+	
+	// Syntaxhighlighter defaults
+	SyntaxHighlighter.defaults.toolbar = false;
 })(jQuery);
