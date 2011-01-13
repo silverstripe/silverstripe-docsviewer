@@ -401,8 +401,13 @@ class DocumentationService {
 				
 				// if the name has a . then take the substr 
 				$formatted = ($pos = strrpos($formatted, '.')) ? substr($formatted, 0, $pos) : $formatted;
-				$name = ($dot = strrpos($name, '.')) ? substr($name, 0, $dot) : $name;
 
+				if($dot = strrpos($name, '.')) {
+					if(in_array(substr($name, $dot), self::get_valid_extensions())) {
+						$name = substr($name, 0, $dot);
+					}
+				}
+				
 				// the folder is the one that we are looking for.
 				if(strtolower($name) == strtolower($formatted)) {
 					
