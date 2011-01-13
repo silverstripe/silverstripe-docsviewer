@@ -471,7 +471,9 @@ class DocumentationService {
 	}
 	
 	/**
-	 * Helper function to strip the extension off 
+	 * Helper function to strip the extension off.
+	 * Warning: Doesn't work if the filename includes dots,
+	 * but no extension, e.g. "2.4.0-alpha" will return "2.4".
 	 *
 	 * @param string
 	 *
