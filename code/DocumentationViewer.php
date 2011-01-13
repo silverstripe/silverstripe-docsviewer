@@ -382,7 +382,7 @@ class DocumentationViewer extends Controller {
 			$page->setEntity($module);
 			$page->setLang($this->Lang);
 			$page->setVersion($this->Version);
-			
+
 			return $page;
 		}
 		
@@ -499,10 +499,6 @@ class DocumentationViewer extends Controller {
 		
 		$output = new DataObjectSet();
 		
-		// $output->push(new ArrayData(array(
-		// 	'Title' => ($this->Version) ? $this->Version : _t('DocumentationViewer.DOCUMENTATION', 'Documentation'),
-		// 	'Link' => $this->Link()
-		// )));
 		if($pages) {
 			$path = array();
 			
@@ -520,6 +516,25 @@ class DocumentationViewer extends Controller {
 		}
 		
 		return $output;
+	}
+	
+	/**
+	 * Generate a string for the title tag in the URL.
+	 *
+	 * @return String
+	 */
+	function getPageTitle() {
+		if($pages = $this->getBreadcrumbs()) {
+			$output = "";
+			
+			foreach($pages as $page) {
+				$output = $page->Title .' | '. $output;
+			}
+			
+			return $output;
+		}
+		
+		return false;
 	}
 	
 	/**
