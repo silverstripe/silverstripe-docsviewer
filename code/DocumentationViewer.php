@@ -432,7 +432,11 @@ class DocumentationViewer extends Controller {
 	private function _getModulePagesNested(&$page, $module, $level = 0) {
 		// only support 2 more levels
 		if(isset($this->Remaining[$level])) {
-			if(strtolower($this->Remaining[$level]) == trim($page->Filename, '/')) {
+			// compare segment successively, e.g. with "changelogs/alpha/2.4.0-alpha",
+			// first comparison on $level=0 is against "changelogs",
+			// second comparison on $level=1 is against "changelogs/alpha", etc.
+			$segments = array_slice($this->Remaining, 0, $level+1);
+			if(strtolower(implode('/', $segments)) == trim($page->getRelativeLink(), '/')) {
 				
 				// its either in this section or is the actual link
 				$page->LinkingMode = (isset($this->Remaining[$level + 1])) ? 'section' : 'current';
