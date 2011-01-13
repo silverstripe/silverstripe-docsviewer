@@ -108,7 +108,7 @@ class DocumentationPage extends ViewableData {
 	 */
 	function Link() {
 		if($entity = $this->getEntity()) {
-			$link = Controller::join_links($entity->Link($this->version, $this->lang), $this->getRelativePath());
+			$link = Controller::join_links($entity->Link($this->version, $this->lang), $this->getRelativeLink());
 
 			$link = rtrim(DocumentationService::trim_extension_off($link), '/');
 			
@@ -122,6 +122,22 @@ class DocumentationPage extends ViewableData {
 			$link = $this->getPath(true);
 		}
 
+		return $link;
+	}
+	
+	/**
+	 * Relative to the module base, not the webroot
+	 * 
+	 * @return string
+	 */
+	function getRelativeLink() {
+		$link = rtrim(DocumentationService::trim_extension_off($this->getRelativePath()), '/');
+		
+		// folders should have a / on them. Looks nicer
+		try {
+			if(is_dir($this->getPath())) $link .= '/';
+		} catch (Exception $e) {};
+		
 		return $link;
 	}
 	
