@@ -198,9 +198,7 @@ class DocumentationParser {
 	 *
 	 */
 	static function rewrite_heading_anchors($md, $page) {
-		$re = '/
-			\#+(.*)
-		/x';	
+		$re = '/^\#+(.*)/m';	
 		$md = preg_replace_callback($re, array('DocumentationParser', '_rewrite_heading_anchors_callback'), $md);
 		
 		return $md; 
