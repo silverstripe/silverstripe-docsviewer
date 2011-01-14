@@ -5,13 +5,13 @@
 class DocumentationParserTest extends SapphireTest {
 	
 	function testRewriteCodeBlocks() {
-			$page = new DocumentationPage();
-			$page->setRelativePath('test.md');
-			$page->setEntity(new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'));
-			$page->setLang('en');
-			$page->setVersion('2.4');
-			$result = DocumentationParser::rewrite_code_blocks($page->getMarkdown());
-			$expected = <<<HTML
+		$page = new DocumentationPage();
+		$page->setRelativePath('test.md');
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', BASE_PATH . '/sapphiredocs/tests/docs/'));
+		$page->setLang('en');
+		$page->setVersion('2.4');
+		$result = DocumentationParser::rewrite_code_blocks($page->getMarkdown());
+		$expected = <<<HTML
 <pre class="brush: php">
 code block
 with multiple
@@ -23,16 +23,16 @@ lines
 Normal text after code block
 HTML;
 
-			$this->assertContains($expected, $result, 'Custom code blocks with ::: prefix');		
-			
-			$expected = <<<HTML
+		$this->assertContains($expected, $result, 'Custom code blocks with ::: prefix');		
+		
+		$expected = <<<HTML
 <pre>
 code block
 without formatting prefix
 </pre>
 HTML;
-			$this->assertContains($expected, $result, 'Traditional markdown code blocks');
-		}
+		$this->assertContains($expected, $result, 'Traditional markdown code blocks');
+	}
 	
 	function testImageRewrites() {
 		// Page on toplevel
@@ -204,5 +204,17 @@ HTML;
 			'[link: absolute page](mycontroller/cms/2.4/en/test)',
 			$result
 		);
+	}
+	
+	function testRetrieveMetaData() {
+		$page = new DocumentationPage();
+		$page->setRelativePath('MetaDataTest.md');
+		$page->setEntity(new DocumentationEntity('parser', '2.4', BASE_PATH . '/sapphiredocs/tests/docs-parser/'));
+		
+		DocumentationParser::retrieve_meta_data($page);
+		
+		$this->assertEquals('Dr. Foo Bar.', $page->Author);
+		$this->assertEquals("Foo Bar's Test page.", $page->getTitle());
+		$this->assertEquals("Foo Bar's Test page.", $page->Title);
 	}
 }

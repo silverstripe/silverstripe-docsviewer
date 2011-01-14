@@ -303,4 +303,27 @@ class DocumentationParser {
 		
 		return $md;
 	}
+	
+	/**
+	 * Strips out the metadata for a page
+	 *
+	 * @param DocumentationPage
+	 */
+	public static function retrieve_meta_data(DocumentationPage &$page) {
+		if($md = $page->getMarkdown()) {
+			$matches = preg_match_all('/
+				(?<key>[A-Za-z0-9_-]+): 
+				\s*
+				(?<value>.*)
+			/x', $md, $meta);
+		
+			if($matches) {
+				foreach($meta['key'] as $index => $key) {
+					if(isset($meta['value'][$index])) {
+						$page->setMetaData($key, $meta['value'][$index]);
+					}
+				}
+			}
+		}
+	}
 }

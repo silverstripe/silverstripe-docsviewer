@@ -141,10 +141,6 @@ class DocumentationPage extends ViewableData {
 		return $link;
 	}
 	
-	function setFullPath($path) {
-		$this->fullPath = $path;
-	}
-		
 	function getLang() {
 		return $this->lang;
 	}
@@ -170,6 +166,16 @@ class DocumentationPage extends ViewableData {
 	}
 	
 	/**
+	 * Set a variable from the metadata field on this class
+	 *
+	 * @param String key
+	 * @param mixed value
+	 */
+	public function setMetaData($key, $value) {
+		$this->$key = $value;
+	}
+	
+	/**
 	 * @return string
 	 */
 	function getFilename() {
@@ -182,7 +188,7 @@ class DocumentationPage extends ViewableData {
 		
 		return $path;
 	}
-	
+
 	/**
 	 * @return String
 	 */
@@ -205,6 +211,6 @@ class DocumentationPage extends ViewableData {
 	 */
 	function getHTML($baselink = null) {
 		// if this is not a directory then we can to parse the file
-		return DocumentationParser::parse($this->getPath(true), $baselink);
+		return DocumentationParser::parse($this, $baselink);
 	}
 }

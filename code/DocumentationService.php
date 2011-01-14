@@ -387,8 +387,7 @@ class DocumentationService {
 
 		if($handle) {
 			$extensions = DocumentationService::get_valid_extensions();
-			$firstFile = false;
-					
+
 			// ensure we end with a slash
 			$base = rtrim($base, '/') .'/';
 			
@@ -405,9 +404,6 @@ class DocumentationService {
 						$name = substr($name, 0, $dot);
 					}
 				}
-				
-				// save this file as a backup if we don't have one to fail back to
-				if(!$firstFile && !is_dir($base . $file)) $firstFile = $file;
 				
 				// the folder is the one that we are looking for.
 				if(strtolower($name) == strtolower($formatted)) {
