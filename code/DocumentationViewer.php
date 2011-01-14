@@ -379,6 +379,7 @@ class DocumentationViewer extends Controller {
 
 			$page = new DocumentationPage();
 			$page->setRelativePath($relativeFilePath);
+
 			$page->setEntity($module);
 			$page->setLang($this->Lang);
 			$page->setVersion($this->Version);
@@ -409,7 +410,6 @@ class DocumentationViewer extends Controller {
 					}
 					
 					$page->LinkingMode = 'link';
-				
 					$page->Children = $this->_getModulePagesNested($page, $module);
 				}
 			}
@@ -422,6 +422,10 @@ class DocumentationViewer extends Controller {
 	
 	/**
 	 * Get the module pages under a given page. Recursive call for {@link getModulePages()}
+	 *
+	 * @todo Need to rethink how to support pages which are pulling content from their children
+	 *		i.e if a folder doesn't have index.md then it will load the first file in the folder
+	 *		however it doesn't yet pass the highlighting to it.
 	 *
 	 * @param ArrayData CurrentPage
 	 * @param DocumentationEntity 
@@ -440,8 +444,13 @@ class DocumentationViewer extends Controller {
 				
 				// its either in this section or is the actual link
 				$page->LinkingMode = (isset($this->Remaining[$level + 1])) ? 'section' : 'current';
-	
-				if(is_dir($page->getPath())) {
+				
+				$relativePath = Controller::join_links(
+					$module->getPath($page->getVersion(), $page->getLang()),
+					$page->getRelativePath()
+				);
+
+				if(is_dir($relativePath)) {
 					$children = DocumentationService::get_pages_from_folder($module, $page->getRelativePath(), false);
 
 					$segments = array();
@@ -455,7 +464,7 @@ class DocumentationViewer extends Controller {
 							
 							continue;
 						}
-
+						
 						$child->LinkingMode = 'link';
 						$child->Children = $this->_getModulePagesNested($child, $module, $level + 1);
 					}

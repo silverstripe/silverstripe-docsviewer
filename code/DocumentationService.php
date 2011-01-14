@@ -393,10 +393,7 @@ class DocumentationService {
 			$base = rtrim($base, '/') .'/';
 			
 			while (false !== ($file = readdir($handle))) {
-				
 				if(in_array($file, DocumentationService::get_valid_extensions())) continue;
-				
-				if(!$firstFile && !is_dir($base . $file)) $firstFile = $file;
 				
 				$formatted = strtolower($file);
 				
@@ -408,6 +405,9 @@ class DocumentationService {
 						$name = substr($name, 0, $dot);
 					}
 				}
+				
+				// save this file as a backup if we don't have one to fail back to
+				if(!$firstFile && !is_dir($base . $file)) $firstFile = $file;
 				
 				// the folder is the one that we are looking for.
 				if(strtolower($name) == strtolower($formatted)) {
@@ -439,13 +439,15 @@ class DocumentationService {
 					}
 				}
 			}
+		
+			// if goal has not been found and the index.md file does not exist then the next
+			// option is to pick the first file in the folder
+			return $base . ltrim($firstFile, '/');
 		}
 		
 		closedir($handle);
 		
-		// if goal has not been found and the index.md file does not exist then the next
-		// option is to pick the first file in the folder
-		return $base . ltrim($file, '/');
+		return false;
 	}
 	
 	/**

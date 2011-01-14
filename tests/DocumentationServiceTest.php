@@ -57,9 +57,10 @@ class DocumentationServiceTest extends SapphireTest {
 		// second level
 		$path = DocumentationService::find_page('DocumentationViewerTests', array('subfolder', 'subpage'));
 		$this->assertEquals(BASE_PATH . "/sapphiredocs/tests/docs/en/subfolder/subpage.md", $path);
-			
+		
+		// subsubfolder has no index file. It should fail through to the first file
 		$path = DocumentationService::find_page('DocumentationViewerTests', array('subfolder', 'subsubfolder'));
-		$this->assertEquals(BASE_PATH . "/sapphiredocs/tests/docs/en/subfolder/subsubfolder/", $path);
+		$this->assertEquals(BASE_PATH . "/sapphiredocs/tests/docs/en/subfolder/subsubfolder/subsubpage.md", $path);
 		
 		// third level
 		$path = DocumentationService::find_page('DocumentationViewerTests', array('subfolder', 'subsubfolder', 'subsubpage'));
