@@ -386,7 +386,7 @@ class DocumentationViewer extends Controller {
 
 			return $page;
 		}
-		
+
 		return false;
 	}
 	
@@ -486,10 +486,22 @@ class DocumentationViewer extends Controller {
 	 */
 	function getContent() {
 		if($page = $this->getPage()) {
-			
+		
 			// Remove last portion of path (filename), we want a link to the folder base
 			$html = DocumentationParser::parse($page, $this->Link(array_slice($this->Remaining, 0)));
 			return DBField::create("HTMLText", $html);
+		}
+		else {
+			// if no page found then we may want to get the listing of
+			// the folder
+			if($url = $this->Remaining) {
+				$pages = DocumentationService::get_pages_from_folder($this->getModule(), implode('/', $url), false);
+
+				return $this->customise(array(
+					'Title' => DocumentationService::clean_page_name(array_pop($url)),
+					'Pages' => $pages
+				))->renderWith('DocFolderListing');
+			}
 		}
 		
 		return false;

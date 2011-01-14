@@ -439,10 +439,6 @@ class DocumentationService {
 					}
 				}
 			}
-		
-			// if goal has not been found and the index.md file does not exist then the next
-			// option is to pick the first file in the folder
-			return $base . ltrim($firstFile, '/');
 		}
 		
 		closedir($handle);
