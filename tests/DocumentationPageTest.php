@@ -15,21 +15,21 @@ class DocumentationPageTest extends SapphireTest {
 		$page->setEntity($entity);
 		
 		// single layer
-		$this->assertStringEndsWith('en/testmodule/test', $page->Link(), 'The page link should have no extension and have a language');
+		$this->assertStringEndsWith('testmodule/en/test', $page->Link(), 'The page link should have no extension and have a language');
 		
 		$folder = new DocumentationPage();
 		$folder->setRelativePath('sort');
 		$folder->setEntity($entity);
 		
 		// folder, should have a trailing slash
-		$this->assertStringEndsWith('en/testmodule/sort/', $folder->Link());
+		$this->assertStringEndsWith('testmodule/en/sort/', $folder->Link());
 		
 		// second 
 		$nested = new DocumentationPage();
 		$nested->setRelativePath('subfolder/subpage.md');
 		$nested->setEntity($entity);
 		
-		$this->assertStringEndsWith('en/testmodule/subfolder/subpage', $nested->Link());
+		$this->assertStringEndsWith('testmodule/en/subfolder/subpage', $nested->Link());
 		
 		// test with version.
 		$entity = DocumentationService::register("versionlinks", BASE_PATH . "/sapphiredocs/tests/docs-2/", '1');
@@ -37,7 +37,7 @@ class DocumentationPageTest extends SapphireTest {
 		$page->setRelativePath('test.md');
 		$page->setEntity($entity);
 		$page->setVersion('1');
-		$this->assertStringEndsWith('1/en/versionlinks/test', $page->Link());
+		$this->assertStringEndsWith('versionlinks/en/1/test', $page->Link());
 	}
 	
 	

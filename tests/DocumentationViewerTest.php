@@ -41,7 +41,7 @@ class DocumentationViewerTest extends FunctionalTest {
 	
 	function testGetModulePagesShort() {
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.4/en/DocumentationViewerTests/subfolder/'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4/subfolder/'));
 		$pages = $v->getModulePages();
 		
 		$arr = $pages->toArray();
@@ -52,7 +52,7 @@ class DocumentationViewerTest extends FunctionalTest {
 	
 	function testGetModulePages() {
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.4/en/DocumentationViewerTests/subfolder/'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4/subfolder/'));
 		$pages = $v->getModulePages();
 		$this->assertEquals(
 			array('sort/', 'subfolder/', 'test.md'),
@@ -69,9 +69,9 @@ class DocumentationViewerTest extends FunctionalTest {
 		
 		$links = $pages->column('Link');
 		
-		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/sort/', $links[0]);
-		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/subfolder/', $links[1]);
-		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/test', $links[2]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/sort/', $links[0]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/', $links[1]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/test', $links[2]);
 		
 		// Children
 		$pagesArr = $pages->toArray();
@@ -96,44 +96,44 @@ class DocumentationViewerTest extends FunctionalTest {
 		$child2Links = $children->column('Link');
 		$subpage = $children->First();
 
-		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/subfolder/subpage', $child2Links[0]);
-		$this->assertStringEndsWith('2.4/en/DocumentationViewerTests/subfolder/subsubfolder/', $child2Links[1]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/subpage', $child2Links[0]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/subsubfolder/', $child2Links[1]);
 	}
 	
 	function testCurrentRedirection() {
-		$response = $this->get('dev/docs/3.0/en/DocumentationViewerTests/test');
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/3.0/test');
 
 		$this->assertEquals(301, $response->getStatusCode());
 		$this->assertEquals(
-			Director::absoluteBaseURL() . 'dev/docs/current/en/DocumentationViewerTests/test/',
+			Director::absoluteBaseURL() . 'dev/docs/DocumentationViewerTests/en/test/',
 			$response->getHeader('Location'),
 			'Redirection to current on page'
 		);
 		
-		$response = $this->get('dev/docs/3.0/en/DocumentationViewerTests/');
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/3.0');
 		$this->assertEquals(301, $response->getStatusCode());
 		$this->assertEquals(
-			Director::absoluteBaseURL() . 'dev/docs/current/en/DocumentationViewerTests/',
+			Director::absoluteBaseURL() . 'dev/docs/DocumentationViewerTests/en/',
 			$response->getHeader('Location'),
 			'Redirection to current on index'
 		);
 		
-		$response = $this->get('dev/docs/2.3/en/DocumentationViewerTests/');
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.3');
 		$this->assertEquals(200, $response->getStatusCode(), 'No redirection on older versions');
 	}
 	
 	function testUrlParsing() {
 		// Module index
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.3/en/DocumentationViewerTests/test'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/test'));
 		$this->assertEquals('2.3', $v->getVersion());
 		$this->assertEquals('en', $v->getLang());
 		$this->assertEquals('DocumentationViewerTests', $v->module);
 		$this->assertEquals(array('test'), $v->Remaining);
-		
+
 		// Module index without version and language. Should pick up the defaults
 		$v2 = new DocumentationViewer();
-		$response = $v2->handleRequest(new SS_HTTPRequest('GET', 'en/DocumentationViewerTests/test'));
+		$response = $v2->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/test'));
 
 		$this->assertEquals('3.0', $v2->getVersion());
 		$this->assertEquals('en', $v2->getLang());
@@ -143,7 +143,7 @@ class DocumentationViewerTest extends FunctionalTest {
 		// Overall index
 		$v = new DocumentationViewer();
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', ''));
-		$this->assertEquals('current', $v->getVersion());
+		$this->assertEquals('', $v->getVersion());
 		$this->assertEquals('en', $v->getLang());
 		$this->assertEquals('', $v->module);
 		$this->assertEquals(array(), $v->Remaining);
@@ -152,35 +152,35 @@ class DocumentationViewerTest extends FunctionalTest {
 	function testBreadcrumbs() {
 		// Module index
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.4/en/DocumentationViewerTests/'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4'));
 		$crumbs = $v->getBreadcrumbs();
 		
 		$this->assertEquals(1, $crumbs->Count());
 		$crumbLinks = $crumbs->column('Link');
-		$this->assertStringEndsWith('DocumentationViewerTests/', $crumbLinks[0]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/', $crumbLinks[0]);
 		
 		// Subfolder index
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.4/en/DocumentationViewerTests/subfolder/'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4/subfolder/'));
 		$crumbs = $v->getBreadcrumbs();
 		$this->assertEquals(2, $crumbs->Count());
 		$crumbLinks = $crumbs->column('Link');
-		$this->assertStringEndsWith('DocumentationViewerTests/', $crumbLinks[0]);
-		$this->assertStringEndsWith('DocumentationViewerTests/subfolder/', $crumbLinks[1]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/', $crumbLinks[0]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/', $crumbLinks[1]);
 		
 		// Subfolder page
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', '2.4/en/DocumentationViewerTests/subfolder/subpage'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4/subfolder/subpage'));
 		$crumbs = $v->getBreadcrumbs();
 		$this->assertEquals(3, $crumbs->Count());
 		$crumbLinks = $crumbs->column('Link');
-		$this->assertStringEndsWith('DocumentationViewerTests/', $crumbLinks[0]);
-		$this->assertStringEndsWith('DocumentationViewerTests/subfolder/', $crumbLinks[1]);
-		$this->assertStringEndsWith('DocumentationViewerTests/subfolder/subpage/', $crumbLinks[2]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/', $crumbLinks[0]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/', $crumbLinks[1]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/subpage/', $crumbLinks[2]);
 	}
 	
 	function testRouting() {
-		$response = $this->get('dev/docs/2.4/en/DocumentationViewerTests/test');
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.4/test');
 		$this->assertEquals(200, $response->getStatusCode());
 		$this->assertContains('english test', $response->getBody(), 'Toplevel content page');
 	}

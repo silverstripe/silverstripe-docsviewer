@@ -238,9 +238,9 @@ class DocumentationEntity extends ViewableData {
 		return Controller::join_links(
 			Director::absoluteBaseURL(),
 			DocumentationViewer::get_link_base(), 
-			$version,
+			$this->moduleFolder,
 			$lang,
-			$this->moduleFolder
+			$version
 		);
 	}
 	

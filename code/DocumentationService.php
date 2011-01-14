@@ -232,13 +232,14 @@ class DocumentationService {
 	 * @return DocumentationEntity $module the registered module
 	 */
 	public static function is_registered_module($module, $version = false, $lang = false) {
-		
 		$check = ($module instanceof DocumentationEntity) ? $module->getModuleFolder() : (string) $module;
-		
+
 		if(isset(self::$registered_modules[$check])) {
 			$module = self::$registered_modules[$check];
-			if($lang && !$module->hasLanguage($lang)) return false;
-			if($version && !$module->hasVersion($version)) return false;
+	
+			if(($lang && !$module->hasLanguage($lang)) || ($version && !$module->hasVersion($version))) {
+				return false;
+			}
 			
 			return $module;
 		}

@@ -34,10 +34,11 @@ class DocumentationParser {
 		if(!$page || (!$page instanceof DocumentationPage)) return false;
 
 		$md = $page->getMarkdown();
-		
+
 		// Pre-processing
 		$md = self::rewrite_image_links($md, $page);
 		$md = self::rewrite_relative_links($md, $page, $baselink);
+
 		$md = self::rewrite_api_links($md, $page);
 		$md = self::rewrite_heading_anchors($md, $page);
 		$md = self::rewrite_code_blocks($md, $page);
@@ -103,6 +104,7 @@ class DocumentationParser {
 			
 			// Don't process absolute links (based on protocol detection)
 			$urlParts = parse_url($url);
+
 			if($urlParts && isset($urlParts['scheme'])) continue;
 			
 			// Rewrite URL (relative or absolute)
@@ -246,6 +248,7 @@ class DocumentationParser {
 	 * @return String Markdown
 	 */
 	static function rewrite_relative_links($md, $page, $baselink) {
+
 		$re = '/
 			([^\!]?) # exclude image format
 			\[
@@ -262,6 +265,7 @@ class DocumentationParser {
 		if($relativePath == '.') $relativePath = '';
 		
 		if($matches) {
+			
 			foreach($matches[0] as $i => $match) {
 				$title = $matches[2][$i];
 				$url = $matches[3][$i];
@@ -272,12 +276,12 @@ class DocumentationParser {
 				// Don't process absolute links (based on protocol detection)
 				$urlParts = parse_url($url);
 				if($urlParts && isset($urlParts['scheme'])) continue;
-			
+				
 				// Rewrite URL (relative or absolute)
 				if(preg_match('/^\//', $url)) {
-					$relativeUrl = $baselink . $url;
+					$relativeUrl = Controller::join_links($baselink, $url);
 				} else {
-					$relativeUrl = $baselink . '/' . $relativePath . '/' . $url;
+					$relativeUrl = Controller::join_links($baselink, $relativePath, $url);
 				}
 			
 				// Resolve relative paths

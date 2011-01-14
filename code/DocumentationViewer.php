@@ -25,7 +25,7 @@ class DocumentationViewer extends Controller {
 	/**
 	 * @var string
 	 */
-	public $version = "current";
+	public $version = "";
 	
 	/**
 	 * @var string
@@ -128,7 +128,6 @@ class DocumentationViewer extends Controller {
 		$thirdParam = $request->shift();
 		
 		$this->Remaining = $request->shift(10);
-
 		DocumentationService::load_automatic_registration();
 
 		if(isset($firstParam)) {
@@ -146,33 +145,34 @@ class DocumentationViewer extends Controller {
 				return $this->response;
 				
 			}
-			else if(is_numeric($firstParam) || $firstParam == "current") {
-				// its a version number first in the form 2.4/en/sapphire
-				$this->version = $firstParam;
-				$this->lang = $secondParam;
-				$this->module = $thirdParam;
+
+			$this->module = $firstParam;
+			$this->lang = $secondParam;
+			
+			if(isset($thirdParam) && (is_numeric($thirdParam))) {
+				$this->version = $thirdParam;
 			}
 			else {
-				// we have a language first in the form /en/sapphire
+				// current version so store one area para
 				array_unshift($this->Remaining, $thirdParam);
-
-				$this->lang = $firstParam;
-				$this->module = $secondParam;
+				
+				$this->version = "";
 			}
 		}
 		
 		// 'current' version mapping
 		$module = DocumentationService::is_registered_module($this->module, null, $this->getLang());
-
-		if($module && $this->getVersion()) {
+		
+		if($module) {
 			$current = $module->getCurrentVersion();
-			
+
 			$version = $this->getVersion();
 
-			if($version == 'current') {
+			if(!$version || $version == '') {
 				$this->version = $current;
 			} else if($current == $version) {
-				$this->version = 'current';
+				$this->version = '';
+				
 				$link = $this->Link($this->Remaining);
 				$this->response = new SS_HTTPResponse();
 
@@ -180,8 +180,7 @@ class DocumentationViewer extends Controller {
 			
 				return $this->response;
 			}	
-		}		
-
+		}
 		
 		return parent::handleRequest($request);
 	}
@@ -216,7 +215,8 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
-	 * Returns the current version
+	 * Returns the current version. If no version is set then it is the current
+	 * set version so need to pull that from the module
 	 *
 	 * @return String
 	 */
@@ -369,9 +369,9 @@ class DocumentationViewer extends Controller {
 	 */
 	function getPage() {
 		$module = $this->getModule();
-
-		if(!$module) return false;
 		
+		if(!$module) return false;
+
 		$absFilepath = DocumentationService::find_page($module, $this->Remaining);
 
 		if($absFilepath) {
@@ -399,7 +399,7 @@ class DocumentationViewer extends Controller {
 	function getModulePages() {
 		if($module = $this->getModule()) {
 			$pages = DocumentationService::get_pages_from_folder($module, null, false);
-			
+
 			if($pages) {
 				foreach($pages as $page) {
 					if(strtolower($page->Title) == "index") {
@@ -479,7 +479,7 @@ class DocumentationViewer extends Controller {
 		if($page = $this->getPage()) {
 			
 			// Remove last portion of path (filename), we want a link to the folder base
-			$html = DocumentationParser::parse($page, $this->Link(array_slice($this->Remaining, -1, -1)));
+			$html = DocumentationParser::parse($page, $this->Link(array_slice($this->Remaining, 0)));
 			return DBField::create("HTMLText", $html);
 		}
 		
@@ -563,7 +563,7 @@ class DocumentationViewer extends Controller {
 			}
 		}
 		
-		$link = Controller::join_links($base, self::get_link_base(), $version, $lang, $module, $action);
+		$link = Controller::join_links($base, self::get_link_base(), $module, $lang, $version, $action);
 
 		return $link;
 	} 

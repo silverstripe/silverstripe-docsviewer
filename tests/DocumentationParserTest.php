@@ -139,6 +139,10 @@ HTML;
 			'[link: api](api:DataObject)',
 			$result
 		);
+		$this->assertContains(
+			'[link: relative](mycontroller/cms/2.4/a-relative-file.md)',
+			$result
+		);	
 		
 		// Page in subfolder
 		$page = new DocumentationPage();
@@ -147,6 +151,11 @@ HTML;
 		
 		$result = DocumentationParser::rewrite_relative_links($page->getMarkdown(), $page, 'mycontroller/cms/2.4/en/');
 
+		$this->assertContains(
+			'[link: relative](mycontroller/cms/2.4/en/subfolder/subpage.md)',
+			$result
+		);
+		
 		$this->assertContains(
 			'[link: absolute index](mycontroller/cms/2.4/en/)',
 			$result

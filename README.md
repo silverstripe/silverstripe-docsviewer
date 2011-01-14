@@ -16,6 +16,8 @@ Reads markdown documentation files from the /docs/ folder in . To read documenta
 For more documentation on how to use the module please read /docs/Writing-Documentation.md 
 (or via this in /dev/docs/sapphiredocs/Writing-Documentation in your webbrowser)
 
+**Note** This module assumes you are using numeric values for your versions.
+
 ## Syntax Highlighting ##
 
 The custom Markdown parser can render custom prefixes for code blocks,
@@ -58,4 +60,4 @@ To include the syntax highlighter source, add the following to your `Documentati
 	Requirements::css('sapphiredocs/thirdparty/syntaxhighlighter/styles/shThemeRDark.css');
 	
 You can overload the `DocumentationViewer` class and add a custom route through `Director::addRule()`
-if you prefer not to modify the module file.>>>>>>> .r115400
+if you prefer not to modify the module file.
