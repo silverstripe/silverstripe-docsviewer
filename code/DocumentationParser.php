@@ -235,6 +235,7 @@ class DocumentationParser {
 		$t = ereg_replace('[^A-Za-z0-9]+','-',$t);
 		$t = ereg_replace('-+','-',$t);
 		$t = trim($t, '-');
+		$t = strtolower($t);
 				
 		return $t;
 	}

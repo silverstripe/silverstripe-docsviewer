@@ -104,14 +104,14 @@ HTML;
 		
 		*/
 
-		$this->assertContains('# Heading one {#Heading-one}', $result);
+		$this->assertContains('# Heading one {#heading-one}', $result);
 		$this->assertContains('# Heading with custom anchor {#custom-anchor}', $result);
-		$this->assertNotContains('# Heading with custom anchor {#custom-anchor} {#Heading', $result);
-		$this->assertContains('# Heading two {#Heading-two}', $result);
-		$this->assertContains('# Heading three {#Heading-three}', $result);
-		$this->assertContains('## Heading duplicate {#Heading-duplicate}', $result);
-		$this->assertContains('## Heading duplicate {#Heading-duplicate-2}', $result);
-		$this->assertContains('## Heading duplicate {#Heading-duplicate-3}', $result);
+		$this->assertNotContains('# Heading with custom anchor {#custom-anchor} {#heading', $result);
+		$this->assertContains('# Heading two {#heading-two}', $result);
+		$this->assertContains('# Heading three {#heading-three}', $result);
+		$this->assertContains('## Heading duplicate {#heading-duplicate}', $result);
+		$this->assertContains('## Heading duplicate {#heading-duplicate-2}', $result);
+		$this->assertContains('## Heading duplicate {#heading-duplicate-3}', $result);
 		
 	}
 		
