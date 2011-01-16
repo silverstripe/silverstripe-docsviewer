@@ -232,11 +232,17 @@ class DocumentationEntity extends ViewableData {
 	 * @return string
 	 */
 	public function Link($version = false, $lang = false) {
+		return Controller::join_links(
+			Director::absoluteBaseURL(),
+			$this->getRelativeLink($version, $lang)
+		);
+	}
+	
+	function getRelativeLink($version = false, $lang = false) {
 		if(!$version) $version = '';
 		if(!$lang) $lang = 'en';
 		
 		return Controller::join_links(
-			Director::absoluteBaseURL(),
 			DocumentationViewer::get_link_base(), 
 			$this->moduleFolder,
 			$lang,

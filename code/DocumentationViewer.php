@@ -488,7 +488,7 @@ class DocumentationViewer extends Controller {
 		if($page = $this->getPage()) {
 		
 			// Remove last portion of path (filename), we want a link to the folder base
-			$html = DocumentationParser::parse($page, $this->Link(array_slice($this->Remaining, 0)));
+			$html = DocumentationParser::parse($page);
 			return DBField::create("HTMLText", $html);
 		}
 		else {
@@ -561,7 +561,6 @@ class DocumentationViewer extends Controller {
 	/**
 	 * Return the base link to this documentation location
 	 *
-	 * @todo Make this work on non /dev/ 
 	 * @return String
 	 */
 	public function Link($path = false) {

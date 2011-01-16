@@ -248,7 +248,8 @@ class DocumentationParser {
 	 * @param String $baselink
 	 * @return String Markdown
 	 */
-	static function rewrite_relative_links($md, $page, $baselink) {
+	static function rewrite_relative_links($md, $page, $baselink = null) {
+		if(!$baselink) $baselink = $page->getEntity()->getRelativeLink();
 
 		$re = '/
 			([^\!]?) # exclude image format
@@ -261,12 +262,12 @@ class DocumentationParser {
 		/x';
 		preg_match_all($re, $md, $matches);
 		
-		// relative path (to module base folder), without the filename
+		// relative path (relative to module base folder), without the filename.
+		// For "sapphire/en/current/topics/templates", this would be "templates"
 		$relativePath = dirname($page->getRelativePath());
 		if($relativePath == '.') $relativePath = '';
 		
 		if($matches) {
-			
 			foreach($matches[0] as $i => $match) {
 				$title = $matches[2][$i];
 				$url = $matches[3][$i];
@@ -277,11 +278,13 @@ class DocumentationParser {
 				// Don't process absolute links (based on protocol detection)
 				$urlParts = parse_url($url);
 				if($urlParts && isset($urlParts['scheme'])) continue;
-				
-				// Rewrite URL (relative or absolute)
+
+				// Rewrite URL
 				if(preg_match('/^\//', $url)) {
+					// Absolute: Only path to module base
 					$relativeUrl = Controller::join_links($baselink, $url);
 				} else {
+					// Relative: Include path to module base and any folders
 					$relativeUrl = Controller::join_links($baselink, $relativePath, $url);
 				}
 			
