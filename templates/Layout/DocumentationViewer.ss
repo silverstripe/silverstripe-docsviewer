@@ -3,12 +3,14 @@
 		<% if Content %>
 			$Content
 		<% else %>
-			<p>Woops page not found</p>
+			<% include DocNotFound %>
 		<% end_if %>
 	</div>
 
+	<% if Content %>
 	<div id="right-column">
 		<% include DocTableOfContents %>
 		<% include DocInThisModule %>
 	</div>
+	<% end_if %>
 </div>

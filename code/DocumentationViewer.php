@@ -492,11 +492,13 @@ class DocumentationViewer extends Controller {
 			return DBField::create("HTMLText", $html);
 		}
 		else {
-			// if no page found then we may want to get the listing of
-			// the folder
-			if($url = $this->Remaining) {
-				$pages = DocumentationService::get_pages_from_folder($this->getModule(), implode('/', $url), false);
-
+			// If no page found then we may want to get the listing of the folder.
+			// In case no folder exists, show a "not found" page.
+			$module = $this->getModule();
+			$url = $this->Remaining;
+			if($url && $module) {
+				$pages = DocumentationService::get_pages_from_folder($module, implode('/', $url), false);
+				// If no pages are found, the 404 is handled in the same template
 				return $this->customise(array(
 					'Title' => DocumentationService::clean_page_name(array_pop($url)),
 					'Pages' => $pages

@@ -552,6 +552,8 @@ class DocumentationService {
 
 		$folder = Controller::join_links($base, $relative);
 		
+		if(!is_dir($folder)) return false;
+			
 		$handle = opendir($folder);
 
 		if($handle) {

@@ -9,5 +9,5 @@
 		</ul>
 	</div>
 <% else %>
-	<p>Nothing to see here</p>
+	<% include DocNotFound %>
 <% end_if %>
