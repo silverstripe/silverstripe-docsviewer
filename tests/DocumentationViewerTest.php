@@ -39,6 +39,23 @@ class DocumentationViewerTest extends FunctionalTest {
 		DocumentationViewer::set_link_base($this->origLinkBase);
 	}
 	
+	function testLocationExists() {
+		$response = $this->get('DocumentationViewerTests/en/2.4/');
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
+		
+		$response = $this->get('DocumentationViewerTests/en/2.4/subfolder');
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing subfolder');
+		
+		$response = $this->get('DocumentationViewerTests/en/2.4/nonexistant-subfolder');
+		$this->assertEquals($response->getStatusCode(), 404, 'Nonexistant subfolder');
+		
+		$response = $this->get('DocumentationViewerTests/en/2.4/nonexistant-file.txt');
+		$this->assertEquals($response->getStatusCode(), 404, 'Nonexistant file');
+		
+		$response = $this->get('DocumentationViewerTests/en/2.4/test');
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing file');
+	}
+	
 	function testGetModulePagesShort() {
 		$v = new DocumentationViewer();
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4/subfolder/'));
@@ -76,7 +93,7 @@ class DocumentationViewerTest extends FunctionalTest {
 		// Children
 		$pagesArr = $pages->toArray();
 		$child1 = $pagesArr[1];
-
+	
 		$this->assertFalse($child1->Children);
 		$child2 = $pagesArr[2];
 		
@@ -86,7 +103,7 @@ class DocumentationViewerTest extends FunctionalTest {
 			array('subfolder/subpage.md', 'subfolder/subsubfolder/'),
 			$child2->Children->column('Filename')
 		);
-
+	
 		$children = $child2->Children;
 		
 		foreach($children as $child) {
@@ -95,14 +112,14 @@ class DocumentationViewerTest extends FunctionalTest {
 		
 		$child2Links = $children->column('Link');
 		$subpage = $children->First();
-
+	
 		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/subpage', $child2Links[0]);
 		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/subsubfolder/', $child2Links[1]);
 	}
 	
 	function testCurrentRedirection() {
 		$response = $this->get('dev/docs/DocumentationViewerTests/en/3.0/test');
-
+	
 		$this->assertEquals(301, $response->getStatusCode());
 		$this->assertEquals(
 			Director::absoluteBaseURL() . 'dev/docs/DocumentationViewerTests/en/test/',
@@ -130,16 +147,16 @@ class DocumentationViewerTest extends FunctionalTest {
 		$this->assertEquals('en', $v->getLang());
 		$this->assertEquals('DocumentationViewerTests', $v->module);
 		$this->assertEquals(array('test'), $v->Remaining);
-
+	
 		// Module index without version and language. Should pick up the defaults
 		$v2 = new DocumentationViewer();
 		$response = $v2->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/test'));
-
+	
 		$this->assertEquals('3.0', $v2->getVersion());
 		$this->assertEquals('en', $v2->getLang());
 		$this->assertEquals('DocumentationViewerTests', $v2->module);
 		$this->assertEquals(array('test'), $v2->Remaining);
-
+	
 		// Overall index
 		$v = new DocumentationViewer();
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', ''));

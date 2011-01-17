@@ -182,9 +182,16 @@ class DocumentationViewer extends Controller {
 			}	
 		}
 		
+		// Check if page exists, otherwise return 404
+		if(!$this->locationExists()) {
+			$body = $this->renderWith(get_class($this));
+			$this->response = new SS_HTTPResponse($body, 404);
+			return $this->response;
+		}
+		
 		return parent::handleRequest($request);
 	}
-	
+		
 	/**
 	 * Custom templates for each of the sections. 
 	 */
@@ -362,6 +369,24 @@ class DocumentationViewer extends Controller {
 		}
 
 		return false;
+	}
+	
+	/**
+	 * Simple way to check for existence of page of folder
+	 * without constructing too much object state.
+	 * Useful for generating 404 pages.
+	 * 
+	 * @return boolean
+	 */
+	function locationExists() {
+		$module = $this->getModule();
+		return (
+			$module
+			&& (
+				DocumentationService::find_page($module, $this->Remaining)
+				|| is_dir($module->getPath() . implode('/', $this->Remaining))
+			)
+		);
 	}
 	
 	/**
