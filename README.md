@@ -18,6 +18,10 @@ For more documentation on how to use the module please read /docs/Writing-Docume
 
 **Note** This module assumes you are using numeric values for your versions.
 
+## Search ##
+
+Search needs to be indexed manually with `dev/tasks/RebuildLuceneDocsIndex`.
+
 ## Syntax Highlighting ##
 
 The custom Markdown parser can render custom prefixes for code blocks,
