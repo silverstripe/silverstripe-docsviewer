@@ -20,7 +20,7 @@ class RebuildLuceneDocsIndex extends BuildTask {
 	}
 	
 	function rebuildIndexes($quiet = false) {
-		require_once('../sapphiredocs/thirdparty/markdown/markdown.php');
+		require_once(BASE_PATH . '/sapphiredocs/thirdparty/markdown/markdown.php');
 
 		ini_set("memory_limit", -1);
 		ini_set('max_execution_time', 0);
