@@ -709,12 +709,11 @@ class DocumentationViewer extends Controller {
 	/**
 	 * Past straight to results, display and encode the query
 	 */
-	function results($data, $form, $request) {
+	function results($data, $form, $request) {	
 		$search = new DocumentationSearch();
-		$search->performSearch($form->dataFieldByName('Search')->dataValue());
+		$search->setQuery($form->dataFieldByName('Search')->dataValue());
+		$search->setOutputController($this);
 		
-		$data = $search->getDataArrayFromHits($request);
-		
-		return $this->customise($data)->renderWith(array('DocumentationViewer_results', 'DocumentationViewer'));
+		return $search->renderResults();
 	}
 }

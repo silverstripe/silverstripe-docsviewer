@@ -3,19 +3,82 @@
 /**
  * Documentation Search powered by Lucene. You will need Zend_Lucene installed on your path
  * to rebuild the indexes run the {@link RebuildLuceneDocsIndex} task. You may wish to setup
- * a cron job to remake the indexes on a regular basis
+ * a cron job to remake the indexes on a regular basis.
+ *
+ * It has the ability to generate an OpenSearch RSS formatted feeds simply by using the URL
+ *
+ * <code>
+ * yoursite.com/search/?q=Foo&format=rss. // Format can either be specified as rss or left off.
+ * </code>
+ *
+ * To get a specific amount of results you can also use the modifiers start and limit
+ *
+ * <code>
+ * yoursite.com/search/?q=Foo&start=10&limit=10
+ * </code>
  *
  * @package sapphiredocs
  */
 
-class DocumentationSearch {
-
+class DocumentationSearch extends Controller {
+	
+	/**
+	 * @var bool - Is search enabled
+	 */
 	private static $enabled = false;
 	
+	/**
+	 * @var string - OpenSearch metadata. Please use {@link DocumentationSearch::set_meta_data()}
+	 */
+	private static $meta_data;
+	
+	/**
+	 * @var DataObjectSet - Results
+	 */
 	private $results;
 	
+	/**
+	 * @var int
+	 */
 	private $totalResults;
 	
+	/**
+	 * @var string
+	 */
+	private $query;
+	
+	/**
+	 * @var Controller
+	 */
+	private $outputController;
+	
+	/**
+	 * Set the current search query
+	 *
+	 * @param string
+	 */
+	public function setQuery($query) {
+		$this->query = $query;
+	}
+	
+	/**
+	 * Returns the current search query
+	 *
+	 * @return string
+	 */
+	public function getQuery() {
+		return $this->query;
+	}
+	
+	/**
+	 * Sets the {@link DocumentationViewer} or {@link DocumentationSearch} instance which this search is rendering
+	 * on based on whether it is the results display or RSS feed
+	 *
+	 * @param Controller
+	 */
+	public function setOutputController($controller) {
+		$this->outputController = $controller;
+	}
 	
 	/**
 	 * Folder name for indexes (in the temp folder). You can override it using
@@ -26,7 +89,8 @@ class DocumentationSearch {
 	private static $index_location = 'sapphiredocs';
 	
 	static $allowed_actions = array(
-		'buildindex'
+		'buildindex',
+		'opensearch'
 	);
 	
 	/**
@@ -96,29 +160,28 @@ class DocumentationSearch {
 	
 	/**
 	 * Perform a search query on the index
-	 *
-	 * Rebuilds the index if it out of date
 	 */
-	public function performSearch($query) {	
+	public function performSearch() {	
 		try {
 			$index = Zend_Search_Lucene::open(self::get_index_location());
 		
 			Zend_Search_Lucene::setResultSetLimit(200);
 		
-			$this->results = $index->find($query);
+			$this->results = $index->find($this->getQuery());
 			$this->totalResults = $index->numDocs();
 		}
 		catch(Zend_Search_Lucene_Exception $e) {
-			// the reindexing task has not been run
 			user_error('DocumentationSearch::performSearch() could not perform search as index does not exist. 
 				Please run /dev/tasks/RebuildLuceneDocsIndex', E_USER_ERROR);
 		}
 	}
 	
 	/**
-	 * @return DataObjectSet
+	 * @return ArrayData
 	 */
-	public function getDataArrayFromHits($request) {
+	public function getSearchResults($request) {
+		$pageLength = (isset($_GET['length'])) ? (int) $_GET['length'] : 10;
+		
 		$data = array(
 			'Results' => null,
 			'Query' => null,
@@ -127,6 +190,7 @@ class DocumentationSearch {
 			'TotalPages' => null,
 			'ThisPage' => null,
 			'StartResult' => null,
+			'PageLength' => $pageLength,
 			'EndResult' => null,
 			'PrevUrl' => DBField::create('Text', 'false'),
 			'NextUrl' => DBField::create('Text', 'false'),
@@ -136,7 +200,7 @@ class DocumentationSearch {
 		$start = ($request->requestVar('start')) ? (int)$request->requestVar('start') : 0;
 		$query = ($request->requestVar('Search')) ? $request->requestVar('Search') : '';
 		
-		$pageLength = 10;
+
 		$currentPage = floor( $start / $pageLength ) + 1;
 		
 		$totalPages = ceil(count($this->results) / $pageLength );
@@ -204,10 +268,12 @@ class DocumentationSearch {
 			}
 		}
 
-		return $data;
+		return new ArrayData($data);
 	}
 	
 	/**
+	 * Build a nice query string for the results
+	 *
 	 * @return string
 	 */
 	private function buildQueryUrl($params) {
@@ -232,9 +298,79 @@ class DocumentationSearch {
 		return (int) $this->totalResults;
 	}
 
+	/**
+	 * Optimizes the search indexes on the File System
+	 *
+	 * @return void
+	 */
 	public function optimizeIndex() {
 		$index = Zend_Search_Lucene::open(self::get_index_location());
 
 		if($index) $index->optimize();
+	}
+	
+	public function getTitle() {
+		return ($this->outputController) ? $this->outputController->Title : "";
+	}
+	
+	/**
+	 * OpenSearch MetaData. Includes 'description', 'tags', 'contact'
+	 *
+	 * @param array
+	 */
+	public static function set_meta_data($data) {
+		if(is_array($data)) {
+			foreach($data as $key => $value) {
+				self::$meta_data[strtolower($key)] = $value;
+			}
+		}
+	}
+	
+	/**
+	 * Returns the meta data needed by opensearch.
+	 *
+	 * @return array
+	 */
+	public static function get_meta_data() {
+		$data = self::$meta_data;
+		
+		return array(
+			'Description' => (isset($data['description'])) ? $data['description'] : "",
+			'Tags' => (isset($data['tags'])) ? $data['tags'] : "",
+			'Contact' => (isset($data['contact'])) ? $data['contact'] : "",
+			'ShortName' => (isset($data['shortname'])) ? $data['shortname'] : ""
+		);
+	}
+	
+	public function renderResults() {
+		if(!$this->results) $this->performSearch();
+		if(!$this->outputController) $this->outputController = $this;
+		
+		$request = $this->outputController->getRequest();
+		
+		$data = $this->getSearchResults($request);
+		$templates = array('DocumentationViewer_results', 'DocumentationViewer');
+
+		if($request->requestVar('format') && $request->requestVar('format') == "rss") {
+			// alter the fields for the opensearch xml.
+			$title = ($title = $this->getTitle()) ? ' | '. $title : "";
+			
+			$data->setField('Title', $data->Title . $title);
+
+			$data->setField('DescriptionURL', 'DocumentationSearch/opensearch/');
+			
+			array_unshift($templates, 'OpenSearchResults');
+		}
+		
+		return $this->outputController->customise($data)->renderWith($templates);
+	}
+	
+	/**
+	 * Returns the opensearch description of the search results
+	 */
+	public function opensearch() {
+		$data = self::get_meta_data();
+		
+		return $this->customise(new ArrayData($data))->renderWith(array('OpenSearchDescription'));
 	}
 }
