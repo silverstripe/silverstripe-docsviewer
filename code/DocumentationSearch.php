@@ -193,7 +193,6 @@ class DocumentationSearch {
 	
 		$start = ($request->requestVar('start')) ? (int)$request->requestVar('start') : 0;
 		$query = ($request->requestVar('Search')) ? $request->requestVar('Search') : '';
-		
 
 		$currentPage = floor( $start / $pageLength ) + 1;
 		
@@ -226,7 +225,7 @@ class DocumentationSearch {
 		}
 
 		$data['Results'] = $results;
-		$data['Query']   = DBField::create('Text', $query);
+		$data['Query'] = DBField::create('Text', $query);
 		$data['TotalResults'] = DBField::create('Text', count($this->results));
 		$data['TotalPages'] = DBField::create('Text', $totalPages);
 		$data['ThisPage'] = DBField::create('Text', $currentPage);
@@ -344,13 +343,14 @@ class DocumentationSearch {
 		if(!$this->outputController) return user_error('Call renderResults() on a DocumentationViewer instance.', E_USER_ERROR);
 		
 		$request = $this->outputController->getRequest();
-		
+
 		$data = $this->getSearchResults($request);
+		
 		$templates = array('DocumentationViewer_results', 'DocumentationViewer');
 
 		if($request->requestVar('format') && $request->requestVar('format') == "rss") {
 			// alter the fields for the opensearch xml.
-			$title = ($title = $this->getTitle()) ? ' | '. $title : "";
+			$title = ($title = $this->getTitle()) ? ' - '. $title : "";
 			
 			$link = Controller::join_links($this->outputController->Link(), 'DocumentationOpenSearch_Controller/description/');
 			
@@ -386,7 +386,7 @@ class DocumentationOpenSearch_Controller extends Controller {
 		$link = Director::absoluteBaseUrl() .
 		$data['SearchPageLink'] = Controller::join_links(
 			$viewer->Link(),
-			'results/?query={searchTerms}&amp;start={startIndex}&amp;length={count}'
+			'results/?Search={searchTerms}&amp;start={startIndex}&amp;length={count}&amp;action_results=1'
 		);
 		
 		$data['SearchPageRss'] = $data['SearchPageLink'] . '&amp;format=rss';

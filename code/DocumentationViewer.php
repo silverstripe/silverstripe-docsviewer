@@ -716,9 +716,14 @@ class DocumentationViewer extends Controller {
 	/**
 	 * Past straight to results, display and encode the query
 	 */
-	function results($data, $form, $request) {	
+	function results($data, $form = false) {
+
+		$query = (isset($_REQUEST['Search'])) ? $_REQUEST['Search'] : false;
+		
+		if(!$query) return $this->httpError('404');
+		
 		$search = new DocumentationSearch();
-		$search->setQuery($form->dataFieldByName('Search')->dataValue());
+		$search->setQuery($query);
 		$search->setOutputController($this);
 		
 		return $search->renderResults();
