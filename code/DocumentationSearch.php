@@ -20,7 +20,7 @@
  * @package sapphiredocs
  */
 
-class DocumentationSearch extends Controller {
+class DocumentationSearch {
 	
 	/**
 	 * @var bool - Is search enabled
@@ -30,7 +30,7 @@ class DocumentationSearch extends Controller {
 	/**
 	 * @var string - OpenSearch metadata. Please use {@link DocumentationSearch::set_meta_data()}
 	 */
-	private static $meta_data;
+	private static $meta_data = array();
 	
 	/**
 	 * @var DataObjectSet - Results
@@ -87,11 +87,6 @@ class DocumentationSearch extends Controller {
 	 * @var string 
 	 */
 	private static $index_location = 'sapphiredocs';
-	
-	static $allowed_actions = array(
-		'buildindex',
-		'opensearch'
-	);
 	
 	/**
 	 * Generate an array of every single documentation page installed on the system. 
@@ -171,8 +166,7 @@ class DocumentationSearch extends Controller {
 			$this->totalResults = $index->numDocs();
 		}
 		catch(Zend_Search_Lucene_Exception $e) {
-			user_error('DocumentationSearch::performSearch() could not perform search as index does not exist. 
-				Please run /dev/tasks/RebuildLuceneDocsIndex', E_USER_ERROR);
+			user_error($e .'. Ensure you have run the rebuld task (/dev/tasks/RebuildLuceneDocsIndex)', E_USER_ERROR);
 		}
 	}
 	
@@ -309,8 +303,11 @@ class DocumentationSearch extends Controller {
 		if($index) $index->optimize();
 	}
 	
+	/**
+	 * @return String
+	 */
 	public function getTitle() {
-		return ($this->outputController) ? $this->outputController->Title : "";
+		return ($this->outputController) ? $this->outputController->Title : _t('DocumentationSearch.SEARCH', 'Search');
 	}
 	
 	/**
@@ -335,16 +332,16 @@ class DocumentationSearch extends Controller {
 		$data = self::$meta_data;
 		
 		return array(
-			'Description' => (isset($data['description'])) ? $data['description'] : "",
-			'Tags' => (isset($data['tags'])) ? $data['tags'] : "",
-			'Contact' => (isset($data['contact'])) ? $data['contact'] : "",
-			'ShortName' => (isset($data['shortname'])) ? $data['shortname'] : ""
+			'Description' => (isset($data['description'])) ? $data['description'] : _t('DocumentationViewer.OPENSEARCHDESC', 'Search the documentation'),
+			'Tags' => (isset($data['tags'])) ? $data['tags'] : _t('DocumentationViewer.OPENSEARCHTAGS', 'documentation'),
+			'Contact' => (isset($data['contact'])) ? $data['contact'] :  Email::getAdminEmail(),
+			'ShortName' => (isset($data['shortname'])) ? $data['shortname'] : _t('DocumentationViewer.OPENSEARCHNAME', 'Documentation Search')
 		);
 	}
 	
 	public function renderResults() {
 		if(!$this->results) $this->performSearch();
-		if(!$this->outputController) $this->outputController = $this;
+		if(!$this->outputController) return user_error('Call renderResults() on a DocumentationViewer instance.', E_USER_ERROR);
 		
 		$request = $this->outputController->getRequest();
 		
@@ -355,21 +352,44 @@ class DocumentationSearch extends Controller {
 			// alter the fields for the opensearch xml.
 			$title = ($title = $this->getTitle()) ? ' | '. $title : "";
 			
+			$link = Controller::join_links($this->outputController->Link(), 'DocumentationOpenSearch_Controller/description/');
+			
 			$data->setField('Title', $data->Title . $title);
-
-			$data->setField('DescriptionURL', 'DocumentationSearch/opensearch/');
+			$data->setField('DescriptionURL', $link);
 			
 			array_unshift($templates, 'OpenSearchResults');
 		}
 		
 		return $this->outputController->customise($data)->renderWith($templates);
 	}
+}
+
+
+/**
+ * Public facing controller for handling search.
+ *
+ * @package sapphiredocs
+ */
+
+class DocumentationOpenSearch_Controller extends Controller {
 	
-	/**
-	 * Returns the opensearch description of the search results
-	 */
-	public function opensearch() {
-		$data = self::get_meta_data();
+	function index() {
+		return $this->httpError('404');
+	}
+	
+	function description() {
+		$viewer = new DocumentationViewer();
+		
+		if(!DocumentationViewer::canView()) return Security::permissionFailure($this);
+		
+		$data = DocumentationSearch::get_meta_data();
+		$link = Director::absoluteBaseUrl() .
+		$data['SearchPageLink'] = Controller::join_links(
+			$viewer->Link(),
+			'results/?query={searchTerms}&amp;start={startIndex}&amp;length={count}'
+		);
+		
+		$data['SearchPageRss'] = $data['SearchPageLink'] . '&amp;format=rss';
 		
 		return $this->customise(new ArrayData($data))->renderWith(array('OpenSearchDescription'));
 	}

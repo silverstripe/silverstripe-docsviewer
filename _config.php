@@ -12,12 +12,3 @@
 Director::addRules(100, array(
 	'dev/docs' => 'DocumentationViewer'
 ));
-
-// the default meta data for the OpenSearch library. More descriptive values
-// can be set in your mysite file
-DocumentationSearch::set_meta_data(array(
-	'ShortName' => _t('DocumentationViewer.OPENSEARCHNAME', 'Documentation Search'),
-	'Description' => _t('DocumentationViewer.OPENSEARCHDESC', 'Search the documentation'),
-	'Contact' => Email::getAdminEmail(),
-	'Tags' => _t('DocumentationViewer.OPENSEARCHTAGS', 'Documentation')
-));

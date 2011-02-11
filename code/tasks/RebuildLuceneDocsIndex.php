@@ -42,7 +42,9 @@ class RebuildLuceneDocsIndex extends BuildTask {
 			$index = Zend_Search_Lucene::open(DocumentationSearch::get_index_location());
 			$index->removeReference();
 		}
-		catch (Zend_Search_Lucene_Exception $e) {}
+		catch (Zend_Search_Lucene_Exception $e) {
+			user_error($e);
+		}
 
 		try {
 			$index = Zend_Search_Lucene::create(DocumentationSearch::get_index_location());
@@ -53,7 +55,7 @@ class RebuildLuceneDocsIndex extends BuildTask {
 
 		// includes registration
 		$pages = DocumentationSearch::get_all_documentation_pages();
-
+		
 		if($pages) {
 			$count = 0;
 			

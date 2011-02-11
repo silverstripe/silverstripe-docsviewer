@@ -54,10 +54,8 @@ class DocumentationViewer extends Controller {
 	
 	function init() {
 		parent::init();
-		
-		$canAccess = (Director::isDev() || Director::is_cli() || !self::$check_permission || Permission::check(self::$check_permission));
 
-		if(!$canAccess) return Security::permissionFailure($this);
+		if(!$this->canView()) return Security::permissionFailure($this);
 
 		// javascript
 		Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');
@@ -87,6 +85,15 @@ class DocumentationViewer extends Controller {
 		Requirements::css('sapphiredocs/thirdparty/syntaxhighlighter/styles/shThemeEclipse.css');
 		
 		Requirements::customScript('jQuery(document).ready(function() {SyntaxHighlighter.all();});');
+	}
+	
+	/**
+	 * Can the user view this documentation. Hides all functionality for private wikis
+	 *
+	 * @return bool
+	 */
+	public function canView() {
+		return (Director::isDev() || Director::is_cli() || !self::$check_permission || Permission::check(self::$check_permission));
 	}
 
 	/**
