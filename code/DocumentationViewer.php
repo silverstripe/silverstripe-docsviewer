@@ -156,7 +156,7 @@ class DocumentationViewer extends Controller {
 			$this->module = $firstParam;
 			$this->lang = $secondParam;
 			
-			if(isset($thirdParam) && (is_numeric($thirdParam))) {
+			if(isset($thirdParam) && (is_numeric($thirdParam) || in_array($thirdParam, array('master', 'trunk')))) {
 				$this->version = $thirdParam;
 			}
 			else {
