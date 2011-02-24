@@ -583,7 +583,7 @@ class DocumentationViewer extends Controller {
 			$output = "";
 			
 			foreach($pages as $page) {
-				$output = $page->Title .' | '. $output;
+				$output = $page->Title .' - '. $output;
 			}
 			
 			return $output;
