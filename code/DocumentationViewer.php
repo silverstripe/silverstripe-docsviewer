@@ -81,8 +81,8 @@ class DocumentationViewer extends Controller {
 
 		// css
 		Requirements::css('sapphiredocs/thirdparty/syntaxhighlighter/styles/shCore.css');
-		Requirements::css('sapphiredocs/thirdparty/syntaxhighlighter/styles/shCoreEclipse.css');
-		Requirements::css('sapphiredocs/thirdparty/syntaxhighlighter/styles/shThemeEclipse.css');
+		Requirements::css('sapphiredocs/thirdparty/syntaxhighlighter/styles/shCoreRDark.css');
+		Requirements::css('sapphiredocs/thirdparty/syntaxhighlighter/styles/shThemeRDark.css');
 		
 		Requirements::customScript('jQuery(document).ready(function() {SyntaxHighlighter.all();});');
 	}
