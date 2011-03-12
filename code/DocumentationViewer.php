@@ -169,7 +169,7 @@ class DocumentationViewer extends Controller {
 		
 		// 'current' version mapping
 		$module = DocumentationService::is_registered_module($this->module, null, $this->getLang());
-		
+
 		if($module) {
 			$current = $module->getCurrentVersion();
 
@@ -186,14 +186,14 @@ class DocumentationViewer extends Controller {
 				$this->redirect($link, 301); // permanent redirect
 			
 				return $this->response;
-			}	
-		}
-		
-		// Check if page exists, otherwise return 404
-		if(!$this->locationExists()) {
-			$body = $this->renderWith(get_class($this));
-			$this->response = new SS_HTTPResponse($body, 404);
-			return $this->response;
+			}
+			
+			// Check if page exists, otherwise return 404
+			if(!$this->locationExists()) {
+				$body = $this->renderWith(get_class($this));
+				$this->response = new SS_HTTPResponse($body, 404);
+				return $this->response;
+			}
 		}
 		
 		return parent::handleRequest($request);
@@ -357,6 +357,7 @@ class DocumentationViewer extends Controller {
 				$output->push(new ArrayData(array(
 					'Title' 	=> $module->getTitle(),
 					'Code'		=> $module,
+					'Link'		=> $this->Link(array_slice($this->Remaining, -1, -1), $module->moduleFolder),
 					'Content' 	=> DBField::create("HTMLText", $content)
 				)));
 			}
@@ -387,6 +388,7 @@ class DocumentationViewer extends Controller {
 	 */
 	function locationExists() {
 		$module = $this->getModule();
+
 		return (
 			$module
 			&& (
@@ -528,12 +530,21 @@ class DocumentationViewer extends Controller {
 			// In case no folder exists, show a "not found" page.
 			$module = $this->getModule();
 			$url = $this->Remaining;
+			
 			if($url && $module) {
 				$pages = DocumentationService::get_pages_from_folder($module, implode('/', $url), false);
 				// If no pages are found, the 404 is handled in the same template
 				return $this->customise(array(
 					'Title' => DocumentationService::clean_page_name(array_pop($url)),
 					'Pages' => $pages
+				))->renderWith('DocFolderListing');
+			}
+			else {
+				// get all available modules and show a table of contents.
+				
+				return $this->customise(array(
+					'Title' => _t('DocumentationViewer.MODULES', 'Modules'),
+					'Pages' => $this->getModules()
 				))->renderWith('DocFolderListing');
 			}
 		}
@@ -597,12 +608,12 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return String
 	 */
-	public function Link($path = false) {
+	public function Link($path = false, $module = false) {
 		$base = Director::absoluteBaseURL();
 		
 		$version = ($this->version) ? $this->version . '/' : false;
 		$lang = ($this->language) ? $this->language  .'/' : false;
-		$module = ($this->module) ? $this->module .'/' : false;
+		$module = (!$module && $this->module) ? $this->module .'/' : $module;
 		
 		$action = '';
 		

@@ -1,10 +1,13 @@
 <div id="home">
-	<% control Modules %>
-		<% if Content %>
+	<h2><% _t('DOCUMENTEDMODULES', 'Documented Modules') %></h2>
+	
+	<% if Modules %>
+		<% control Modules %>
 			<div class="module">
-				
-				$Content
+				<h3><a href="$Link">$Title</a></h3>
 			</div>
-		<% end_if %>
-	<% end_control %>
+		<% end_control %>
+	<% else %>
+		<p><% _t('NOMODULEDOCUMENTATION', 'No modules with documentation installed could be found.') %></p>
+	<% end_if %>
 </div>
