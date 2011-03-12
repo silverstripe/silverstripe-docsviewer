@@ -47,7 +47,7 @@
 		</div>
 		
 		<div id="footer">
-			<p>Documentation powered by <a href="http://www.silverstripe.org">SilverStripe</a>. Found a typo? <a href="http://github.com/chillu/silverstripe-doc-restructuring">Contribute to the Documentation Project</a>.</p>
+			<p>Documentation powered by <a href="http://www.silverstripe.org">SilverStripe</a>.</p>
 		</div>
 	</body>
 </html>
