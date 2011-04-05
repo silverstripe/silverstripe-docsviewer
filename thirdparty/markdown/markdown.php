@@ -1419,8 +1419,9 @@ class Markdown_Parser {
 			$text = preg_replace('/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/', 
 								'&amp;', $text);;
 		}
-		# Encode remaining <'s
-		$text = str_replace('<', '&lt;', $text);
+		
+		# Encode remaining <'s and >'s
+		$text = str_replace(array('<','>'), array('&lt;','&gt;'), $text);
 
 		return $text;
 	}

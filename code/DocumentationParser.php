@@ -42,11 +42,13 @@ class DocumentationParser {
 		$md = self::rewrite_api_links($md, $page);
 		$md = self::rewrite_heading_anchors($md, $page);
 		$md = self::rewrite_code_blocks($md, $page);
-		
+	
 		require_once(BASE_PATH . '/sapphiredocs/thirdparty/markdown/markdown.php');
-		$html = Markdown($md);
-
-		return $html;
+		
+		$parser = new MarkdownExtra_Parser();
+		$parser->no_markup = true;
+		
+		return $parser->transform($md);
 	}
 	
 	function rewrite_code_blocks($md) {
