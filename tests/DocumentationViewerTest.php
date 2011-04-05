@@ -99,7 +99,7 @@ class DocumentationViewerTest extends FunctionalTest {
 		$this->assertFalse($child1->Children);
 		$child2 = $pagesArr[2];
 		
-		$this->assertType('DataObjectSet', $child2->Children);
+		$this->assertInstanceOf('DataObjectSet', $child2->Children);
 	
 		$this->assertEquals(
 			array('subfolder/subpage.md', 'subfolder/subsubfolder/'),
