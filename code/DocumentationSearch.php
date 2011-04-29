@@ -33,6 +33,13 @@ class DocumentationSearch {
 	private static $meta_data = array();
 	
 	/**
+	 * @var Array Regular expression mapped to a "boost factor" for the searched document.
+	 * Defaults to 1.0, lower to decrease relevancy. Requires reindex.
+	 * Uses {@link DocumentationPage->getRelativePath()} for comparison.
+	 */
+	static $boost_by_path = array();
+	
+	/**
 	 * @var DataObjectSet - Results
 	 */
 	private $results;
@@ -129,7 +136,12 @@ class DocumentationSearch {
 		self::$enabled = true;
 		
 		// include the zend search functionality
-		set_include_path(get_include_path() . PATH_SEPARATOR . dirname(dirname(__FILE__)) . '/thirdparty/');
+		set_include_path(
+		 	dirname(dirname(__FILE__)) . '/thirdparty/'. PATH_SEPARATOR .
+			get_include_path()
+		);
+		
+		require_once 'Zend/Search/Lucene.php';
 	}
 
 	/**
@@ -213,6 +225,7 @@ class DocumentationSearch {
 			// do a simple markdown parse of the file
 			$obj = new ArrayData(array(
 				'Title' => DBField::create('Varchar', $doc->getFieldValue('Title')),
+				'BreadcrumbTitle' => DBField::create('HTMLText', $doc->getFieldValue('BreadcrumbTitle')),
 				'Link' => DBField::create('Varchar',$doc->getFieldValue('Link')),
 				'Language' => DBField::create('Varchar',$doc->getFieldValue('Language')),
 				'Version' => DBField::create('Varchar',$doc->getFieldValue('Version')),
@@ -350,7 +363,6 @@ class DocumentationSearch {
 		$request = $this->outputController->getRequest();
 
 		$data = $this->getSearchResults($request);
-		
 		$templates = array('DocumentationViewer_results', 'DocumentationViewer');
 
 		if($request->requestVar('format') && $request->requestVar('format') == "atom") {

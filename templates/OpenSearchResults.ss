@@ -13,7 +13,7 @@
 	<opensearch:Query role="request" searchTerms="$Query" startIndex="$StartResult" count="$PageLength"></opensearch:Query>
 	<% control Results %>
 	<entry>
-		<title>$Title</title>
+		<title><% if BreadcrumbTitle %>$BreadcrumbTitle<% else %>$Title<% end_if %></title>
 		<link href="$Link">$Link</link>
 		<id>urn:uuid:$ID</id>
 		<content type="text">$Content.LimitCharacters(200)</content>

@@ -21,6 +21,7 @@ class RebuildLuceneDocsIndex extends BuildTask {
 	
 	function rebuildIndexes($quiet = false) {
 		require_once(BASE_PATH . '/sapphiredocs/thirdparty/markdown/markdown.php');
+		require_once 'Zend/Search/Lucene.php';
 
 		ini_set("memory_limit", -1);
 		ini_set('max_execution_time', 0);
@@ -43,7 +44,7 @@ class RebuildLuceneDocsIndex extends BuildTask {
 			$index->removeReference();
 		}
 		catch (Zend_Search_Lucene_Exception $e) {
-			user_error($e);
+			// user_error($e);
 		}
 
 		try {
@@ -73,14 +74,23 @@ class RebuildLuceneDocsIndex extends BuildTask {
 					if($content) $content = Markdown($content);
 
 					$doc->addField(Zend_Search_Lucene_Field::Text('content', $content));
-					$doc->addField(Zend_Search_Lucene_Field::Text('Title', $page->getTitle()));
+					$doc->addField($titleField = Zend_Search_Lucene_Field::Text('Title', $page->getTitle()));
+					$doc->addField($breadcrumbField = Zend_Search_Lucene_Field::Text('BreadcrumbTitle', $page->getBreadcrumbTitle()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Version', $page->getVersion()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Language', $page->getLang()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Link', $page->Link()));
+					
+					// custom boosts
+					$titleField->boost = 1.5;
+					$breadcrumbField->boost = 1.5;
+					foreach(DocumentationSearch::$boost_by_path as $pathExpr => $boost) {
+						if(preg_match($pathExpr, $page->getRelativePath())) $doc->boost = $boost;
+					}
+					
 					$index->addDocument($doc);
 				}
 				
-				if(!$quiet) echo "adding ". $page->getTitle() ."\n\n";
+				if(!$quiet) echo "adding ". $page->getPath() ."\n";
 			}
 			
 			error_reporting($error);
