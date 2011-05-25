@@ -121,6 +121,9 @@ class DocumentationParser {
 			// Replace any double slashes (apart from protocol)
 			$relativeUrl = preg_replace('/([^:])\/{2,}/', '$1/', $relativeUrl);
 			
+			//replace backslashes with forwardslashes (windows users)
+			$relativeUrl = str_replace('\\','/',$relativeUrl);
+
 			// Make it absolute again
 			$absoluteUrl = Director::absoluteBaseURL() . $relativeUrl;
 			
