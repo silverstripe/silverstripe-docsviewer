@@ -26,9 +26,9 @@ class DocumentationViewerTest extends FunctionalTest {
 		}
 		
 		// We set 3.0 as current, and test most assertions against 2.4 - to avoid 'current' rewriting issues
-		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs/", '2.4');
-		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs-2/", '2.3');
-		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs-3/", '3.0');
+		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs/", '2.3');
+		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs-v2.4/", '2.4', 'Doc Test', true);
+		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs-v3.0/", '3.0', 'Doc Test', true, true);
 	}
 	
 	function tearDownOnce() {
@@ -39,31 +39,71 @@ class DocumentationViewerTest extends FunctionalTest {
 		DocumentationViewer::set_link_base($this->origLinkBase);
 	}
 	
-	// TODO Works with phpunit executable, but not with sake. 
-	// Also works in actual URL routing, just not in tests...
-	// function testLocationExists() {
-	// 	$response = $this->get('DocumentationViewerTests/en/2.4/');
-	// 	$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
-	// 	
-	// 	$response = $this->get('DocumentationViewerTests/en/2.4/subfolder');
-	// 	$this->assertEquals($response->getStatusCode(), 200, 'Existing subfolder');
-	// 	
-	// 	$response = $this->get('DocumentationViewerTests/en/2.4/nonexistant-subfolder');
-	// 	$this->assertEquals($response->getStatusCode(), 404, 'Nonexistant subfolder');
-	// 	
-	// 	$response = $this->get('DocumentationViewerTests/en/2.4/nonexistant-file.txt');
-	// 	$this->assertEquals($response->getStatusCode(), 404, 'Nonexistant file');
-	// 	
-	// 	$response = $this->get('DocumentationViewerTests/en/2.4/test');
-	// 	$this->assertEquals($response->getStatusCode(), 200, 'Existing file');
-	// }
+	/**
+	 * This tests that all the locations will exist if we access it via the urls.
+	 */
+	function testLocationsExists() {
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.3/subfolder');
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.4');
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.4/');		
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
+		
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.3/nonexistant-subfolder');
+		$this->assertEquals($response->getStatusCode(), 404, 'Nonexistant subfolder');
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.3/nonexistant-file.txt');
+		$this->assertEquals($response->getStatusCode(), 404, 'Nonexistant file');
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.3/test');
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing file');
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/3.0/empty?foo');
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing page');
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/3.0/empty.md');
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing page');
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/3.0/empty/');
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing page');
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/3.0/test');
+		$this->assertEquals($response->getStatusCode(), 404, 'Missing page');
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/3.0/test.md');
+		$this->assertEquals($response->getStatusCode(), 404, 'Missing page');
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/3.0/test/');
+		$this->assertEquals($response->getStatusCode(), 404, 'Missing page');
+	}
+	
+	
+	function testRouting() {
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.4');
+		
+		$this->assertEquals(200, $response->getStatusCode());
+		$this->assertContains('english test', $response->getBody(), 'Toplevel content page');
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.4/');
+		$this->assertEquals(200, $response->getStatusCode());
+		$this->assertContains('english test', $response->getBody(), 'Toplevel content page');
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.4/index.md');
+		$this->assertEquals(200, $response->getStatusCode());
+		$this->assertContains('english test', $response->getBody(), 'Toplevel content page');
+	}
 	
 	function testGetModulePagesShort() {
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4/subfolder/'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/subfolder/'));
 		$pages = $v->getModulePages();
-		
+
 		$arr = $pages->toArray();
+		
 		$page = $arr[2];
 		
 		$this->assertEquals('Subfolder', $page->Title);
@@ -71,7 +111,7 @@ class DocumentationViewerTest extends FunctionalTest {
 	
 	function testGetModulePages() {
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4/subfolder/'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/subfolder/'));
 		$pages = $v->getModulePages();
 		$this->assertEquals(
 			array('sort/', 'subfolder/', 'test.md'),
@@ -83,14 +123,14 @@ class DocumentationViewerTest extends FunctionalTest {
 		);
 		
 		foreach($pages as $page) {
-			$page->setVersion('2.4');
+			$page->setVersion('2.3');
 		}
 		
 		$links = $pages->column('Link');
 		
-		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/sort/', $links[0]);
-		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/', $links[1]);
-		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/test', $links[2]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.3/sort/', $links[0]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.3/subfolder/', $links[1]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.3/test', $links[2]);
 		
 		// Children
 		$pagesArr = $pages->toArray();
@@ -109,36 +149,14 @@ class DocumentationViewerTest extends FunctionalTest {
 		$children = $child2->Children;
 		
 		foreach($children as $child) {
-			$child->setVersion('2.4');
+			$child->setVersion('2.3');
 		}
 		
 		$child2Links = $children->column('Link');
 		$subpage = $children->First();
 	
-		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/subpage', $child2Links[0]);
-		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/subsubfolder/', $child2Links[1]);
-	}
-	
-	function testCurrentRedirection() {
-		$response = $this->get('dev/docs/DocumentationViewerTests/en/3.0/test');
-	
-		$this->assertEquals(301, $response->getStatusCode());
-		$this->assertEquals(
-			Director::absoluteBaseURL() . 'dev/docs/DocumentationViewerTests/en/test/',
-			$response->getHeader('Location'),
-			'Redirection to current on page'
-		);
-		
-		$response = $this->get('dev/docs/DocumentationViewerTests/en/3.0');
-		$this->assertEquals(301, $response->getStatusCode());
-		$this->assertEquals(
-			Director::absoluteBaseURL() . 'dev/docs/DocumentationViewerTests/en/',
-			$response->getHeader('Location'),
-			'Redirection to current on index'
-		);
-		
-		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.3');
-		$this->assertEquals(200, $response->getStatusCode(), 'No redirection on older versions');
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.3/subfolder/subpage', $child2Links[0]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/2.3/subfolder/subsubfolder/', $child2Links[1]);
 	}
 	
 	function testUrlParsing() {
@@ -198,20 +216,15 @@ class DocumentationViewerTest extends FunctionalTest {
 		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/subpage/', $crumbLinks[2]);
 	}
 	
-	function testRouting() {
-		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.4/test');
-		$this->assertEquals(200, $response->getStatusCode());
-		$this->assertContains('english test', $response->getBody(), 'Toplevel content page');
+	function testGetVersion() {
+		$v = new DocumentationViewer();
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4'));
+		$this->assertEquals('2.4', $v->getVersion());
+
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/1'));
+		$this->assertEquals('1', $v->getVersion());
+		
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/3.0'));
+		$this->assertEquals('3.0', $v->getVersion());		
 	}
-	
-	// function testGetPage() {
-	// 	$v = new DocumentationViewer();
-	// 	$v->handleRequest(new SS_HTTPRequest('GET', '2.4/en/cms'));
-	// 	$p = $v->getPage();
-	// 	$this->assertType('DocumentationPage', $p);
-	// 	$this->assertEquals('/', $p->getRelativePath());
-	// 	$this->assertEquals('en', $p->getLang());
-	// 	$this->assertEquals('2.4', $p->getVersion());
-	// }
-	
 }

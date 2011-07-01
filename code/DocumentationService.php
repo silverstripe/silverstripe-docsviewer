@@ -145,8 +145,8 @@ class DocumentationService {
 	 */
 	public static function get_registered_versions($module = false) {
 		if($module) {
-			if(isset($registered_modules[$module])) {
-				return $registered_modules[$module]->getVersions();
+			if(isset(self::$registered_modules[$module])) {
+				return self::$registered_modules[$module]->getVersions();
 			}
 			else {
 				return false;
@@ -256,26 +256,26 @@ class DocumentationService {
 	 * @param Float $version Version of module.
 	 * @param String $title Nice title to use
 	 * @param bool $major is this a major release
+	 * @param bool $latest - return is this the latest release.
 	 *
 	 * @throws InvalidArgumentException
 	 *
 	 * @return DocumentationEntity
 	 */
-	public static function register($module, $path, $version = '', $title = false, $major = false) {
+	public static function register($module, $path, $version = '', $title = false, $major = false, $latest = false) {
 		if(!file_exists($path)) throw new InvalidArgumentException(sprintf('Path "%s" doesn\'t exist', $path));
 
 		// add the module to the registered array
 		if(!isset(self::$registered_modules[$module])) {
 			// module is completely new
 			$entity = new DocumentationEntity($module, $version, $path, $title);
-
+			
 			self::$registered_modules[$module] = $entity;
 		}
 		else {
 			// module exists so add the version to it
 			$entity = self::$registered_modules[$module];
-			
-			$entity->addVersion($version, $path, true);
+			$entity->addVersion($version, $path);
 		}
 		
 		if($major) {
@@ -285,6 +285,11 @@ class DocumentationService {
 				self::$major_versions[] = $version;
 			}
 		}
+		
+		if($latest) {
+			$entity->setLatestVersion($version);
+		}
+
 		
 		return $entity;
 	}
@@ -362,14 +367,16 @@ class DocumentationService {
 	 *
 	 * @param DocumentationEntity 
 	 * @param array exploded url string
+	 * @param string version number
+	 * @param string lang code
 	 *
 	 * @return String|false - File path
 	 */
-	static function find_page($module, $path) {	
-		if($module = self::is_registered_module($module)) {
-			return self::find_page_recursive($module->getPath(), $path);
+	static function find_page($module, $path, $version = '', $lang = 'en') {	
+		if($module = self::is_registered_module($module, $version, $lang)) {
+			return self::find_page_recursive($module->getPath($version, $lang), $path);
 		}
-
+		
 		return false;
 	}
 	
@@ -503,19 +510,24 @@ class DocumentationService {
 	 * @param DocumentationEntity path
 	 * @param string - an optional path within a module
 	 * @param bool enable several recursive calls (more than 1 level)
+	 * @param string - version to use
+	 * @param string - lang to use
 	 *
 	 * @throws Exception
 	 * @return DataObjectSet
 	 */
-	public static function get_pages_from_folder($module, $relativePath = false, $recursive = true) {
-		// var_dump("START: get pages from $module | $relativePath");
+	public static function get_pages_from_folder($module, $relativePath = false, $recursive = true, $version = 'trunk', $lang = 'en') {
 		$output = new DataObjectSet();
-		
 		$pages = array();
-		if(!$module instanceof DocumentationEntity) user_error("get_pages_from_folder must be passed a module", E_USER_ERROR);
+		
+		if(!$module instanceof DocumentationEntity) 
+			user_error("get_pages_from_folder must be passed a module", E_USER_ERROR);
+		
+		$path = $module->getPath($version, $lang);
+
 		
 		if(self::is_registered_module($module)) {
-			self::get_pages_from_folder_recursive($module->getPath(), $relativePath, $recursive, $pages);
+			self::get_pages_from_folder_recursive($path, $relativePath, $recursive, $pages);
 		}
 		else {
 			return user_error("$module is not registered", E_USER_WARNING);
@@ -524,22 +536,27 @@ class DocumentationService {
 		if(count($pages) > 0) {
 			natsort($pages);
 			
-			foreach($pages as $key => $path) {
+			foreach($pages as $key => $pagePath) {
 				
 				// get file name from the path
-				$file = ($pos = strrpos($path, '/')) ? substr($path, $pos + 1) : $path;
+				$file = ($pos = strrpos($pagePath, '/')) ? substr($pagePath, $pos + 1) : $pagePath;
 				
 				$page = new DocumentationPage();
 				$page->setTitle(self::clean_page_name($file));
-				$relative = str_replace($module->getPath(), '', $path);
+				$relative = str_replace($path, '', $pagePath);
 				
+				// if no extension, put a slash on it
+				if(strpos($relative, '.') === false) $relative .= '/';
+
 				$page->setEntity($module);
 				$page->setRelativePath($relative);
-				// var_dump("ADDING FILE: ". $relative . " [$path]");
+				$page->setVersion($version);
+				$page->setLang($lang);
+				
 				$output->push($page);
 			}
 		}
-		// var_dump("END get pages");
+		
 		return $output;
 	}
 	

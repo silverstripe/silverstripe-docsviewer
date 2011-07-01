@@ -11,9 +11,10 @@
  * 
  * Versions are assumed to be in numeric format (e.g. '2.4'),
  * mainly as an easy way to distinguish them from language codes in the routing logic.
- * They're also parsed through version_compare() in {@link getCurrentVersion()} which assumes a certain format. 
+ * They're also parsed through version_compare() in {@link getLatestVersion()} which assumes a certain format. 
  *
  * @package sapphiredocs
+ * @subpackage model
  */
 
 class DocumentationEntity extends ViewableData {
@@ -40,7 +41,7 @@ class DocumentationEntity extends ViewableData {
 	/**
 	 * @var array
 	 */
-	private $currentVersion;
+	private $latestVersion;
 	
 	/**
 	 * @var Array $langs a list of available langauges
@@ -124,14 +125,15 @@ class DocumentationEntity extends ViewableData {
 	/**
 	 * @return String|Boolean
 	 */
-	public function getCurrentVersion() {
+	public function getLatestVersion() {
 		if(!$this->hasVersions()) return false;
 		
-		if($this->currentVersion) {
-			return $this->currentVersion;
+		if($this->latestVersion) {
+			return $this->latestVersion;
 		} else {
 			$sortedVersions = $this->getVersions();
 			usort($sortedVersions, create_function('$a,$b', 'return version_compare($a,$b);'));
+			
 			return array_pop($sortedVersions);
 		}
 	}
@@ -139,10 +141,9 @@ class DocumentationEntity extends ViewableData {
 	/**
 	 * @param String $version
 	 */
-	public function setCurrentVersion($version) {
+	public function setLatestVersion($version) {
 		if(!$this->hasVersion($version)) throw new InvalidArgumentException(sprintf('Version "%s" does not exist', $version));
-
-		$this->currentVersion = $version;
+		$this->latestVersion = $version;
 	}
 	
 	/**
@@ -168,13 +169,10 @@ class DocumentationEntity extends ViewableData {
 	 *
 	 * @param Float $version Version number
 	 * @param String $path path to folder
-	 * @param Boolean $current
 	 */
-	public function addVersion($version = '', $path, $current = false) {
-		// determine the langs in this path
-		
+	public function addVersion($version = '', $path) {
+
 		$langs = scandir($path);
-		
 		$available = array();
 		
 		if($langs) {
@@ -189,8 +187,6 @@ class DocumentationEntity extends ViewableData {
 		
 		$this->addLanguage($available);
 		$this->versions[$version] = $path;
-		
-		if($current) $this->setCurrentVersion($version);
 	}
 	
 	/**
@@ -211,8 +207,7 @@ class DocumentationEntity extends ViewableData {
 	 * @return string
 	 */
 	public function getPath($version = false, $lang = false) {
-		
-		if(!$version) $version = '';
+		if(!$version) $version = $this->getLatestVersion();
 		if(!$lang) $lang = 'en';
 		
 		if($this->hasVersion($version)) {
@@ -239,7 +234,7 @@ class DocumentationEntity extends ViewableData {
 	}
 	
 	function getRelativeLink($version = false, $lang = false) {
-		if(!$version) $version = '';
+		if(!$version) $version = $this->getLatestVersion();
 		if(!$lang) $lang = 'en';
 		
 		return Controller::join_links(

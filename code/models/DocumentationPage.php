@@ -5,6 +5,7 @@
  * filesystem.
  * 
  * @package sapphiredocs
+ * @subpackage model
  */
 class DocumentationPage extends ViewableData {
 	
@@ -76,7 +77,11 @@ class DocumentationPage extends ViewableData {
 	 */
 	function getPath($defaultFile = false) {
 		if($this->entity) {
-			$path = rtrim($this->entity->getPath($this->version, $this->lang), '/') . '/' . trim($this->getRelativePath(), '/');
+			
+			$path = Controller::join_links(
+				$this->entity->getPath($this->getVersion(), $this->lang),
+				$this->getRelativePath()
+			);
 			
 			if(!is_dir($path)) $path = realpath($path);
 			else if($defaultFile) {
@@ -88,7 +93,6 @@ class DocumentationPage extends ViewableData {
 		else {
 			$path = $this->getRelativePath();
 		}
-		
 		if(!file_exists($path)) {
 			throw new InvalidArgumentException(sprintf(
 				'Path could not be found. Module path: %s, file path: %s', 
@@ -107,7 +111,12 @@ class DocumentationPage extends ViewableData {
 	 */
 	function getBreadcrumbTitle($divider = ' - ') {
 		$pathParts = explode('/', $this->getRelativePath());
+		
+		// add the module to the breadcrumb trail.
+		array_unshift($pathParts, $this->entity->getTitle());
+		
 		$titleParts = array_map(array('DocumentationService', 'clean_page_name'), $pathParts);
+		
 		return implode($divider, $titleParts + array($this->getTitle()));
 	}
 	
@@ -118,7 +127,7 @@ class DocumentationPage extends ViewableData {
 	 */
 	function Link() {
 		if($entity = $this->getEntity()) {
-			$link = Controller::join_links($entity->Link($this->version, $this->lang), $this->getRelativeLink());
+			$link = Controller::join_links($entity->Link($this->getVersion(), $this->lang), $this->getRelativeLink());
 
 			$link = rtrim(DocumentationService::trim_extension_off($link), '/');
 			
@@ -160,7 +169,7 @@ class DocumentationPage extends ViewableData {
 	}
 	
 	function getVersion() {
-		return $this->version;
+		return $this->version ? $this->version : $this->entity->getLatestVersion();
 	}
 	
 	function setVersion($version) {
@@ -174,7 +183,7 @@ class DocumentationPage extends ViewableData {
 	function getTitle() {
 		return $this->title;
 	}
-	
+
 	/**
 	 * Set a variable from the metadata field on this class
 	 *
@@ -200,6 +209,9 @@ class DocumentationPage extends ViewableData {
 	}
 
 	/**
+	 * Return the raw markdown for a given documentation page
+	 *
+	 * @throws InvalidArgumentException
 	 * @return String
 	 */
 	function getMarkdown() {
@@ -212,15 +224,17 @@ class DocumentationPage extends ViewableData {
 		}
 		catch(InvalidArgumentException $e) {}
 		
-		return null;
+		return false;
 	}
 	
 	/**
+	 * Parse a file (with a lang and a version).
+	 *
 	 * @param String $baselink 
+	 *
 	 * @return String
 	 */
-	function getHTML($baselink = null) {
-		// if this is not a directory then we can to parse the file
-		return DocumentationParser::parse($this, $baselink);
+	function getHTML($version, $lang = 'en') {
+		return DocumentationParser::parse($this, $this->entity->getRelativeLink($version, $lang));
 	}
 }

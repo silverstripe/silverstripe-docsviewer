@@ -108,10 +108,9 @@ class DocumentationSearch {
 
 		if($modules) {
 			foreach($modules as $module) {
-				
-				foreach($module->getLanguages() as $language) {
+				foreach($module->getVersions() as $version) {
 					try {
-						$pages = DocumentationService::get_pages_from_folder($module);
+						$pages = DocumentationService::get_pages_from_folder($module, false, true, $version);
 						
 						if($pages) {
 							foreach($pages as $page) {

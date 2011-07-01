@@ -32,7 +32,7 @@ class DocumentationPageTest extends SapphireTest {
 		$this->assertStringEndsWith('testmodule/en/subfolder/subpage', $nested->Link());
 		
 		// test with version.
-		$entity = DocumentationService::register("versionlinks", BASE_PATH . "/sapphiredocs/tests/docs-2/", '1');
+		$entity = DocumentationService::register("versionlinks", BASE_PATH . "/sapphiredocs/tests/docs-v2.4/", '1');
 		$page = new DocumentationPage();
 		$page->setRelativePath('test.md');
 		$page->setEntity($entity);
@@ -68,6 +68,22 @@ class DocumentationPageTest extends SapphireTest {
 		$page->setEntity(new DocumentationEntity('mymodule', null, $absPath));
 		
 		$this->assertEquals($absPath . 'en/subfolder/subpage.md', $page->getPath());
+	}
+	
+	function testGetBreadcrumbTitle() {
+		$entity = new DocumentationEntity('testmodule', null, BASE_PATH . '/sapphiredocs/tests/docs/');
+		
+		$page = new DocumentationPage();
+		$page->setRelativePath('test.md');
+		$page->setEntity($entity);
+		
+		$this->assertEquals("Testmodule - Test", $page->getBreadcrumbTitle());
+		
+		$page = new DocumentationPage();
+		$page->setRelativePath('subfolder/subpage.md');
+		$page->setEntity(new DocumentationEntity('mymodule', null, BASE_PATH . '/sapphiredocs/tests/docs/'));
+		
+		$this->assertEquals('Mymodule - Subfolder - Subpage', $page->getBreadcrumbTitle());
 	}
 	
 }

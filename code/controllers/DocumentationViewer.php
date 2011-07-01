@@ -136,7 +136,7 @@ class DocumentationViewer extends Controller {
 		
 		$this->Remaining = $request->shift(10);
 		DocumentationService::load_automatic_registration();
-
+		
 		if(isset($firstParam)) {
 			// allow assets
 			if($firstParam == "assets") return parent::handleRequest($request);
@@ -145,10 +145,8 @@ class DocumentationViewer extends Controller {
 				// the first param is a shortcode for a page so redirect the user to
 				// the short code.
 				$this->response = new SS_HTTPResponse();
-		
-				$this->redirect($link, 301); // permanent redirect
-				
-
+				$this->redirect($link, 301); // 301 permanent redirect
+			
 				return $this->response;
 				
 			}
@@ -157,45 +155,36 @@ class DocumentationViewer extends Controller {
 			$this->lang = $secondParam;
 			
 			if(isset($thirdParam) && (is_numeric($thirdParam) || in_array($thirdParam, array('master', 'trunk')))) {
-				$this->version = $thirdParam;
+				$this->version = $thirdParam;	
 			}
 			else {
 				// current version so store one area para
 				array_unshift($this->Remaining, $thirdParam);
 				
-				$this->version = "";
+				$this->version = false;
 			}
 		}
 		
 		// 'current' version mapping
 		$module = DocumentationService::is_registered_module($this->module, null, $this->getLang());
-
+		
 		if($module) {
-			$current = $module->getCurrentVersion();
-
+			$current = $module->getLatestVersion();
 			$version = $this->getVersion();
-
+			
 			if(!$version || $version == '') {
 				$this->version = $current;
-			} else if($current == $version) {
-				$this->version = '';
-				
-				$link = $this->Link($this->Remaining);
-				$this->response = new SS_HTTPResponse();
-
-				$this->redirect($link, 301); // permanent redirect
-			
-				return $this->response;
 			}
 			
 			// Check if page exists, otherwise return 404
 			if(!$this->locationExists()) {
 				$body = $this->renderWith(get_class($this));
 				$this->response = new SS_HTTPResponse($body, 404);
+				
 				return $this->response;
 			}
 		}
-		
+
 		return parent::handleRequest($request);
 	}
 		
@@ -206,6 +195,7 @@ class DocumentationViewer extends Controller {
 		// count the number of parameters after the language, version are taken
 		// into account. This automatically includes ' ' so all the counts
 		// are 1 more than what you would expect
+
 		if($this->module || $this->Remaining) {
 
 			$paramCount = count($this->Remaining);
@@ -214,11 +204,10 @@ class DocumentationViewer extends Controller {
 				return parent::getViewer('folder');
 			}
 			else if($module = $this->getModule()) {
-				$params = $this->Remaining;
-				
-				$path = implode('/', array_unique($params));
-				
-				if(is_dir($module->getPath() . $path)) return parent::getViewer('folder');
+				// if this is a folder return the folder listing
+				if($this->locationExists() == 2) {
+					return parent::getViewer('folder');
+				}
 			}
 		}
 		else {
@@ -230,12 +219,20 @@ class DocumentationViewer extends Controller {
 	
 	/**
 	 * Returns the current version. If no version is set then it is the current
-	 * set version so need to pull that from the module
+	 * set version so need to pull that from the module.
 	 *
 	 * @return String
 	 */
 	function getVersion() {
-		return $this->version;
+		if($this->version) return $this->version;
+		
+		if($module = $this->getModule()) {
+			$this->version = $module->getLatestVersion();
+			
+			return $this->version;
+		} 
+		
+		return false;
 	}
 	
 	/**
@@ -299,25 +296,35 @@ class DocumentationViewer extends Controller {
 	 * @return DataObjectSet
 	 */
 	function getVersions($module = false) {
-		$versions = DocumentationService::get_registered_versions($module);
-		$output = new DataObjectSet();
+		if(!$module) $module = $this->module;
 		
-		foreach($versions as $key => $version) {
-			// work out the link to this version of the documentation. 
-			// 
-			// @todo Keep the user on their given page rather than redirecting to module.
-			// @todo Get links working
-			$linkingMode = ($this->Version == $version) ? 'current' : 'link';
+		$entity = DocumentationService::is_registered_module($module);
+		if(!$entity) return false;
+		
+		$versions = DocumentationService::get_registered_versions($module);
+		
+		$output = new DataObjectSet();
+		$currentVersion = $this->getVersion();
+				
+		if($versions) {
+			$lang = $this->getLang();
 			
-			if(!$version) $version = 'Current';
-			$major = (in_array($version, DocumentationService::get_major_versions())) ? true : false;
+			foreach($versions as $key => $version) {
+				// work out the link to this version of the documentation.  
+				// @todo Keep the user on their given page rather than redirecting to module.
+				$linkingMode = ($currentVersion == $version) ? 'current' : 'link';
 			
-			$output->push(new ArrayData(array(
-				'Title' => $version,
-				'Link' => $_SERVER['REQUEST_URI'],
-				'LinkingMode' => $linkingMode,
-				'MajorRelease' => $major
-			)));
+				if(!$version) $version = 'Current';
+				$major = (in_array($version, DocumentationService::get_major_versions())) ? true : false;
+
+				
+				$output->push(new ArrayData(array(
+					'Title' => $version,
+					'Link' => $entity->Link($version, $lang),
+					'LinkingMode' => $linkingMode,
+					'MajorRelease' => $major
+				)));
+			}
 		}
 		
 		return $output;
@@ -331,22 +338,24 @@ class DocumentationViewer extends Controller {
 	 * @return DataObject
 	 */ 
 	function getModules($version = false, $lang = false) {
-		if(!$version) $version = $this->Version;
-		if(!$lang) $lang = $this->Lang;
+		if(!$version) $version = $this->getVersion();
+		if(!$lang) $lang = $this->getLang();
 		
 		$modules = DocumentationService::get_registered_modules($version, $lang);
 		$output = new DataObjectSet();
 
 		if($modules) {
 			foreach($modules as $module) {
-				$absFilepath = $module->getPath() . '/index.md';
-				$relativeFilePath = str_replace($module->getPath(), '', $absFilepath);
+				$path = $module->getPath($version, $lang);
+				$absFilepath = $path . '/index.md';
+				$relativeFilePath = str_replace($path, '', $absFilepath);
+	
 				if(file_exists($absFilepath)) {
 					$page = new DocumentationPage();
 					$page->setRelativePath($relativeFilePath);
 					$page->setEntity($module);
-					$page->setLang($this->Lang);
-					$page->setVersion($this->Version);
+					$page->setLang($lang);
+					$page->setVersion($version);
 					
 					$content = DocumentationParser::parse($page, $this->Link(array_slice($this->Remaining, -1, -1)));
 				} else {
@@ -373,7 +382,11 @@ class DocumentationViewer extends Controller {
 	 */
 	function getModule() {
 		if($this->module) {
-			return DocumentationService::is_registered_module($this->module, $this->version, $this->lang);
+			return DocumentationService::is_registered_module(
+				$this->module, 
+				$this->version, 
+				$this->language
+			);
 		}
 
 		return false;
@@ -381,21 +394,34 @@ class DocumentationViewer extends Controller {
 	
 	/**
 	 * Simple way to check for existence of page of folder
-	 * without constructing too much object state.
-	 * Useful for generating 404 pages.
-	 * 
-	 * @return boolean
+	 * without constructing too much object state. Useful for 
+	 * generating 404 pages. Returns 0 for not a page or
+	 * folder, returns 1 for a page and 2 for folder
+	 *
+	 * @return int
 	 */
 	function locationExists() {
 		$module = $this->getModule();
+		
+		if($module) {
+			$has_dir = is_dir(Controller::join_links(
+				$module->getPath($this->getVersion(), $this->getLang()), 
+				implode('/', $this->Remaining)
+			));
+			
+			if($has_dir) return 2;
+			
+			$has_page = DocumentationService::find_page(
+				$module, 
+				$this->Remaining, 
+				$this->getVersion(), 
+				$this->getLang()
+			);
 
-		return (
-			$module
-			&& (
-				DocumentationService::find_page($module, $this->Remaining)
-				|| is_dir($module->getPath() . implode('/', $this->Remaining))
-			)
-		);
+			if($has_page) return 1;
+		}
+
+		return 0;
 	}
 	
 	/**
@@ -403,20 +429,31 @@ class DocumentationViewer extends Controller {
 	 */
 	function getPage() {
 		$module = $this->getModule();
-		
+
 		if(!$module) return false;
 
-		$absFilepath = DocumentationService::find_page($module, $this->Remaining);
-
+		$version = $this->getVersion();
+		$lang = $this->getLang();
+		
+		$absFilepath = DocumentationService::find_page(
+			$module, 
+			$this->Remaining, 
+			$version,
+			$lang
+		);
+		
 		if($absFilepath) {
-			$relativeFilePath = str_replace($module->getPath(), '', $absFilepath);
-
+			$relativeFilePath = str_replace(
+				$module->getPath($version, $lang),
+				'', 
+				$absFilepath
+			);
+			
 			$page = new DocumentationPage();
 			$page->setRelativePath($relativeFilePath);
-
 			$page->setEntity($module);
-			$page->setLang($this->Lang);
-			$page->setVersion($this->Version);
+			$page->setLang($lang);
+			$page->setVersion($version);
 
 			return $page;
 		}
@@ -433,7 +470,7 @@ class DocumentationViewer extends Controller {
 	 */
 	function getModulePages() {
 		if($module = $this->getModule()) {
-			$pages = DocumentationService::get_pages_from_folder($module, null, false);
+			$pages = DocumentationService::get_pages_from_folder($module, null, false, $this->getVersion(), $this->getLang());
 
 			if($pages) {
 				foreach($pages as $page) {
@@ -447,10 +484,10 @@ class DocumentationViewer extends Controller {
 					$page->Children = $this->_getModulePagesNested($page, $module);
 				}
 			}
-			
+
 			return $pages;
 		}
-		
+
 		return false;
 	}
 	
@@ -458,7 +495,7 @@ class DocumentationViewer extends Controller {
 	 * Get the module pages under a given page. Recursive call for {@link getModulePages()}
 	 *
 	 * @todo Need to rethink how to support pages which are pulling content from their children
-	 *		i.e if a folder doesn't have index.md then it will load the first file in the folder
+	 *		i.e if a folder doesn't have 2 then it will load the first file in the folder
 	 *		however it doesn't yet pass the highlighting to it.
 	 *
 	 * @param ArrayData CurrentPage
@@ -468,24 +505,30 @@ class DocumentationViewer extends Controller {
 	 * @return DataObjectSet|false
 	 */
 	private function _getModulePagesNested(&$page, $module, $level = 0) {
-		// only support 2 more levels
 		if(isset($this->Remaining[$level])) {
 			// compare segment successively, e.g. with "changelogs/alpha/2.4.0-alpha",
 			// first comparison on $level=0 is against "changelogs",
 			// second comparison on $level=1 is against "changelogs/alpha", etc.
 			$segments = array_slice($this->Remaining, 0, $level+1);
+			
 			if(strtolower(implode('/', $segments)) == trim($page->getRelativeLink(), '/')) {
 				
 				// its either in this section or is the actual link
 				$page->LinkingMode = (isset($this->Remaining[$level + 1])) ? 'section' : 'current';
 				
 				$relativePath = Controller::join_links(
-					$module->getPath($page->getVersion(), $page->getLang()),
+					$module->getPath($this->getVersion(), $this->getLang()),
 					$page->getRelativePath()
 				);
 
 				if(is_dir($relativePath)) {
-					$children = DocumentationService::get_pages_from_folder($module, $page->getRelativePath(), false);
+					$children = DocumentationService::get_pages_from_folder(
+						$module, 
+						$page->getRelativePath(), 
+						false, 
+						$this->getVersion(), 
+						$this->getLang()
+					);
 
 					$segments = array();
 					for($x = 0; $x <= $level; $x++) {
@@ -519,11 +562,10 @@ class DocumentationViewer extends Controller {
 	 * @return HTMLText
 	 */
 	function getContent() {
-		if($page = $this->getPage()) {
+		$page = $this->getPage();
 		
-			// Remove last portion of path (filename), we want a link to the folder base
-			$html = DocumentationParser::parse($page);
-			return DBField::create("HTMLText", $html);
+		if($page) {
+			return DBField::create("HTMLText", $page->getHTML($this->getVersion(), $this->getLang()));
 		}
 		else {
 			// If no page found then we may want to get the listing of the folder.
@@ -532,7 +574,14 @@ class DocumentationViewer extends Controller {
 			$url = $this->Remaining;
 			
 			if($url && $module) {
-				$pages = DocumentationService::get_pages_from_folder($module, implode('/', $url), false);
+				$pages = DocumentationService::get_pages_from_folder(
+					$module, 
+					implode('/', $url), 
+					false,
+					$this->getVersion(),
+					$this->getLang()
+				);
+				
 				// If no pages are found, the 404 is handled in the same template
 				return $this->customise(array(
 					'Title' => DocumentationService::clean_page_name(array_pop($url)),
@@ -572,10 +621,10 @@ class DocumentationViewer extends Controller {
 				if($title) {
 					// Don't add module name, already present in Link()
 					if($i > 0) $path[] = $title;
-
+					
 					$output->push(new ArrayData(array(
 						'Title' => DocumentationService::clean_page_name($title),
-						'Link' => $this->Link($path)
+						'Link' => rtrim($this->Link($path), "/"). "/"
 					)));
 				}
 			}
@@ -611,21 +660,16 @@ class DocumentationViewer extends Controller {
 	public function Link($path = false, $module = false) {
 		$base = Director::absoluteBaseURL();
 		
-		$version = ($this->version) ? $this->version . '/' : false;
-		$lang = ($this->language) ? $this->language  .'/' : false;
-		$module = (!$module && $this->module) ? $this->module .'/' : $module;
+		$version = $this->getVersion();
+		$lang = $this->getLang();
+		
+		$module = (!$module && $this->module) ? $this->module : $module;
 		
 		$action = '';
 		
-		if(is_string($path)) {
-			$action = $path . '/';
-		}
+		if(is_string($path)) $action = $path;
 		else if(is_array($path)) {
-			foreach($path as $key => $value) {
-				if($value) {
-					$action .= $value .'/';
-				}
-			}
+			$action = implode('/', $path);
 		}
 		
 		$link = Controller::join_links($base, self::get_link_base(), $module, $lang, $version, $action);
