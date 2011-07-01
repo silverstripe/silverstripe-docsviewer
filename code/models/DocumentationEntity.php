@@ -1,20 +1,20 @@
 <?php
 
 /**
- * A wrapper for a documentation entity which is created when registering the
- * path with {@link DocumentationService::register()}. This refers to a whole package
- * rather than a specific page but if we need page options we may need to introduce 
- * a class for that.
- * 
+ * A {@link DocumentationEntity} is created when registering a module path 
+ * with {@link DocumentationService::register()}. A {@link DocumentationEntity} 
+ * represents a module or folder with documentation rather than a specific 
+ * page. Individual pages are handled by {@link DocumentationPage}
+ *
  * Each folder must have at least one language subfolder, which is automatically
  * determined through {@link addVersion()} and should not be included in the $path argument.
  * 
  * Versions are assumed to be in numeric format (e.g. '2.4'),
- * mainly as an easy way to distinguish them from language codes in the routing logic.
+ *
  * They're also parsed through version_compare() in {@link getLatestVersion()} which assumes a certain format. 
  *
  * @package sapphiredocs
- * @subpackage model
+ * @subpackage models
  */
 
 class DocumentationEntity extends ViewableData {
@@ -24,9 +24,9 @@ class DocumentationEntity extends ViewableData {
 	);
 	
 	/**
-	 * @var string $module folder name
+	 * @var string $folder folder name
 	 */
-	private $moduleFolder;
+	private $folder;
 	
 	/**
 	 * @var string $title nice title
@@ -52,21 +52,21 @@ class DocumentationEntity extends ViewableData {
 	 * Constructor. You do not need to pass the langs to this as
 	 * it will work out the languages from the filesystem
 	 *
-	 * @param string $module name of module
+	 * @param string $folder folder name
 	 * @param string $version version of this module
 	 * @param string $path Absolute path to this module (excluding language folders)
 	 * @param string $title
 	 */
-	function __construct($module, $version, $path, $title = false) {
+	function __construct($folder, $version, $path, $title = false) {
 		$this->addVersion($version, $path);
-		$this->title = (!$title) ? $module : $title;
-		$this->moduleFolder = $module;
+		$this->title = (!$title) ? $folder : $title;
+		$this->folder = $folder;
 	}
 	
 	/**
 	 * Return the languages which are available
 	 *
-	 * @return Array
+	 * @return array
 	 */
 	public function getLanguages() {
 		return $this->langs;
@@ -100,8 +100,8 @@ class DocumentationEntity extends ViewableData {
 	 *
 	 * @return String
 	 */
-	public function getModuleFolder() {
-		return $this->moduleFolder;
+	public function getFolder() {
+		return $this->folder;
 	}
 	
 	/**
@@ -114,9 +114,9 @@ class DocumentationEntity extends ViewableData {
 	}
 	
 	/**
-	 * Return the versions which are available
+	 * Return the versions which have been registered for this entity.
 	 *
-	 * @return Array
+	 * @return array
 	 */
 	public function getVersions() {
 		return array_keys($this->versions);
@@ -218,7 +218,7 @@ class DocumentationEntity extends ViewableData {
 			$path = $this->versions[$versions[0]]; 
 		}
 		
-		return rtrim($path, '/') . '/' . rtrim($lang, '/') .'/';
+		return Controller::join_links($path, $lang);
 	}
 	
 	/**
@@ -239,10 +239,35 @@ class DocumentationEntity extends ViewableData {
 		
 		return Controller::join_links(
 			DocumentationViewer::get_link_base(), 
-			$this->moduleFolder,
+			$this->getFolder(),
 			$lang,
 			$version
 		);
+	}
+	
+	/**
+	 * Return the summary / index text for this entity. Either pulled
+	 * from an index file or some other summary field
+	 *
+	 * @return DocumentationPage
+	 */
+	function getIndexPage($version, $lang = 'en') {
+		$path = $this->getPath($version, $lang);
+		$absFilepath = Controller::join_links($path, 'index.md');
+		
+		if(file_exists($absFilepath)) {
+			$relativeFilePath = str_replace($path, '', $absFilepath);
+			
+			$page = new DocumentationPage();
+			$page->setRelativePath($relativeFilePath);
+			$page->setEntity($this);
+			$page->setLang($lang);
+			$page->setVersion($version);
+			
+			return $page;
+		}
+		
+		return false;
 	}
 	
 	/**

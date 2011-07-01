@@ -10,7 +10,7 @@ class DocumentationEntityTest extends SapphireTest {
 		$this->assertEquals($entity->getTitle(), 'My Test');
 		$this->assertEquals($entity->getVersions(), array('1.0'));
 		$this->assertEquals($entity->getLanguages(), array('en', 'de'));
-		$this->assertEquals($entity->getModuleFolder(), 'docs');
+		$this->assertEquals($entity->getFolder(), 'docs');
 		
 		$this->assertTrue($entity->hasVersion('1.0'));
 		$this->assertFalse($entity->hasVersion('2.0'));

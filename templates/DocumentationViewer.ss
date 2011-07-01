@@ -20,34 +20,47 @@
 				<div id="language">
 				 	$LanguageForm
 				</div>
-				
-				<div id="breadcrumbs">
-					<% include DocBreadcrumbs %>
-				</div>	
 			</div>
 			
 			<div id="layout">
-				<div id="versions-nav">
-					<h2>Versions:</h2>
-					
-					<ul>
-						<% control Versions %>
-							<% if MajorRelease %>
-								<li class="major-release"><a href="$Link" class="$LinkingMode">$Title</a></li>
-							<% else %>
-								<li class="module-only"><a href="$Link" class="$LinkingMode">$Title</a></li>
-							<% end_if %>
-						<% end_control %>
-					</ul>
+				<div id="search-bar">					
+					<div id="breadcrumbs">
+						<% include DocBreadcrumbs %>
+					</div>
+
+					<div id="search">
+						$DocumentationSearchForm
+					</div>
+
+					<% if Entities %>
+					<div id="entities-nav" class="documentation-nav">
+						<h2>Modules:</h2>
+							<ul>
+							<% control Entities %>
+								<li><a href="$Link" class="$LinkingMode">$Title</a></li>
+							<% end_control %>
+						</ul>
+					</div>
+					<% end_if %>
+										
+					<% if Versions %>
+					<div id="versions-nav" class="documentation-nav">
+						<h2>Versions:</h2>
+							<ul>
+							<% control Versions %>
+								<li><a href="$Link" class="$LinkingMode">$Title</a></li>
+							<% end_control %>
+						</ul>
+					</div>
+					<% end_if %>
 				</div>
-				<div id="content">
+				
+				<div id="content" class="typography">
 					$Layout
 				</div>
 			</div>
 		</div>
 		
-		<div id="footer">
-			<p>Documentation powered by <a href="http://www.silverstripe.org">SilverStripe</a>.</p>
-		</div>
+		<% include DocumentationFooter %>
 	</body>
 </html>

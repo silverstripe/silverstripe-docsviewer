@@ -3,26 +3,24 @@
 /**
  * DocumentationService
  *
- * Handles the management of the documentation services delivered by the module.
+ * Handles the management of the documentation services delivered by the entity.
  * Includes registering which components to document and handles the entities being
  * documented
  *
- * @todo - unregistering a lang / version from site does not update the registered_* arrays
- *		 - handle modules (rather than core) differently
  * @package sapphiredocs
  */
 
 class DocumentationService {
 	
 	/**
-	 * A mapping of know / popular languages to nice titles.
+	 * A mapping of known / popular languages to nice titles. 
 	 *
 	 * @var Array
 	 */
 	private static $language_mapping = array(
 		'en' => 'English',
-		'fr' => 'French',
-		'de' => 'German'
+		'fr' => 'Français',
+		'de' => 'Deutsch'
 	);
 	
 	/**
@@ -33,40 +31,43 @@ class DocumentationService {
 	private static $ignored_files = array('.', '..', '.DS_Store', '.svn', '.git', 'assets', 'themes', '_images');
 
 	/**
-	 * Case insenstive values to use as extensions on markdown pages.
+	 * Case insenstive values to use as extensions on markdown pages. The
+	 * recommended extension is .md.
 	 *
 	 * @var array
 	 */
 	public static $valid_markdown_extensions = array('.md', '.txt', '.markdown');
 	
 	/**
-	 * Registered modules to include in the documentation. Either pre-filled by the
-	 * automatic filesystem parser or via {@link DocumentationService::register()}. Stores
-	 * {@link DocumentEntity} objects which contain the languages and versions of each module.
+	 * Registered {@link DocumentationEntity} objects to include in the documentation. 
+	 * Either pre-filled by the automatic filesystem parser or via {@link DocumentationService::register()}. 
+	 * Stores the {@link DocumentEntity} objects which contain the languages 
+	 * and versions of each entity.
 	 *
-	 * You can remove registered modules using {@link DocumentationService::unregister()}
-	 *
-	 * @var array
-	 */
-	private static $registered_modules = array();
-	
-	/**
-	 * Major Versions store. We don't want to register all versions of every module in
-	 * the documentation but for sapphire/cms and overall we need to register major
-	 * versions via {@link DocumentationService::register}
+	 * You can remove registered {@link DocumentationEntity} objects by using 
+	 * {@link DocumentationService::unregister()}
 	 *
 	 * @var array
 	 */
-	private static $major_versions = array();
+	private static $registered_entities = array();
+	
 	
 	/**
-	 * Return the major versions
+	 * Should generation of documentation categories be automatic? 
 	 *
-	 * @return array
+	 * If this is set to true then it will generate {@link DocumentationEntity}
+	 * objects from the filesystem. This can be slow and also some projects 
+	 * may want to restrict to specific project folders (rather than everything).
+	 *
+	 * You can also disable or remove a given folder from registration using 
+	 * {@link DocumentationService::unregister()}
+	 *
+	 * @see DocumentationService::$registered_entities
+	 * @see DocumentationService::set_automatic_registration();
+	 *
+	 * @var bool
 	 */
-	public static function get_major_versions() {
-		return self::$major_versions;
-	}
+	private static $automatic_registration = true;
 	
 	/**
 	 * Return the allowed extensions
@@ -94,86 +95,9 @@ class DocumentationService {
 	public function get_ignored_files() {
 		return self::$ignored_files;
 	}
-	
-	/**
-	 * Check to see if a given language is registered in the system
-	 *
-	 * @param string
-	 * @return bool
-	 */
-	public static function is_registered_language($lang) {
-		$langs = self::get_registered_languages();
-		
-		return (isset($langs[$lang]));
-	}
-	
-	/**
-	 * Get all the registered languages. Optionally limited to a module. Includes
-	 * the nice titles
-	 *
-	 * @return Array
-	 */
-	public static function get_registered_languages($module = false) {
-		$langs = array();
-		
-		if($module) {
-			if(isset(self::$registered_modules[$module])) {
-				$langs = self::$registered_modules[$module]->getLanguages();
-			}
-		}
-		else if($modules = self::get_registered_modules()) {
-			
-			foreach($modules as $module) {
-				$langs = array_unique(array_merge($langs, $module->getLanguages()));
-			}
-		}
-		
-		$output = array();
-		foreach($langs as $lang) {
-			$output[$lang] = self::get_language_title($lang);
-		}
-		
-		return $output;
-	}
-	
-	/**
-	 * Returns all the registered versions in the system. Optionally only 
-	 * include versions from a module.
-	 *
-	 * @param String $module module to check for versions
-	 * @return array
-	 */
-	public static function get_registered_versions($module = false) {
-		if($module) {
-			if(isset(self::$registered_modules[$module])) {
-				return self::$registered_modules[$module]->getVersions();
-			}
-			else {
-				return false;
-			}
-		}
 
-		return self::$major_versions;
-	}
-	
 	/**
-	 * Should generation of documentation categories be automatic. If this
-	 * is set to true then it will generate documentation sections (modules) from
-	 * the filesystem. This can be slow and also some projects may want to restrict
-	 * to specific project folders (rather than everything).
-	 *
-	 * You can also disable or remove a given folder from registration using 
-	 * {@link DocumentationService::unregister()}
-	 *
-	 * @see DocumentationService::$registered_modules
-	 * @see DocumentationService::set_automatic_registration();
-	 *
-	 * @var bool
-	 */
-	private static $automatic_registration = true;
-	
-	/**
-	 * Set automatic registration of modules and documentation folders
+	 * Set automatic registration of entities and documentation folders
 	 *
 	 * @see DocumentationService::$automatic_registration
 	 * @param bool
@@ -182,14 +106,14 @@ class DocumentationService {
 		self::$automatic_registration = $bool;
 		
 		if(!$bool) {
-			// remove current registed modules when disabling automatic registration
+			// remove current registed entities when disabling automatic registration
 			// needed to avoid caching issues when running all the tests
-			self::$registered_modules = array();
+			self::$registered_entities = array();
 		}
 	}
 	
 	/**
-	 * Is automatic registration of modules enabled.
+	 * Is automatic registration of entities enabled.
 	 *
 	 * @return bool
 	 */
@@ -198,24 +122,24 @@ class DocumentationService {
 	}
 	
 	/**
-	 * Return the modules which are listed for documentation. Optionally only get
-	 * modules which have a version or language given
+	 * Return the entities which are listed for documentation. Optionally only get
+	 * entities which have a version or language given
 	 *
 	 * @return array
 	 */
-	public static function get_registered_modules($version = false, $lang = false) {
+	public static function get_registered_entities($version = false, $lang = false) {
 		$output = array();
 		
-		if($modules = self::$registered_modules) {
+		if($entities = self::$registered_entities) {
 			if($version || $lang) {
-				foreach($modules as $module) {
-					if(self::is_registered_module($module->getModuleFolder(), $version, $lang)) {
-						$output[] = $module;
+				foreach($entities as $entity) {
+					if(self::is_registered_entity($entity->getFolder(), $version, $lang)) {
+						$output[] = $entity;
 					}
 				}
 			}
 			else {
-				$output = $modules;
+				$output = $entities;
 			}
 		}
 		
@@ -223,101 +147,90 @@ class DocumentationService {
 	}
 	
 	/**
-	 * Check to see if a module is registered with the documenter
+	 * Check to see if a entity is registered with the documenter
 	 *
-	 * @param String $module module name
+	 * @param String $entity entity name
 	 * @param String $version version
 	 * @param String $lang language
 	 *
-	 * @return DocumentationEntity $module the registered module
+	 * @return DocumentationEntity $entity the registered entity
 	 */
-	public static function is_registered_module($module, $version = false, $lang = false) {
-		$check = ($module instanceof DocumentationEntity) ? $module->getModuleFolder() : (string) $module;
+	public static function is_registered_entity($entity, $version = false, $lang = false) {
+		$check = ($entity instanceof DocumentationEntity) ? $entity->getFolder() : (string) $entity;
 
-		if(isset(self::$registered_modules[$check])) {
-			$module = self::$registered_modules[$check];
+		if(isset(self::$registered_entities[$check])) {
+			$entity = self::$registered_entities[$check];
 	
-			if(($lang && !$module->hasLanguage($lang)) || ($version && !$module->hasVersion($version))) {
+			if(($lang && !$entity->hasLanguage($lang)) || ($version && !$entity->hasVersion($version))) {
 				return false;
 			}
 			
-			return $module;
+			return $entity;
 		}
 
 		return false;		
 	}
 	
 	/**
-	 * Register a module to be included in the documentation. To unregister a module
+	 * Register a entity to be included in the documentation. To unregister a entity
 	 * use {@link DocumentationService::unregister()}. Must include the trailing slash
 	 *
-	 * @param String $module Name of module to register
+	 * @param String $entity Name of entity to register
 	 * @param String $path Path to documentation root.
-	 * @param Float $version Version of module.
+	 * @param Float $version Version of entity.
 	 * @param String $title Nice title to use
-	 * @param bool $major is this a major release
 	 * @param bool $latest - return is this the latest release.
 	 *
 	 * @throws InvalidArgumentException
 	 *
 	 * @return DocumentationEntity
 	 */
-	public static function register($module, $path, $version = '', $title = false, $major = false, $latest = false) {
+	public static function register($entity, $path, $version = '', $title = false, $latest = false) {
 		if(!file_exists($path)) throw new InvalidArgumentException(sprintf('Path "%s" doesn\'t exist', $path));
-
-		// add the module to the registered array
-		if(!isset(self::$registered_modules[$module])) {
-			// module is completely new
-			$entity = new DocumentationEntity($module, $version, $path, $title);
+		
+		// add the entity to the registered array
+		if(!isset(self::$registered_entities[$entity])) {
+			// entity is completely new
+			$output = new DocumentationEntity($entity, $version, $path, $title);
 			
-			self::$registered_modules[$module] = $entity;
+			self::$registered_entities[$entity] = $output;
 		}
 		else {
-			// module exists so add the version to it
-			$entity = self::$registered_modules[$module];
-			$entity->addVersion($version, $path);
+			// entity exists so add the version to it
+			$output = self::$registered_entities[$entity];
+			$output->addVersion($version, $path);
 		}
 		
-		if($major) {
-			if(!$version) $version = '';
-			
-			if(!in_array($version, self::$major_versions)) {	
-				self::$major_versions[] = $version;
-			}
-		}
+		if($latest)
+			$output->setLatestVersion($version);
 		
-		if($latest) {
-			$entity->setLatestVersion($version);
-		}
-
-		
-		return $entity;
+		return $output;
 	}
 	
 	/**
-	 * Unregister a module from being included in the documentation. Useful
+	 * Unregister a entity from being included in the documentation. Useful
 	 * for keeping {@link DocumentationService::$automatic_registration} enabled
-	 * but disabling modules which you do not want to show. Combined with a 
-	 * {@link Director::isLive()} you can hide modules you don't want a client to see.
+	 * but disabling entities which you do not want to show. Combined with a 
+	 * {@link Director::isLive()} you can hide entities you don't want a client to see.
 	 *
-	 * If no version or lang specified then the whole module is removed. Otherwise only
+	 * If no version or lang specified then the whole entity is removed. Otherwise only
 	 * the specified version of the documentation.
 	 *
-	 * @param String $module
+	 * @param String $entity
 	 * @param String $version
 	 *
 	 * @return bool
 	 */
-	public static function unregister($moduleName, $version = '') {
-		if(isset(self::$registered_modules[$moduleName])) {
-			$module = self::$registered_modules[$moduleName];
+	public static function unregister($entityName, $version = false) {
+		if(isset(self::$registered_entities[$entityName])) {
+			$entity = self::$registered_entities[$entityName];
 			
 			if($version) {
-				$module->removeVersion($version);
+				$entity->removeVersion($version);
 			}
 			else {
-				// only given a module so unset the whole module
-				unset(self::$registered_modules[$moduleName]);	
+				// only given a entity so unset the whole entity
+				unset(self::$registered_entities[$entityName]);	
 			}
 			
 			return true;
@@ -328,22 +241,24 @@ class DocumentationService {
 	
 	/**
 	 * Register the docs from off a file system if automatic registration is turned on.
+	 *
+	 * @see {@link DocumentationService::set_automatic_registration()}
 	 */
 	public static function load_automatic_registration() {
 		if(self::automatic_registration_enabled()) {
-			$modules = scandir(BASE_PATH);
+			$entities = scandir(BASE_PATH);
 
-			if($modules) {
-				foreach($modules as $key => $module) {
-					$dir = is_dir(Controller::join_links(BASE_PATH, $module));
-					$ignored = in_array($module, self::get_ignored_files(), true);
+			if($entities) {
+				foreach($entities as $key => $entity) {
+					$dir = is_dir(Controller::join_links(BASE_PATH, $entity));
+					$ignored = in_array($entity, self::get_ignored_files(), true);
 					
 					if($dir && !$ignored) {
 						// check to see if it has docs
 						$docs = Controller::join_links($dir, 'docs');
 	
 						if(is_dir($docs)) {
-							self::register($module, $docs, '', $module, true);
+							self::register($entity, $docs, '', $entity, true);
 						}
 					}
 				}
@@ -381,9 +296,9 @@ class DocumentationService {
 	 *
 	 * @return String|false - File path
 	 */
-	static function find_page($module, $path, $version = '', $lang = 'en') {	
-		if($module = self::is_registered_module($module, $version, $lang)) {
-			return self::find_page_recursive($module->getPath($version, $lang), $path);
+	static function find_page($entity, $path, $version = '', $lang = 'en') {	
+		if($entity = self::is_registered_entity($entity, $version, $lang)) {
+			return self::find_page_recursive($entity->getPath($version, $lang), $path);
 		}
 		
 		return false;
@@ -513,11 +428,11 @@ class DocumentationService {
 	
 	
 	/**
-	 * Return the children from a given module sorted by Title using natural ordering. 
+	 * Return the children from a given entity sorted by Title using natural ordering. 
 	 * It is used for building the tree of the page.
 	 *
 	 * @param DocumentationEntity path
-	 * @param string - an optional path within a module
+	 * @param string - an optional path within a entity
 	 * @param bool enable several recursive calls (more than 1 level)
 	 * @param string - version to use
 	 * @param string - lang to use
@@ -525,21 +440,21 @@ class DocumentationService {
 	 * @throws Exception
 	 * @return DataObjectSet
 	 */
-	public static function get_pages_from_folder($module, $relativePath = false, $recursive = true, $version = 'trunk', $lang = 'en') {
+	public static function get_pages_from_folder($entity, $relativePath = false, $recursive = true, $version = 'trunk', $lang = 'en') {
 		$output = new DataObjectSet();
 		$pages = array();
 		
-		if(!$module instanceof DocumentationEntity) 
-			user_error("get_pages_from_folder must be passed a module", E_USER_ERROR);
+		if(!$entity instanceof DocumentationEntity) 
+			user_error("get_pages_from_folder must be passed a entity", E_USER_ERROR);
 		
-		$path = $module->getPath($version, $lang);
+		$path = $entity->getPath($version, $lang);
 
 		
-		if(self::is_registered_module($module)) {
+		if(self::is_registered_entity($entity)) {
 			self::get_pages_from_folder_recursive($path, $relativePath, $recursive, $pages);
 		}
 		else {
-			return user_error("$module is not registered", E_USER_WARNING);
+			return user_error("$entity is not registered", E_USER_WARNING);
 		}
 
 		if(count($pages) > 0) {
@@ -557,7 +472,7 @@ class DocumentationService {
 				// if no extension, put a slash on it
 				if(strpos($relative, '.') === false) $relative .= '/';
 
-				$page->setEntity($module);
+				$page->setEntity($entity);
 				$page->setRelativePath($relative);
 				$page->setVersion($version);
 				$page->setLang($lang);
@@ -570,8 +485,9 @@ class DocumentationService {
 	}
 	
 	/**
-	 * Recursively search through $folder
+	 * Recursively search through a given folder
 	 *
+	 * @see {@link DocumentationService::get_pages_from_folder}
 	 */ 
 	private static function get_pages_from_folder_recursive($base, $relative, $recusive, &$pages) {
 		if(!is_dir($base)) throw new Exception(sprintf('%s is not a folder', $folder));

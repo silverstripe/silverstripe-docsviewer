@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Parser wrapping the Markdown Extra parser (see http://michelf.com/projects/php-markdown/extra/). 
  *
@@ -165,7 +166,7 @@ class DocumentationParser {
 			foreach($linksWithTitles[0] as $i => $match) {
 				$title = $linksWithTitles[1][$i];
 				$subject = $linksWithTitles[2][$i];
-				$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getModuleFolder());
+				$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getFolder());
 				$md = str_replace(
 					$match, 
 					sprintf('[%s](%s)', $title, $url),
@@ -186,7 +187,7 @@ class DocumentationParser {
 		if($links) {
 			foreach($links[0] as $i => $match) {
 				$subject = $links[1][$i];
-				$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getModuleFolder());
+				$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getFolder());
 				$md = str_replace(
 					$match, 
 					sprintf('[%s](%s)', $subject, $url),

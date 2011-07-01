@@ -18,17 +18,17 @@ class DocumentationViewerTest extends FunctionalTest {
 		
 		$this->origEnabled = DocumentationService::automatic_registration_enabled();
 		DocumentationService::set_automatic_registration(false);
-		$this->origModules = DocumentationService::get_registered_modules();
+		$this->origModules = DocumentationService::get_registered_entities();
 		$this->origLinkBase = DocumentationViewer::get_link_base();
 		DocumentationViewer::set_link_base('dev/docs/');
 		foreach($this->origModules as $module) {
-			DocumentationService::unregister($module->getModuleFolder());
+			DocumentationService::unregister($module->getFolder());
 		}
 		
 		// We set 3.0 as current, and test most assertions against 2.4 - to avoid 'current' rewriting issues
 		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs/", '2.3');
 		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs-v2.4/", '2.4', 'Doc Test', true);
-		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs-v3.0/", '3.0', 'Doc Test', true, true);
+		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs-v3.0/", '3.0', 'Doc Test');
 	}
 	
 	function tearDownOnce() {
@@ -104,7 +104,7 @@ class DocumentationViewerTest extends FunctionalTest {
 	function testGetModulePagesShort() {
 		$v = new DocumentationViewer();
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/subfolder/'));
-		$pages = $v->getModulePages();
+		$pages = $v->getEntityPages();
 
 		$arr = $pages->toArray();
 		
@@ -116,7 +116,7 @@ class DocumentationViewerTest extends FunctionalTest {
 	function testGetModulePages() {
 		$v = new DocumentationViewer();
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/subfolder/'));
-		$pages = $v->getModulePages();
+		$pages = $v->getEntityPages();
 		$this->assertEquals(
 			array('sort/', 'subfolder/', 'test.md'),
 			$pages->column('Filename')
@@ -169,16 +169,16 @@ class DocumentationViewerTest extends FunctionalTest {
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/test'));
 		$this->assertEquals('2.3', $v->getVersion());
 		$this->assertEquals('en', $v->getLang());
-		$this->assertEquals('DocumentationViewerTests', $v->module);
+		$this->assertEquals('DocumentationViewerTests', $v->getEntity()->getTitle());
 		$this->assertEquals(array('test'), $v->Remaining);
 	
 		// Module index without version and language. Should pick up the defaults
 		$v2 = new DocumentationViewer();
 		$response = $v2->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/test'));
 	
-		$this->assertEquals('3.0', $v2->getVersion());
+		$this->assertEquals('2.4', $v2->getVersion());
 		$this->assertEquals('en', $v2->getLang());
-		$this->assertEquals('DocumentationViewerTests', $v2->module);
+		$this->assertEquals('DocumentationViewerTests', $v2->getEntity()->getTitle());
 		$this->assertEquals(array('test'), $v2->Remaining);
 	
 		// Overall index

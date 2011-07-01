@@ -33,9 +33,11 @@ class DocumentationViewer extends Controller {
 	public $language = "en";
 	
 	/**
+	 * The string name of the currently accessed {@link DocumentationEntity}
+	 * object. To access the entire object use {@link getEntity()} 
 	 * @var string
 	 */
-	public $module = '';
+	public $entity = '';
 	
 	/**
 	 * @var array
@@ -59,7 +61,6 @@ class DocumentationViewer extends Controller {
 
 		// javascript
 		Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');
-		Requirements::javascript('sapphiredocs/javascript/shBrushSS.js');
 		
 		Requirements::combine_files(
 			'syntaxhighlighter.js',
@@ -133,7 +134,12 @@ class DocumentationViewer extends Controller {
 		$this->Remaining = $request->shift(10);
 		DocumentationService::load_automatic_registration();
 		
-		if(isset($firstParam)) {
+		// if no params passed at all then it's the homepage
+		if(!$firstParam && !$secondParam && !$thirdParam) {
+			return parent::handleRequest($request);
+		}
+		
+		if($firstParam) {
 			// allow assets
 			if($firstParam == "assets") return parent::handleRequest($request);
 			
@@ -150,11 +156,11 @@ class DocumentationViewer extends Controller {
 
 			// check to see if the module is a valid module. If it isn't, then we
 			// need to throw a 404.
-			if(!DocumentationService::is_registered_module($firstParam)) {
+			if(!DocumentationService::is_registered_entity($firstParam)) {
 				return $this->throw404();
 			}
 			
-			$this->module = $firstParam;
+			$this->entity = $firstParam;
 			$this->language = $secondParam;
 			
 			if(isset($thirdParam) && (is_numeric($thirdParam) || in_array($thirdParam, array('master', 'trunk')))) {
@@ -169,7 +175,7 @@ class DocumentationViewer extends Controller {
 		}
 		
 		// 'current' version mapping
-		$entity = DocumentationService::is_registered_module($this->module, null, $this->getLang());
+		$entity = DocumentationService::is_registered_entity($this->entity, null, $this->getLang());
 
 		if($entity) {
 			$current = $entity->getLatestVersion();
@@ -215,14 +221,14 @@ class DocumentationViewer extends Controller {
 		// into account. This automatically includes ' ' so all the counts
 		// are 1 more than what you would expect
 
-		if($this->module || $this->Remaining) {
+		if($this->entity || $this->Remaining) {
 
 			$paramCount = count($this->Remaining);
 			
 			if($paramCount == 0) {
 				return parent::getViewer('folder');
 			}
-			else if($module = $this->getModule()) {
+			else if($entity = $this->getEntity()) {
 				// if this is a folder return the folder listing
 				if($this->locationExists() == 2) {
 					return parent::getViewer('folder');
@@ -245,8 +251,8 @@ class DocumentationViewer extends Controller {
 	function getVersion() {
 		if($this->version) return $this->version;
 		
-		if($module = $this->getModule()) {
-			$this->version = $module->getLatestVersion();
+		if($entity = $this->getEntity()) {
+			$this->version = $entity->getLatestVersion();
 			
 			return $this->version;
 		} 
@@ -264,69 +270,40 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
-	 * Return all the available languages. Optionally the languages which are
-	 * available for a given module
+	 * Return all the available languages for the module.
 	 *
 	 * @param String - The name of the module
 	 * @return DataObjectSet
 	 */
-	function getLanguages($module = false) {
-		$output = new DataObjectSet();
+	function getLanguages() {
+		$entity = $this->getEntity();
+			
+		if($entity) {
+			return $entity->getLanguages();
+		}
 		
-		if($module) {
-			// lookup the module for the available languages
-			
-			// @todo
-		}
-		else {
-			$languages = DocumentationService::get_registered_languages();
-
-			if($languages) {
-				foreach($languages as $key => $lang) {
-	
-					if(stripos($_SERVER['REQUEST_URI'], '/'. $this->Lang .'/') === false) {
-						// no language is in the URL currently. It needs to insert the language 
-						// into the url like /sapphire/install to /en/sapphire/install
-						//
-						// @todo
-					} 
-					
-					$link = str_ireplace('/'.$this->Lang .'/', '/'. $lang .'/', $_SERVER['REQUEST_URI']);
-
-					$output->push(new ArrayData(array(
-						'Title' => $lang,
-						'Link' => $link
-					)));
-				}
-			}
-		}
-			
-		return $output;
+		return array('en' => 'English');
 	}
 
 	/**
-	 * Get all the versions loaded into the module. If the project is only displaying from 
+	 * Get all the versions loaded for the current {@link DocumentationEntity}. 
 	 * the filesystem then they are loaded under the 'Current' namespace.
 	 *
-	 * @todo Only show 'core' versions (2.3, 2.4) versions of the modules are going
-	 *		to spam this
-	 *
-	 * @param String $module name of module to limit it to eg sapphire
+	 * @param String $entity name of module to limit it to eg sapphire
 	 * @return DataObjectSet
 	 */
-	function getVersions($module = false) {
-		if(!$module) $module = $this->module;
+	function getVersions($entity = false) {
+		if(!$entity) $entity = $this->entity;
 		
-		$entity = DocumentationService::is_registered_module($module);
+		$entity = DocumentationService::is_registered_entity($entity);
 		if(!$entity) return false;
 		
-		$versions = DocumentationService::get_registered_versions($module);
-		
+		$versions = $entity->getVersions();
 		$output = new DataObjectSet();
-		$currentVersion = $this->getVersion();
 				
 		if($versions) {
 			$lang = $this->getLang();
+			$currentVersion = $this->getVersion();
 			
 			foreach($versions as $key => $version) {
 				// work out the link to this version of the documentation.  
@@ -334,14 +311,10 @@ class DocumentationViewer extends Controller {
 				$linkingMode = ($currentVersion == $version) ? 'current' : 'link';
 			
 				if(!$version) $version = 'Current';
-				$major = (in_array($version, DocumentationService::get_major_versions())) ? true : false;
-
-				
 				$output->push(new ArrayData(array(
 					'Title' => $version,
-					'Link' => $entity->Link($version, $lang),
-					'LinkingMode' => $linkingMode,
-					'MajorRelease' => $major
+					'Link' => $this->Link(implode('/',$this->Remaining), $entity->getFolder(), $version),
+					'LinkingMode' => $linkingMode
 				)));
 			}
 		}
@@ -350,43 +323,37 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
-	 * Generate the module which are to be documented. It filters
-	 * the list based on the current head version. It displays the contents
-	 * from the index.md file on the page to use.
+	 * Generate a list of entities which have been registered and which can 
+	 * be documented. 
 	 *
 	 * @return DataObject
 	 */ 
-	function getModules($version = false, $lang = false) {
+	function getEntities($version = false, $lang = false) {
 		if(!$version) $version = $this->getVersion();
 		if(!$lang) $lang = $this->getLang();
 		
-		$modules = DocumentationService::get_registered_modules($version, $lang);
+		$entities = DocumentationService::get_registered_entities($version, $lang);
 		$output = new DataObjectSet();
+		
+		$currentEntity = $this->getEntity();
 
-		if($modules) {
-			foreach($modules as $module) {
-				$path = $module->getPath($version, $lang);
-				$absFilepath = $path . '/index.md';
-				$relativeFilePath = str_replace($path, '', $absFilepath);
-	
-				if(file_exists($absFilepath)) {
-					$page = new DocumentationPage();
-					$page->setRelativePath($relativeFilePath);
-					$page->setEntity($module);
-					$page->setLang($lang);
-					$page->setVersion($version);
-					
-					$content = DocumentationParser::parse($page, $this->Link(array_slice($this->Remaining, -1, -1)));
-				} else {
-					$content = '';
+		if($entities) {
+			foreach($entities as $entity) {
+				$mode = ($entity === $currentEntity) ? 'current' : 'link';
+				$folder = $entity->getFolder();
+				
+				$link = $this->Link(array_slice($this->Remaining, -1, -1), $folder, $version, $lang);
+				
+				$content = false;
+				if($page = $entity->getIndexPage($version, $lang)) {
+					$content = DBField::create('HTMLText', DocumentationParser::parse($page, $link));
 				}
 				
-				// build the dataset. Load the $Content from an index.md
 				$output->push(new ArrayData(array(
-					'Title' 	=> $module->getTitle(),
-					'Code'		=> $module,
-					'Link'		=> $this->Link(array_slice($this->Remaining, -1, -1), $module->moduleFolder),
-					'Content' 	=> DBField::create("HTMLText", $content)
+					'Title' 	  => $entity->getTitle(),
+					'Link'		  => $link,
+					'LinkingMode' => $mode,
+					'Content' 	  => $content
 				)));
 			}
 		}
@@ -399,10 +366,10 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return false|DocumentationEntity
 	 */
-	function getModule() {
-		if($this->module) {
-			return DocumentationService::is_registered_module(
-				$this->module, 
+	function getEntity() {
+		if($this->entity) {
+			return DocumentationService::is_registered_entity(
+				$this->entity, 
 				$this->version, 
 				$this->language
 			);
@@ -420,19 +387,19 @@ class DocumentationViewer extends Controller {
 	 * @return int
 	 */
 	function locationExists() {
-		$module = $this->getModule();
+		$entity = $this->getEntity();
 		
-		if($module) {
+		if($entity) {
 			
 			$has_dir = is_dir(Controller::join_links(
-				$module->getPath($this->getVersion(), $this->getLang()), 
+				$entity->getPath($this->getVersion(), $this->getLang()), 
 				implode('/', $this->Remaining)
 			));
 			
 			if($has_dir) return 2;
 			
 			$has_page = DocumentationService::find_page(
-				$module, 
+				$entity, 
 				$this->Remaining, 
 				$this->getVersion(), 
 				$this->getLang()
@@ -448,15 +415,15 @@ class DocumentationViewer extends Controller {
 	 * @return DocumentationPage
 	 */
 	function getPage() {
-		$module = $this->getModule();
+		$entity = $this->getEntity();
 
-		if(!$module) return false;
+		if(!$entity) return false;
 
 		$version = $this->getVersion();
 		$lang = $this->getLang();
 		
 		$absFilepath = DocumentationService::find_page(
-			$module, 
+			$entity, 
 			$this->Remaining, 
 			$version,
 			$lang
@@ -464,14 +431,14 @@ class DocumentationViewer extends Controller {
 		
 		if($absFilepath) {
 			$relativeFilePath = str_replace(
-				$module->getPath($version, $lang),
+				$entity->getPath($version, $lang),
 				'', 
 				$absFilepath
 			);
 			
 			$page = new DocumentationPage();
 			$page->setRelativePath($relativeFilePath);
-			$page->setEntity($module);
+			$page->setEntity($entity);
 			$page->setLang($lang);
 			$page->setVersion($version);
 
@@ -482,15 +449,16 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
-	 * Get the related pages to this module and the children to those pages
+	 * Get the related pages to the current {@link DocumentationEntity} and 
+	 * the children to those pages
 	 *
 	 * @todo this only handles 2 levels. Could make it recursive
 	 *
 	 * @return false|DataObjectSet
 	 */
-	function getModulePages() {
-		if($module = $this->getModule()) {
-			$pages = DocumentationService::get_pages_from_folder($module, null, false, $this->getVersion(), $this->getLang());
+	function getEntityPages() {
+		if($entity = $this->getEntity()) {
+			$pages = DocumentationService::get_pages_from_folder($entity, null, false, $this->getVersion(), $this->getLang());
 
 			if($pages) {
 				foreach($pages as $page) {
@@ -501,7 +469,7 @@ class DocumentationViewer extends Controller {
 					}
 					
 					$page->LinkingMode = 'link';
-					$page->Children = $this->_getModulePagesNested($page, $module);
+					$page->Children = $this->_getEntityPagesNested($page, $entity);
 				}
 			}
 
@@ -512,7 +480,7 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
-	 * Get the module pages under a given page. Recursive call for {@link getModulePages()}
+	 * Get the module pages under a given page. Recursive call for {@link getEntityPages()}
 	 *
 	 * @todo Need to rethink how to support pages which are pulling content from their children
 	 *		i.e if a folder doesn't have 2 then it will load the first file in the folder
@@ -524,7 +492,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return DataObjectSet|false
 	 */
-	private function _getModulePagesNested(&$page, $module, $level = 0) {
+	private function _getEntityPagesNested(&$page, $entity, $level = 0) {
 		if(isset($this->Remaining[$level])) {
 			// compare segment successively, e.g. with "changelogs/alpha/2.4.0-alpha",
 			// first comparison on $level=0 is against "changelogs",
@@ -537,13 +505,13 @@ class DocumentationViewer extends Controller {
 				$page->LinkingMode = (isset($this->Remaining[$level + 1])) ? 'section' : 'current';
 				
 				$relativePath = Controller::join_links(
-					$module->getPath($this->getVersion(), $this->getLang()),
+					$entity->getPath($this->getVersion(), $this->getLang()),
 					$page->getRelativePath()
 				);
 
 				if(is_dir($relativePath)) {
 					$children = DocumentationService::get_pages_from_folder(
-						$module, 
+						$entity, 
 						$page->getRelativePath(), 
 						false, 
 						$this->getVersion(), 
@@ -563,7 +531,7 @@ class DocumentationViewer extends Controller {
 						}
 						
 						$child->LinkingMode = 'link';
-						$child->Children = $this->_getModulePagesNested($child, $module, $level + 1);
+						$child->Children = $this->_getEntityPagesNested($child, $entity, $level + 1);
 					}
 					
 					return $children;
@@ -590,12 +558,12 @@ class DocumentationViewer extends Controller {
 		
 		// If no page found then we may want to get the listing of the folder.
 		// In case no folder exists, show a "not found" page.
-		$module = $this->getModule();
+		$entity = $this->getEntity();
 		$url = $this->Remaining;
 		
-		if($url && $module) {
+		if($url && $entity) {
 			$pages = DocumentationService::get_pages_from_folder(
-				$module, 
+				$entity, 
 				implode('/', $url), 
 				false,
 				$this->getVersion(),
@@ -612,7 +580,7 @@ class DocumentationViewer extends Controller {
 			return $this->customise(array(
 				'Content' => false,
 				'Title' => _t('DocumentationViewer.MODULES', 'Modules'),
-				'Pages' => $this->getModules()
+				'Pages' => $this->getEntities()
 			))->renderWith('DocFolderListing');
 		}
 	
@@ -628,7 +596,7 @@ class DocumentationViewer extends Controller {
 	function getBreadcrumbs() {
 		if(!$this->Remaining) $this->Remaining = array();
 		
-		$pages = array_merge(array($this->module), $this->Remaining);
+		$pages = array_merge(array($this->entity), $this->Remaining);
 		
 		$output = new DataObjectSet();
 		
@@ -673,24 +641,30 @@ class DocumentationViewer extends Controller {
 	/**
 	 * Return the base link to this documentation location
 	 *
+	 * @param string $path - subfolder path
+	 * @param string $entity - name of entity
+	 * @param float $version - optional version
+	 * @param string $lang - optional lang
+	 *
 	 * @return String
 	 */
-	public function Link($path = false, $module = false) {
+	public function Link($path = false, $entity = false, $version = false, $lang = false) {
 		$base = Director::absoluteBaseURL();
 		
-		$version = $this->getVersion();
-		$lang = $this->getLang();
+		$version = (!$version) ? $this->getVersion() : $version;
+		$lang = (!$lang) ? $this->getLang() : $lang;
 		
-		$module = (!$module && $this->module) ? $this->module : $module;
-		
+		$entity = (!$entity && $this->entity) ? $this->entity : $entity;
 		$action = '';
 		
-		if(is_string($path)) $action = $path;
+		if(is_string($path)) {
+			$action = $path;
+		}
 		else if(is_array($path)) {
 			$action = implode('/', $path);
 		}
 		
-		$link = Controller::join_links($base, self::get_link_base(), $module, $lang, $version, $action);
+		$link = Controller::join_links($base, self::get_link_base(), $entity, $lang, $version, $action);
 
 		return $link;
 	} 
@@ -703,8 +677,8 @@ class DocumentationViewer extends Controller {
 	 * @return Form
 	 */
 	function LanguageForm() {
-		if($module = $this->getModule()) {
-			$langs = DocumentationService::get_registered_languages($module->getModuleFolder());
+		if($entity = $this->getEntity()) {
+			$langs = DocumentationService::get_registered_languages($entity->getFolder());
 		}
 		else {
 			$langs = DocumentationService::get_registered_languages();

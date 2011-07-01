@@ -103,7 +103,7 @@ class DocumentationSearch {
 	public static function get_all_documentation_pages() {
 		DocumentationService::load_automatic_registration();
 		
-		$modules = DocumentationService::get_registered_modules();
+		$modules = DocumentationService::get_registered_entities();
 		$output = new DataObjectSet();
 
 		if($modules) {

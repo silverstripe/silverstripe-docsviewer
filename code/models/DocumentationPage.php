@@ -145,7 +145,7 @@ class DocumentationPage extends ViewableData {
 	}
 	
 	/**
-	 * Relative to the module base, not the webroot
+	 * Relative to the module base, not the webroot.
 	 * 
 	 * @return string
 	 */

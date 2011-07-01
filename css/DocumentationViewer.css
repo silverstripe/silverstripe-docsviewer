@@ -69,12 +69,26 @@ fieldset { border: none; }
 #content { }
 
 /* Versions */
-#versions-nav { background: #121929; margin: 0 0 44px; padding: 10px 0 0 10px; overflow: hidden;}
-	#versions-nav h2 { font-size: 11px; color: #fff; font-weight: normal; float: left; margin-right: 5px;}
-	#versions-nav ul { margin: 0; padding: 0; float: left;}
-		#versions-nav li { list-style: none; }
-			#versions-nav li a { display: block; float: left; margin-left: 4px; padding: 11px; font-size: 14px;}
-				#versions-nav li a.current { background: #fff;}
+.documentation-nav { 
+	clear: both;
+	margin: 0 0 5px; 
+	overflow: hidden; color: #999999; 
+	font-size: 11px;
+}
+	.documentation-nav h2 { font-size: 11px; font-weight: normal; float: left; margin-right: 5px;}
+	.documentation-nav ul { margin: 0; padding: 0; float: left;}
+		.documentation-nav li { display: inline; list-style: none; padding: 0; margin: 0; font-size: 11px; }
+			.documentation-nav li a { margin-left: 5px; padding: 0px; }
+				.documentation-nav li a.current { 
+					background: #0973A6; color: #fff; font-weight: bold; 
+					padding: 4px;
+					-moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px; 
+				}
+					.documentation-nav li a.current:hover,
+					.documentation-nav li a.current:focus {
+						text-decoration: none;
+					}
+					
 #left-column { width: 640px; float: left; }
 
 #right-column {
