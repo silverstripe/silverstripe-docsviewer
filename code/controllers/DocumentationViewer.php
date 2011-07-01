@@ -48,7 +48,7 @@ class DocumentationViewer extends Controller {
 	protected static $link_base = 'dev/docs/';
 	
 	/**
-	 * @var String|array Optional permssion check
+	 * @var String|array Optional permission check
 	 */
 	static $check_permission = 'ADMIN';
 	
@@ -59,12 +59,8 @@ class DocumentationViewer extends Controller {
 
 		// javascript
 		Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');
-		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shCore.js');
-		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushJScript.js');
-		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushPhp.js');
-		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushXml.js');
-		Requirements::javascript('sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushCss.js');
 		Requirements::javascript('sapphiredocs/javascript/shBrushSS.js');
+		
 		Requirements::combine_files(
 			'syntaxhighlighter.js',
 			array(
@@ -97,11 +93,11 @@ class DocumentationViewer extends Controller {
 	}
 
 	/**
-	 * Overloaded to avoid "action doesnt exist" errors - all URL parts in this
+	 * Overloaded to avoid "action doesn't exist" errors - all URL parts in this
 	 * controller are virtual and handled through handleRequest(), not controller methods.
 	 */
 	public function handleAction($request) {
-		try{
+		try {
 			$response = parent::handleAction($request);
 		} catch(SS_HTTPResponse_Exception $e) {
 			if(strpos($e->getMessage(), 'does not exist') !== FALSE) {
@@ -141,6 +137,7 @@ class DocumentationViewer extends Controller {
 			// allow assets
 			if($firstParam == "assets") return parent::handleRequest($request);
 			
+			// check for permalinks
 			if($link = DocumentationPermalinks::map($firstParam)) {
 				// the first param is a shortcode for a page so redirect the user to
 				// the short code.
@@ -151,8 +148,14 @@ class DocumentationViewer extends Controller {
 				
 			}
 
+			// check to see if the module is a valid module. If it isn't, then we
+			// need to throw a 404.
+			if(!DocumentationService::is_registered_module($firstParam)) {
+				return $this->throw404();
+			}
+			
 			$this->module = $firstParam;
-			$this->lang = $secondParam;
+			$this->language = $secondParam;
 			
 			if(isset($thirdParam) && (is_numeric($thirdParam) || in_array($thirdParam, array('master', 'trunk')))) {
 				$this->version = $thirdParam;	
@@ -166,28 +169,44 @@ class DocumentationViewer extends Controller {
 		}
 		
 		// 'current' version mapping
-		$module = DocumentationService::is_registered_module($this->module, null, $this->getLang());
-		
-		if($module) {
-			$current = $module->getLatestVersion();
+		$entity = DocumentationService::is_registered_module($this->module, null, $this->getLang());
+
+		if($entity) {
+			$current = $entity->getLatestVersion();
 			$version = $this->getVersion();
 			
-			if(!$version || $version == '') {
+			if(!$version) {
 				$this->version = $current;
 			}
 			
 			// Check if page exists, otherwise return 404
 			if(!$this->locationExists()) {
-				$body = $this->renderWith(get_class($this));
-				$this->response = new SS_HTTPResponse($body, 404);
-				
-				return $this->response;
+				return $this->throw404();
 			}
+			
+			
+			return parent::handleRequest($request);
 		}
-
-		return parent::handleRequest($request);
+		
+		return $this->throw404();
 	}
 		
+	
+	/**
+	 * Helper function for throwing a 404 error from the {@link handleRequest}
+	 * method.
+	 *
+	 * @return HttpResponse
+	 */
+	function throw404() {
+		$class = get_class($this);
+		
+		$body = $this->renderWith(array("{$class}_error", $class));
+		$this->response = new SS_HTTPResponse($body, 404);
+		
+		return $this->response;
+	}
+	
 	/**
 	 * Custom templates for each of the sections. 
 	 */
@@ -404,6 +423,7 @@ class DocumentationViewer extends Controller {
 		$module = $this->getModule();
 		
 		if($module) {
+			
 			$has_dir = is_dir(Controller::join_links(
 				$module->getPath($this->getVersion(), $this->getLang()), 
 				implode('/', $this->Remaining)
@@ -567,37 +587,35 @@ class DocumentationViewer extends Controller {
 		if($page) {
 			return DBField::create("HTMLText", $page->getHTML($this->getVersion(), $this->getLang()));
 		}
-		else {
-			// If no page found then we may want to get the listing of the folder.
-			// In case no folder exists, show a "not found" page.
-			$module = $this->getModule();
-			$url = $this->Remaining;
-			
-			if($url && $module) {
-				$pages = DocumentationService::get_pages_from_folder(
-					$module, 
-					implode('/', $url), 
-					false,
-					$this->getVersion(),
-					$this->getLang()
-				);
-				
-				// If no pages are found, the 404 is handled in the same template
-				return $this->customise(array(
-					'Title' => DocumentationService::clean_page_name(array_pop($url)),
-					'Pages' => $pages
-				))->renderWith('DocFolderListing');
-			}
-			else {
-				// get all available modules and show a table of contents.
-				
-				return $this->customise(array(
-					'Title' => _t('DocumentationViewer.MODULES', 'Modules'),
-					'Pages' => $this->getModules()
-				))->renderWith('DocFolderListing');
-			}
-		}
 		
+		// If no page found then we may want to get the listing of the folder.
+		// In case no folder exists, show a "not found" page.
+		$module = $this->getModule();
+		$url = $this->Remaining;
+		
+		if($url && $module) {
+			$pages = DocumentationService::get_pages_from_folder(
+				$module, 
+				implode('/', $url), 
+				false,
+				$this->getVersion(),
+				$this->getLang()
+			);
+			
+			return $this->customise(array(
+				'Content' => false,
+				'Title' => DocumentationService::clean_page_name(array_pop($url)),
+				'Pages' => $pages
+			))->renderWith('DocFolderListing');
+		}
+		else {
+			return $this->customise(array(
+				'Content' => false,
+				'Title' => _t('DocumentationViewer.MODULES', 'Modules'),
+				'Pages' => $this->getModules()
+			))->renderWith('DocFolderListing');
+		}
+	
 		return false;
 	}
 	

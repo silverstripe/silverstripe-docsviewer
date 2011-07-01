@@ -50,8 +50,7 @@ class DocumentationViewerTest extends FunctionalTest {
 		$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
 		
 		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.4/');		
-		$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
-		
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');		
 		
 		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.3/nonexistant-subfolder');
 		$this->assertEquals($response->getStatusCode(), 404, 'Nonexistant subfolder');
@@ -79,8 +78,13 @@ class DocumentationViewerTest extends FunctionalTest {
 		
 		$response = $this->get('dev/docs/DocumentationViewerTests/en/3.0/test/');
 		$this->assertEquals($response->getStatusCode(), 404, 'Missing page');
+		
+		$response = $this->get('dev/docs/en');
+		$this->assertEquals($response->getStatusCode(), 404, 'Must include a module');
+		
+		$response = $this->get('dev/docs/DocumentationViewerTests/dk/');;
+		$this->assertEquals($response->getStatusCode(), 404, 'Access a language that doesn\'t exist');
 	}
-	
 	
 	function testRouting() {
 		$response = $this->get('dev/docs/DocumentationViewerTests/en/2.4');

@@ -335,9 +335,12 @@ class DocumentationService {
 
 			if($modules) {
 				foreach($modules as $key => $module) {
-					if(is_dir(BASE_PATH .'/'. $module) && !in_array($module, self::get_ignored_files(), true)) {
+					$dir = is_dir(Controller::join_links(BASE_PATH, $module));
+					$ignored = in_array($module, self::get_ignored_files(), true);
+					
+					if($dir && !$ignored) {
 						// check to see if it has docs
-						$docs = BASE_PATH .'/'. $module .'/docs/';
+						$docs = Controller::join_links($dir, 'docs');
 	
 						if(is_dir($docs)) {
 							self::register($module, $docs, '', $module, true);
@@ -355,7 +358,13 @@ class DocumentationService {
 	 * @param String $code code
 	 */
 	public static function get_language_title($lang) {
-		return (isset(self::$language_mapping[$lang])) ? _t("DOCUMENTATIONSERVICE.LANG-$lang", self::$language_mapping[$lang]) : $lang;
+		$map = self::$language_mapping;
+		
+		if(isset($map[$lang])) { 
+			return _t("DOCUMENTATIONSERVICE.LANG-$lang", $map[$lang]);
+		}
+		
+		return $lang;
 	}
 	
 	

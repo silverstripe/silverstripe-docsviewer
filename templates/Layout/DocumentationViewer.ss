@@ -1,10 +1,6 @@
 <div id="documentation-page">
 	<div id="left-column">
-		<% if Content %>
-			$Content
-		<% else %>
-			<% include DocNotFound %>
-		<% end_if %>
+		$Content
 	</div>
 
 	<% if Content %>
