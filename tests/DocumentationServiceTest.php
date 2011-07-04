@@ -11,7 +11,6 @@ class DocumentationServiceTest extends SapphireTest {
 		$entity = DocumentationService::register('testdocs', BASE_PATH . '/sapphiredocs/tests/docs/');
 		$pages = DocumentationService::get_pages_from_folder($entity);
 		
-		// check folders and files exist as their filenames
 		$this->assertContains('index.md', $pages->column('Filename'), 'The tests/docs/en folder should contain a index file');
 		$this->assertContains('subfolder/', $pages->column('Filename'), 'The tests/docs/en folder should contain a subfolder called subfolder');
 		$this->assertContains('test.md', $pages->column('Filename'), 'The tests/docs/en folder should contain a test file');
@@ -95,5 +94,19 @@ class DocumentationServiceTest extends SapphireTest {
 		foreach($names as $key => $value) {
 			$this->assertEquals(DocumentationService::clean_page_name($value), $should[$key]);
 		}
+	}
+	
+	function testIsValidExtension() {
+		$this->assertTrue(DocumentationService::is_valid_extension('md'));
+		$this->assertTrue(DocumentationService::is_valid_extension('markdown'));
+		$this->assertTrue(DocumentationService::is_valid_extension('MD'));
+		$this->assertTrue(DocumentationService::is_valid_extension('MARKDOWN'));
+		
+		$this->assertFalse(DocumentationService::is_valid_extension('.markd'));
+		$this->assertFalse(DocumentationService::is_valid_extension('.exe'));
+		
+		// require an extension as internally we check for extension, not using
+		// one could cause issues.
+		$this->assertFalse(DocumentationService::is_valid_extension(''));
 	}
 }

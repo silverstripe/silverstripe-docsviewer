@@ -237,4 +237,24 @@ HTML;
 			$parsed
 		);
 	}
+	
+	function testRewritingRelativeLinksToFiles() {
+		$folder = '/sapphiredocs/tests/docs-parser/';
+		
+		$page = new DocumentationPage();
+		$page->setRelativePath('file-download.md');
+		$page->setEntity(new DocumentationEntity('parser', '2.4', BASE_PATH . $folder));
+		
+		$parsed = DocumentationParser::parse($page, $folder);
+		
+		$this->assertContains(
+			Controller::join_links($folder, '/en/_images/external_link.png'),
+			$parsed
+		);
+		
+		$this->assertContains(
+			Controller::join_links($folder, '/en/_images/test.tar.gz'),
+			$parsed
+		);
+	}
 }

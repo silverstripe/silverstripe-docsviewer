@@ -141,7 +141,9 @@ class DocumentationViewer extends Controller {
 		
 		if($firstParam) {
 			// allow assets
-			if($firstParam == "assets") return parent::handleRequest($request);
+			if($firstParam == "assets") {
+				return parent::handleRequest($request);
+			}
 			
 			// check for permalinks
 			if($link = DocumentationPermalinks::map($firstParam)) {
@@ -329,9 +331,6 @@ class DocumentationViewer extends Controller {
 	 * @return DataObject
 	 */ 
 	function getEntities($version = false, $lang = false) {
-		if(!$version) $version = $this->getVersion();
-		if(!$lang) $lang = $this->getLang();
-		
 		$entities = DocumentationService::get_registered_entities($version, $lang);
 		$output = new DataObjectSet();
 		
@@ -342,7 +341,7 @@ class DocumentationViewer extends Controller {
 				$mode = ($entity === $currentEntity) ? 'current' : 'link';
 				$folder = $entity->getFolder();
 				
-				$link = $this->Link(array_slice($this->Remaining, -1, -1), $folder, $version, $lang);
+				$link = $this->Link(array(), $folder, false, $lang);
 				
 				$content = false;
 				if($page = $entity->getIndexPage($version, $lang)) {
@@ -602,6 +601,8 @@ class DocumentationViewer extends Controller {
 		
 		if($pages) {
 			$path = array();
+			$version = $this->getVersion();
+			$lang = $this->getLang();
 			
 			foreach($pages as $i => $title) {
 				if($title) {
@@ -610,7 +611,7 @@ class DocumentationViewer extends Controller {
 					
 					$output->push(new ArrayData(array(
 						'Title' => DocumentationService::clean_page_name($title),
-						'Link' => rtrim($this->Link($path), "/"). "/"
+						'Link' => rtrim($this->Link($path, false, $version, $lang), "/"). "/"
 					)));
 				}
 			}
@@ -651,7 +652,9 @@ class DocumentationViewer extends Controller {
 	public function Link($path = false, $entity = false, $version = false, $lang = false) {
 		$base = Director::absoluteBaseURL();
 		
-		$version = (!$version) ? $this->getVersion() : $version;
+		// only include the version. Version is optional after all
+		$version = ($version === null) ? $this->getVersion() : $version;
+		
 		$lang = (!$lang) ? $this->getLang() : $lang;
 		
 		$entity = (!$entity && $this->entity) ? $this->entity : $entity;

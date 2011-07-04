@@ -36,7 +36,7 @@ class DocumentationService {
 	 *
 	 * @var array
 	 */
-	public static $valid_markdown_extensions = array('.md', '.txt', '.markdown');
+	public static $valid_markdown_extensions = array('md', 'txt', 'markdown');
 	
 	/**
 	 * Registered {@link DocumentationEntity} objects to include in the documentation. 
@@ -76,6 +76,16 @@ class DocumentationService {
 	 */
 	public static function get_valid_extensions() {
 		return self::$valid_markdown_extensions;
+	}
+	
+	/**
+	 * Check to see if a given extension is a valid extension to be rendered.
+	 * Assumes that $ext has a leading dot as that is what $valid_extension uses.
+	 *
+	 * @return bool
+	 */
+	public static function is_valid_extension($ext) {
+		return in_array(strtolower($ext), self::get_valid_extensions());
 	}
 	
 	/**
@@ -313,35 +323,27 @@ class DocumentationService {
 	private static function find_page_recursive($base, $goal) {
 		$handle = opendir($base);
 
-		$name = strtolower(array_shift($goal));
+		$name = self::trim_extension_off(strtolower(array_shift($goal)));
 		if(!$name || $name == '/') $name = 'index';
 
-		if($handle) {
-			$extensions = DocumentationService::get_valid_extensions();
 
+		if($handle) {
+			$ignored = self::get_ignored_files();
+			
 			// ensure we end with a slash
 			$base = rtrim($base, '/') .'/';
 			
 			while (false !== ($file = readdir($handle))) {
-				if(in_array($file, DocumentationService::get_valid_extensions())) continue;
+				if(in_array($file, $ignored)) continue;
 				
-				$formatted = strtolower($file);
-				
-				// if the name has a . then take the substr 
-				$formatted = ($pos = strrpos($formatted, '.')) ? substr($formatted, 0, $pos) : $formatted;
-
-				if($dot = strrpos($name, '.')) {
-					if(in_array(substr($name, $dot), self::get_valid_extensions())) {
-						$name = substr($name, 0, $dot);
-					}
-				}
+				$formatted = self::trim_extension_off(strtolower($file));
 				
 				// the folder is the one that we are looking for.
 				if(strtolower($name) == strtolower($formatted)) {
 					
 					// if this file is a directory we could be displaying that
 					// or simply moving towards the goal.
-					if(is_dir($base . $file)) {
+					if(is_dir(Controller::join_links($base, $file))) {
 						
 						$base = $base . trim($file, '/') .'/';
 						
@@ -402,30 +404,36 @@ class DocumentationService {
 	}
 	
 	/**
-	 * Helper function to strip the extension off.
-	 * Warning: Doesn't work if the filename includes dots,
-	 * but no extension, e.g. "2.4.0-alpha" will return "2.4".
+	 * Helper function to strip the extension off and return the name without
+	 * the extension. If you need the extension see {@link get_extension()}
 	 *
 	 * @param string
 	 *
 	 * @return string
 	 */
 	public static function trim_extension_off($name) {
-		$hasExtension = strrpos($name, '.');
+		$ext = self::get_extension($name);
 
-		if($hasExtension !== false && $hasExtension > 0) {
-			$shorted = substr($name, $hasExtension);
-			
-			// can remove the extension only if we know how
-			// to read it again
-			if(in_array(rtrim($shorted, '/'), self::get_valid_extensions())) {
-				$name = substr($name, 0, $hasExtension);
+		if($ext) {
+			if(self::is_valid_extension($ext)) {
+				return substr($name, 0, strrpos($name,'.'));
 			}
 		}
 		
 		return $name;
 	}
 	
+	/**
+	 * Returns the extension from a string. If you want to trim the extension
+	 * off the end of the string see {@link trim_extension_off()}
+	 *
+	 * @param string
+	 * 
+	 * @return string
+	 */
+	public static function get_extension($name) {
+		return substr(strrchr($name,'.'), 1);
+	}
 	
 	/**
 	 * Return the children from a given entity sorted by Title using natural ordering. 
@@ -499,7 +507,6 @@ class DocumentationService {
 		$handle = opendir($folder);
 
 		if($handle) {
-			$extensions = self::get_valid_extensions();
 			$ignore = self::get_ignored_files();
 			$files = array();
 			
@@ -510,11 +517,13 @@ class DocumentationService {
 					$relativeFilePath = Controller::join_links($relative, $file);
 
 					if(is_dir($path)) {
+						// dir
 						$pages[] = $relativeFilePath;
 						
 						if($recusive) self::get_pages_from_folder_recursive($base, $relativeFilePath, $recusive, $pages);
 					} 
-					else if(in_array(substr($file, (strrpos($file, '.'))), $extensions)) {
+					else if(self::is_valid_extension(self::get_extension($path))) {
+						// file we want
 						$pages[] = $relativeFilePath;
 					}
 				}

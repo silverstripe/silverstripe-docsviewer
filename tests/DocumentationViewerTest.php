@@ -29,6 +29,9 @@ class DocumentationViewerTest extends FunctionalTest {
 		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs/", '2.3');
 		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs-v2.4/", '2.4', 'Doc Test', true);
 		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs-v3.0/", '3.0', 'Doc Test');
+		
+		DocumentationService::register("DocumentationViewerAltModule1", BASE_PATH . "/sapphiredocs/tests/docs-parser/", '1.0');
+		DocumentationService::register("DocumentationViewerAltModule2", BASE_PATH . "/sapphiredocs/tests/docs-search/", '1.0');
 	}
 	
 	function tearDownOnce() {
@@ -113,7 +116,7 @@ class DocumentationViewerTest extends FunctionalTest {
 		$this->assertEquals('Subfolder', $page->Title);
 	}
 	
-	function testGetModulePages() {
+	function testGetEntityPages() {
 		$v = new DocumentationViewer();
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/subfolder/'));
 		$pages = $v->getEntityPages();
@@ -230,5 +233,21 @@ class DocumentationViewerTest extends FunctionalTest {
 		
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/3.0'));
 		$this->assertEquals('3.0', $v->getVersion());		
+	}
+	
+	function testGetEntities() {
+		$v = new DocumentationViewer();
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4'));
+		
+		$pages = $v->getEntities();
+		
+		$this->assertEquals(3, $pages->Count(), 'Registered 3 entities');
+		
+		// check to see the links don't have version or pages in them
+		foreach($pages as $page) {
+			$expected = Controller::join_links('docs', $page->Title, 'en');
+			
+			$this->assertStringEndsWith($expected, $page->Link);
+		}
 	}
 }

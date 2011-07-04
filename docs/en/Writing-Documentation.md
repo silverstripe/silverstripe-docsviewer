@@ -1,32 +1,67 @@
-# Writing Documentation #
+# Writing Documentation
 
-Your documentation needs to go in the specific modules docs folder which it refers mostly too. For example if you want to document
-a feature of your custom module 'MyModule' you need to create markdown files in mymodule/docs/.
+Your documentation needs to go in the specific modules docs folder which it 
+refers mostly too. For example if you want to document a feature of your 
+custom module 'mymodule' you need to create markdown files in mymodule/docs/en/.
 
-The files have to end with the __.md__ extension. The documentation viewer will automatically replace hyphens (-) with spaces (since you cannot
-have spaces web / file systems).
+The files have to end with the __.md__ extension. The documentation viewer will 
+automatically replace hyphens (-) with spaces.
 
-Also docs folder should be localized. Even if you do not plan on using multiple languages you should at least write your documentation
-in a 'en' subfolder
+	my-documentation-file.md
+	
+Translates to:
+
+	My documentation file
+	
+The module also support number prefixing for specifying the order of pages in
+the index pages and navigation trees.
+
+	03-foo.md
+	1-bar.md
+	4-baz.md
+	
+Will be output as the following in the listing views.
+
+	Bar
+	Foo
+	Baz
+
+## Localization
+
+All documentation folder should be localized. Even if you do not plan on supporting 
+multiple languages you need to write your documentation in a 'en' subfolder
 
 	/module/docs/en/
+	
 
-## Syntax ##
+## Syntax
 
-This uses a customized markdown extra parser. To view the syntax for page formatting check out [Daring Fireball](http://daringfireball.net/projects/markdown/syntax)
+Documentation should be written in markdown with an `.md` extension attached.
+To view the syntax for page formatting check out [Daring Fireball](http://daringfireball.net/projects/markdown/syntax).
 
-## Creating Hierarchy ##
+To see how to use the documentation from examples, I recommend opening up this 
+file in your text editor and playing around. As these files are plain text, any
+text editor will be able to open and write markdown files.
 
-The document viewer supports folder structure. There is a 9 folder limit on depth / number of sub categories you can create. 
-Each level deep it will generate the nested urls.
+
+## Creating Hierarchy
+
+The document viewer supports a hierarchical folder structure so you can categorize 
+documentation and create topics.
+
+## Directory Listing
+
+Each folder you create should also contain a __index.md__ file which contains 
+an overview of the module and related links. If no index is available, the 
+default behaviour is to display an ordered list of links.
+
+## Table of Contents
+
+The table of contents on each module page is generated based on where and what 
+headers you use. 
+
  
-## Directory Listing ##
+## Images and Files
 
-Each folder you create should also contain a __index.md__ file (see sapphiredocs/doc/en/index.md) which contains an overview of the
-module and related links.
-
-## Table of Contents ##
-
-The table of contents on each module page is generated 
-
- 
+If you want to attach images and other assets to a page you need to bundle those
+in a directory called _images at the same level as your documentation.

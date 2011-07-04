@@ -67,6 +67,13 @@ class DocumentationPage extends ViewableData {
 	}
 	
 	/**
+	 * @return string
+	 */
+	function getExtension() {
+		return DocumentationService::get_extension($this->getRelativePath());
+	}
+	
+	/**
 	 * Absolute path including version and lang folder.
 	 * 
 	 * @throws InvalidArgumentException
@@ -209,17 +216,23 @@ class DocumentationPage extends ViewableData {
 	}
 
 	/**
-	 * Return the raw markdown for a given documentation page
+	 * Return the raw markdown for a given documentation page. Will throw
+	 * an error if the path isn't a file.
 	 *
-	 * @throws InvalidArgumentException
-	 * @return String
+	 * Will return empty if the type is not readable
+	 *
+	 * @return string
 	 */
 	function getMarkdown() {
 		try {
 			$path = $this->getPath(true);
 
 			if($path) {
-				return file_get_contents($path);
+				$ext = $this->getExtension();
+				
+				if(DocumentationService::is_valid_extension($ext)) {
+					return file_get_contents($path);			
+				}
 			}
 		}
 		catch(InvalidArgumentException $e) {}
