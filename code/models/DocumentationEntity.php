@@ -234,8 +234,8 @@ class DocumentationEntity extends ViewableData {
 	}
 	
 	function getRelativeLink($version = false, $lang = false) {
-		if(!$version) $version = $this->getLatestVersion();
 		if(!$lang) $lang = 'en';
+		if($version == $this->getLatestVersion()) $version = false;
 		
 		return Controller::join_links(
 			DocumentationViewer::get_link_base(), 

@@ -205,7 +205,7 @@ HTML;
 			$result
 		);
 	}
-	
+
 	function testRetrieveMetaData() {
 		$page = new DocumentationPage();
 		$page->setRelativePath('MetaDataTest.md');
