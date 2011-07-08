@@ -7,11 +7,13 @@
  * page. Individual pages are handled by {@link DocumentationPage}
  *
  * Each folder must have at least one language subfolder, which is automatically
- * determined through {@link addVersion()} and should not be included in the $path argument.
+ * determined through {@link addVersion()} and should not be included in the 
+ * $path argument.
  * 
  * Versions are assumed to be in numeric format (e.g. '2.4'),
  *
- * They're also parsed through version_compare() in {@link getLatestVersion()} which assumes a certain format. 
+ * They're also parsed through version_compare() in {@link getStableVersion()} 
+ * which assumes a certain format {@link http://php.net/manual/en/function.version-compare.php}
  *
  * @package sapphiredocs
  * @subpackage models
@@ -19,6 +21,9 @@
 
 class DocumentationEntity extends ViewableData {
 	
+	/**
+	 * @var array
+	 */
 	static $casting = array(
 		'Name' => 'Text'
 	);
@@ -41,7 +46,7 @@ class DocumentationEntity extends ViewableData {
 	/**
 	 * @var array
 	 */
-	private $latestVersion;
+	private $stableVersion;
 	
 	/**
 	 * @var Array $langs a list of available langauges
@@ -123,13 +128,13 @@ class DocumentationEntity extends ViewableData {
 	}
 	
 	/**
-	 * @return String|Boolean
+	 * @return string|boo
 	 */
-	public function getLatestVersion() {
+	public function getStableVersion() {
 		if(!$this->hasVersions()) return false;
 		
-		if($this->latestVersion) {
-			return $this->latestVersion;
+		if($this->stableVersion) {
+			return $this->stableVersion;
 		} else {
 			$sortedVersions = $this->getVersions();
 			usort($sortedVersions, create_function('$a,$b', 'return version_compare($a,$b);'));
@@ -141,9 +146,23 @@ class DocumentationEntity extends ViewableData {
 	/**
 	 * @param String $version
 	 */
-	public function setLatestVersion($version) {
+	public function setStableVersion($version) {
 		if(!$this->hasVersion($version)) throw new InvalidArgumentException(sprintf('Version "%s" does not exist', $version));
-		$this->latestVersion = $version;
+		$this->stableVersion = $version;
+	}
+	
+	/**
+	 * Returns an integer value based on if a given version is the latest 
+	 * version. Will return -1 for if the version is older, 0 if versions are 
+	 * the same and 1 if the version is greater than.
+	 *
+	 * @param string $version
+	 * @return int
+	 */
+	public function compare($version) {
+		$latest = $this->getStableVersion();
+		
+		return version_compare($version, $latest);
 	}
 	
 	/**
@@ -207,7 +226,7 @@ class DocumentationEntity extends ViewableData {
 	 * @return string
 	 */
 	public function getPath($version = false, $lang = false) {
-		if(!$version) $version = $this->getLatestVersion();
+		if(!$version) $version = $this->getStableVersion();
 		if(!$lang) $lang = 'en';
 		
 		if($this->hasVersion($version)) {
@@ -235,7 +254,7 @@ class DocumentationEntity extends ViewableData {
 	
 	function getRelativeLink($version = false, $lang = false) {
 		if(!$lang) $lang = 'en';
-		if($version == $this->getLatestVersion()) $version = false;
+		if($version == $this->getStableVersion()) $version = false;
 		
 		return Controller::join_links(
 			DocumentationViewer::get_link_base(), 

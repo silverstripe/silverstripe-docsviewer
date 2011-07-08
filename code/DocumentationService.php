@@ -212,7 +212,7 @@ class DocumentationService {
 		}
 		
 		if($latest)
-			$output->setLatestVersion($version);
+			$output->setStableVersion($version);
 		
 		return $output;
 	}

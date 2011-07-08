@@ -34,7 +34,7 @@ class DocumentationPageTest extends SapphireTest {
 		// test with version.
 		$entity = DocumentationService::register("versionlinks", BASE_PATH . "/sapphiredocs/tests/docs-v2.4/", '1');
 		$entity->addVersion('2', BASE_PATH . "/sapphiredocs/tests/docs-v3.0/");
-		$entity->setLatestVersion('2');
+		$entity->setStableVersion('2');
 		
 		$page = new DocumentationPage();
 		$page->setRelativePath('test.md');

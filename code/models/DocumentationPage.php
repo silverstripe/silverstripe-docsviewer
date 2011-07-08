@@ -176,7 +176,7 @@ class DocumentationPage extends ViewableData {
 	}
 	
 	function getVersion() {
-		return $this->version ? $this->version : $this->entity->getLatestVersion();
+		return $this->version ? $this->version : $this->entity->getStableVersion();
 	}
 	
 	function setVersion($version) {

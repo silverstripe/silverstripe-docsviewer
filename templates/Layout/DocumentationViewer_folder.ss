@@ -1,3 +1,7 @@
+<% if VersionWarning %>
+	<% include DocumentationVersion_warning %>
+<% end_if %>
+
 <div id="module-home">
 	<div id="left-column">
 		<% if Content %>

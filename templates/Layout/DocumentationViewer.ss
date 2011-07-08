@@ -1,3 +1,7 @@
+<% if VersionWarning %>
+	<% include DocumentationVersion_warning %>
+<% end_if %>
+
 <div id="documentation-page">
 	<div id="left-column">
 		$Content

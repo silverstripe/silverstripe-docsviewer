@@ -180,7 +180,7 @@ class DocumentationViewer extends Controller {
 		$entity = DocumentationService::is_registered_entity($this->entity, null, $this->getLang());
 
 		if($entity) {
-			$current = $entity->getLatestVersion();
+			$current = $entity->getStableVersion();
 			$version = $this->getVersion();
 			
 			if(!$version) {
@@ -254,7 +254,7 @@ class DocumentationViewer extends Controller {
 		if($this->version) return $this->version;
 		
 		if($entity = $this->getEntity()) {
-			$this->version = $entity->getLatestVersion();
+			$this->version = $entity->getStableVersion();
 			
 			return $this->version;
 		} 
@@ -316,7 +316,8 @@ class DocumentationViewer extends Controller {
 				$output->push(new ArrayData(array(
 					'Title' => $version,
 					'Link' => $this->Link(implode('/',$this->Remaining), $entity->getFolder(), $version),
-					'LinkingMode' => $linkingMode
+					'LinkingMode' => $linkingMode,
+					'Version' => $version // separate from title, we may want to make title nicer.
 				)));
 			}
 		}
@@ -777,5 +778,41 @@ class DocumentationViewer extends Controller {
 		$search->setOutputController($this);
 		
 		return $search->renderResults();
+	}
+	
+	/**
+	 * Check to see if the currently accessed version is out of date or
+	 * perhaps a future version rather than the stable edition
+	 *
+	 * @return false|ArrayData
+	 */
+	function VersionWarning() {
+		$version = $this->getVersion();
+		$entity = $this->getEntity();
+		
+		if($entity) {
+			$compare = $entity->compare($version);
+			$stable = $entity->getStableVersion();
+
+			// same
+			if($version == $stable) return false;
+			
+			// check for trunk, if trunk and not the same then it's future
+			// also run through compare
+			if($version == "trunk" || $compare > 0) {
+				return $this->customise(new ArrayData(array(
+					'FutureRelease' => true,
+					'StableVersion' => DBField::create('HTMLText', $stable)
+				)));				
+			}
+			else {
+				return $this->customise(new ArrayData(array(
+					'OutdatedRelease' => true,
+					'StableVersion' => DBField::create('HTMLText', $stable)
+				)));
+			}
+		}
+		
+		return false;
 	}
 }
