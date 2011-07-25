@@ -759,7 +759,7 @@ class DocumentationViewer extends Controller {
 		$form = new Form($this, 'DocumentationSearchForm', $fields, $actions);
 		$form->disableSecurityToken();
 		$form->setFormMethod('get');
-		$form->setFormAction('home/DocumentationSearchForm');
+		$form->setFormAction(self::$link_base . 'DocumentationSearchForm');
 		
 		return $form;
 	}
