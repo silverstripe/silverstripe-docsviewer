@@ -1,8 +1,8 @@
 <div id="home">
 	<h2><% _t('DOCUMENTEDMODULES', 'Documented Modules') %></h2>
 	
-	<% if Modules %>
-		<% control Modules %>
+	<% if Entities %>
+		<% control Entities %>
 			<div class="module">
 				<h3><a href="$Link">$Title</a></h3>
 			</div>
