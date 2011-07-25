@@ -265,7 +265,7 @@ class DocumentationService {
 					
 					if($dir && !$ignored) {
 						// check to see if it has docs
-						$docs = Controller::join_links($dir, 'docs');
+						$docs = Director::baseFolder() . '/' . Controller::join_links($entity, 'docs');
 	
 						if(is_dir($docs)) {
 							self::register($entity, $docs, '', $entity, true);
