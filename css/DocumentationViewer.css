@@ -63,7 +63,12 @@ fieldset { border: none; }
 #footer { width: 960px; margin: 22px auto; }
 	#footer p { font-size: 11px; line-height: 11px; color: #798D85;}
 		#footer p a { color: #798D85;}
-		
+
+/* Search */
+#search { float: right; }		
+	#search label { display: none; }
+/* Breadcrumbs */
+#breadcrumbs { float: left; }
 /* Content */
 #layout { }
 #content { }
@@ -89,14 +94,14 @@ fieldset { border: none; }
 						text-decoration: none;
 					}
 					
-#left-column { width: 640px; float: left; }
+#content-column { width: 640px; float: left; }
 
-#right-column {
+#sidebar-column {
 	width: 260px; 
 	float: right;
 }
 
-	#right-column .box {
+	#sidebar-column .box {
 		margin: 0 12px 12px 0;
 	}
 	

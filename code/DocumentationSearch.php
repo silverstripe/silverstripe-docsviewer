@@ -131,16 +131,18 @@ class DocumentationSearch {
 	/**
 	 * Enable searching documentation 
 	 */
-	public static function enable() {
-		self::$enabled = true;
+	public static function enable($enabled = true) {
+		self::$enabled = $enabled;
 		
-		// include the zend search functionality
-		set_include_path(
-		 	dirname(dirname(__FILE__)) . '/thirdparty/'. PATH_SEPARATOR .
-			get_include_path()
-		);
+		if($enabled) {
+			// include the zend search functionality
+			set_include_path(
+		 		dirname(dirname(__FILE__)) . '/thirdparty/'. PATH_SEPARATOR .
+				get_include_path()
+			);
 		
-		require_once 'Zend/Search/Lucene.php';
+			require_once 'Zend/Search/Lucene.php';
+		}
 	}
 
 	/**
@@ -377,36 +379,5 @@ class DocumentationSearch {
 		}
 		
 		return $this->outputController->customise($data)->renderWith($templates);
-	}
-}
-
-
-/**
- * Public facing controller for handling search.
- *
- * @package sapphiredocs
- */
-
-class DocumentationOpenSearch_Controller extends Controller {
-	
-	function index() {
-		return $this->httpError('404');
-	}
-	
-	function description() {
-		$viewer = new DocumentationViewer();
-		
-		if(!DocumentationViewer::canView()) return Security::permissionFailure($this);
-		
-		$data = DocumentationSearch::get_meta_data();
-		$link = Director::absoluteBaseUrl() .
-		$data['SearchPageLink'] = Controller::join_links(
-			$viewer->Link(),
-			'results/?Search={searchTerms}&amp;start={startIndex}&amp;length={count}&amp;action_results=1'
-		);
-		
-		$data['SearchPageAtom'] = $data['SearchPageLink'] . '&amp;format=atom';
-		
-		return $this->customise(new ArrayData($data))->renderWith(array('OpenSearchDescription'));
 	}
 }

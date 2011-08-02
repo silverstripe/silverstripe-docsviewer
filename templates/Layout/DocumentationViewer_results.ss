@@ -1,5 +1,5 @@
 <div id="documentation-page">
-	<div id="left-column">
+	<div id="content-column">
 		<p>Your search for <strong>&quot;$Query.XML&quot;</strong> found $TotalResults result<% if TotalResults != 1 %>s<% end_if %>.</p>
 	
 		<% if Results %>
@@ -40,7 +40,7 @@
 		<% end_if %>
 	</div>
 
-	<div id="right-column">
+	<div id="sidebar-column">
 
 	</div>
 </div>

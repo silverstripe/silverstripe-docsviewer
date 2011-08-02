@@ -12,7 +12,7 @@
 			// Remove existing anchor redirection in the url
 			var pageURL = window.location.href.replace(/#[a-zA-Z0-9\-\_]*/g, '');
 			
-			$('#left-column h1[id], #left-column h2[id], #left-column h3[id], #left-column h4[id]').each(function(i) {
+			$('#content-column h1[id], #content-column h2[id], #content-column h3[id], #content-column h4[id]').each(function(i) {
 				var current = $(this);
 				toc += '<li class="' + current.attr("tagName").toLowerCase() + '"><a id="link' + i + '" href="'+ pageURL +'#' + $(this).attr('id') + '" title="' + current.html() + '">' + current.html() + '</a></li>';
 			});
@@ -29,7 +29,7 @@
 		 */
 		var url = window.location.href;
 		
-		$("#left-column h1[id], #left-column h2[id], #left-column h3[id], #left-column h4[id], #left-column h5[id], #left-column h6[id]").each(function() {
+		$("#content-column h1[id], #content-column h2[id], #content-column h3[id], #content-column h4[id], #content-column h5[id], #content-column h6[id]").each(function() {
 			var link = '<a class="heading-anchor-link" title="Link to this section" href="'+ url + '#' + $(this).attr('id') + '">&para;</a>';
 			$(this).append(' ' + link);
 		}); 

@@ -296,13 +296,13 @@ class DocumentationViewer extends Controller {
 	 */
 	function getVersions($entity = false) {
 		if(!$entity) $entity = $this->entity;
-		
+
 		$entity = DocumentationService::is_registered_entity($entity);
 		if(!$entity) return false;
-		
+
 		$versions = $entity->getVersions();
 		$output = new DataObjectSet();
-				
+			
 		if($versions) {
 			$lang = $this->getLang();
 			$currentVersion = $this->getVersion();
@@ -681,12 +681,7 @@ class DocumentationViewer extends Controller {
 	 * @return Form
 	 */
 	function LanguageForm() {
-		if($entity = $this->getEntity()) {
-			$langs = DocumentationService::get_registered_languages($entity->getFolder());
-		}
-		else {
-			$langs = DocumentationService::get_registered_languages();
-		}
+		$langs = $this->getLanguages();
 		
 		$fields = new FieldSet(
 			$dropdown = new DropdownField(
