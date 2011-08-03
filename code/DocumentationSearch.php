@@ -60,6 +60,21 @@ class DocumentationSearch {
 	private $outputController;
 	
 	/**
+	 * Optionally filter by module and version
+	 *
+	 * @var array
+	 */
+	private $modules, $versions;
+	
+	public function setModules($modules) {
+		$this->modules = $modules;
+	}
+	
+	public function setVersions($versions) {
+		$this->versions = $versions;
+	}
+	
+	/**
 	 * Set the current search query
 	 *
 	 * @param string
@@ -173,9 +188,37 @@ class DocumentationSearch {
 		try {
 			$index = Zend_Search_Lucene::open(self::get_index_location());
 		
-			Zend_Search_Lucene::setResultSetLimit(200);
-		
-			$this->results = $index->find($this->getQuery());
+			Zend_Search_Lucene::setResultSetLimit(100);
+			
+			$query = new Zend_Search_Lucene_Search_Query_Boolean();
+			$term = Zend_Search_Lucene_Search_QueryParser::parse($this->getQuery());
+			$query->addSubquery($term, true);
+			
+			if($this->modules) {
+				$moduleQuery = new Zend_Search_Lucene_Search_Query_MultiTerm();
+				
+				foreach($this->modules as $module) {
+					$moduleQuery->addTerm(new Zend_Search_Lucene_Index_Term($module, 'Module'));
+				}
+				
+				$query->addSubquery($moduleQuery, true);
+			}
+			
+			if($this->versions) {
+				$versionQuery = new Zend_Search_Lucene_Search_Query_MultiTerm();
+				
+				foreach($this->versions as $version) {
+					$versionQuery->addTerm(new Zend_Search_Lucene_Index_Term($version, 'Version'));
+				}
+				
+				$query->addSubquery($versionQuery, true);
+			}
+			
+			$er = error_reporting();
+			error_reporting('E_ALL ^ E_NOTICE');
+			$this->results = $index->find($query);
+			error_reporting($er);
+			
 			$this->totalResults = $index->numDocs();
 		}
 		catch(Zend_Search_Lucene_Exception $e) {
@@ -188,10 +231,12 @@ class DocumentationSearch {
 	 */
 	public function getSearchResults($request) {
 		$pageLength = (isset($_GET['length'])) ? (int) $_GET['length'] : 10;
-		
+
 		$data = array(
 			'Results' => null,
 			'Query' => null,
+			'Versions' => DBField::create('Text', implode(',', $this->versions)),
+			'Modules' => DBField::create('Text', implode(',', $this->modules)),
 			'Title' => _t('DocumentationSearch.SEARCHRESULTS', 'Search Results'),
 			'TotalResults' => null,
 			'TotalPages' => null,
@@ -216,27 +261,29 @@ class DocumentationSearch {
 
 		$results = new DataObjectSet();
 		
-		foreach($this->results as $k => $hit) {
-			if($k < ($currentPage-1)*$pageLength || $k >= ($currentPage*$pageLength)) continue;
+		if($this->results) {
+			foreach($this->results as $k => $hit) {
+				if($k < ($currentPage-1)*$pageLength || $k >= ($currentPage*$pageLength)) continue;
 			
-			$doc = $hit->getDocument();
+				$doc = $hit->getDocument();
 			
-			$content = $hit->content;
-			
-			// do a simple markdown parse of the file
-			$obj = new ArrayData(array(
-				'Title' => DBField::create('Varchar', $doc->getFieldValue('Title')),
-				'BreadcrumbTitle' => DBField::create('HTMLText', $doc->getFieldValue('BreadcrumbTitle')),
-				'Link' => DBField::create('Varchar',$doc->getFieldValue('Link')),
-				'Language' => DBField::create('Varchar',$doc->getFieldValue('Language')),
-				'Version' => DBField::create('Varchar',$doc->getFieldValue('Version')),
-				'Content' => DBField::create('HTMLText', $content),
-				'Score' => $hit->score,
-				'Number' => $k + 1,
-				'ID' => md5($doc->getFieldValue('Link'))
-			));
+				$content = $hit->content;
+				
+				$obj = new ArrayData(array(
+					'Title' => DBField::create('Varchar', $doc->getFieldValue('Title')),
+					'BreadcrumbTitle' => DBField::create('HTMLText', $doc->getFieldValue('BreadcrumbTitle')),
+					'Link' => DBField::create('Varchar',$doc->getFieldValue('Link')),
+					'Language' => DBField::create('Varchar',$doc->getFieldValue('Language')),
+					'Version' => DBField::create('Varchar',$doc->getFieldValue('Version')),
+					'Module' => DBField::create('Varchar', $doc->getFieldValue('Module')),
+					'Content' => DBField::create('HTMLText', $content),
+					'Score' => $hit->score,
+					'Number' => $k + 1,
+					'ID' => md5($doc->getFieldValue('Link'))
+				));
 
-			$results->push($obj);
+				$results->push($obj);
+			}
 		}
 
 		$data['Results'] = $results;
@@ -358,7 +405,7 @@ class DocumentationSearch {
 	 * the search results template or the Atom feed
 	 */
 	public function renderResults() {
-		if(!$this->results) $this->performSearch();
+		if(!$this->results && $this->query) $this->performSearch();
 		if(!$this->outputController) return user_error('Call renderResults() on a DocumentationViewer instance.', E_USER_ERROR);
 		
 		$request = $this->outputController->getRequest();

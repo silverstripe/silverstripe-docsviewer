@@ -144,7 +144,7 @@ class DocumentationService {
 			if($version || $lang) {
 				foreach($entities as $entity) {
 					if(self::is_registered_entity($entity->getFolder(), $version, $lang)) {
-						$output[] = $entity;
+						$output[$entity->getFolder()] = $entity;
 					}
 				}
 			}

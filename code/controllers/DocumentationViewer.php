@@ -156,7 +156,7 @@ class DocumentationViewer extends Controller {
 				
 			}
 
-			// check to see if the module is a valid module. If it isn't, then we
+			// check to see if the request is a valid entity. If it isn't, then we
 			// need to throw a 404.
 			if(!DocumentationService::is_registered_entity($firstParam)) {
 				return $this->throw404();
@@ -246,7 +246,7 @@ class DocumentationViewer extends Controller {
 	
 	/**
 	 * Returns the current version. If no version is set then it is the current
-	 * set version so need to pull that from the module.
+	 * set version so need to pull that from the {@link Entity}.
 	 *
 	 * @return String
 	 */
@@ -272,10 +272,9 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
-	 * Return all the available languages for the module.
+	 * Return all the available languages for the {@link Entity}.
 	 *
-	 * @param String - The name of the module
-	 * @return DataObjectSet
+	 * @return array
 	 */
 	function getLanguages() {
 		$entity = $this->getEntity();
@@ -291,7 +290,7 @@ class DocumentationViewer extends Controller {
 	 * Get all the versions loaded for the current {@link DocumentationEntity}. 
 	 * the filesystem then they are loaded under the 'Current' namespace.
 	 *
-	 * @param String $entity name of module to limit it to eg sapphire
+	 * @param String $entity name of {@link Entity} to limit it to eg sapphire
 	 * @return DataObjectSet
 	 */
 	function getVersions($entity = false) {
@@ -302,14 +301,12 @@ class DocumentationViewer extends Controller {
 
 		$versions = $entity->getVersions();
 		$output = new DataObjectSet();
-			
+
 		if($versions) {
 			$lang = $this->getLang();
 			$currentVersion = $this->getVersion();
-			
+
 			foreach($versions as $key => $version) {
-				// work out the link to this version of the documentation.  
-				// @todo Keep the user on their given page rather than redirecting to module.
 				$linkingMode = ($currentVersion == $version) ? 'current' : 'link';
 			
 				if(!$version) $version = 'Current';
@@ -480,7 +477,7 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
-	 * Get the module pages under a given page. Recursive call for {@link getEntityPages()}
+	 * Get all the pages under a given page. Recursive call for {@link getEntityPages()}
 	 *
 	 * @todo Need to rethink how to support pages which are pulling content from their children
 	 *		i.e if a folder doesn't have 2 then it will load the first file in the folder
@@ -607,7 +604,7 @@ class DocumentationViewer extends Controller {
 			
 			foreach($pages as $i => $title) {
 				if($title) {
-					// Don't add module name, already present in Link()
+					// Don't add entity name, already present in Link()
 					if($i > 0) $path[] = $title;
 					
 					$output->push(new ArrayData(array(
@@ -651,9 +648,6 @@ class DocumentationViewer extends Controller {
 	 * @return String
 	 */
 	public function Link($path = false, $entity = false, $version = false, $lang = false) {
-		$base = Director::absoluteBaseURL();
-		
-		// only include the version. Version is optional after all
 		$version = ($version === null) ? $this->getVersion() : $version;
 		
 		$lang = (!$lang) ? $this->getLang() : $lang;
@@ -668,7 +662,14 @@ class DocumentationViewer extends Controller {
 			$action = implode('/', $path);
 		}
 		
-		$link = Controller::join_links($base, self::get_link_base(), $entity, $lang, $version, $action);
+		$link = Controller::join_links(
+			Director::absoluteBaseURL(), 
+			self::get_link_base(), 
+			$entity, 
+			($entity) ? $lang : "", // only include lang for entity - sapphire/en vs en/
+			($entity) ? $version :"",
+			$action
+		);
 
 		return $link;
 	} 
@@ -733,18 +734,19 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
-	 * Documentation Basic Search Form
+	 * Documentation Search Form. Allows filtering of the results by many entities
+	 * and multiple versions.
 	 *
-	 * Integrates with sphinx
 	 * @return Form
 	 */
 	function DocumentationSearchForm() {
 		if(!DocumentationSearch::enabled()) return false;
-		
-		$query = (isset($_REQUEST['Search'])) ? Convert::raw2xml($_REQUEST['Search']) : "";
-		
+		$q = ($q = $this->getSearchQuery()) ? $q->NoHTML() : "";
+
 		$fields = new FieldSet(
-			new TextField('Search', _t('DocumentationViewer.SEARCH', 'Search'), $query)
+			new TextField('Search', _t('DocumentationViewer.SEARCH', 'Search'), $q),
+			new HiddenField('Entities', '', implode(',', array_keys($this->getSearchedEntities()))),
+			new HiddenField('Versions', '', implode(',', $this->getSearchedVersions()))
 		);
 		
 		$actions = new FieldSet(
@@ -760,19 +762,134 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
+	 * Return an array of folders and titles
+	 *
+	 * @return array
+	 */
+	function getSearchedEntities() {
+		$entities = array();
+
+		if(isset($_REQUEST['Entities'])) {
+			if(is_array($_REQUEST['Entities'])) {
+				$entities = Convert::raw2att($_REQUEST['Entities']);
+			}
+			else {
+				$entities = explode(',', Convert::raw2att($_REQUEST['Entities']));
+				$entities = array_combine($entities, $entities);
+			}
+		}
+		else if($entity = $this->getEntity()) {
+			$entities[$entity->getFolder()] = Convert::raw2att($entity->getTitle());
+		}
+		
+		return $entities;
+	}
+	
+	/**
+	 * Return an array of versions that we're allowed to return
+	 *
+	 * @return array
+	 */
+	function getSearchedVersions() {
+		$versions = array();
+		
+		if(isset($_REQUEST['Versions'])) {
+			if(is_array($_REQUEST['Versions'])) {
+				$versions = Convert::raw2att($_REQUEST['Versions']);
+				$versions = array_combine($versions, $versions);
+			}
+			else {
+				$version = Convert::raw2att($_REQUEST['Versions']);
+				$versions[$version] = $version;
+			}
+		}
+		else if($version = $this->getVersion()) {
+			$version =  Convert::raw2att($version);
+			$versions[$version] = $version;
+		}
+
+		return $versions;
+	}
+	
+	/**
+	 * Return the current search query
+	 *
+	 * @return HTMLText|null
+	 */
+	function getSearchQuery() {
+		if(isset($_REQUEST['Search'])) {
+			return DBField::create('HTMLText', $_REQUEST['Search']);
+		}
+	}
+	
+	/**
 	 * Past straight to results, display and encode the query
 	 */
 	function results($data, $form = false) {
-
 		$query = (isset($_REQUEST['Search'])) ? $_REQUEST['Search'] : false;
-		
-		if(!$query) return $this->httpError('404');
 		
 		$search = new DocumentationSearch();
 		$search->setQuery($query);
+		$search->setVersions($this->getSearchedVersions());
+		$search->setModules($this->getSearchedEntities());
 		$search->setOutputController($this);
 		
 		return $search->renderResults();
+	}
+	
+	/**
+	 * Returns an search form which allows people to express more complex rules
+	 * and options than the plain search form.
+	 *
+	 * @todo client side filtering of checkable option based on the module selected.
+	 *
+	 * @return Form
+	 */
+	function AdvancedSearchForm() {
+		$entities = DocumentationService::get_registered_entities();
+		$versions = array();
+		
+		foreach($entities as $entity) {
+			$versions[$entity->getFolder()] = $entity->getVersions();
+		}
+		
+		// get a list of all the unique versions
+		$uniqueVersions = array_unique(self::array_flatten(array_values($versions)));
+		asort($uniqueVersions);
+		$uniqueVersions = array_combine($uniqueVersions,$uniqueVersions);
+		
+		$q = ($q = $this->getSearchQuery()) ? $q->NoHTML() : "";
+		
+		// klude to take an array of objects down to a simple map
+		$entities = new DataObjectSet($entities);
+		$entities = $entities->map('Folder', 'Title');
+		
+		// if we haven't gone any search limit then we're searching everything
+		$searchedEntities = $this->getSearchedEntities();
+		if(count($searchedEntities) < 1) $searchedEntities = $entities;
+		
+		$searchedVersions = $this->getSearchedVersions();
+		if(count($searchedVersions) < 1) $searchedVersions = $uniqueVersions;
+
+		$fields = new FieldSet(
+			new TextField('Search', _t('DocumentationViewer.KEYWORDS', 'Keywords'), $q),
+			new CheckboxSetField('Entities', _t('DocumentationViewer.MODULES', 'Modules'), $entities, $searchedEntities),
+			new CheckboxSetField('Versions', _t('DocumentationViewer.VERSIONS', 'Versions'),
+			 	$uniqueVersions, $searchedVersions
+			)
+		);
+		
+		$actions = new FieldSet(
+			new FormAction('results', _t('DocumentationViewer.SEARCH', 'Search'))
+		);
+		$required = new RequiredFields(array('Search'));
+		
+		$form = new Form($this, 'AdvancedSearchForm', $fields, $actions, $required);
+		$form->disableSecurityToken();
+		$form->setFormMethod('get');
+		$form->setFormAction(self::$link_base . 'DocumentationSearchForm');
+	
+		return $form;
 	}
 	
 	/**
@@ -809,5 +926,27 @@ class DocumentationViewer extends Controller {
 		}
 		
 		return false;
+	}
+	
+	/** 
+	 * Flattens an array
+	 *
+	 * @param array
+	 * @return array
+	 */ 
+	public static function array_flatten($array) { 
+		if(!is_array($array)) return false; 
+		
+		$output = array(); 
+		foreach($array as $k => $v) { 
+			if(is_array($v)) { 
+				$output = array_merge($output, self::array_flatten($v)); 
+			} 
+			else { 
+				$output[$k] = $v; 
+			} 
+		}
+		
+		return $output; 
 	}
 }

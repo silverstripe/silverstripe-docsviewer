@@ -73,15 +73,18 @@ class RebuildLuceneDocsIndex extends BuildTask {
 					$content = $page->getMarkdown();
 					if($content) $content = Markdown($content);
 
+					$entity = ($entity = $page->getEntity()) ? $entity->getTitle() : "";
+					
 					$doc->addField(Zend_Search_Lucene_Field::Text('content', $content));
 					$doc->addField($titleField = Zend_Search_Lucene_Field::Text('Title', $page->getTitle()));
 					$doc->addField($breadcrumbField = Zend_Search_Lucene_Field::Text('BreadcrumbTitle', $page->getBreadcrumbTitle()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Version', $page->getVersion()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Language', $page->getLang()));
+					$doc->addField(Zend_Search_Lucene_Field::Keyword('Entity', $entity));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Link', $page->Link()));
 					
 					// custom boosts
-					$titleField->boost = 1.5;
+					$titleField->boost = 3;
 					$breadcrumbField->boost = 1.5;
 					foreach(DocumentationSearch::$boost_by_path as $pathExpr => $boost) {
 						if(preg_match($pathExpr, $page->getRelativePath())) $doc->boost = $boost;
