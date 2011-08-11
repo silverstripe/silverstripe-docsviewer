@@ -198,7 +198,7 @@ class DocumentationSearch {
 				$moduleQuery = new Zend_Search_Lucene_Search_Query_MultiTerm();
 				
 				foreach($this->modules as $module) {
-					$moduleQuery->addTerm(new Zend_Search_Lucene_Index_Term($module, 'Module'));
+					$moduleQuery->addTerm(new Zend_Search_Lucene_Index_Term($module, 'Entity'));
 				}
 				
 				$query->addSubquery($moduleQuery, true);
@@ -275,7 +275,7 @@ class DocumentationSearch {
 					'Link' => DBField::create('Varchar',$doc->getFieldValue('Link')),
 					'Language' => DBField::create('Varchar',$doc->getFieldValue('Language')),
 					'Version' => DBField::create('Varchar',$doc->getFieldValue('Version')),
-					'Module' => DBField::create('Varchar', $doc->getFieldValue('Module')),
+					'Entity' => DBField::create('Varchar', $doc->getFieldValue('Entity')),
 					'Content' => DBField::create('HTMLText', $content),
 					'Score' => $hit->score,
 					'Number' => $k + 1,
@@ -372,7 +372,8 @@ class DocumentationSearch {
 	}
 	
 	/**
-	 * OpenSearch MetaData. Includes 'description', 'tags', 'contact'
+	 * OpenSearch MetaData fields. For a list of fields consult 
+	 * {@link self::get_meta_data()}
 	 *
 	 * @param array
 	 */
@@ -381,6 +382,9 @@ class DocumentationSearch {
 			foreach($data as $key => $value) {
 				self::$meta_data[strtolower($key)] = $value;
 			}
+		}
+		else {
+			user_error("set_meta_data must be passed an array", E_USER_ERROR);
 		}
 	}
 	
@@ -392,12 +396,19 @@ class DocumentationSearch {
 	public static function get_meta_data() {
 		$data = self::$meta_data;
 		
-		return array(
-			'Description' => (isset($data['description'])) ? $data['description'] : _t('DocumentationViewer.OPENSEARCHDESC', 'Search the documentation'),
-			'Tags' => (isset($data['tags'])) ? $data['tags'] : _t('DocumentationViewer.OPENSEARCHTAGS', 'documentation'),
-			'Contact' => (isset($data['contact'])) ? $data['contact'] :  Email::getAdminEmail(),
-			'ShortName' => (isset($data['shortname'])) ? $data['shortname'] : _t('DocumentationViewer.OPENSEARCHNAME', 'Documentation Search')
+		$defaults = array(
+			'Description' => _t('DocumentationViewer.OPENSEARCHDESC', 'Search the documentation'),
+			'Tags' => _t('DocumentationViewer.OPENSEARCHTAGS', 'documentation'),
+			'Contact' => Email::getAdminEmail(),
+			'ShortName' => _t('DocumentationViewer.OPENSEARCHNAME', 'Documentation Search'),
+			'Author' => 'SilverStripe'
 		);
+		
+		foreach($defaults as $key => $value) {
+			if(isset($data[$key])) $defaults[$key] = $data[$key];
+		}
+		
+		return $defaults;
 	}
 	
 	/**
@@ -417,7 +428,7 @@ class DocumentationSearch {
 			// alter the fields for the opensearch xml.
 			$title = ($title = $this->getTitle()) ? ' - '. $title : "";
 			
-			$link = Controller::join_links($this->outputController->Link(), 'DocumentationOpenSearch_Controller/description/');
+			$link = Controller::join_links($this->outputController->Link(), 'DocumentationOpenSearchController/description/');
 			
 			$data->setField('Title', $data->Title . $title);
 			$data->setField('DescriptionURL', $link);

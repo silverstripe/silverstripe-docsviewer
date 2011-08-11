@@ -3,7 +3,7 @@
 	<title>$Title</title>
 	<link>$Link</link>
 	<author> 
-		<name>SilverStripe Ltd.</name>
+		<name>$Author</name>
 	</author>
 	
 	<updated>$Now</updated>
