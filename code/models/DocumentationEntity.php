@@ -17,7 +17,7 @@
  *
  * @see http://php.net/manual/en/function.version-compare.php
  *
- * @package docviewer
+ * @package docsviewer
  * @subpackage models
  */
 

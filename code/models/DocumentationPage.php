@@ -4,7 +4,7 @@
  * A specific page within a {@link DocumentationEntity}. Maps 1 to 1 to a file on the 
  * filesystem.
  * 
- * @package docviewer
+ * @package docsviewer
  * @subpackage model
  */
 class DocumentationPage extends ViewableData {

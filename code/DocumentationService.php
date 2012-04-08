@@ -8,7 +8,7 @@
  * Includes registering which components to document and handles the entities being
  * documented.
  *
- * @package docviewer
+ * @package docsviewer
  */
 
 class DocumentationService {

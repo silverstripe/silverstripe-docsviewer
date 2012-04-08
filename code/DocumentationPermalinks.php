@@ -6,7 +6,7 @@
  *
  * Redirects the user from example.com/foo to example.com/en/module/foo
  *
- * @package docviewer
+ * @package docsviewer
  */
 
 class DocumentationPermalinks {

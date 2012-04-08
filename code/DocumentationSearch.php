@@ -21,7 +21,7 @@
  * yoursite.com/search/?q=Foo&start=10&limit=10
  * </code>
  *
- * @package docviewer
+ * @package docsviewer
  */
 
 class DocumentationSearch {
@@ -183,7 +183,7 @@ class DocumentationSearch {
 	 */
 	public function get_index_location() {
 		if(!self::$index_location) 
-			self::$index_location = DOCVIEWER_DIR;
+			self::$index_location = DOCSVIEWER_DIR;
 		
 		return Controller::join_links(
 			TEMP_FOLDER, 

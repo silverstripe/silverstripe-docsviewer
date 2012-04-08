@@ -3,7 +3,7 @@
 /**
  * Parser wrapping the Markdown Extra parser (see http://michelf.com/projects/php-markdown/extra/). 
  *
- * @package docviewer
+ * @package docsviewer
  */
 class DocumentationParser {
 
@@ -45,7 +45,7 @@ class DocumentationParser {
 		$md = self::rewrite_heading_anchors($md, $page);
 		$md = self::rewrite_code_blocks($md, $page);
 	
-		require_once(DOCVIEWER_PATH .'/thirdparty/markdown/markdown.php');
+		require_once(DOCSVIEWER_PATH .'/thirdparty/markdown/markdown.php');
 		
 		$parser = new MarkdownExtra_Parser();
 		$parser->no_markup = true;

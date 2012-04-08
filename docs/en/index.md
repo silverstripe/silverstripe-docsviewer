@@ -1,4 +1,4 @@
-# Docviewer Module
+# docsviewer Module
 
 This module has been developed to read and display content from markdown and 
 plain text files in web browser. It provides an easy way to bundle end user 
@@ -36,7 +36,7 @@ location then you can register paths directly:
 
 
 To configure the documentation system the configuration information is 
-available on the [Configurations](dev/docs/en/docviewer/configuration-options)
+available on the [Configurations](dev/docs/en/docsviewer/configuration-options)
 page.
 
 ## Writing documentation

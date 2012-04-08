@@ -1,14 +1,14 @@
 <?php
 
 /**
- * @package docviewer
+ * @package docsviewer
  * @subpackage tests
  */
 
 class DocumentationServiceTest extends SapphireTest {
 
 	function testGetPagesFromFolder() {
-		$entity = DocumentationService::register('testdocs', DOCVIEWER_PATH . '/tests/docs/');
+		$entity = DocumentationService::register('testdocs', DOCSVIEWER_PATH . '/tests/docs/');
 		$pages = DocumentationService::get_pages_from_folder($entity);
 		
 		$this->assertContains('index.md', $pages->column('Filename'), 'The tests/docs/en folder should contain a index file');
@@ -28,7 +28,7 @@ class DocumentationServiceTest extends SapphireTest {
 	
 	
 	function testGetPagesFromFolderRecursive() {	
-		$entity = DocumentationService::register('testdocsrecursive', DOCVIEWER_PATH . '/tests/docs-recursive/');
+		$entity = DocumentationService::register('testdocsrecursive', DOCSVIEWER_PATH . '/tests/docs-recursive/');
 		
 		$pages = DocumentationService::get_pages_from_folder($entity, null, true);
 		
@@ -43,19 +43,19 @@ class DocumentationServiceTest extends SapphireTest {
 	}
 	
 	function testFindPath() {
-		DocumentationService::register("DocumentationViewerTests", DOCVIEWER_PATH . "/tests/docs/");
+		DocumentationService::register("DocumentationViewerTests", DOCSVIEWER_PATH . "/tests/docs/");
 		
 		// file
 		$path = DocumentationService::find_page('DocumentationViewerTests', array('test'));
-		$this->assertEquals(DOCVIEWER_PATH . "/tests/docs/en/test.md", $path);
+		$this->assertEquals(DOCSVIEWER_PATH . "/tests/docs/en/test.md", $path);
 
 		// the home page. The path finder should go to the index.md file in the default language
 		$path = DocumentationService::find_page('DocumentationViewerTests', array(''));
-		$this->assertEquals(DOCVIEWER_PATH . "/tests/docs/en/index.md", $path);
+		$this->assertEquals(DOCSVIEWER_PATH . "/tests/docs/en/index.md", $path);
 
 		// second level
 		$path = DocumentationService::find_page('DocumentationViewerTests', array('subfolder', 'subpage'));
-		$this->assertEquals(DOCVIEWER_PATH . "/tests/docs/en/subfolder/subpage.md", $path);
+		$this->assertEquals(DOCSVIEWER_PATH . "/tests/docs/en/subfolder/subpage.md", $path);
 		
 		// subsubfolder has no index file. It should fail instead the viewer should pick up on this
 		// and display the listing of the folder
@@ -64,11 +64,11 @@ class DocumentationServiceTest extends SapphireTest {
 		
 		// third level
 		$path = DocumentationService::find_page('DocumentationViewerTests', array('subfolder', 'subsubfolder', 'subsubpage'));
-		$this->assertEquals(DOCVIEWER_PATH . "/tests/docs/en/subfolder/subsubfolder/subsubpage.md", $path);
+		$this->assertEquals(DOCSVIEWER_PATH . "/tests/docs/en/subfolder/subsubfolder/subsubpage.md", $path);
 
 		// with trailing slash
 		$path = DocumentationService::find_page('DocumentationViewerTests', array('subfolder', 'subsubfolder', 'subsubpage'));
-		$this->assertEquals(DOCVIEWER_PATH . "/tests/docs/en/subfolder/subsubfolder/subsubpage.md", $path);
+		$this->assertEquals(DOCSVIEWER_PATH . "/tests/docs/en/subfolder/subsubfolder/subsubpage.md", $path);
 	}
 	
 	

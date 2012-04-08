@@ -9,7 +9,7 @@
  * For more documentation on how to use this class see the documentation in the
  * docs folder
  *
- * @package docviewer
+ * @package docsviewer
  */
 
 class DocumentationViewer extends Controller {
@@ -65,19 +65,19 @@ class DocumentationViewer extends Controller {
 		Requirements::combine_files(
 			'syntaxhighlighter.js',
 			array(
-				DOCVIEWER_DIR .'/thirdparty/syntaxhighlighter/scripts/shCore.js',
-				DOCVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushJScript.js',
-				DOCVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushPhp.js',
-				DOCVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushXml.js',
-				DOCVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushCss.js',
-				DOCVIEWER_DIR . '/javascript/shBrushSS.js'
+				DOCSVIEWER_DIR .'/thirdparty/syntaxhighlighter/scripts/shCore.js',
+				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushJScript.js',
+				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushPhp.js',
+				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushXml.js',
+				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushCss.js',
+				DOCSVIEWER_DIR . '/javascript/shBrushSS.js'
 			)
 		);
 		
-		Requirements::javascript(DOCVIEWER_DIR .'/javascript/DocumentationViewer.js');
-		Requirements::css(DOCVIEWER_DIR .'/css/shSilverStripeDocs.css');
+		Requirements::javascript(DOCSVIEWER_DIR .'/javascript/DocumentationViewer.js');
+		Requirements::css(DOCSVIEWER_DIR .'/css/shSilverStripeDocs.css');
 		
-		Requirements::css(DOCVIEWER_DIR .'/css/DocumentationViewer.css');
+		Requirements::css(DOCSVIEWER_DIR .'/css/DocumentationViewer.css');
 	}
 	
 	/**

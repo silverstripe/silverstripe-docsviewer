@@ -3,15 +3,15 @@
  * Documentation Configuration
  *
  * Please override any of these options in your own projects _config.php file.
- * For more information and documentation see docviewer/docs/en
+ * For more information and documentation see docsviewer/docs/en
  */
 
-if(!defined('DOCVIEWER_PATH')) {
-	define('DOCVIEWER_PATH', dirname(__FILE__));
+if(!defined('DOCSVIEWER_PATH')) {
+	define('DOCSVIEWER_PATH', dirname(__FILE__));
 }
 
-if(!defined('DOCVIEWER_DIR')) {
-	define('DOCVIEWER_DIR', array_pop(explode(DIRECTORY_SEPARATOR, DOCVIEWER_PATH)));
+if(!defined('DOCSVIEWER_DIR')) {
+	define('DOCSVIEWER_DIR', array_pop(explode(DIRECTORY_SEPARATOR, DOCSVIEWER_PATH)));
 }
 
 

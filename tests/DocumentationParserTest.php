@@ -1,13 +1,13 @@
 <?php
 /**
- * @package docviewer
+ * @package docsviewer
  */
 class DocumentationParserTest extends SapphireTest {
 	
 	function testRewriteCodeBlocks() {
 		$page = new DocumentationPage();
 		$page->setRelativePath('test.md');
-		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCVIEWER_PATH . '/tests/docs/'));
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCSVIEWER_PATH . '/tests/docs/'));
 		$page->setLang('en');
 		$page->setVersion('2.4');
 		$result = DocumentationParser::rewrite_code_blocks($page->getMarkdown());
@@ -38,23 +38,23 @@ HTML;
 		// Page on toplevel
 		$page = new DocumentationPage();
 		$page->setRelativePath('subfolder/subpage.md');
-		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCVIEWER_PATH . '/tests/docs/'));
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCSVIEWER_PATH . '/tests/docs/'));
 		$page->setLang('en');
 		$page->setVersion('2.4');
 		
 		$result = DocumentationParser::rewrite_image_links($page->getMarkdown(), $page, 'mycontroller/cms/2.4/en/');
 
 		$this->assertContains(
-			'[relative image link](' . Director::absoluteBaseURL() .'/'. DOCVIEWER_DIR . '/tests/docs/en/subfolder/_images/image.png)',
+			'[relative image link](' . Director::absoluteBaseURL() .'/'. DOCSVIEWER_DIR . '/tests/docs/en/subfolder/_images/image.png)',
 			$result
 		);
 		$this->assertContains(
-			'[parent image link](' . Director::absoluteBaseURL() . '/'. DOCVIEWER_DIR. '/tests/docs/en/_images/image.png)',
+			'[parent image link](' . Director::absoluteBaseURL() . '/'. DOCSVIEWER_DIR. '/tests/docs/en/_images/image.png)',
 			$result
 		);
 		
 		// $this->assertContains(
-		//	'[absolute image link](' . Director::absoluteBaseURL() . '/'. DOCVIEWER_DIR. '/tests/docs/en/_images/image.png)',
+		//	'[absolute image link](' . Director::absoluteBaseURL() . '/'. DOCSVIEWER_DIR. '/tests/docs/en/_images/image.png)',
 		//	$result
 		// );
 	}
@@ -63,7 +63,7 @@ HTML;
 		// Page on toplevel
 		$page = new DocumentationPage();
 		$page->setRelativePath('test.md');
-		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCVIEWER_PATH .'/tests/docs/'));
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCSVIEWER_PATH .'/tests/docs/'));
 		$page->setLang('en');
 		$page->setVersion('2.4');
 		
@@ -81,7 +81,7 @@ HTML;
 	function testHeadlineAnchors() {
 		$page = new DocumentationPage();
 		$page->setRelativePath('test.md');
-		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCVIEWER_PATH . '/tests/docs/'));
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCSVIEWER_PATH . '/tests/docs/'));
 		$page->setLang('en');
 		$page->setVersion('2.4');
 		
@@ -119,7 +119,7 @@ HTML;
 		// Page on toplevel
 		$page = new DocumentationPage();
 		$page->setRelativePath('test.md');
-		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCVIEWER_PATH . '/tests/docs/'));
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCSVIEWER_PATH . '/tests/docs/'));
 
 		$result = DocumentationParser::rewrite_relative_links($page->getMarkdown(), $page, 'mycontroller/cms/2.4/en/');
 
@@ -147,7 +147,7 @@ HTML;
 		// Page in subfolder
 		$page = new DocumentationPage();
 		$page->setRelativePath('subfolder/subpage.md');
-		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCVIEWER_PATH . '/tests/docs/'));
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCSVIEWER_PATH . '/tests/docs/'));
 		
 		$result = DocumentationParser::rewrite_relative_links($page->getMarkdown(), $page, 'mycontroller/cms/2.4/en/');
 
@@ -180,7 +180,7 @@ HTML;
 		// Page in nested subfolder
 		$page = new DocumentationPage();
 		$page->setRelativePath('subfolder/subsubfolder/subsubpage.md');
-		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCVIEWER_PATH . '/tests/docs/'));
+		$page->setEntity(new DocumentationEntity('mymodule', '2.4', DOCSVIEWER_PATH . '/tests/docs/'));
 		
 		$result = DocumentationParser::rewrite_relative_links($page->getMarkdown(), $page, 'mycontroller/cms/2.4/en/');
 		
@@ -209,7 +209,7 @@ HTML;
 	function testRetrieveMetaData() {
 		$page = new DocumentationPage();
 		$page->setRelativePath('MetaDataTest.md');
-		$page->setEntity(new DocumentationEntity('parser', '2.4', DOCVIEWER_PATH . '/tests/docs-parser/'));
+		$page->setEntity(new DocumentationEntity('parser', '2.4', DOCSVIEWER_PATH . '/tests/docs-parser/'));
 		
 		DocumentationParser::retrieve_meta_data($page);
 		
@@ -221,9 +221,9 @@ HTML;
 	function testParserConvertsSpecialCharacters() {
 		$page = new DocumentationPage();
 		$page->setRelativePath('CodeSnippets.md');
-		$page->setEntity(new DocumentationEntity('parser', '2.4', DOCVIEWER_PATH . '/tests/docs-parser/'));
+		$page->setEntity(new DocumentationEntity('parser', '2.4', DOCSVIEWER_PATH . '/tests/docs-parser/'));
 
-		$parsed = DocumentationParser::parse($page, '/'.DOCVIEWER_DIR .'/tests/docs-parser/');
+		$parsed = DocumentationParser::parse($page, '/'.DOCSVIEWER_DIR .'/tests/docs-parser/');
 		
 		// header elements parsed
 		$this->assertContains(
@@ -239,7 +239,7 @@ HTML;
 	}
 	
 	function testRewritingRelativeLinksToFiles() {
-		$folder = DOCVIEWER_PATH . '/tests/docs-parser/';
+		$folder = DOCSVIEWER_PATH . '/tests/docs-parser/';
 		
 		$page = new DocumentationPage();
 		$page->setRelativePath('file-download.md');
@@ -248,12 +248,12 @@ HTML;
 		$parsed = DocumentationParser::parse($page, $folder);
 
 		$this->assertContains(
-			DOCVIEWER_DIR .'/tests/docs-parser/en/_images/external_link.png',
+			DOCSVIEWER_DIR .'/tests/docs-parser/en/_images/external_link.png',
 			$parsed
 		);
 		
 		$this->assertContains(
-			DOCVIEWER_DIR .'/tests/docs-parser/en/_images/test.tar.gz',
+			DOCSVIEWER_DIR .'/tests/docs-parser/en/_images/test.tar.gz',
 			$parsed
 		);
 	}

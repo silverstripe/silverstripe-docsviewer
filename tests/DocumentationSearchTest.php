@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @package docviewer
+ * @package docsviewer
  * @subpackage tests
  */
 
@@ -13,14 +13,14 @@ class DocumentationSearchTest extends FunctionalTest {
 		if(!DocumentationSearch::enabled()) return;
 		
 		DocumentationService::set_automatic_registration(false);
-		DocumentationService::register('docs-search', DOCVIEWER_PATH . '/tests/docs-search/');
+		DocumentationService::register('docs-search', DOCSVIEWER_PATH . '/tests/docs-search/');
 	}
 	
 	function testGetAllPages() {
 		if(!DocumentationSearch::enabled()) return;
 		
 		DocumentationService::set_automatic_registration(false);
-		DocumentationService::register('docs-search', DOCVIEWER_PATH . '/tests/docs-search/');
+		DocumentationService::register('docs-search', DOCSVIEWER_PATH . '/tests/docs-search/');
 		
 		$search = DocumentationSearch::get_all_documentation_pages();
 		

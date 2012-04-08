@@ -5,7 +5,7 @@
  *
  * For the hourly cron rebuild use RebuildLuceneDocusIndex_Hourly 
  *
- * @package docviewer
+ * @package docsviewer
  * @subpackage tasks
  */
 
@@ -14,14 +14,14 @@ class RebuildLuceneDocsIndex extends BuildTask {
 	protected $title = "Rebuild Documentation Search Indexes";
 	
 	protected $description = "
-		Rebuilds the indexes used for the search engine in the docviewer.";
+		Rebuilds the indexes used for the search engine in the docsviewer.";
 	
 	function run($request) {
 		$this->rebuildIndexes();
 	}
 	
 	function rebuildIndexes($quiet = false) {
-		require_once(DOCVIEWER_PATH .'/thirdparty/markdown/markdown.php');
+		require_once(DOCSVIEWER_PATH .'/thirdparty/markdown/markdown.php');
 		require_once 'Zend/Search/Lucene.php';
 
 		ini_set("memory_limit", -1);
@@ -107,7 +107,7 @@ class RebuildLuceneDocsIndex extends BuildTask {
 }
 
 /**
- * @package docviewer
+ * @package docsviewer
  * @subpackage tasks
  */
 class RebuildLuceneDocusIndex_Hourly extends HourlyTask {
