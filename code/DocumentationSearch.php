@@ -1,23 +1,27 @@
 <?php
 
 /**
- * Documentation Search powered by Lucene. You will need Zend_Lucene installed on your path
- * to rebuild the indexes run the {@link RebuildLuceneDocsIndex} task. You may wish to setup
- * a cron job to remake the indexes on a regular basis.
+ * Documentation Search powered by Lucene. You will need Zend_Lucene installed 
+ * on your path.
  *
- * It has the ability to generate an OpenSearch RSS formatted feeds simply by using the URL
+ * To rebuild the indexes run the {@link RebuildLuceneDocsIndex} task. You may 
+ * wish to setup a cron job to remake the indexes on a regular basis.
+ *
+ * This class has the ability to generate an OpenSearch RSS formatted feeds 
+ * simply by using the URL:
  *
  * <code>
  * yoursite.com/search/?q=Foo&format=rss. // Format can either be specified as rss or left off.
  * </code>
  *
- * To get a specific amount of results you can also use the modifiers start and limit
+ * To get a specific amount of results you can also use the modifiers start and 
+ * limit:
  *
  * <code>
  * yoursite.com/search/?q=Foo&start=10&limit=10
  * </code>
  *
- * @package sapphiredocs
+ * @package docviewer
  */
 
 class DocumentationSearch {
@@ -108,7 +112,7 @@ class DocumentationSearch {
 	 *
 	 * @var string 
 	 */
-	private static $index_location = 'sapphiredocs';
+	private static $index_location;
 	
 	/**
 	 * Generate an array of every single documentation page installed on the system. 
@@ -178,7 +182,13 @@ class DocumentationSearch {
 	 * @return string
 	 */
 	public function get_index_location() {
-		return TEMP_FOLDER . '/'. trim(self::$index_location, '/');
+		if(!self::$index_location) 
+			self::$index_location = DOCVIEWER_DIR;
+		
+		return Controller::join_links(
+			TEMP_FOLDER, 
+			trim(self::$index_location, '/')
+		);
 	}
 	
 	/**

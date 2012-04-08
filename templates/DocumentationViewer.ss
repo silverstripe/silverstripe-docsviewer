@@ -5,11 +5,6 @@
 		<% base_tag %>
 		<meta charset="utf-8" />
 		<title>SilverStripe Documentation</title>
-		
-		<% require themedCSS(DocumentationViewer) %>
-		<% require javascript(sapphire/thirdparty/jquery/jquery.js) %>
-		<% require javascript(sapphiredocs/javascript/DocumentationViewer.js) %>
-		
 	</head>
 	
 	<body>

@@ -1,11 +1,12 @@
 <?php
 /**
- * @package sapphiredocs
+ * @package docviewer
+ * @subpackage tests
  */
 class DocumentationEntityTest extends SapphireTest {
 	
 	function testDocumentationEntityAccessing() {
-		$entity = new DocumentationEntity('docs', '1.0', '../sapphiredocs/tests/docs/', 'My Test');
+		$entity = new DocumentationEntity('docs', '1.0', DOCVIEWER_PATH .'/tests/docs/', 'My Test');
 		
 		$this->assertEquals($entity->getTitle(), 'My Test');
 		$this->assertEquals($entity->getVersions(), array('1.0'));
@@ -20,13 +21,13 @@ class DocumentationEntityTest extends SapphireTest {
 	}
 	
 	function testgetStableVersion() {
-		$entity = new DocumentationEntity('docs', '1.0', '../sapphiredocs/tests/docs/', 'My Test');
-		$entity->addVersion('1.1', '../sapphiredocs/tests/docs-v2.4/');
-		$entity->addVersion('0.0', '../sapphiredocs/tests/docs-v3.0/');
+		$entity = new DocumentationEntity('docs', '1.0', DOCVIEWER_PATH. '/tests/docs/', 'My Test');
+		$entity->addVersion('1.1', DOCVIEWER_PATH. '/tests/docs-v2.4/');
+		$entity->addVersion('0.0', DOCVIEWER_PATH. '/tests/docs-v3.0/');
 		$this->assertEquals('1.1', $entity->getStableVersion(), 'Automatic version sorting');
 		
-		$entity = new DocumentationEntity('docs', '1.0', '../sapphiredocs/tests/docs/', 'My Test');
-		$entity->addVersion('1.1.', '../sapphiredocs/tests/docs-v2.4/');
+		$entity = new DocumentationEntity('docs', '1.0', DOCVIEWER_PATH. '/tests/docs/', 'My Test');
+		$entity->addVersion('1.1.', DOCVIEWER_PATH .'/tests/docs-v2.4/');
 		$entity->setStableVersion('1.0');
 		$this->assertEquals('1.0', $entity->getStableVersion(), 'Manual setting');
 	}

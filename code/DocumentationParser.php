@@ -3,7 +3,7 @@
 /**
  * Parser wrapping the Markdown Extra parser (see http://michelf.com/projects/php-markdown/extra/). 
  *
- * @package sapphiredocs
+ * @package docviewer
  */
 class DocumentationParser {
 
@@ -15,9 +15,10 @@ class DocumentationParser {
 	static $heading_counts = array();
 	
 	/**
-	 * Parse a given path to the documentation for a file. Performs a case insensitive 
-	 * lookup on the file system. Automatically appends the file extension to one of the markdown
-	 * extensions as well so /install/ in a web browser will match /install.md or /INSTALL.md
+	 * Parse a given path to the documentation for a file. Performs a case 
+	 * insensitive lookup on the file system. Automatically appends the file 
+	 * extension to one of the markdown extensions as well so /install/ in a
+	 * web browser will match /install.md or /INSTALL.md
 	 * 
 	 * Filepath: /var/www/myproject/src/cms/en/folder/subfolder/page.md
 	 * URL: http://myhost/mywebroot/dev/docs/2.4/cms/en/folder/subfolder/page
@@ -44,7 +45,7 @@ class DocumentationParser {
 		$md = self::rewrite_heading_anchors($md, $page);
 		$md = self::rewrite_code_blocks($md, $page);
 	
-		require_once(BASE_PATH . '/sapphiredocs/thirdparty/markdown/markdown.php');
+		require_once(DOCVIEWER_PATH .'/thirdparty/markdown/markdown.php');
 		
 		$parser = new MarkdownExtra_Parser();
 		$parser->no_markup = true;

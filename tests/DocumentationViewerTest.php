@@ -4,12 +4,11 @@
  * Some of these tests are simply checking that pages load. They should not assume
  * somethings working.
  *
- * @package sapphiredocs
+ * @package docviewer
+ * @subpackage tests
  */
 
 class DocumentationViewerTest extends FunctionalTest {
-
-	static $fixture_file = 'sapphiredocs/tests/DocumentTests.yml';
 
 	protected $autoFollowRedirection = false;
 	
@@ -26,12 +25,12 @@ class DocumentationViewerTest extends FunctionalTest {
 		}
 		
 		// We set 3.0 as current, and test most assertions against 2.4 - to avoid 'current' rewriting issues
-		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs/", '2.3');
-		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs-v2.4/", '2.4', 'Doc Test', true);
-		DocumentationService::register("DocumentationViewerTests", BASE_PATH . "/sapphiredocs/tests/docs-v3.0/", '3.0', 'Doc Test');
+		DocumentationService::register("DocumentationViewerTests", DOCVIEWER_PATH . "/tests/docs/", '2.3');
+		DocumentationService::register("DocumentationViewerTests", DOCVIEWER_PATH . "/tests/docs-v2.4/", '2.4', 'Doc Test', true);
+		DocumentationService::register("DocumentationViewerTests", DOCVIEWER_PATH . "/tests/docs-v3.0/", '3.0', 'Doc Test');
 		
-		DocumentationService::register("DocumentationViewerAltModule1", BASE_PATH . "/sapphiredocs/tests/docs-parser/", '1.0');
-		DocumentationService::register("DocumentationViewerAltModule2", BASE_PATH . "/sapphiredocs/tests/docs-search/", '1.0');
+		DocumentationService::register("DocumentationViewerAltModule1", DOCVIEWER_PATH . "/tests/docs-parser/", '1.0');
+		DocumentationService::register("DocumentationViewerAltModule2", DOCVIEWER_PATH . "/tests/docs-search/", '1.0');
 	}
 	
 	function tearDownOnce() {

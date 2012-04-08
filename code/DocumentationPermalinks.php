@@ -1,12 +1,12 @@
 <?php
 
 /**
- * A mapping store of given permalinks to the full documentation path or useful for customizing the
- * shortcut URLs used in the viewer.
+ * A mapping store of given permalinks to the full documentation path or useful 
+ * for customizing the shortcut URLs used in the viewer.
  *
  * Redirects the user from example.com/foo to example.com/en/module/foo
  *
- * @module sapphiredocs
+ * @package docviewer
  */
 
 class DocumentationPermalinks {
@@ -19,13 +19,14 @@ class DocumentationPermalinks {
 	/**
 	 * Add a mapping of nice short permalinks to a full long path
 	 *
-	 * 		DocumentationPermalinks::add(array(
-	 *			'debugging' => 'current/en/sapphire/topics/debugging'
-	 *		));
+	 * <code>
+	 * DocumentationPermalinks::add(array(
+	 * 	'debugging' => 'current/en/sapphire/topics/debugging'
+	 * ));
+	 * </code>
 	 *
-	 *
-	 * You do not need to include the language or the version current as it will add it
-	 * based off the language or version in the session
+	 * Do not need to include the language or the version current as it 
+	 * will add it based off the language or version in the session
 	 */
 	public static function add($map = array()) {
 		if(ArrayLib::is_associative($map)) {

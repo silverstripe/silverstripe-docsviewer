@@ -1,11 +1,7 @@
 # Writing Documentation
 
-Your documentation needs to go in the specific modules docs folder which it 
-refers mostly too. For example if you want to document a feature of your 
-custom module 'mymodule' you need to create markdown files in mymodule/docs/en/.
-
-The files have to end with the __.md__ extension. The documentation viewer will 
-automatically replace hyphens (-) with spaces.
+The files have to end with the __.md__ or __.markdown__ extension. The 
+documentation viewer will automatically replace hyphens (-) with spaces.
 
 	my-documentation-file.md
 	
@@ -60,7 +56,6 @@ default behaviour is to display an ordered list of links.
 The table of contents on each module page is generated based on where and what 
 headers you use. 
 
- 
 ## Images and Files
 
 If you want to attach images and other assets to a page you need to bundle those

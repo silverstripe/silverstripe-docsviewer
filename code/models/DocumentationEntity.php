@@ -13,9 +13,11 @@
  * Versions are assumed to be in numeric format (e.g. '2.4'),
  *
  * They're also parsed through version_compare() in {@link getStableVersion()} 
- * which assumes a certain format {@link http://php.net/manual/en/function.version-compare.php}
+ * which assumes a certain format:
  *
- * @package sapphiredocs
+ * @see http://php.net/manual/en/function.version-compare.php
+ *
+ * @package docviewer
  * @subpackage models
  */
 

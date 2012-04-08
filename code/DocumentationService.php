@@ -4,10 +4,11 @@
  * DocumentationService
  *
  * Handles the management of the documentation services delivered by the entity.
+ * 
  * Includes registering which components to document and handles the entities being
- * documented
+ * documented.
  *
- * @package sapphiredocs
+ * @package docviewer
  */
 
 class DocumentationService {
@@ -28,7 +29,10 @@ class DocumentationService {
 	 *
 	 * @var array
 	 */
-	private static $ignored_files = array('.', '..', '.DS_Store', '.svn', '.git', 'assets', 'themes', '_images');
+	private static $ignored_files = array(
+		'.', '..', '.DS_Store', 
+		'.svn', '.git', 'assets', 'themes', '_images'
+	);
 
 	/**
 	 * Case insenstive values to use as extensions on markdown pages. The
@@ -39,8 +43,12 @@ class DocumentationService {
 	public static $valid_markdown_extensions = array('md', 'txt', 'markdown');
 	
 	/**
-	 * Registered {@link DocumentationEntity} objects to include in the documentation. 
-	 * Either pre-filled by the automatic filesystem parser or via {@link DocumentationService::register()}. 
+	 * Registered {@link DocumentationEntity} objects to include in the 
+	 * documentation. 
+	 *
+	 * Either pre-filled by the automatic filesystem parser or via 
+	 * {@link DocumentationService::register()}. 
+	 *
 	 * Stores the {@link DocumentEntity} objects which contain the languages 
 	 * and versions of each entity.
 	 *
@@ -132,8 +140,8 @@ class DocumentationService {
 	}
 	
 	/**
-	 * Return the entities which are listed for documentation. Optionally only get
-	 * entities which have a version or language given
+	 * Return the entities which are listed for documentation. Optionally only 
+	 * get entities which have a version or language given.
 	 *
 	 * @return array
 	 */
@@ -157,7 +165,7 @@ class DocumentationService {
 	}
 	
 	/**
-	 * Check to see if a entity is registered with the documenter
+	 * Check to see if a entity is registered with the documenter.
 	 *
 	 * @param String $entity entity name
 	 * @param String $version version
@@ -250,7 +258,8 @@ class DocumentationService {
 	}
 	
 	/**
-	 * Register the docs from off a file system if automatic registration is turned on.
+	 * Register the docs from off a file system if automatic registration is 
+	 * turned on.
 	 *
 	 * @see {@link DocumentationService::set_automatic_registration()}
 	 */
@@ -294,8 +303,8 @@ class DocumentationService {
 	
 	
 	/**
-	 * Find a documentation page given a path and a file name. It ignores the extensions
-	 * and simply compares the title.
+	 * Find a documentation page given a path and a file name. It ignores the 
+	 * extensions and simply compares the title.
 	 *
 	 * Name may also be a path /install/foo/bar.
 	 *

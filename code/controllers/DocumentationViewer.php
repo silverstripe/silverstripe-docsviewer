@@ -3,12 +3,13 @@
 /**
  * Documentation Viewer.
  *
- * Reads the bundled markdown files from documentation folders and displays the output (either
- * via markdown or plain text)
+ * Reads the bundled markdown files from documentation folders and displays the 
+ * output (either via markdown or plain text)
  *
- * For more documentation on how to use this class see the documentation in /sapphiredocs/docs folder
+ * For more documentation on how to use this class see the documentation in the
+ * docs folder
  *
- * @package sapphiredocs
+ * @package docviewer
  */
 
 class DocumentationViewer extends Controller {
@@ -34,7 +35,8 @@ class DocumentationViewer extends Controller {
 	
 	/**
 	 * The string name of the currently accessed {@link DocumentationEntity}
-	 * object. To access the entire object use {@link getEntity()} 
+	 * object. To access the entire object use {@link getEntity()}
+	 *
 	 * @var string
 	 */
 	public $entity = '';
@@ -59,41 +61,46 @@ class DocumentationViewer extends Controller {
 
 		if(!$this->canView()) return Security::permissionFailure($this);
 
-		// javascript
-		Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');
-		
+		Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');		
 		Requirements::combine_files(
 			'syntaxhighlighter.js',
 			array(
-				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shCore.js',
-				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushJScript.js',
-				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushPhp.js',
-				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushXml.js',
-				'sapphiredocs/thirdparty/syntaxhighlighter/scripts/shBrushCss.js',
-				'sapphiredocs/javascript/shBrushSS.js'
+				DOCVIEWER_DIR .'/thirdparty/syntaxhighlighter/scripts/shCore.js',
+				DOCVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushJScript.js',
+				DOCVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushPhp.js',
+				DOCVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushXml.js',
+				DOCVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushCss.js',
+				DOCVIEWER_DIR . '/javascript/shBrushSS.js'
 			)
 		);
 		
-		Requirements::javascript('sapphiredocs/javascript/DocumentationViewer.js');
-
-		// css
-		Requirements::css('sapphiredocs/css/shSilverStripeDocs.css');
+		Requirements::javascript(DOCVIEWER_DIR .'/javascript/DocumentationViewer.js');
+		Requirements::css(DOCVIEWER_DIR .'/css/shSilverStripeDocs.css');
 		
-		Requirements::customScript('jQuery(document).ready(function() {SyntaxHighlighter.all();});');
+		Requirements::css(DOCVIEWER_DIR .'/css/DocumentationViewer.css');
 	}
 	
 	/**
-	 * Can the user view this documentation. Hides all functionality for private wikis
+	 * Can the user view this documentation. Hides all functionality for 
+	 * private wikis.
 	 *
 	 * @return bool
 	 */
 	public function canView() {
-		return (Director::isDev() || Director::is_cli() || !self::$check_permission || Permission::check(self::$check_permission));
+		return (Director::isDev() || Director::is_cli() || 
+			!self::$check_permission || 
+			Permission::check(self::$check_permission)
+		);
 	}
 
 	/**
-	 * Overloaded to avoid "action doesn't exist" errors - all URL parts in this
-	 * controller are virtual and handled through handleRequest(), not controller methods.
+	 * Overloaded to avoid "action doesn't exist" errors - all URL parts in 
+	 * this controller are virtual and handled through handleRequest(), not 
+	 * controller methods.
+	 *
+	 * @param SS_HTTPRequest
+	 *
+	 * @return SS_HTTPResponse
 	 */
 	public function handleAction($request) {
 		try {
@@ -123,7 +130,8 @@ class DocumentationViewer extends Controller {
 	 */
 	public function handleRequest(SS_HTTPRequest $request) {
 		// if we submitted a form, let that pass
-		if(!$request->isGET() || isset($_GET['action_results'])) return parent::handleRequest($request);
+		if(!$request->isGET() || isset($_GET['action_results'])) 
+			return parent::handleRequest($request);
 
 		$firstParam = ($request->param('Action')) ? $request->param('Action') : $request->shift();		
 		$secondParam = $request->shift();

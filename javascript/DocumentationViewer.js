@@ -1,4 +1,4 @@
-(function($) {
+;(function($) {
 	$(document).ready(function() {
 		
 		/** -----------------------------------------------
@@ -52,8 +52,8 @@
 		$("#Form_LanguageForm select").change(function() {
 			$("#Form_LanguageForm").submit();
 		});
+		
+		SyntaxHighlighter.defaults.toolbar = false;
+		SyntaxHighlighter.all();
 	});
-	
-	// Syntaxhighlighter defaults
-	SyntaxHighlighter.defaults.toolbar = false;
 })(jQuery);

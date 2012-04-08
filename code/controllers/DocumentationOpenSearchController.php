@@ -4,7 +4,7 @@
  * Public facing controller for handling an opensearch interface based on
  * the standard search form.
  *
- * @package sapphiredocs
+ * @package docviewer
  */
 
 class DocumentationOpenSearchController extends ContentController {
