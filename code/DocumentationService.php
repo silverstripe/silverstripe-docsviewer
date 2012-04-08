@@ -330,7 +330,7 @@ class DocumentationService {
 	 * @return string
 	 */
 	private static function find_page_recursive($base, $goal) {
-		$handle = opendir($base);
+		$handle = (is_dir($base)) ? opendir($base) : false;
 
 		$name = self::trim_extension_off(strtolower(array_shift($goal)));
 		if(!$name || $name == '/') $name = 'index';
@@ -377,9 +377,9 @@ class DocumentationService {
 					}
 				}
 			}
+			
+			closedir($handle);
 		}
-		
-		closedir($handle);
 		
 		return false;
 	}
