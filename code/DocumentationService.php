@@ -455,10 +455,10 @@ class DocumentationService {
 	 * @param string - lang to use
 	 *
 	 * @throws Exception
-	 * @return DataObjectSet
+	 * @return ArrayList
 	 */
 	public static function get_pages_from_folder($entity, $relativePath = false, $recursive = true, $version = 'trunk', $lang = 'en') {
-		$output = new DataObjectSet();
+		$output = new ArrayList();
 		$pages = array();
 		
 		if(!$entity instanceof DocumentationEntity) 

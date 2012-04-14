@@ -76,7 +76,6 @@ class DocumentationViewer extends Controller {
 		
 		Requirements::javascript(DOCSVIEWER_DIR .'/javascript/DocumentationViewer.js');
 		Requirements::css(DOCSVIEWER_DIR .'/css/shSilverStripeDocs.css');
-		
 		Requirements::css(DOCSVIEWER_DIR .'/css/DocumentationViewer.css');
 	}
 	
@@ -128,7 +127,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return SS_HTTPResponse
 	 */
-	public function handleRequest(SS_HTTPRequest $request) {
+	public function handleRequest(SS_HTTPRequest $request, DataModel $model = null) {
 		// if we submitted a form, let that pass
 		if(!$request->isGET() || isset($_GET['action_results'])) 
 			return parent::handleRequest($request);
@@ -148,7 +147,7 @@ class DocumentationViewer extends Controller {
 		if($firstParam) {
 			// allow assets
 			if($firstParam == "assets") {
-				return parent::handleRequest($request);
+				return parent::handleRequest($request, $model);
 			}
 			
 			// check for permalinks
@@ -199,7 +198,7 @@ class DocumentationViewer extends Controller {
 			}
 			
 			
-			return parent::handleRequest($request);
+			return parent::handleRequest($request, $model);
 		}
 		
 		return $this->throw404();
@@ -297,7 +296,7 @@ class DocumentationViewer extends Controller {
 	 * the filesystem then they are loaded under the 'Current' namespace.
 	 *
 	 * @param String $entity name of {@link Entity} to limit it to eg sapphire
-	 * @return DataObjectSet
+	 * @return ArrayList
 	 */
 	function getVersions($entity = false) {
 		if(!$entity) $entity = $this->entity;
@@ -306,7 +305,7 @@ class DocumentationViewer extends Controller {
 		if(!$entity) return false;
 
 		$versions = $entity->getVersions();
-		$output = new DataObjectSet();
+		$output = new ArrayList();
 
 		if($versions) {
 			$lang = $this->getLang();
@@ -336,7 +335,7 @@ class DocumentationViewer extends Controller {
 	 */ 
 	function getEntities($version = false, $lang = false) {
 		$entities = DocumentationService::get_registered_entities($version, $lang);
-		$output = new DataObjectSet();
+		$output = new ArrayList();
 		
 		$currentEntity = $this->getEntity();
 
@@ -349,7 +348,7 @@ class DocumentationViewer extends Controller {
 				
 				$content = false;
 				if($page = $entity->getIndexPage($version, $lang)) {
-					$content = DBField::create('HTMLText', DocumentationParser::parse($page, $link));
+					$content = DBField::create_field('HTMLText', DocumentationParser::parse($page, $link));
 				}
 				
 				$output->push(new ArrayData(array(
@@ -457,7 +456,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @todo this only handles 2 levels. Could make it recursive
 	 *
-	 * @return false|DataObjectSet
+	 * @return false|ArrayList
 	 */
 	function getEntityPages() {
 		if($entity = $this->getEntity()) {
@@ -493,7 +492,7 @@ class DocumentationViewer extends Controller {
 	 * @param DocumentationEntity 
 	 * @param int Depth of page in the tree
 	 *
-	 * @return DataObjectSet|false
+	 * @return ArrayList|false
 	 */
 	private function _getEntityPagesNested(&$page, $entity, $level = 0) {
 		if(isset($this->Remaining[$level])) {
@@ -556,7 +555,7 @@ class DocumentationViewer extends Controller {
 		$page = $this->getPage();
 		
 		if($page) {
-			return DBField::create("HTMLText", $page->getHTML($this->getVersion(), $this->getLang()));
+			return DBField::create_field("HTMLText", $page->getHTML($this->getVersion(), $this->getLang()));
 		}
 		
 		// If no page found then we may want to get the listing of the folder.
@@ -594,14 +593,14 @@ class DocumentationViewer extends Controller {
 	 * Generate a list of breadcrumbs for the user. Based off the remaining params
 	 * in the url
 	 *
-	 * @return DataObjectSet
+	 * @return ArrayList
 	 */
 	function getBreadcrumbs() {
 		if(!$this->Remaining) $this->Remaining = array();
 		
 		$pages = array_merge(array($this->entity), $this->Remaining);
 		
-		$output = new DataObjectSet();
+		$output = new ArrayList();
 		
 		if($pages) {
 			$path = array();
@@ -690,7 +689,7 @@ class DocumentationViewer extends Controller {
 	function LanguageForm() {
 		$langs = $this->getLanguages();
 		
-		$fields = new FieldSet(
+		$fields = new FieldList(
 			$dropdown = new DropdownField(
 				'LangCode', 
 				_t('DocumentationViewer.LANGUAGE', 'Language'),
@@ -699,7 +698,7 @@ class DocumentationViewer extends Controller {
 			)
 		);
 		
-		$actions = new FieldSet(
+		$actions = new FieldList(
 			new FormAction('doLanguageForm', _t('DocumentationViewer.CHANGE', 'Change'))
 		);
 		
@@ -749,13 +748,13 @@ class DocumentationViewer extends Controller {
 		if(!DocumentationSearch::enabled()) return false;
 		$q = ($q = $this->getSearchQuery()) ? $q->NoHTML() : "";
 
-		$fields = new FieldSet(
+		$fields = new FieldList(
 			new TextField('Search', _t('DocumentationViewer.SEARCH', 'Search'), $q),
 			new HiddenField('Entities', '', implode(',', array_keys($this->getSearchedEntities()))),
 			new HiddenField('Versions', '', implode(',', $this->getSearchedVersions()))
 		);
 		
-		$actions = new FieldSet(
+		$actions = new FieldList(
 			new FormAction('results', 'Search')
 		);
 		
@@ -824,7 +823,7 @@ class DocumentationViewer extends Controller {
 	 */
 	function getSearchQuery() {
 		if(isset($_REQUEST['Search'])) {
-			return DBField::create('HTMLText', $_REQUEST['Search']);
+			return DBField::create_field('HTMLText', $_REQUEST['Search']);
 		}
 	}
 	
@@ -867,7 +866,7 @@ class DocumentationViewer extends Controller {
 		$q = ($q = $this->getSearchQuery()) ? $q->NoHTML() : "";
 		
 		// klude to take an array of objects down to a simple map
-		$entities = new DataObjectSet($entities);
+		$entities = new ArrayList($entities);
 		$entities = $entities->map('Folder', 'Title');
 		
 		// if we haven't gone any search limit then we're searching everything
@@ -877,7 +876,7 @@ class DocumentationViewer extends Controller {
 		$searchedVersions = $this->getSearchedVersions();
 		if(count($searchedVersions) < 1) $searchedVersions = $uniqueVersions;
 
-		$fields = new FieldSet(
+		$fields = new FieldList(
 			new TextField('Search', _t('DocumentationViewer.KEYWORDS', 'Keywords'), $q),
 			new CheckboxSetField('Entities', _t('DocumentationViewer.MODULES', 'Modules'), $entities, $searchedEntities),
 			new CheckboxSetField('Versions', _t('DocumentationViewer.VERSIONS', 'Versions'),
@@ -885,7 +884,7 @@ class DocumentationViewer extends Controller {
 			)
 		);
 		
-		$actions = new FieldSet(
+		$actions = new FieldList(
 			new FormAction('results', _t('DocumentationViewer.SEARCH', 'Search'))
 		);
 		$required = new RequiredFields(array('Search'));
@@ -920,13 +919,13 @@ class DocumentationViewer extends Controller {
 			if($version == "trunk" || $compare > 0) {
 				return $this->customise(new ArrayData(array(
 					'FutureRelease' => true,
-					'StableVersion' => DBField::create('HTMLText', $stable)
+					'StableVersion' => DBField::create_field('HTMLText', $stable)
 				)));				
 			}
 			else {
 				return $this->customise(new ArrayData(array(
 					'OutdatedRelease' => true,
-					'StableVersion' => DBField::create('HTMLText', $stable)
+					'StableVersion' => DBField::create_field('HTMLText', $stable)
 				)));
 			}
 		}

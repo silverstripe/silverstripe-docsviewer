@@ -7,7 +7,7 @@
 
 ## Requirements
 
-* SilverStripe 2.4
+* SilverStripe 3.0
 
 ## Summary
 
@@ -20,4 +20,3 @@ For more documentation on how to use the module please read /docs/Writing-Docume
 (or via this in /dev/docs/sapphiredocs/Writing-Documentation in your webbrowser)
 
 **Note** This module assumes you are using numeric values for your versions.
-

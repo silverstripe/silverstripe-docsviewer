@@ -113,8 +113,9 @@ class DocumentationPage extends ViewableData {
 	}
 	
 	/**
-	 * @param String - has to be plain text for open search compatibility.
-	 * @return String
+	 * @param string - has to be plain text for open search compatibility.
+	 *
+	 * @return string
 	 */
 	function getBreadcrumbTitle($divider = ' - ') {
 		$pathParts = explode('/', $this->getRelativePath());
@@ -128,11 +129,11 @@ class DocumentationPage extends ViewableData {
 	}
 	
 	/**
-	 * Returns the link for the web browser
+	 * Returns the public accessible link for this page.
 	 *
 	 * @return string
 	 */
-	function Link() {
+	function getLink() {
 		if($entity = $this->getEntity()) {
 			$link = Controller::join_links($entity->Link($this->getVersion(), $this->lang), $this->getRelativeLink());
 
@@ -194,7 +195,7 @@ class DocumentationPage extends ViewableData {
 	/**
 	 * Set a variable from the metadata field on this class
 	 *
-	 * @param String key
+	 * @param string key
 	 * @param mixed value
 	 */
 	public function setMetaData($key, $value) {
@@ -231,7 +232,7 @@ class DocumentationPage extends ViewableData {
 				$ext = $this->getExtension();
 				
 				if(DocumentationService::is_valid_extension($ext)) {
-					return file_get_contents($path);			
+					return file_get_contents($path);
 				}
 			}
 		}
@@ -243,9 +244,9 @@ class DocumentationPage extends ViewableData {
 	/**
 	 * Parse a file (with a lang and a version).
 	 *
-	 * @param String $baselink 
+	 * @param string $baselink 
 	 *
-	 * @return String
+	 * @return string
 	 */
 	function getHTML($version, $lang = 'en') {
 		return DocumentationParser::parse($this, $this->entity->getRelativeLink($version, $lang));

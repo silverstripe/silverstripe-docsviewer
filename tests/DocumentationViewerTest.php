@@ -133,7 +133,6 @@ class DocumentationViewerTest extends FunctionalTest {
 		}
 		
 		$links = $pages->column('Link');
-		
 		$this->assertStringEndsWith('DocumentationViewerTests/en/2.3/sort/', $links[0]);
 		$this->assertStringEndsWith('DocumentationViewerTests/en/2.3/subfolder/', $links[1]);
 		$this->assertStringEndsWith('DocumentationViewerTests/en/2.3/test', $links[2]);

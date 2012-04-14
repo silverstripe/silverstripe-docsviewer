@@ -44,7 +44,7 @@ class DocumentationSearch {
 	static $boost_by_path = array();
 	
 	/**
-	 * @var DataObjectSet - Results
+	 * @var ArrayList - Results
 	 */
 	private $results;
 	
@@ -117,13 +117,13 @@ class DocumentationSearch {
 	/**
 	 * Generate an array of every single documentation page installed on the system. 
 	 *
-	 * @return DataObjectSet
+	 * @return ArrayList
 	 */
 	public static function get_all_documentation_pages() {
 		DocumentationService::load_automatic_registration();
 		
 		$modules = DocumentationService::get_registered_entities();
-		$output = new DataObjectSet();
+		$output = new ArrayList();
 
 		if($modules) {
 			foreach($modules as $module) {
@@ -245,8 +245,8 @@ class DocumentationSearch {
 		$data = array(
 			'Results' => null,
 			'Query' => null,
-			'Versions' => DBField::create('Text', implode(',', $this->versions)),
-			'Modules' => DBField::create('Text', implode(',', $this->modules)),
+			'Versions' => DBField::create_field('Text', implode(',', $this->versions)),
+			'Modules' => DBField::create_field('Text', implode(',', $this->modules)),
 			'Title' => _t('DocumentationSearch.SEARCHRESULTS', 'Search Results'),
 			'TotalResults' => null,
 			'TotalPages' => null,
@@ -254,9 +254,9 @@ class DocumentationSearch {
 			'StartResult' => null,
 			'PageLength' => $pageLength,
 			'EndResult' => null,
-			'PrevUrl' => DBField::create('Text', 'false'),
-			'NextUrl' => DBField::create('Text', 'false'),
-			'SearchPages' => new DataObjectSet()
+			'PrevUrl' => DBField::create_field('Text', 'false'),
+			'NextUrl' => DBField::create_field('Text', 'false'),
+			'SearchPages' => new ArrayList()
 		);
 	
 		$start = ($request->requestVar('start')) ? (int)$request->requestVar('start') : 0;
@@ -269,7 +269,7 @@ class DocumentationSearch {
 		if ($totalPages == 0) $totalPages = 1;
 		if ($currentPage > $totalPages) $currentPage = $totalPages;
 
-		$results = new DataObjectSet();
+		$results = new ArrayList();
 		
 		if($this->results) {
 			foreach($this->results as $k => $hit) {
@@ -280,13 +280,13 @@ class DocumentationSearch {
 				$content = $hit->content;
 				
 				$obj = new ArrayData(array(
-					'Title' => DBField::create('Varchar', $doc->getFieldValue('Title')),
-					'BreadcrumbTitle' => DBField::create('HTMLText', $doc->getFieldValue('BreadcrumbTitle')),
-					'Link' => DBField::create('Varchar',$doc->getFieldValue('Link')),
-					'Language' => DBField::create('Varchar',$doc->getFieldValue('Language')),
-					'Version' => DBField::create('Varchar',$doc->getFieldValue('Version')),
-					'Entity' => DBField::create('Varchar', $doc->getFieldValue('Entity')),
-					'Content' => DBField::create('HTMLText', $content),
+					'Title' => DBField::create_field('Varchar', $doc->getFieldValue('Title')),
+					'BreadcrumbTitle' => DBField::create_field('HTMLText', $doc->getFieldValue('BreadcrumbTitle')),
+					'Link' => DBField::create_field('Varchar',$doc->getFieldValue('Link')),
+					'Language' => DBField::create_field('Varchar',$doc->getFieldValue('Language')),
+					'Version' => DBField::create_field('Varchar',$doc->getFieldValue('Version')),
+					'Entity' => DBField::create_field('Varchar', $doc->getFieldValue('Entity')),
+					'Content' => DBField::create_field('HTMLText', $content),
 					'Score' => $hit->score,
 					'Number' => $k + 1,
 					'ID' => md5($doc->getFieldValue('Link'))
@@ -297,22 +297,22 @@ class DocumentationSearch {
 		}
 
 		$data['Results'] = $results;
-		$data['Query'] = DBField::create('Text', $query);
-		$data['TotalResults'] = DBField::create('Text', count($this->results));
-		$data['TotalPages'] = DBField::create('Text', $totalPages);
-		$data['ThisPage'] = DBField::create('Text', $currentPage);
+		$data['Query'] = DBField::create_field('Text', $query);
+		$data['TotalResults'] = DBField::create_field('Text', count($this->results));
+		$data['TotalPages'] = DBField::create_field('Text', $totalPages);
+		$data['ThisPage'] = DBField::create_field('Text', $currentPage);
 		$data['StartResult'] = $start + 1;
 		$data['EndResult'] = $start + count($results);
 
 		// Pagination links
 		if($currentPage > 1) {
-			$data['PrevUrl'] = DBField::create('Text', 
+			$data['PrevUrl'] = DBField::create_field('Text', 
 				$this->buildQueryUrl(array('start' => ($currentPage - 2) * $pageLength))
 			);
 		}
 
 		if($currentPage < $totalPages) {
-			$data['NextUrl'] = DBField::create('Text', 
+			$data['NextUrl'] = DBField::create_field('Text', 
 				$this->buildQueryUrl(array('start' => $currentPage * $pageLength))
 			);
 		}

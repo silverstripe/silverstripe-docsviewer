@@ -11,7 +11,9 @@ if(!defined('DOCSVIEWER_PATH')) {
 }
 
 if(!defined('DOCSVIEWER_DIR')) {
-	define('DOCSVIEWER_DIR', array_pop(explode(DIRECTORY_SEPARATOR, DOCSVIEWER_PATH)));
+	$dir = explode(DIRECTORY_SEPARATOR, DOCSVIEWER_PATH);
+
+	define('DOCSVIEWER_DIR', array_pop($dir));
 }
 
 
