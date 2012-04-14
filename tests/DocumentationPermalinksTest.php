@@ -26,7 +26,7 @@ class DocumentationPermalinksTest extends FunctionalTest {
 		$this->autoFollowRedirection = false;
 		
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'foo'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'foo'), DataModel::inst());
 		
 		$this->assertEquals('301', $response->getStatusCode());
 		$this->assertContains('current/en/sapphire/subfolder/foo', $response->getHeader('Location'));

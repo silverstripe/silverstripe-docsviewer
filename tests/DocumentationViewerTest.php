@@ -105,7 +105,7 @@ class DocumentationViewerTest extends FunctionalTest {
 	
 	function testGetModulePagesShort() {
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/subfolder/'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/subfolder/'), DataModel::inst());
 		$pages = $v->getEntityPages();
 
 		$arr = $pages->toArray();
@@ -117,7 +117,7 @@ class DocumentationViewerTest extends FunctionalTest {
 	
 	function testGetEntityPages() {
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/subfolder/'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/subfolder/'), DataModel::inst());
 		$pages = $v->getEntityPages();
 		$this->assertEquals(
 			array('sort/', 'subfolder/', 'test.md'),
@@ -165,7 +165,7 @@ class DocumentationViewerTest extends FunctionalTest {
 	function testUrlParsing() {
 		// Module index
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/test'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/test'), DataModel::inst());
 		$this->assertEquals('2.3', $v->getVersion());
 		$this->assertEquals('en', $v->getLang());
 		$this->assertEquals('DocumentationViewerTests', $v->getEntity()->getTitle());
@@ -173,7 +173,7 @@ class DocumentationViewerTest extends FunctionalTest {
 	
 		// Module index without version and language. Should pick up the defaults
 		$v2 = new DocumentationViewer();
-		$response = $v2->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/test'));
+		$response = $v2->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/test'), DataModel::inst());
 	
 		$this->assertEquals('2.4', $v2->getVersion());
 		$this->assertEquals('en', $v2->getLang());
@@ -182,7 +182,7 @@ class DocumentationViewerTest extends FunctionalTest {
 	
 		// Overall index
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', ''));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', ''), DataModel::inst());
 		$this->assertEquals('', $v->getVersion());
 		$this->assertEquals('en', $v->getLang());
 		$this->assertEquals('', $v->module);
@@ -192,7 +192,7 @@ class DocumentationViewerTest extends FunctionalTest {
 	function testBreadcrumbs() {
 		// Module index
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4'), DataModel::inst());
 		$crumbs = $v->getBreadcrumbs();
 		
 		$this->assertEquals(1, $crumbs->Count());
@@ -201,7 +201,7 @@ class DocumentationViewerTest extends FunctionalTest {
 		
 		// Subfolder index
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4/subfolder/'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4/subfolder/'), DataModel::inst());
 		$crumbs = $v->getBreadcrumbs();
 		$this->assertEquals(2, $crumbs->Count());
 		$crumbLinks = $crumbs->column('Link');
@@ -210,7 +210,7 @@ class DocumentationViewerTest extends FunctionalTest {
 		
 		// Subfolder page
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4/subfolder/subpage'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4/subfolder/subpage'), DataModel::inst());
 		$crumbs = $v->getBreadcrumbs();
 		$this->assertEquals(3, $crumbs->Count());
 		$crumbLinks = $crumbs->column('Link');
@@ -221,19 +221,19 @@ class DocumentationViewerTest extends FunctionalTest {
 	
 	function testGetVersion() {
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4'), DataModel::inst());
 		$this->assertEquals('2.4', $v->getVersion());
 
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/1'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/1'), DataModel::inst());
 		$this->assertEquals('1', $v->getVersion());
 		
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/3.0'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/3.0'), DataModel::inst());
 		$this->assertEquals('3.0', $v->getVersion());		
 	}
 	
 	function testGetEntities() {
 		$v = new DocumentationViewer();
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4'), DataModel::inst());
 		
 		$pages = $v->getEntities();
 		
@@ -251,18 +251,18 @@ class DocumentationViewerTest extends FunctionalTest {
 		$v = new DocumentationViewer();
 		
 		// the current version is set to 2.4, no notice should be shown on that page
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4'), DataModel::inst());
 		$this->assertFalse($v->VersionWarning());
 		
 		// 2.3 is an older release, hitting that should return us an outdated flag
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3'), DataModel::inst());
 		$warn = $v->VersionWarning();
 		
 		$this->assertTrue($warn->OutdatedRelease);
 		$this->assertNull($warn->FutureRelease);
 		
 		// 3.0 is a future release
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/3.0'));
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/3.0'), DataModel::inst());
 		$warn = $v->VersionWarning();
 		
 		$this->assertNull($warn->OutdatedRelease);

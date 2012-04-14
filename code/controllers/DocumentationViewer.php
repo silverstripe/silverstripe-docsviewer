@@ -127,7 +127,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return SS_HTTPResponse
 	 */
-	public function handleRequest(SS_HTTPRequest $request, DataModel $model = null) {
+	public function handleRequest(SS_HTTPRequest $request, DataModel $model) {
 		// if we submitted a form, let that pass
 		if(!$request->isGET() || isset($_GET['action_results'])) 
 			return parent::handleRequest($request);
@@ -141,7 +141,7 @@ class DocumentationViewer extends Controller {
 		
 		// if no params passed at all then it's the homepage
 		if(!$firstParam && !$secondParam && !$thirdParam) {
-			return parent::handleRequest($request);
+			return parent::handleRequest($request, $model);
 		}
 		
 		if($firstParam) {
