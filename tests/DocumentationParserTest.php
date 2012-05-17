@@ -4,6 +4,15 @@
  */
 class DocumentationParserTest extends SapphireTest {
 	
+	function testGenerateHtmlId() {
+		$this->assertEquals('title-one', DocumentationParser::generate_html_id('title one'));
+		$this->assertEquals('title-one', DocumentationParser::generate_html_id('Title one'));
+		$this->assertEquals('title-and-one', DocumentationParser::generate_html_id('Title &amp; One'));
+		$this->assertEquals('title-and-one', DocumentationParser::generate_html_id('Title & One'));
+		$this->assertEquals('title-one', DocumentationParser::generate_html_id(' Title one '));
+		$this->assertEquals('title-one', DocumentationParser::generate_html_id('Title--one'));
+	}
+
 	function testRewriteCodeBlocks() {
 		$page = new DocumentationPage();
 		$page->setRelativePath('test.md');
