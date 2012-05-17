@@ -110,7 +110,7 @@ class DocumentationService {
 	 *
 	 * @return array
 	 */
-	public function get_ignored_files() {
+	public static function get_ignored_files() {
 		return self::$ignored_files;
 	}
 
