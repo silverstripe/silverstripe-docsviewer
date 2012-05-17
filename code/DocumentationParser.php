@@ -43,7 +43,7 @@ class DocumentationParser {
 
 		$md = self::rewrite_api_links($md, $page);
 		$md = self::rewrite_heading_anchors($md, $page);
-		$md = self::rewrite_code_blocks($md, $page);
+		$md = self::rewrite_code_blocks($md);
 	
 		require_once(DOCSVIEWER_PATH .'/thirdparty/markdown/markdown.php');
 		
@@ -53,11 +53,11 @@ class DocumentationParser {
 		return $parser->transform($md);
 	}
 	
-	function rewrite_code_blocks($md) {
+	public static function rewrite_code_blocks($md) {
 		$started = false;
 		$inner = false;
 		
-		$lines = split("\n", $md);
+		$lines = explode("\n", $md);
 		foreach($lines as $i => $line) {
 			if(!$started && preg_match('/^\t*:::\s*(.*)/', $line, $matches)) {
 				// first line with custom formatting
@@ -203,14 +203,14 @@ class DocumentationParser {
 	/**
 	 *
 	 */
-	static function rewrite_heading_anchors($md, $page) {
+	public static function rewrite_heading_anchors($md, $page) {
 		$re = '/^\#+(.*)/m';	
 		$md = preg_replace_callback($re, array('DocumentationParser', '_rewrite_heading_anchors_callback'), $md);
 		
 		return $md; 
 	}
 	
-	static function _rewrite_heading_anchors_callback($matches) {
+	public static function _rewrite_heading_anchors_callback($matches) {
 		$heading = $matches[0];
 		$headingText = $matches[1];
 
@@ -236,8 +236,8 @@ class DocumentationParser {
 		$t = $title;
 		$t = str_replace('&amp;','-and-',$t);
 		$t = str_replace('&','-and-',$t);
-		$t = ereg_replace('[^A-Za-z0-9]+','-',$t);
-		$t = ereg_replace('-+','-',$t);
+		$t = preg_replace('/[^A-Za-z0-9]+/','-',$t);
+		$t = preg_replace('/-+/','-',$t);
 		$t = trim($t, '-');
 		$t = strtolower($t);
 				

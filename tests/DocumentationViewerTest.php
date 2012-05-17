@@ -268,4 +268,17 @@ class DocumentationViewerTest extends FunctionalTest {
 		$this->assertNull($warn->OutdatedRelease);
 		$this->assertTrue($warn->FutureRelease);
 	}
+
+	/**
+	 * Test that the pages comes back sorted by filename
+	 */
+	function testGetEntityPagesSortedByFilename() {
+		$v = new DocumentationViewer();
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/3.0/'), DataModel::inst());
+		$pages = $v->getEntityPages();
+		$links = $pages->column('Link');
+		$this->assertStringEndsWith('DocumentationViewerTests/en/3.0/ChangeLog', $links[0]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/3.0/Tutorials', $links[1]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/3.0/empty', $links[2]);
+	}
 }
