@@ -36,12 +36,12 @@ location then you can register paths directly:
 
 
 To configure the documentation system the configuration information is 
-available on the [Configurations](dev/docs/en/docsviewer/configuration-options)
+available on the [Configurations](configuration-options)
 page.
 
 ## Writing documentation
 
-See [Writing Documentation](dev/docs/en/sapphiredocs/writing-documentation) 
+See [Writing Documentation](writing-documentation)
 for more information on how to write markdown files which are available here. 
 
 
