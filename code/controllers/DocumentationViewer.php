@@ -55,6 +55,12 @@ class DocumentationViewer extends Controller {
 	 * @var String|array Optional permission check
 	 */
 	static $check_permission = 'ADMIN';
+
+	/**
+	 * @var array map of modules to edit links.
+	 * @see {@link getEditLink()}
+	 */
+	private static $edit_links = array();
 	
 	function init() {
 		parent::init();
@@ -930,6 +936,76 @@ class DocumentationViewer extends Controller {
 			}
 		}
 		
+		return false;
+	}
+
+	/**
+	 * Sets the mapping between a entity name and the link for the end user
+	 * to jump into editing the documentation. 
+	 *
+	 * Some variables are replaced:
+	 *	- %version%
+	 *	- %entity%
+	 *	- %path%
+	 * 	- %lang%
+	 *
+	 * For example to provide an edit link to the framework module in github:
+	 *
+	 * <code>
+	 * DocumentationViewer::set_edit_link(
+	 *	'framework', 
+	 *	'https://github.com/silverstripe/%entity%/edit/%version%/docs/%lang%/%path%',
+	 * 	$opts
+	 * ));
+	 * </code>
+	 *
+	 * @param string module name
+	 * @param string link
+	 * @param array options ('rewritetrunktomaster')
+	 */
+	public static function set_edit_link($module, $link, $options = array()) {
+		self::$edit_links[$module] = array(
+			'url' => $link,
+			'options' => $options
+		);
+	}
+
+	/**
+	 * Returns an edit link to the current page (optional).
+	 *
+	 * @return string
+	 */
+	public function getEditLink() {
+		$page = $this->getPage();
+
+		if($page) {
+			$entity = $page->getEntity();
+
+			if($entity && isset(self::$edit_links[$entity->title])) {
+				// build the edit link, using the version defined
+				$url = self::$edit_links[$entity->title];
+				$version = $page->getVersion();
+
+				if($version == "trunk" && (isset($url['options']['rewritetrunktomaster']))) {
+					if($url['options']['rewritetrunktomaster']) {
+						$version = "master";
+					}
+				}
+
+				return str_replace(
+					array('%entity%', '%lang%', '%version%', '%path%'),
+					array(
+						$entity->getFolder(), 
+						$page->getLang(), 
+						$version, 
+						ltrim($page->getRelativePath(), '/')
+					),
+
+					$url['url']
+				);
+			}
+		}
+
 		return false;
 	}
 	
