@@ -7,17 +7,17 @@
  * @package docsviewer
  */
 
-class DocumentationOpenSearchController extends ContentController {
+class DocumentationOpenSearchController extends Controller {
 	
-	static $allowed_actions = array(
+	public static $allowed_actions = array(
 		'description'
 	);
 	
-	function index() {
+	public function index() {
 		return $this->httpError(404);
 	}
 	
-	function description() {
+	public function description() {
 		$viewer = new DocumentationViewer();
 		
 		if(!$viewer->canView()) return Security::permissionFailure($this);

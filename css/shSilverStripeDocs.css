@@ -16,7 +16,7 @@
   float: none !important;
   height: auto !important;
   left: auto !important;
-  line-height: 1.3 !important;
+  line-height: 14px !important;
   margin: 0 !important;
   outline: 0 !important;
   overflow: visible !important;
@@ -33,17 +33,18 @@
   font-size: 1em !important;
   min-height: inherit !important;
   min-height: auto !important;
-  font-family:'Bitstream Vera Sans Mono',Monaco, 'Courier New', monospace !important;  
+  font-family: Monaco, 'Courier New', monospace !important;  
 }
 
 .syntaxhighlighter {
   width: 100% !important;
-  margin: 1em 0 1em 0 !important;
+  margin: 7px 0 21px !important;
   position: relative !important;
   overflow: auto !important;
-  font-size: 12px !important;
-  line-height: 20px !important;
-  background-color: #F8F8FF !important;
+  font-size: 11px !important;
+  line-height: 14px !important;
+  background-color: #f9faf4 !important;
+  border: 1px solid #ddd !important;
 }
 .syntaxhighlighter.source {
   overflow: hidden !important;

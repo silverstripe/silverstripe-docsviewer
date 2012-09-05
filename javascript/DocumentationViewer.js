@@ -14,7 +14,10 @@
 			
 			$('#content-column h1[id], #content-column h2[id], #content-column h3[id], #content-column h4[id]').each(function(i) {
 				var current = $(this);
-				toc += '<li class="' + current.attr("tagName").toLowerCase() + '"><a id="link' + i + '" href="'+ pageURL +'#' + $(this).attr('id') + '" title="' + current.html() + '">' + current.html() + '</a></li>';
+				var tagName = current.attr("tagName");
+				if(typeof tagName == "String") tagName = tagName.toLowerCase();
+				
+				toc += '<li class="' + tagName + '"><a id="link' + i + '" href="'+ pageURL +'#' + $(this).attr('id') + '" title="' + current.html() + '">' + current.html() + '</a></li>';
 			});
 		
 			toc += '</ul></div>';
