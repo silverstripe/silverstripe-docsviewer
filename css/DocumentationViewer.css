@@ -28,8 +28,10 @@ p {
 }
 
 ul { margin: 14px 0 21px 20px; }
-	li, dd { font-size: 14px; line-height: 21px; margin-bottom: 14px;}
+	li, dd { font-size: 14px; line-height: 21px; margin-bottom: 7px;}
 	li { list-style-position: inside; }
+	li ul,
+	li ol { margin-top: 7px; }
 dl { margin: 7px 0 21px 0; }
 	dt { font-weight: bold; }
 	dd { margin: 7px 0 7px 20px; }
