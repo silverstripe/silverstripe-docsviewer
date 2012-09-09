@@ -82,7 +82,7 @@ class RebuildLuceneDocsIndex extends BuildTask {
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Version', $page->getVersion()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Language', $page->getLang()));
 					$doc->addField(Zend_Search_Lucene_Field::Keyword('Entity', $entity));
-					$doc->addField(Zend_Search_Lucene_Field::Keyword('Link', $page->Link()));
+					$doc->addField(Zend_Search_Lucene_Field::Keyword('Link', $page->Link));
 					
 					// custom boosts
 					$titleField->boost = 3;
