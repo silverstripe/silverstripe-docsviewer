@@ -32,6 +32,8 @@ class RebuildLuceneDocsIndex extends BuildTask {
 		$lock = DocumentationSearch::get_index_location() .'/write.lock.file';
 		$lockFileFresh = (file_exists($lock) && filemtime($lock) > (time() - (60 * 60 * 24)));
 
+		echo "Building index in ". DocumentationSearch::get_index_location() . PHP_EOL;
+
 		if($lockFileFresh && !isset($_REQUEST['flush'])) { 
 			if(!$quiet) {
 				echo "Index recently rebuilt. If you want to force reindex use ?flush=1";

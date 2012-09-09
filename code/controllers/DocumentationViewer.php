@@ -14,7 +14,7 @@
 
 class DocumentationViewer extends Controller {
 
-	static $allowed_actions = array(
+	public static $allowed_actions = array(
 		'home',
 		'LanguageForm',
 		'doLanguageForm',
@@ -135,8 +135,9 @@ class DocumentationViewer extends Controller {
 	 */
 	public function handleRequest(SS_HTTPRequest $request, DataModel $model) {
 		// if we submitted a form, let that pass
-		if(!$request->isGET() || isset($_GET['action_results'])) 
-			return parent::handleRequest($request);
+		if(!$request->isGET() || isset($_GET['action_results'])) {
+			return parent::handleRequest($request, $model);
+		}
 
 		$firstParam = ($request->param('Action')) ? $request->param('Action') : $request->shift();		
 		$secondParam = $request->shift();

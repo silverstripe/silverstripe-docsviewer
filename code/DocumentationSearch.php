@@ -182,8 +182,9 @@ class DocumentationSearch {
 	 * @return string
 	 */
 	public function get_index_location() {
-		if(!self::$index_location) 
+		if(!self::$index_location) {
 			self::$index_location = DOCSVIEWER_DIR;
+		}
 		
 		return Controller::join_links(
 			TEMP_FOLDER, 
