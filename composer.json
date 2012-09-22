@@ -1,0 +1,16 @@
+{
+	"name": "silverstripe/docsviewer",
+	"description": "Documentation viewer module for SilverStripe",
+	"type": "silverstripe-module",
+	"keywords": ["silverstripe", "documentation"],
+	"authors": [
+	{
+		"name": "Will Rossiter",
+		"email": "will@silverstripe.com"
+	}
+	],
+	"require":
+	{
+		"silverstripe/framework": "3.*"
+	}
+}
