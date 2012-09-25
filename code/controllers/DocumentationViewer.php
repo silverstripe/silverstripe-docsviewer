@@ -76,6 +76,7 @@ class DocumentationViewer extends Controller {
 				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushPhp.js',
 				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushXml.js',
 				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushCss.js',
+				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushYaml.js',
 				DOCSVIEWER_DIR . '/javascript/shBrushSS.js'
 			)
 		);
