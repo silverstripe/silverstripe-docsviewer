@@ -333,3 +333,14 @@ span.is-folder {float: right;}
 		text-decoration: underline;
 		color: #1389ce;
 	}
+
+/* some settings adapted from themes/ssorgsites/css/core.css */
+#sidebar-column a {
+	padding: 2px 10px;
+}
+	#sidebar-column a:hover,
+	#sidebar-column a:focus,
+	#sidebar-column a:visited {
+		text-decoration: none;
+		color: #1389ce;
+	}
