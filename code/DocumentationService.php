@@ -494,6 +494,10 @@ class DocumentationService {
 				$page->setVersion($version);
 				$page->setLang($lang);
 				
+				// does this page act as a folder?
+				$path = $page->getPath();
+				if (is_dir($path)) { $page->setIsFolder(true); }
+
 				$output->push($page);
 			}
 		}

@@ -277,3 +277,6 @@ fieldset { border: none; }
 			background: linear-gradient(to bottom, #599BDC 1%,#3072B3 100%); /* W3C */
 			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#599BDC', endColorstr='#3072B3',GradientType=0 ); /* IE6-9 */
 		}
+
+/* contains the arrow that marks a folder */
+span.is-folder {float: right;}

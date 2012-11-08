@@ -37,6 +37,24 @@ class DocumentationPage extends ViewableData {
 	 */
 	protected $version;
 	
+	/**
+	 * @var Boolean
+	 */
+	protected $IsFolder = false;
+
+	/**
+	 * @param Boolean
+	 */
+	function setIsFolder($isFolder = false) {
+		$this->IsFolder = $isFolder;
+	}
+
+	/**
+	 * @return Boolean
+	 */
+	function getIsFolder($isFolder = false) {
+		return $this->IsFolder;
+	}
 	
 	/**
 	 * @return DocumentationEntity
