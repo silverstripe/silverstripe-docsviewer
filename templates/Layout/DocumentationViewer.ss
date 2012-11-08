@@ -18,7 +18,6 @@
 
 	<% if Content %>
 	<div id="sidebar-column">
-		<% include DocTableOfContents %>
 		<% include DocInThisModule %>
 	</div>
 	<% end_if %>
