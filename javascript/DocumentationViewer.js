@@ -14,7 +14,7 @@
 			
 			$('#content-column h1[id], #content-column h2[id], #content-column h3[id], #content-column h4[id]').each(function(i) {
 				var current = $(this);
-				var tagName = current.attr("tagName");
+				var tagName = current.prop("tagName");
 				if(typeof tagName == "String") tagName = tagName.toLowerCase();
 				
 				toc += '<li class="' + tagName + '"><a id="link' + i + '" href="'+ pageURL +'#' + $(this).attr('id') + '" title="' + current.html() + '">' + current.html() + '</a></li>';
