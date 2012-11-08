@@ -105,11 +105,14 @@ fieldset { border: none; }
 	}
 		#footer p a { color: #798D85;}
 
+/* module and version selection */
+#top-nav { float: left; }
+
 /* Search */
 #search { float: right; }		
 	#search label { display: none; }
 /* Breadcrumbs */
-#breadcrumbs { float: left; }
+#breadcrumbs { float: none; }
 
 /* Content */
 #layout { }

@@ -19,35 +19,33 @@
 			
 			<div id="layout">
 				<div id="search-bar">					
-					<div id="breadcrumbs">
-						<% include DocBreadcrumbs %>
-					</div>
 
 					<div id="search">
 						$DocumentationSearchForm
 					</div>
-
+					<div id="top-nav">
 					<% if Entities %>
-					<div id="entities-nav" class="documentation-nav">
-						<h2>Modules:</h2>
-							<ul>
-							<% control Entities %>
-								<li><a href="$Link" class="$LinkingMode">$Title</a></li>
-							<% end_control %>
-						</ul>
-					</div>
+						<div id="entities-nav" class="documentation-nav">
+							<h2>Modules:</h2>
+								<ul>
+								<% control Entities %>
+									<li><a href="$Link" class="$LinkingMode">$Title</a></li>
+								<% end_control %>
+							</ul>
+						</div>
+						<% end_if %>
+
+						<% if Versions %>
+						<div id="versions-nav" class="documentation-nav">
+							<h2>Versions:</h2>
+								<ul>
+								<% control Versions %>
+									<li><a href="$Link" class="$LinkingMode">$Title</a></li>
+								<% end_control %>
+							</ul>
+						</div>
 					<% end_if %>
-										
-					<% if Versions %>
-					<div id="versions-nav" class="documentation-nav">
-						<h2>Versions:</h2>
-							<ul>
-							<% control Versions %>
-								<li><a href="$Link" class="$LinkingMode">$Title</a></li>
-							<% end_control %>
-						</ul>
 					</div>
-					<% end_if %>
 				</div>
 				
 				<div id="content" class="typography">

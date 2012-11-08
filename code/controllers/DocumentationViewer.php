@@ -628,7 +628,7 @@ class DocumentationViewer extends Controller {
 			}
 		}
 		
-		return $output;
+		return ($output->count() > 1)? $output : '';
 	}
 	
 	/**
