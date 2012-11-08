@@ -50,7 +50,19 @@
 			$("#table-of-contents li a").click(function (e) { e.stopPropagation(); });
 
 		}
-		
+
+		/** -----------------------------------------------
+		 * SUBMENU
+		 *
+		 * move to separate menu block
+		 */
+		if ($("#submenu").length > 0) {
+			var submenu = '<div class = "sidebar-box"><ul>';
+			submenu += $("#submenu").html();
+			$("#sidebar-column").append(submenu);
+			$("#submenu").remove();
+		}
+
 		/** ---------------------------------------------
 		 * HEADING ANCHOR LINKS
 		 *
