@@ -6,8 +6,9 @@
 		 *
 		 * Transform a #table-of-contents div to a nested list
 		 */
-		if($("#table-of-contents").length > 0) {
-			var toc = '<div class="box"><ul id="toc"><h4>In this document:</h4>';
+		if($("#content-column").length > 0) {
+			var toc = '<div id="table-of-contents" class="open">' + 
+				  '<h4>Table of contents<span class="updown">&#9660;</span></h4><ul id="toc" style="display:none;">';
 			
 			// Remove existing anchor redirection in the url
 			var pageURL = window.location.href.replace(/#[a-zA-Z0-9\-\_]*/g, '');
@@ -22,7 +23,32 @@
 		
 			toc += '</ul></div>';
 	
-			$('#table-of-contents').prepend(toc);
+			// Table of content location
+			var title = $('#content-column h1:first');
+			if (title.length > 0) {
+				title.after(toc);
+			} else {
+				var breadcrums = $('#content-column #breadcrumbs');
+				if (breadcrums.length > 0) {
+					breadcrums.after(toc);
+				} else {
+					$('#content-column').prepend(toc);
+				}	
+			}
+
+			// Toggle the TOC
+			$('#table-of-contents').attr('href', 'javascript:void()').toggle(
+				function() {
+					$("#toc").animate({'height':'show'}, 200, function(){$('#table-of-contents h4 span').html('&#9650;');})
+				},
+				function() {					
+					$("#toc").animate({'height':'hide'}, 200, function(){$('#table-of-contents h4 span').html('&#9660;');})					
+				}
+			);
+
+			// Make sure clicking a link won't toggle the TOC
+			$("#table-of-contents li a").click(function (e) { e.stopPropagation(); });
+			
 		}
 		
 		/** ---------------------------------------------
