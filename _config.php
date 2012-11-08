@@ -22,3 +22,9 @@ if(!defined('DOCSVIEWER_DIR')) {
 Director::addRules(100, array(
 	'dev/docs' => 'DocumentationViewer'
 ));
+
+// define filetypes to ignore
+DocumentationService::set_ignored_files(array(
+	'.', '..', '.DS_Store',
+	'.svn', '.git', 'assets', 'themes', '_images', '_resources'
+));
