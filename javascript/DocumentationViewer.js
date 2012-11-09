@@ -8,8 +8,8 @@
 		 */
 		if($("#content-column").length > 0) {
 			var toc = '<div id="table-of-contents" class="open">' +
-				  '<h4>Table of contents<span class="updown">&#9660;</span></h4><ul id="toc" style="display:none;">';
-			
+				  '<h4>Table of contents<span class="updown">&#9660;</span></h4><ul style="display: none;">';
+
 			// Remove existing anchor redirection in the url
 			var pageURL = window.location.href.replace(/#[a-zA-Z0-9\-\_]*/g, '');
 			
@@ -39,10 +39,10 @@
 			// Toggle the TOC
 			$('#table-of-contents').attr('href', 'javascript:void()').toggle(
 				function() {
-					$("#toc").animate({'height':'show'}, 200, function(){$('#table-of-contents h4 span').html('&#9650;');})
+					$("#table-of-contents ul").animate({'height':'show'}, 200, function(){$('#table-of-contents h4 span').html('&#9650;');})
 				},
 				function() {
-					$("#toc").animate({'height':'hide'}, 200, function(){$('#table-of-contents h4 span').html('&#9660;');})
+					$("#table-of-contents ul").animate({'height':'hide'}, 200, function(){$('#table-of-contents h4 span').html('&#9660;');})
 				}
 			);
 
@@ -57,8 +57,10 @@
 		 * move to separate menu block
 		 */
 		if ($("#submenu").length > 0) {
-			var submenu = '<div class = "sidebar-box"><ul>';
+			var submenuTitle = $("#sibling-pages").find('a.current, a.section').eq(0).text();
+			var submenu = '<div class = "sidebar-box"><h4>' + submenuTitle + '</h4><ul>'
 			submenu += $("#submenu").html();
+			submenu += '</ul></div>';
 			$("#sidebar-column").append(submenu);
 			$("#submenu").remove();
 		}
