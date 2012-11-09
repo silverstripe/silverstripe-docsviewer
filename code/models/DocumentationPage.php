@@ -46,14 +46,14 @@ class DocumentationPage extends ViewableData {
 	 * @param Boolean
 	 */
 	public function setIsFolder($isFolder = false) {
-		$this->IsFolder = $isFolder;
+		$this->isFolder = $isFolder;
 	}
 
 	/**
 	 * @return Boolean
 	 */
 	public function getIsFolder($isFolder = false) {
-		return $this->IsFolder;
+		return $this->isFolder;
 	}
 
 	/**
