@@ -58,7 +58,7 @@
 		 */
 		if ($("#submenu").length > 0) {
 			var submenuTitle = $("#sibling-pages").find('a.current, a.section').eq(0).text();
-			var submenu = '<div class = "sidebar-box"><h4>' + submenuTitle + '</h4><ul>'
+			var submenu = '<div class = "sidebar-box"><h4>' + submenuTitle + '</h4><ul>';
 			submenu += $("#submenu").html();
 			submenu += '</ul></div>';
 			$("#sidebar-column").append(submenu);
