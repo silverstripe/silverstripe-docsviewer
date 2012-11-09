@@ -23,6 +23,7 @@
 					<div id="search">
 						$DocumentationSearchForm
 					</div>
+					
 					<div id="top-nav">
 					<% if Entities %>
 						<div id="entities-nav" class="documentation-nav">

@@ -603,11 +603,10 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return ArrayList
 	 */
-	function getBreadcrumbs() {
+	public function getBreadcrumbs() {
 		if(!$this->Remaining) $this->Remaining = array();
 		
 		$pages = array_merge(array($this->entity), $this->Remaining);
-		
 		$output = new ArrayList();
 		
 		if($pages) {
@@ -628,15 +627,15 @@ class DocumentationViewer extends Controller {
 			}
 		}
 		
-		return ($output->count() > 1)? $output : '';
+		return $output;
 	}
 	
 	/**
 	 * Generate a string for the title tag in the URL.
 	 *
-	 * @return String
+	 * @return string
 	 */
-	function getPageTitle() {
+	public function getPageTitle() {
 		if($pages = $this->getBreadcrumbs()) {
 			$output = "";
 			

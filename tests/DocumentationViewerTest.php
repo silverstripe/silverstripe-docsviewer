@@ -194,29 +194,19 @@ class DocumentationViewerTest extends FunctionalTest {
 		$v = new DocumentationViewer();
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4'), DataModel::inst());
 		$crumbs = $v->getBreadcrumbs();
-		
 		$this->assertEquals(1, $crumbs->Count());
-		$crumbLinks = $crumbs->column('Link');
-		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/', $crumbLinks[0]);
 		
 		// Subfolder index
 		$v = new DocumentationViewer();
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4/subfolder/'), DataModel::inst());
 		$crumbs = $v->getBreadcrumbs();
 		$this->assertEquals(2, $crumbs->Count());
-		$crumbLinks = $crumbs->column('Link');
-		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/', $crumbLinks[0]);
-		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/', $crumbLinks[1]);
 		
 		// Subfolder page
 		$v = new DocumentationViewer();
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4/subfolder/subpage'), DataModel::inst());
 		$crumbs = $v->getBreadcrumbs();
 		$this->assertEquals(3, $crumbs->Count());
-		$crumbLinks = $crumbs->column('Link');
-		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/', $crumbLinks[0]);
-		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/', $crumbLinks[1]);
-		$this->assertStringEndsWith('DocumentationViewerTests/en/2.4/subfolder/subpage/', $crumbLinks[2]);
 	}
 	
 	function testGetVersion() {

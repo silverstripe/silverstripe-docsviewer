@@ -28,7 +28,7 @@
 			if (title.length > 0) {
 				title.after(toc);
 			} else {
-				var breadcrums = $('#content-column #breadcrumbs');
+				var breadcrums = $('#content-column .doc-breadcrumbs');
 				if (breadcrums.length > 0) {
 					breadcrums.after(toc);
 				} else {

@@ -7,6 +7,7 @@
 		<% if Breadcrumbs %>
 			<% include DocBreadcrumbs %>
 		<% end_if %>
+		
 		$Content
 
 		<% if EditLink %>
