@@ -341,7 +341,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return DataObject
 	 */ 
-	function getEntities($version = false, $lang = false) {
+	public function getEntities($version = false, $lang = false) {
 		$entities = DocumentationService::get_registered_entities($version, $lang);
 		$output = new ArrayList();
 		
@@ -376,7 +376,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return false|DocumentationEntity
 	 */
-	function getEntity() {
+	public function getEntity() {
 		if($this->entity) {
 			return DocumentationService::is_registered_entity(
 				$this->entity, 
@@ -396,7 +396,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return int
 	 */
-	function locationExists() {
+	public function locationExists() {
 		$entity = $this->getEntity();
 		
 		if($entity) {

@@ -27,6 +27,8 @@ class DocumentationPermalinks {
 	 *
 	 * Do not need to include the language or the version current as it 
 	 * will add it based off the language or version in the session
+	 *
+	 * @param array
 	 */
 	public static function add($map = array()) {
 		if(ArrayLib::is_associative($map)) {
@@ -40,7 +42,7 @@ class DocumentationPermalinks {
 	/**
 	 * Return the location for a given short value.
 	 *
-	 * @return String|false
+	 * @return string|false
 	 */
 	public static function map($url) {
 		return (isset(self::$mapping[$url])) ? self::$mapping[$url] : false;
