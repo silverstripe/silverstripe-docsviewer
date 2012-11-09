@@ -6,15 +6,16 @@
 		 *
 		 * Transform a #table-of-contents div to a nested list
 		 */
-		if($("#table-of-contents").length > 0) {
-			var toc = '<div class="box"><ul id="toc"><h4>In this document:</h4>';
+		if($("#content-column").length > 0) {
+			var toc = '<div id="table-of-contents" class="open">' + 
+				  '<h4>Table of contents<span class="updown">&#9660;</span></h4><ul style="display: none;">';
 			
 			// Remove existing anchor redirection in the url
 			var pageURL = window.location.href.replace(/#[a-zA-Z0-9\-\_]*/g, '');
 			
 			$('#content-column h1[id], #content-column h2[id], #content-column h3[id], #content-column h4[id]').each(function(i) {
 				var current = $(this);
-				var tagName = current.attr("tagName");
+				var tagName = current.prop("tagName");
 				if(typeof tagName == "String") tagName = tagName.toLowerCase();
 				
 				toc += '<li class="' + tagName + '"><a id="link' + i + '" href="'+ pageURL +'#' + $(this).attr('id') + '" title="' + current.html() + '">' + current.html() + '</a></li>';
@@ -22,9 +23,48 @@
 		
 			toc += '</ul></div>';
 	
-			$('#table-of-contents').prepend(toc);
+			// Table of content location
+			var title = $('#content-column h1:first');
+			if (title.length > 0) {
+				title.after(toc);
+			} else {
+				var breadcrums = $('#content-column #breadcrumbs');
+				if (breadcrums.length > 0) {
+					breadcrums.after(toc);
+				} else {
+					$('#content-column').prepend(toc);
+				}	
+			}
+
+			// Toggle the TOC
+			$('#table-of-contents').attr('href', 'javascript:void()').toggle(
+				function() {
+					$("#table-of-contents ul").animate({'height':'show'}, 200, function(){$('#table-of-contents h4 span').html('&#9650;');})
+				},
+				function() {					
+					$("#table-of-contents ul").animate({'height':'hide'}, 200, function(){$('#table-of-contents h4 span').html('&#9660;');})					
+				}
+			);
+
+			// Make sure clicking a link won't toggle the TOC
+			$("#table-of-contents li a").click(function (e) { e.stopPropagation(); });
+			
 		}
-		
+
+		/** -----------------------------------------------
+		 * SUBMENU
+		 *
+		 * move to separate menu block
+		 */
+		if ($("#submenu").length > 0) {
+			var submenuTitle = $("#sibling-pages").find('a.current, a.section').eq(0).text(); 
+			var submenu = '<div class = "sidebar-box"><h4>' + submenuTitle + '</h4><ul>';			
+			submenu += $("#submenu").html();	
+			submenu += '</ul></div>';
+			$("#sidebar-column").append(submenu);
+			$("#submenu").remove();
+		}
+
 		/** ---------------------------------------------
 		 * HEADING ANCHOR LINKS
 		 *

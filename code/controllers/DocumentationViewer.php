@@ -628,7 +628,7 @@ class DocumentationViewer extends Controller {
 			}
 		}
 		
-		return $output;
+		return ($output->count() > 1)? $output : '';
 	}
 	
 	/**
@@ -674,7 +674,12 @@ class DocumentationViewer extends Controller {
 		else if(is_array($path)) {
 			$action = implode('/', $path);
 		}
-		
+
+		// check for stable version: if so, remove version from link 
+		// (see DocumentationEntity->getRelativeLink() )
+		$objEntity = $this->getEntity();
+		if ($objEntity && $objEntity->getStableVersion() == $version) $version = '';
+
 		$link = Controller::join_links(
 			Director::absoluteBaseURL(), 
 			self::get_link_base(), 

@@ -5,6 +5,9 @@
 <div id="module-home">
 	<div id="content-column">
 		<% if Content %>
+			<% if Breadcrumbs %>
+				<% include DocBreadcrumbs %>
+			<% end_if %>
 			$Content
 
 			<% if EditLink %>

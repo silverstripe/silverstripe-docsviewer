@@ -37,32 +37,50 @@ class DocumentationPage extends ViewableData {
 	 */
 	protected $version;
 	
+	/**
+	 * @var Boolean 
+	 */
+	protected $isFolder = false;
+	
+	/**
+	 * @param Boolean
+	 */
+	public function setIsFolder($isFolder = false) {
+		$this->isFolder = $isFolder;
+	}
+
+	/**
+	 * @return Boolean
+	 */
+	public function getIsFolder($isFolder = false) {
+		return $this->isFolder;
+	}
 	
 	/**
 	 * @return DocumentationEntity
 	 */
-	function getEntity() {
+	public function getEntity() {
 		return $this->entity;
 	}
 	
 	/**
 	 * @param DocumentationEntity
 	 */
-	function setEntity($entity) {
+	public function setEntity($entity) {
 		$this->entity = $entity;
 	}
 		
 	/**
 	 * @return string
 	 */
-	function getRelativePath() {
+	public function getRelativePath() {
 		return $this->relativePath;
 	}
 	
 	/**
 	 * @param string
 	 */
-	function setRelativePath($path) {
+	public function setRelativePath($path) {
 		$this->relativePath = $path;
 	}
 	

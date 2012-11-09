@@ -4,6 +4,9 @@
 
 <div id="documentation-page">
 	<div id="content-column">
+		<% if Breadcrumbs %>
+			<% include DocBreadcrumbs %>
+		<% end_if %>
 		$Content
 
 		<% if EditLink %>
@@ -15,7 +18,6 @@
 
 	<% if Content %>
 	<div id="sidebar-column">
-		<% include DocTableOfContents %>
 		<% include DocInThisModule %>
 	</div>
 	<% end_if %>
