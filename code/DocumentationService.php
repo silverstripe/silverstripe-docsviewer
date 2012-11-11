@@ -101,7 +101,7 @@ class DocumentationService {
 	 *
 	 * @param array
 	 */
-	public function set_ignored_files($files) {
+	public static function set_ignored_files($files) {
 		self::$ignored_files = $files;
 	}
 	
