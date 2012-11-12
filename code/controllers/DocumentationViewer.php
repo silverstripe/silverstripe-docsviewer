@@ -47,6 +47,11 @@ class DocumentationViewer extends Controller {
 	public $remaining = array();
 	
 	/**
+	 * @var DocumentationPage
+	 */
+	public $currentLevelOnePage;
+
+	/**
 	 * @var String Same as the routing pattern set through Director::addRules().
 	 */
 	protected static $link_base = 'dev/docs/';
@@ -62,6 +67,24 @@ class DocumentationViewer extends Controller {
 	 */
 	private static $edit_links = array();
 	
+	/**
+	 * @return boolean
+	 */
+	protected static $separate_submenu = true;
+
+	/**
+	 * @return boolean
+	 */
+	protected static $recursive_submenu = false;
+
+	public static function set_separate_submenu($separate_submenu = true) {
+		self::$separate_submenu = $separate_submenu;
+	}
+
+	public static function set_recursive_submenu($recursive_submenu = false) {
+		self::$recursive_submenu = $nested_submenu;
+	}
+
 	function init() {
 		parent::init();
 
@@ -468,7 +491,7 @@ class DocumentationViewer extends Controller {
 	 */
 	function getEntityPages() {
 		if($entity = $this->getEntity()) {
-			$pages = DocumentationService::get_pages_from_folder($entity, null, false, $this->getVersion(), $this->getLang());
+			$pages = DocumentationService::get_pages_from_folder($entity, null, self::$recursive_submenu, $this->getVersion(), $this->getLang());
 
 			if($pages) {
 				foreach($pages as $page) {
@@ -480,6 +503,10 @@ class DocumentationViewer extends Controller {
 					
 					$page->LinkingMode = 'link';
 					$page->Children = $this->_getEntityPagesNested($page, $entity);
+
+					if (!empty($page->Children)) {
+						$this->currentLevelOnePage = $page;
+					}
 				}
 			}
 
@@ -523,7 +550,7 @@ class DocumentationViewer extends Controller {
 					$children = DocumentationService::get_pages_from_folder(
 						$entity, 
 						$page->getRelativePath(), 
-						false, 
+						self::$recursive_submenu,
 						$this->getVersion(), 
 						$this->getLang()
 					);
@@ -552,6 +579,31 @@ class DocumentationViewer extends Controller {
 		return false;
 	}
 	
+	/**
+	 * @return DocumentationPage
+	 */
+	public function getCurrentLevelOnePage() {
+		return $this->currentLevelOnePage;
+	}
+
+	/**
+	 * returns 'separate' if the submenu should be displayed in a separate
+	 * block, 'nested' otherwise. If no currentDocPage is defined, there is
+	 * no submenu, so an empty string is returned.
+	 *
+	 * @return string
+	 */
+	public function getSubmenu() {
+		if ($this->currentLevelOnePage) {
+			if (self::$separate_submenu && !self::$recursive_submenu) {
+				return 'separate';
+			} else {
+				return 'nested';
+			}
+		}
+		return '';
+	}
+
 	/**
 	 * Return the content for the page. If its an actual documentation page then
 	 * display the content from the page, otherwise display the contents from
