@@ -546,7 +546,10 @@ class DocumentationViewer extends Controller {
 					
 					return $children;
 				}
-			}
+			} else {
+				if ($page->getRelativeLink() == $this->Remaining[$level]) {
+					$page->LinkingMode = 'current';
+				}
 		}
 		
 		return false;
