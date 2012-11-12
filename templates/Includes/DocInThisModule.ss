@@ -5,7 +5,7 @@
 			<% control EntityPages %>
 				<li>
 					<a href="$Link" class="$LinkingMode">$Title</a>
-					<% if Top.Submenu = nested %>
+					<% if Top.SubmenuLocation = nested %>
 						<% if Children %>
 							<% include DocSubmenu %>
 						<% end_if %>
@@ -16,7 +16,7 @@
 	</div>
 <% end_if %>
 
-<% if Submenu = separate %>
+<% if SubmenuLocation = separate %>
 	<% control CurrentLevelOnePage %>
 		<% if Children %>
 			<div class = "sidebar-box">
