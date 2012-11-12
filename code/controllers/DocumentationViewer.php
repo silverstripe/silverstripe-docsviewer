@@ -593,7 +593,7 @@ class DocumentationViewer extends Controller {
 	 * 
 	 * @return string
 	 */
-	public function getSubmenu() { 
+	public function getSubmenuLocation() { 
 		if ($this->currentLevelOnePage) {
 			if (self::$separate_submenu && !self::$recursive_submenu) {
 				return 'separate';
