@@ -5,6 +5,7 @@
 		<% base_tag %>
 		<meta charset="utf-8" />
 		<title>SilverStripe Documentation</title>
+		<% require css(docsviewer/css/DocumentationViewer.css) %>
 	</head>
 	
 	<body>
