@@ -577,6 +577,7 @@ class DocumentationViewer extends Controller {
 				if ($page->getRelativeLink() == $this->Remaining[$level]) {
 					$page->LinkingMode = 'current';
 				}
+			}
 		}
 		
 		return false;
