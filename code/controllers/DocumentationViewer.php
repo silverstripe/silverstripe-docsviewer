@@ -816,10 +816,19 @@ class DocumentationViewer extends Controller {
 		if(!DocumentationSearch::enabled()) return false;
 		$q = ($q = $this->getSearchQuery()) ? $q->NoHTML() : "";
 
+		$entities = $this->getSearchedEntities();
+		$versions = $this->getSearchedVersions();
+		
 		$fields = new FieldList(
-			new TextField('Search', _t('DocumentationViewer.SEARCH', 'Search'), $q),
-			new HiddenField('Entities', '', implode(',', array_keys($this->getSearchedEntities()))),
-			new HiddenField('Versions', '', implode(',', $this->getSearchedVersions()))
+			new TextField('Search', _t('DocumentationViewer.SEARCH', 'Search'), $q)
+		);
+		
+		if ($entities) $fields->push(
+			new HiddenField('Entities', '', implode(',', array_keys($entities)))
+		);
+		
+		if ($versions) $fields->push(
+			new HiddenField('Versions', '', implode(',', $versions))
 		);
 		
 		$actions = new FieldList(
