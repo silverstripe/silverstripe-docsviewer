@@ -158,6 +158,8 @@ class DocumentationViewer extends Controller {
 	 * @return SS_HTTPResponse
 	 */
 	public function handleRequest(SS_HTTPRequest $request, DataModel $model) {
+		DocumentationService::load_automatic_registration();
+		
 		// if we submitted a form, let that pass
 		if(!$request->isGET() || isset($_GET['action_results'])) {
 			return parent::handleRequest($request, $model);
@@ -168,7 +170,6 @@ class DocumentationViewer extends Controller {
 		$thirdParam = $request->shift();
 		
 		$this->Remaining = $request->shift(10);
-		DocumentationService::load_automatic_registration();
 		
 		// if no params passed at all then it's the homepage
 		if(!$firstParam && !$secondParam && !$thirdParam) {
