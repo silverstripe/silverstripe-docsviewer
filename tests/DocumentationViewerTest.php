@@ -110,7 +110,7 @@ class DocumentationViewerTest extends FunctionalTest {
 
 		$arr = $pages->toArray();
 		
-		$page = $arr[2];
+		$page = $arr[1];
 		
 		$this->assertEquals('Subfolder', $page->Title);
 	}
@@ -139,10 +139,10 @@ class DocumentationViewerTest extends FunctionalTest {
 		
 		// Children
 		$pagesArr = $pages->toArray();
-		$child1 = $pagesArr[1];
+		$child1 = $pagesArr[2];
 	
 		$this->assertFalse($child1->Children);
-		$child2 = $pagesArr[2];
+		$child2 = $pagesArr[1];
 		
 		$this->assertEquals(
 			array('subfolder/subpage.md', 'subfolder/subsubfolder/'),
