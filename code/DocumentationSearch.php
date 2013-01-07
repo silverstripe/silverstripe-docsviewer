@@ -246,8 +246,8 @@ class DocumentationSearch {
 		$data = array(
 			'Results' => null,
 			'Query' => null,
-			'Versions' => DBField::create_field('Text', implode(',', $this->versions)),
-			'Modules' => DBField::create_field('Text', implode(',', $this->modules)),
+			'Versions' => DBField::create_field('Text', implode(', ', $this->versions)),
+			'Modules' => DBField::create_field('Text', implode(', ', $this->modules)),
 			'Title' => _t('DocumentationSearch.SEARCHRESULTS', 'Search Results'),
 			'TotalResults' => null,
 			'TotalPages' => null,
