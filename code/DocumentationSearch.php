@@ -30,6 +30,11 @@ class DocumentationSearch {
 	 * @var bool - Is search enabled
 	 */
 	private static $enabled = false;
+
+	/**
+	 * @var bool - Is advanced search enabled
+	 */
+	private static $advanced_search_enabled = true;	
 	
 	/**
 	 * @var string - OpenSearch metadata. Please use {@link DocumentationSearch::set_meta_data()}
@@ -171,6 +176,20 @@ class DocumentationSearch {
 		return self::$enabled;
 	}
 
+	/**
+	 * Enable advanced documentation search 
+	 */	
+	public static function enable_advanced_search($enabled = true) {
+		self::$advanced_search_enabled = ($enabled)? true: false;
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public static function advanced_search_enabled() {
+		return self::$advanced_search_enabled;
+	}
+	
 	/**
 	 * @param string
 	 */

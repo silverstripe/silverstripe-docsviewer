@@ -973,6 +973,17 @@ class DocumentationViewer extends Controller {
 	
 		return $form;
 	}
+
+	/**
+	 * check if the Advanced SearchForm can be displayed
+	 * enabled by default, to disable use: 
+	 * DocumentationSearch::enable_advanced_search(false);
+	 * 
+	 * @return bool
+	 */
+	public function getAdvancedSearchEnabled() {
+		return 	DocumentationSearch::advanced_search_enabled(); 
+	}
 	
 	/**
 	 * Check to see if the currently accessed version is out of date or
