@@ -181,7 +181,7 @@ class DocumentationSearch {
 	/**
 	 * @return string
 	 */
-	public function get_index_location() {
+	public static function get_index_location() {
 		if(!self::$index_location) {
 			self::$index_location = DOCSVIEWER_DIR;
 		}
