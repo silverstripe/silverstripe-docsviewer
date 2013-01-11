@@ -82,7 +82,7 @@ class DocumentationViewer extends Controller {
 	}
 
 	public static function set_recursive_submenu($recursive_submenu = false) {
-		self::$recursive_submenu = $nested_submenu;
+		self::$recursive_submenu = $recursive_submenu;
 	}
 
 	function init() {
