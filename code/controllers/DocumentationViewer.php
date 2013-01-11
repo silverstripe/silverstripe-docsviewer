@@ -536,7 +536,7 @@ class DocumentationViewer extends Controller {
 			// second comparison on $level=1 is against "changelogs/alpha", etc.
 			$segments = array_slice($this->Remaining, 0, $level+1);
 			
-			if(strtolower(implode('/', $segments)) == trim($page->getRelativeLink(), '/')) {
+			if(strtolower(implode('/', $segments)) == strtolower(trim($page->getRelativeLink(), '/'))) {
 				
 				// its either in this section or is the actual link
 				$page->LinkingMode = (isset($this->Remaining[$level + 1])) ? 'section' : 'current';
