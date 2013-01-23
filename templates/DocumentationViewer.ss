@@ -9,7 +9,7 @@
 	</head>
 	
 	<body>
-		<div id="container">
+		<div id="container" class="container">
 			<div id="header">
 				<h1><a href="$Link"><% _t('SILVERSTRIPEDOCUMENTATION', 'SilverStripe Documentation') %></a></h1>
 				
@@ -26,19 +26,21 @@
 					</div>
 					
 					<div id="top-nav">
-					<% if Entities %>
-						<div id="entities-nav" class="documentation-nav">
+						<% if Entities %>
+						<div id="entities-nav" class="documentation-nav clearfix">
 							<h2>Modules:</h2>
 								<ul>
 								<% control Entities %>
 									<li><a href="$Link" class="$LinkingMode">$Title</a></li>
 								<% end_control %>
 							</ul>
+
+							<div class="clear"><!-- --></div>
 						</div>
 						<% end_if %>
 
 						<% if Versions %>
-						<div id="versions-nav" class="documentation-nav">
+						<div id="versions-nav" class="documentation-nav clearfix">
 							<h2>Versions:</h2>
 								<ul>
 								<% control Versions %>
@@ -46,7 +48,7 @@
 								<% end_control %>
 							</ul>
 						</div>
-					<% end_if %>
+						<% end_if %>
 					</div>
 				</div>
 				
