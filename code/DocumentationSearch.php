@@ -174,14 +174,14 @@ class DocumentationSearch {
 	/**
 	 * @param string
 	 */
-	public function set_index($index) {
+	public static function set_index($index) {
 		self::$index_location = $index;
 	}
 	
 	/**
 	 * @return string
 	 */
-	public function get_index_location() {
+	public static function get_index_location() {
 		if(!self::$index_location) {
 			self::$index_location = DOCSVIEWER_DIR;
 		}
