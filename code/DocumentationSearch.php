@@ -198,7 +198,7 @@ class DocumentationSearch {
 	public function performSearch() {	
 		try {
 			$index = Zend_Search_Lucene::open(self::get_index_location());
-		
+
 			Zend_Search_Lucene::setResultSetLimit(100);
 			
 			$query = new Zend_Search_Lucene_Search_Query_Boolean();
@@ -214,7 +214,7 @@ class DocumentationSearch {
 				
 				$query->addSubquery($moduleQuery, true);
 			}
-			
+
 			if($this->versions) {
 				$versionQuery = new Zend_Search_Lucene_Search_Query_MultiTerm();
 				
@@ -229,7 +229,6 @@ class DocumentationSearch {
 			error_reporting('E_ALL ^ E_NOTICE');
 			$this->results = $index->find($query);
 			error_reporting($er);
-			
 			$this->totalResults = $index->numDocs();
 		}
 		catch(Zend_Search_Lucene_Exception $e) {
