@@ -82,7 +82,7 @@ class DocumentationViewer extends Controller {
 	}
 
 	public static function set_recursive_submenu($recursive_submenu = false) {
-		self::$recursive_submenu = $nested_submenu;
+		self::$recursive_submenu = $recursive_submenu;
 	}
 
 	function init() {
@@ -536,7 +536,7 @@ class DocumentationViewer extends Controller {
 			// second comparison on $level=1 is against "changelogs/alpha", etc.
 			$segments = array_slice($this->Remaining, 0, $level+1);
 			
-			if(strtolower(implode('/', $segments)) == trim($page->getRelativeLink(), '/')) {
+			if(strtolower(implode('/', $segments)) == strtolower(trim($page->getRelativeLink(), '/'))) {
 				
 				// its either in this section or is the actual link
 				$page->LinkingMode = (isset($this->Remaining[$level + 1])) ? 'section' : 'current';
@@ -830,14 +830,14 @@ class DocumentationViewer extends Controller {
 		if ($versions) $fields->push(
 			new HiddenField('Versions', '', implode(',', $versions))
 		);
-		
+
 		$actions = new FieldList(
 			new FormAction('results', 'Search')
 		);
-		
+
 		$form = new Form($this, 'DocumentationSearchForm', $fields, $actions);
 		$form->disableSecurityToken();
-		$form->setFormMethod('get');
+		$form->setFormMethod('GET');
 		$form->setFormAction(self::$link_base . 'DocumentationSearchForm');
 		
 		return $form;
@@ -851,7 +851,7 @@ class DocumentationViewer extends Controller {
 	function getSearchedEntities() {
 		$entities = array();
 
-		if(isset($_REQUEST['Entities'])) {
+		if(!empty($_REQUEST['Entities'])) {
 			if(is_array($_REQUEST['Entities'])) {
 				$entities = Convert::raw2att($_REQUEST['Entities']);
 			}
@@ -875,7 +875,7 @@ class DocumentationViewer extends Controller {
 	function getSearchedVersions() {
 		$versions = array();
 		
-		if(isset($_REQUEST['Versions'])) {
+		if(!empty($_REQUEST['Versions'])) {
 			if(is_array($_REQUEST['Versions'])) {
 				$versions = Convert::raw2att($_REQUEST['Versions']);
 				$versions = array_combine($versions, $versions);
@@ -909,7 +909,7 @@ class DocumentationViewer extends Controller {
 	 */
 	function results($data, $form = false) {
 		$query = (isset($_REQUEST['Search'])) ? $_REQUEST['Search'] : false;
-		
+
 		$search = new DocumentationSearch();
 		$search->setQuery($query);
 		$search->setVersions($this->getSearchedVersions());
@@ -968,7 +968,7 @@ class DocumentationViewer extends Controller {
 		
 		$form = new Form($this, 'AdvancedSearchForm', $fields, $actions, $required);
 		$form->disableSecurityToken();
-		$form->setFormMethod('get');
+		$form->setFormMethod('GET');
 		$form->setFormAction(self::$link_base . 'DocumentationSearchForm');
 	
 		return $form;
