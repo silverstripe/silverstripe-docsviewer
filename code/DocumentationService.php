@@ -529,13 +529,20 @@ class DocumentationService {
 		
 		if(self::is_registered_entity($entity)) {
 			self::get_pages_from_folder_recursive($path, $relativePath, $recursive, $pages);
+			if (empty($relativePath) && $rootPath = $entity->getRootPath()) {
+				$rootPages = array();
+				self::get_pages_from_folder_recursive($rootPath, $relativePath, $recursive, $rootPages, true);
+				foreach ($rootPages as $page) {
+					if (!in_array($page, $pages)) $pages[] = $page;
+				}
+			}			
 		}
 		else {
 			return user_error("$entity is not registered", E_USER_WARNING);
 		}
 
 		if(count($pages) > 0) {
-			natsort($pages);
+			natcasesort($pages);
 			
 			foreach($pages as $key => $pagePath) {
 				
@@ -570,8 +577,8 @@ class DocumentationService {
 	 *
 	 * @see {@link DocumentationService::get_pages_from_folder}
 	 */ 
-	private static function get_pages_from_folder_recursive($base, $relative, $recusive, &$pages) {
-		if(!is_dir($base)) throw new Exception(sprintf('%s is not a folder', $folder));
+	private static function get_pages_from_folder_recursive($base, $relative, $recusive, &$pages, $filesOnly=false) {
+		//if(!is_dir($base)) throw new Exception(sprintf('%s is not a folder', $folder));
 
 		$folder = Controller::join_links($base, $relative);
 		
@@ -589,7 +596,7 @@ class DocumentationService {
 					$path = Controller::join_links($folder, $file);
 					$relativeFilePath = Controller::join_links($relative, $file);
 
-					if(is_dir($path)) {
+					if(is_dir($path) && !$filesOnly) {
 						// dir
 						$pages[] = $relativeFilePath;
 						

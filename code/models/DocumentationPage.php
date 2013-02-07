@@ -107,6 +107,12 @@ class DocumentationPage extends ViewableData {
 				$this->entity->getPath($this->getVersion(), $this->lang),
 				$this->getRelativePath()
 			);
+			if(!file_exists($path) && $rootPath = $this->entity->getRootPath()) {
+				$path = Controller::join_links(
+					$rootPath,
+					$this->getRelativePath()
+				);
+			}			
 			
 			if(!is_dir($path)) $path = realpath($path);
 			else if($defaultFile) {
