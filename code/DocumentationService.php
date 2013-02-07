@@ -76,6 +76,22 @@ class DocumentationService {
 	 * @var bool
 	 */
 	private static $automatic_registration = true;
+
+	/**
+	 * Rootpages are non-localized documentation pages that live in the
+	 * root of the entity. They are enabled by default.
+	 * 
+	 * @var bool
+	 */
+	private static $rootpages_enabled = true;	
+
+	/**
+	 * Disables the display of rootpages for single entities. By default
+	 * all entities adhere to the $rootpages_enabled setting
+	 * 
+	 * @var array
+	 */
+	private static $rootpages_disabled_for = array();	
 	
 	/**
 	 * Return the allowed extensions
@@ -138,6 +154,39 @@ class DocumentationService {
 	public static function automatic_registration_enabled() {
 		return self::$automatic_registration;
 	}
+
+	/**
+	 * Rootpages are enabled glabally by default, disable by setting
+	 * DocumentationService::enable_rootpages(false);  
+	 * 
+	 * @param bool $enable
+	 */
+	public static function enable_rootpages($enabled = true) {
+		self::$rootpages_enabled = ($enabled)? true: false;
+	} 
+
+	/**
+	 * Exclude certain entities from displaying their rootpages
+	 * 
+	 * @param type $entities
+	 */
+	public static function disable_rootpages_for($entities) {
+		if (is_array($entities) && !empty($entities)) {
+			self::$rootpages_disabled_for = $entities;
+		}
+	}
+
+	/**
+	 * Are rootpages enabled for this entity? If no entity provided, 
+	 * return the global setting for all entities.
+	 * 
+	 * @return bool
+	 */
+	public static function get_rootpages_enabled($entity = '') {
+		if (!self::$rootpages_enabled) return false;
+		if ($entity && in_array($entity, self::$rootpages_disabled_for)) return false;
+		return true;
+	}	
 	
 	/**
 	 * Return the entities which are listed for documentation. Optionally only 
@@ -277,7 +326,7 @@ class DocumentationService {
 						$docs = Director::baseFolder() . '/' . Controller::join_links($entity, 'docs');
 	
 						if(is_dir($docs)) {
-							self::register($entity, $docs, 'current', $entity, true);
+							self::register($entity, $docs, '', $entity, true);
 						}
 					}
 				}
