@@ -377,9 +377,16 @@ class DocumentationService {
 	 */
 	static function find_page($entity, $path, $version = '', $lang = 'en') {	
 		if($entity = self::is_registered_entity($entity, $version, $lang)) {
-			return self::find_page_recursive($entity->getPath($version, $lang), $path);
+			$result = self::find_page_recursive($entity->getPath($version, $lang), $path);
+			
+			// if nothing is found, this might be a rootpage, so search the root,
+			// without recursion!
+			if (!$result && $rootPath = $entity->getRootPath()) {
+				$result = self::find_page_recursive($rootPath, $path, false);
+			}			
+			return $result;
 		}
-		
+	
 		return false;
 	}
 	
@@ -389,7 +396,7 @@ class DocumentationService {
 	 *
 	 * @return string
 	 */
-	private static function find_page_recursive($base, $goal) {
+	private static function find_page_recursive($base, $goal, $recursive=true) {
 		$handle = (is_dir($base)) ? opendir($base) : false;
 
 		$name = self::trim_extension_off(strtolower(array_shift($goal)));
@@ -413,17 +420,18 @@ class DocumentationService {
 					// if this file is a directory we could be displaying that
 					// or simply moving towards the goal.
 					if(is_dir(Controller::join_links($base, $file))) {
-						
-						$base = $base . trim($file, '/') .'/';
-						
-						// if this is a directory check that there is any more states to get
-						// to in the goal. If none then what we want is the 'index.md' file
-						if(count($goal) > 0) {
-							return self::find_page_recursive($base, $goal);
-						}
-						else {
-							// recurse but check for an index.md file next time around
-							return self::find_page_recursive($base, array('index'));
+						if ($recursive) {
+							$base = $base . trim($file, '/') .'/';
+
+							// if this is a directory check that there is any more states to get
+							// to in the goal. If none then what we want is the 'index.md' file
+							if(count($goal) > 0) {
+								return self::find_page_recursive($base, $goal);
+							}
+							else {
+								// recurse but check for an index.md file next time around
+								return self::find_page_recursive($base, array('index'));
+							}
 						}
 					}
 					else {

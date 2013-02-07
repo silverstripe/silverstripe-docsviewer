@@ -428,7 +428,12 @@ class DocumentationViewer extends Controller {
 				$entity->getPath($this->getVersion(), $this->getLang()), 
 				implode('/', $this->Remaining)
 			));
-			
+			if (!$has_dir && $rootPath = $entity->getRootPath()){
+				$has_dir = is_dir(Controller::join_links(
+					$rootPath, 
+					implode('/', $this->Remaining)
+				));	
+			}
 			if($has_dir) return 2;
 			
 			$has_page = DocumentationService::find_page(
@@ -463,8 +468,12 @@ class DocumentationViewer extends Controller {
 		);
 		
 		if($absFilepath) {
+			$path = $entity->getPath($version, $lang);
+			if (!stristr($absFilepath, $path)) {
+				$path = $entity->getRootPath();
+			}			
 			$relativeFilePath = str_replace(
-				$entity->getPath($version, $lang),
+				$path,
 				'', 
 				$absFilepath
 			);
