@@ -254,7 +254,10 @@ class DocumentationService {
 	 */
 	public static function register($entity, $path, $version = '', $title = false, $latest = false) {
 		if(!file_exists($path)) throw new InvalidArgumentException(sprintf('Path "%s" doesn\'t exist', $path));
-		
+
+		$rootPath = '';
+		self::configure_paths($entity, $path, $rootPath);
+				
 		// add the entity to the registered array
 		if(!isset(self::$registered_entities[$entity])) {
 			// entity is completely new
@@ -267,6 +270,8 @@ class DocumentationService {
 			$output = self::$registered_entities[$entity];
 			$output->addVersion($version, $path);
 		}
+		if (!empty($rootPath)) 
+			$output->setRootPath($rootPath);
 		
 		if($latest)
 			$output->setStableVersion($version);
@@ -318,15 +323,21 @@ class DocumentationService {
 
 			if($entities) {
 				foreach($entities as $key => $entity) {
-					$dir = is_dir(Controller::join_links(BASE_PATH, $entity));
+					$entityRoot = Controller::join_links(BASE_PATH, $entity);
+					$dir = is_dir($entityRoot);
 					$ignored = in_array($entity, self::get_ignored_files(), true);
 					
 					if($dir && !$ignored) {
-						// check to see if it has docs
-						$docs = Director::baseFolder() . '/' . Controller::join_links($entity, 'docs');
-	
+						$docs = Controller::join_links($entityRoot, 'docs');
 						if(is_dir($docs)) {
-							self::register($entity, $docs, '', $entity, true);
+							self::register($entity, $docs, 'current', $entity, true);
+						} elseif (self::get_rootpages_enabled($entity)) {	
+							//check if there are files in the root and displaying them is allowed
+							$rootPages = array();
+							self::get_pages_from_folder_recursive($entityRoot, '', false, $rootPages, true);
+							if (count($rootPages) > 0) {
+								self::register($entity, $entityRoot, 'current', $entity, true);
+							}
 						}
 					}
 				}
@@ -594,4 +605,34 @@ class DocumentationService {
 
 		closedir($handle);
 	}
+
+	/**
+	 * On default registration, the path wil point to the root of the 
+	 * entity. On manual registration of entities that follow the 
+	 * SilverStripe standards having a /docs folder, the path can
+	 * still point to the /docs folder (backwards compatibility)
+	 * 
+	 * For entities without a docs folder, the rootfolder will be equal to 
+	 * the path, But the entity can still have separate rootfiles, as all 
+	 * localized docs will always live in language/version directories. 
+	 * 
+	 * @param string reference $path
+	 * @param string reference $rootPath
+	 */
+	private static function configure_paths($entity, &$path, &$rootPath) {
+		$path = rtrim($path, '/');	
+		$docsPath = Controller::join_links($path, 'docs');
+		if (is_dir($docsPath)) {
+			$path = $docsPath;
+		} 
+		
+		if (self::get_rootpages_enabled($entity)) {
+			$rootPath = $path;
+			if ('/docs' == substr($path, -5, 5)) {
+				$subPath = substr($path, 0, -5);
+				if ($subPath != BASE_PATH) $rootPath = $subPath;				
+			} 
+		}
+	}
+	
 }
