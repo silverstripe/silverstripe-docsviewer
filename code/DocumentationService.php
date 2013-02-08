@@ -91,7 +91,14 @@ class DocumentationService {
 	 * 
 	 * @var array
 	 */
-	private static $rootpages_disabled_for = array();	
+	private static $rootpages_disabled_for = array();
+	
+	/**
+	 * In the proper order: which files can serve as index file
+	 * 
+	 * @var array
+	 */
+	private static $valid_index_files = array('index', 'readme');	
 	
 	/**
 	 * Return the allowed extensions
@@ -174,6 +181,25 @@ class DocumentationService {
 		if (is_array($entities) && !empty($entities)) {
 			self::$rootpages_disabled_for = $entities;
 		}
+	}
+
+	/**
+	 * Return the valid index files (no extensions)
+	 *
+	 * @return array
+	 */	
+	public static function get_valid_index_files() {
+		return self::$valid_index_files;
+	}
+	
+	/**
+	 * Cset an array of valid index file (in order of importance, 
+	 * no extensions)
+	 * 
+	 * @return array
+	 */
+	public static function set_valid_index_files($indexes) {
+		self::$valid_index_files = $indexes;
 	}
 
 	/**
@@ -400,7 +426,7 @@ class DocumentationService {
 		$handle = (is_dir($base)) ? opendir($base) : false;
 
 		$name = self::trim_extension_off(strtolower(array_shift($goal)));
-		if(!$name || $name == '/') $name = 'index';
+		$arrName = (!$name || $name == '/') ? self::$valid_index_files : array($name);
 
 
 		if($handle) {
@@ -414,34 +440,36 @@ class DocumentationService {
 				
 				$formatted = self::trim_extension_off(strtolower($file));
 				
-				// the folder is the one that we are looking for.
-				if(strtolower($name) == strtolower($formatted)) {
-					
-					// if this file is a directory we could be displaying that
-					// or simply moving towards the goal.
-					if(is_dir(Controller::join_links($base, $file))) {
-						if ($recursive) {
-							$base = $base . trim($file, '/') .'/';
+				foreach ($arrName as $aName) {
+					// the folder is the one that we are looking for.
+					if(strtolower($aName) == strtolower($formatted)) {
 
-							// if this is a directory check that there is any more states to get
-							// to in the goal. If none then what we want is the 'index.md' file
-							if(count($goal) > 0) {
-								return self::find_page_recursive($base, $goal);
-							}
-							else {
-								// recurse but check for an index.md file next time around
-								return self::find_page_recursive($base, array('index'));
+						// if this file is a directory we could be displaying that
+						// or simply moving towards the goal.
+						if(is_dir(Controller::join_links($base, $file))) {
+							if ($recursive) {
+								$base = $base . trim($file, '/') .'/';
+
+								// if this is a directory check that there is any more states to get
+								// to in the goal. If none then what we want is the 'index.md' file
+								if(count($goal) > 0) {
+									return self::find_page_recursive($base, $goal);
+								}
+								else {
+									// recurse but check for an index.md file next time around
+									return self::find_page_recursive($base, array('index'));
+								}
 							}
 						}
-					}
-					else {
-						// goal state. End of recursion.
-						// tidy up the URLs with single trailing slashes
-						$result =  $base . ltrim($file, '/');
+						else {
+							// goal state. End of recursion.
+							// tidy up the URLs with single trailing slashes
+							$result =  $base . ltrim($file, '/');
 
-						if(is_dir($result)) $result = (rtrim($result, '/') . '/');
+							if(is_dir($result)) $result = (rtrim($result, '/') . '/');
 
-						return $result;
+							return $result;
+						}
 					}
 				}
 			}

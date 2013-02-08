@@ -503,8 +503,16 @@ class DocumentationViewer extends Controller {
 			$pages = DocumentationService::get_pages_from_folder($entity, null, self::$recursive_submenu, $this->getVersion(), $this->getLang());
 
 			if($pages) {
+				$version = $this->getVersion();
+				$lang = $this->getLang();
+				$index = 'index';
+				if ($indexPage = $entity->getIndexPage($version, $lang)) {
+					$index = trim($indexPage->getRelativePath(), '/');
+					$index = DocumentationService::trim_extension_off($index);
+				}	
+
 				foreach($pages as $page) {
-					if(strtolower($page->Title) == "index") {
+					if(strtolower($page->Title) == strtolower($index)) {
 						$pages->remove($page);
 						
 						continue;

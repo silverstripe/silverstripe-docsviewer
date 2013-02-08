@@ -300,7 +300,13 @@ class DocumentationEntity extends ViewableData {
 	function getIndexPage($version, $lang = 'en') {
 		$path = $this->getPath($version, $lang);
 		$absFilepath = Controller::join_links($path, 'index.md');
-		
+
+		if (!file_exists($absFilepath)) 
+			$absFilepath = Controller::join_links($path, 'README.md');
+
+		if (!file_exists($absFilepath) && $path = $this->rootPath) 
+			$absFilepath = Controller::join_links($path, 'README.md');
+				
 		if(file_exists($absFilepath)) {
 			$relativeFilePath = str_replace($path, '', $absFilepath);
 			
