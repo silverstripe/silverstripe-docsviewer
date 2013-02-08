@@ -277,7 +277,7 @@ class DocumentationService {
 						$docs = Director::baseFolder() . '/' . Controller::join_links($entity, 'docs');
 	
 						if(is_dir($docs)) {
-							self::register($entity, $docs, '', $entity, true);
+							self::register($entity, $docs, 'current', $entity, true);
 						}
 					}
 				}
