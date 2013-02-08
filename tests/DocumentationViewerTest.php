@@ -268,7 +268,7 @@ class DocumentationViewerTest extends FunctionalTest {
 		$pages = $v->getEntityPages();
 		$links = $pages->column('Link');
 		$this->assertStringEndsWith('DocumentationViewerTests/en/3.0/ChangeLog', $links[0]);
-		$this->assertStringEndsWith('DocumentationViewerTests/en/3.0/Tutorials', $links[1]);
-		$this->assertStringEndsWith('DocumentationViewerTests/en/3.0/empty', $links[2]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/3.0/Tutorials', $links[2]);
+		$this->assertStringEndsWith('DocumentationViewerTests/en/3.0/empty', $links[1]);
 	}
 }
