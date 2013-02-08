@@ -65,6 +65,13 @@ documentation search needs to be updated on the fly
 
 	sake dev/tasks/RebuildLuceneDocsIndex flush=1
 
+## Advanced Search
+
+Advanced Search is enabled by default on the searchresults page, allowing you to 
+extend your search over multiple modules and/or versions. Advanced search can 
+be disabled from your _config.php like this:
+
+	DocumentationSearch::enable_advanced_search(false);
 
 ## Using a URL other than /dev/docs/
 

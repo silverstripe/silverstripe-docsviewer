@@ -30,6 +30,11 @@ class DocumentationSearch {
 	 * @var bool - Is search enabled
 	 */
 	private static $enabled = false;
+
+	/**
+	 * @var bool - Is advanced search enabled
+	 */
+	private static $advanced_search_enabled = true;	
 	
 	/**
 	 * @var string - OpenSearch metadata. Please use {@link DocumentationSearch::set_meta_data()}
@@ -172,6 +177,20 @@ class DocumentationSearch {
 	}
 
 	/**
+	 * Enable advanced documentation search 
+	 */	
+	public static function enable_advanced_search($enabled = true) {
+		self::$advanced_search_enabled = ($enabled)? true: false;
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public static function advanced_search_enabled() {
+		return self::$advanced_search_enabled;
+	}
+	
+	/**
 	 * @param string
 	 */
 	public static function set_index($index) {
@@ -245,8 +264,8 @@ class DocumentationSearch {
 		$data = array(
 			'Results' => null,
 			'Query' => null,
-			'Versions' => DBField::create_field('Text', implode(',', $this->versions)),
-			'Modules' => DBField::create_field('Text', implode(',', $this->modules)),
+			'Versions' => DBField::create_field('Text', implode(', ', $this->versions)),
+			'Modules' => DBField::create_field('Text', implode(', ', $this->modules)),
 			'Title' => _t('DocumentationSearch.SEARCHRESULTS', 'Search Results'),
 			'TotalResults' => null,
 			'TotalPages' => null,

@@ -43,10 +43,13 @@
 		<% end_if %>
 	</div>
 
-	<div id="sidebar-column">
-		<div class="sidebar-box">
-			<h4><% _t('ADVANCEDSEARCH', 'Advanced Search') %></h4>
-			$AdvancedSearchForm
+	<% if AdvancedSearchEnabled %>
+		<div id="sidebar-column">
+			<div class="sidebar-box">
+				<h4><% _t('ADVANCEDSEARCH', 'Advanced Search') %></h4>
+				$AdvancedSearchForm
+			</div>
 		</div>
-	</div>
+	<% end_if %>
+
 </div>

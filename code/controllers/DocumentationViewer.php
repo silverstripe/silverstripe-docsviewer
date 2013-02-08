@@ -158,6 +158,8 @@ class DocumentationViewer extends Controller {
 	 * @return SS_HTTPResponse
 	 */
 	public function handleRequest(SS_HTTPRequest $request, DataModel $model) {
+		DocumentationService::load_automatic_registration();
+		
 		// if we submitted a form, let that pass
 		if(!$request->isGET() || isset($_GET['action_results'])) {
 			return parent::handleRequest($request, $model);
@@ -168,7 +170,6 @@ class DocumentationViewer extends Controller {
 		$thirdParam = $request->shift();
 		
 		$this->Remaining = $request->shift(10);
-		DocumentationService::load_automatic_registration();
 		
 		// if no params passed at all then it's the homepage
 		if(!$firstParam && !$secondParam && !$thirdParam) {
@@ -344,8 +345,7 @@ class DocumentationViewer extends Controller {
 
 			foreach($versions as $key => $version) {
 				$linkingMode = ($currentVersion == $version) ? 'current' : 'link';
-			
-				if(!$version) $version = 'Current';
+
 				$output->push(new ArrayData(array(
 					'Title' => $version,
 					'Link' => $this->Link(implode('/',$this->Remaining), $entity->getFolder(), $version),
@@ -816,10 +816,19 @@ class DocumentationViewer extends Controller {
 		if(!DocumentationSearch::enabled()) return false;
 		$q = ($q = $this->getSearchQuery()) ? $q->NoHTML() : "";
 
+		$entities = $this->getSearchedEntities();
+		$versions = $this->getSearchedVersions();
+		
 		$fields = new FieldList(
-			new TextField('Search', _t('DocumentationViewer.SEARCH', 'Search'), $q),
-			new HiddenField('Entities', '', implode(',', array_keys($this->getSearchedEntities()))),
-			new HiddenField('Versions', '', implode(',', $this->getSearchedVersions()))
+			new TextField('Search', _t('DocumentationViewer.SEARCH', 'Search'), $q)
+		);
+		
+		if ($entities) $fields->push(
+			new HiddenField('Entities', '', implode(',', array_keys($entities)))
+		);
+		
+		if ($versions) $fields->push(
+			new HiddenField('Versions', '', implode(',', $versions))
 		);
 
 		$actions = new FieldList(
@@ -963,6 +972,17 @@ class DocumentationViewer extends Controller {
 		$form->setFormAction(self::$link_base . 'DocumentationSearchForm');
 	
 		return $form;
+	}
+
+	/**
+	 * check if the Advanced SearchForm can be displayed
+	 * enabled by default, to disable use: 
+	 * DocumentationSearch::enable_advanced_search(false);
+	 * 
+	 * @return bool
+	 */
+	public function getAdvancedSearchEnabled() {
+		return 	DocumentationSearch::advanced_search_enabled(); 
 	}
 	
 	/**
