@@ -278,9 +278,11 @@ class DocumentationService {
 	 *
 	 * @return DocumentationEntity
 	 */
-	public static function register($entity, $path, $version = '', $title = false, $latest = false) {
+	public static function register($entity, $path, $version = 'current', $title = false, $latest = false) {
 		if(!file_exists($path)) throw new InvalidArgumentException(sprintf('Path "%s" doesn\'t exist', $path));
 
+		if (!$version) $version = 'current';
+		
 		$rootPath = '';
 		self::configure_paths($entity, $path, $rootPath);
 				
