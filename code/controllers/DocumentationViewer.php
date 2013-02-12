@@ -344,6 +344,8 @@ class DocumentationViewer extends Controller {
 			$currentVersion = $this->getVersion();
 
 			foreach($versions as $key => $version) {
+				if(!$version) continue;
+
 				$linkingMode = ($currentVersion == $version) ? 'current' : 'link';
 
 				$output->push(new ArrayData(array(
