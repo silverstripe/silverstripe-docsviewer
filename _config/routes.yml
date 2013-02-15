@@ -1,0 +1,8 @@
+---
+Name: docs
+After: framework/routes#coreroutes
+---
+Director:
+  rules:
+    'dev/docs': 'DocumentationViewer'
+    'DocumentationOpenSearchController//$Action': 'DocumentationOpenSearchController'
