@@ -127,13 +127,13 @@ class DocumentationViewer extends Controller {
 	 * this controller are virtual and handled through handleRequest(), not 
 	 * controller methods.
 	 *
-	 * @param SS_HTTPRequest
-	 *
+	 * @param $request
+	 * @param $action
 	 * @return SS_HTTPResponse
 	 */
-	public function handleAction($request) {
+	public function handleAction($request, $action) {
 		try {
-			$response = parent::handleAction($request);
+			$response = parent::handleAction($request, $action);
 		} catch(SS_HTTPResponse_Exception $e) {
 			if(strpos($e->getMessage(), 'does not exist') !== FALSE) {
 				return $this;
