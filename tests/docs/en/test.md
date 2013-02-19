@@ -24,7 +24,23 @@ Normal text after code block
 
 	code block
 	without formatting prefix
-	
+
+```
+Fenced code block
+```
+
+Did the fence work?
+
+```php
+Fenced box with
+
+new lines in
+
+between
+
+content
+```
+
 # Heading one
 
 # Heading with custom anchor {#custom-anchor}
