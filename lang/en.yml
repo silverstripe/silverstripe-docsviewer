@@ -1,0 +1,19 @@
+en:
+  DocumentationSearch:
+    SEARCH: Search
+    SEARCHRESULTS: 'Search Results'
+  DocumentationViewer:
+    CHANGE: Change
+    KEYWORDS: Keywords
+    LANGUAGE: Language
+    MODULES: Modules
+    OPENSEARCHDESC: 'Search the documentation'
+    OPENSEARCHNAME: 'Documentation Search'
+    OPENSEARCHTAGS: documentation
+    SEARCH: Search
+    VERSIONS: Versions
+  DocumentationViewer_home.ss:
+    DOCUMENTEDMODULES: 'Documented Modules'
+    NOMODULEDOCUMENTATION: 'No modules with documentation installed could be found.'
+  DocumentationViewer_results.ss:
+    ADVANCEDSEARCH: 'Advanced Search'

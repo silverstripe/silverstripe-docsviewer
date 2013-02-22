@@ -16,13 +16,6 @@ if(!defined('DOCSVIEWER_DIR')) {
 	define('DOCSVIEWER_DIR', array_pop($dir));
 }
 
-
-// default location for documentation. If you want this under a custom url
-// define your own rule in your mysite/_config.php
-Director::addRules(100, array(
-	'dev/docs' => 'DocumentationViewer'
-));
-
 // define filetypes to ignore
 DocumentationService::set_ignored_files(array(
 	'.', '..', '.DS_Store',

@@ -1,24 +1,32 @@
 <?php
 
 /**
- * Parser wrapping the Markdown Extra parser (see http://michelf.com/projects/php-markdown/extra/). 
+ * Parser wrapping the Markdown Extra parser.
+ * 
+ * @see http://michelf.com/projects/php-markdown/extra/
  *
  * @package docsviewer
  */
 class DocumentationParser {
 
+	const CODE_BLOCK_BACKTICK = 1;
+	const CODE_BLOCK_COLON = 2;
+
 	/**
-	 * @var String Rewriting of api links in the format "[api:MyClass]" or "[api:MyClass::$my_property]".
+	 * @var string Rewriting of api links in the format "[api:MyClass]" or "[api:MyClass::$my_property]".
 	 */
-	static $api_link_base = 'http://api.silverstripe.org/search/lookup/?q=%s&version=%s&module=%s';
+	public static $api_link_base = 'http://api.silverstripe.org/search/lookup/?q=%s&version=%s&module=%s';
 	
-	static $heading_counts = array();
+	/**
+	 * @var array
+	 */
+	public static $heading_counts = array();
 	
 	/**
 	 * Parse a given path to the documentation for a file. Performs a case 
 	 * insensitive lookup on the file system. Automatically appends the file 
 	 * extension to one of the markdown extensions as well so /install/ in a
-	 * web browser will match /install.md or /INSTALL.md
+	 * web browser will match /install.md or /INSTALL.md.
 	 * 
 	 * Filepath: /var/www/myproject/src/cms/en/folder/subfolder/page.md
 	 * URL: http://myhost/mywebroot/dev/docs/2.4/cms/en/folder/subfolder/page
@@ -27,8 +35,9 @@ class DocumentationParser {
 	 * Pathparts: folder/subfolder/page
 	 * 
 	 * @param DocumentationPage $page
-	 * @param String $baselink Link relative to webroot, up until the "root" of the module.  
-	 *  Necessary to rewrite relative links
+	 * @param String $baselink Link relative to webroot, up until the "root" 
+	 *							of the module. Necessary to rewrite relative 
+	 *							links
 	 *
 	 * @return String
 	 */
@@ -56,38 +65,110 @@ class DocumentationParser {
 	public static function rewrite_code_blocks($md) {
 		$started = false;
 		$inner = false;
-		
+		$mode = false;
+		$end = false;
+
 		$lines = explode("\n", $md);
+		$output = array();
+
 		foreach($lines as $i => $line) {
 			if(!$started && preg_match('/^\t*:::\s*(.*)/', $line, $matches)) {
 				// first line with custom formatting
 				$started = true;
-				$lines[$i] = sprintf('<pre class="brush: %s">', $matches[1]);
-			} elseif(preg_match('/^\t(.*)/', $line, $matches)) {
-				// inner line of ::: block, or first line of standard markdown code block
+				$mode = self::CODE_BLOCK_COLON;
+				$output[$i] = sprintf('<pre class="brush: %s">', (isset($matches[1])) ? $matches[1] : "");
+			} 
+			elseif(!$started && preg_match('/^\t*```\s*(.*)/', $line, $matches)) {
+				$started = true;
+				$mode = self::CODE_BLOCK_BACKTICK;
+				$output[$i] = sprintf('<pre class="brush: %s">', (isset($matches[1])) ? $matches[1] : "");
+			} 
+			elseif($started && $mode == self::CODE_BLOCK_BACKTICK) {
+				// inside a backtick fenced box
+				if(preg_match('/^\t*```\s*/', $line, $matches)) {
+					// end of the backtick fenced box. Unset the line that contains the backticks
+					$end = true;
+				}
+				else {
+					// still inside the line.
+					$output[$i] = ($started) ? '' : '<pre>' . "\n";
+					$output[$i] .= htmlentities($line, ENT_COMPAT, 'UTF-8');
+					$inner = true;
+				}
+			} 
+			elseif(preg_match('/^\t(.*)/', $line, $matches)) {
+				// inner line of block, or first line of standard markdown code block
 				// regex removes first tab (any following tabs are part of the code).
-				$lines[$i] = ($started) ? '' : '<pre>' . "\n";
-				$lines[$i] .= htmlentities($matches[1], ENT_COMPAT, 'UTF-8');
+				$output[$i] = ($started) ? '' : '<pre>' . "\n";
+				$output[$i] .= htmlentities($matches[1], ENT_COMPAT, 'UTF-8');
 				$inner = true;
 				$started = true;
-			} elseif($started && $inner) {
-				// remove any previous blank lines
-				$j = $i-1;
-				while(isset($lines[$j]) && preg_match('/^[\t\s]*$/', $lines[$j])) {
-					unset($lines[$j]);
-					$j--;
-				}
-				
-				// last line, close pre
-				$lines[$i] = '</pre>' . "\n\n" . $line;
-				
+			}
+			elseif($started && $inner && $mode == self::CODE_BLOCK_COLON && trim($line) === "") {
+				// still inside a colon based block, if the line is only whitespace 
+				// then continue with  with it. We can continue with it for now as 
+				// it'll be tidied up later in the $end section.
+				$inner = true;
+				$output[$i] = $line;
+			}
+			elseif($started && $inner) {
+				// line contains something other than whitespace, or tabbed. E.g
+				// 	> code
+				//	> \n
+				//	> some message
+				//
+				// So actually want to reset $i to the line before this new line
+				// and include this line. The edge case where this will fail is
+				// new the following segment contains a code block as well as it
+				// will not open.
+				$end = true;
+				$output[$i] = $line;
+				$i = $i -1;
+			}
+			else {
+				$output[$i] = $line;
+			}
+
+			if($end) {
+				$output = self::finalize_code_output($i, $output);
+
 				// reset state
-				$started = $inner = false;
+				$started = $inner = $mode = $end = false;
 			}
 		}
-		
-		return join("\n", $lines);
 
+		if($started) {
+			$output = self::finalize_code_output($i, $output);
+		}
+
+		return join("\n", $output);
+
+	}
+
+	/**
+	 * @param int
+	 * @param array
+	 *
+	 * @return array
+	 */
+	private static function finalize_code_output($i, $output) {
+		$j = $i;
+
+		while(isset($output[$j]) && trim($output[$j]) === "") {
+			unset($output[$j]);
+		
+			$j--;
+		}
+				
+		if(isset($output[$j])) {
+			$output[$j] .= "</pre>\n";
+		}
+
+		else {
+			$output[$j] = "</pre>\n\n";
+		}
+
+		return $output;				
 	}
 	
 	static function rewrite_image_links($md, $page) {
