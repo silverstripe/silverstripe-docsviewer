@@ -41,6 +41,11 @@ class DocumentationPage extends ViewableData {
 	 * @var Boolean
 	 */
 	protected $isFolder = false;
+	
+	/**
+	 * @var int
+	 */
+	protected $pagenumber = 0;
 
 	/**
 	 * @param Boolean
@@ -56,6 +61,14 @@ class DocumentationPage extends ViewableData {
 		return $this->isFolder;
 	}
 
+	/**
+	 * @param integer
+	 */
+	public function setPagenumber($number = 0) {
+		if (is_int($number )) $this->pagenumber = $number;
+	}	
+	
+	
 	/**
 	 * @return DocumentationEntity
 	 */

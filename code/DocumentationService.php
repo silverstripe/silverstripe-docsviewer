@@ -502,6 +502,7 @@ class DocumentationService {
 		}
 
 		if(count($pages) > 0) {
+			$pagenumber = self::get_pagenumber_start_at();
 			natsort($pages);
 			
 			foreach($pages as $key => $pagePath) {
@@ -524,6 +525,8 @@ class DocumentationService {
 				// does this page act as a folder?
 				$path = $page->getPath();
 				if (is_dir($path)) { $page->setIsFolder(true); }
+				
+				$page->setPagenumber($pagenumber++);
 
 				$output->push($page);
 			}
