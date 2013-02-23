@@ -510,6 +510,7 @@ class DocumentationService {
 	 */
 	public static function get_pages_from_folder($entity, $relativePath = false, $recursive = true, $version = 'trunk', $lang = 'en') {
 		$output = new ArrayList();
+		$metaCommentsEnabled = self::meta_comments_enabled();
 		$pages = array();
 		
 		if(!$entity instanceof DocumentationEntity) 
@@ -551,12 +552,14 @@ class DocumentationService {
 				if (is_dir($path)) { $page->setIsFolder(true); }
 				
 				$page->setPagenumber($pagenumber++);
+				// we need the markdown to get the comments
+				if ($metaCommentsEnabled) $page->getMarkdown();
 
 				$output->push($page);
 			}
 		}
 		
-		return $output;
+		return ($metaCommentsEnabled)? $output->sort('pagenumber') : $output;
 	}
 	
 	/**
