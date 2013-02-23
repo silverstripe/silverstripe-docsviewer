@@ -78,6 +78,14 @@ class DocumentationService {
 	private static $automatic_registration = true;
 	
 	/**
+	 * by default pagenumbers start high at 10.000
+	 * 
+	 * @var int 
+	 */
+	private static $pagenumber_start_at = 10000;
+	
+	
+	/**
 	 * Return the allowed extensions
 	 *
 	 * @return array
@@ -138,6 +146,25 @@ class DocumentationService {
 	public static function automatic_registration_enabled() {
 		return self::$automatic_registration;
 	}
+	
+	/** 
+	 * set the number to start default pagenumbering, allowing room for 
+	 * custom pagenumbers below.
+	 * 
+	 * @param int $number
+	 */
+	public static function start_pagenumbers_at($number = 10000) {
+		if (is_int($number)) self::$pagenumber_start_at = $number;
+	}
+
+	/**
+	 * return the startlevel for default pagenumbering
+	 * 
+	 * @return int
+	 */
+	public static function get_pagenumber_start_at() {
+		return self::$pagenumber_start_at;
+	}	
 	
 	/**
 	 * Return the entities which are listed for documentation. Optionally only 
