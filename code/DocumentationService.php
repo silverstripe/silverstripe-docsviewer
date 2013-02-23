@@ -528,7 +528,7 @@ class DocumentationService {
 
 		if(count($pages) > 0) {
 			$pagenumber = self::get_pagenumber_start_at();
-			natsort($pages);
+			natcasesort($pages);
 			
 			foreach($pages as $key => $pagePath) {
 				
