@@ -567,11 +567,15 @@ class DocumentationService {
 		
 		if(self::is_registered_entity($entity)) {
 			self::get_pages_from_folder_recursive($path, $relativePath, $recursive, $pages);
+			if(count($pages) > 0) natcasesort($pages);
 			if (empty($relativePath) && $rootPath = $entity->getRootPath()) {
 				$rootPages = array();
 				self::get_pages_from_folder_recursive($rootPath, $relativePath, $recursive, $rootPages, true);
-				foreach ($rootPages as $page) {
-					if (!in_array($page, $pages)) $pages[] = $page;
+				if(count($rootPages) > 0) {
+					natcasesort($rootPages);
+					foreach ($rootPages as $page) {
+						if (!in_array($page, $pages)) $pages[] = $page;
+					}
 				}
 			}			
 		}
@@ -580,7 +584,6 @@ class DocumentationService {
 		}
 
 		if(count($pages) > 0) {
-			natcasesort($pages);
 			
 			foreach($pages as $key => $pagePath) {
 				
