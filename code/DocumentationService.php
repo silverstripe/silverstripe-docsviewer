@@ -84,6 +84,11 @@ class DocumentationService {
 	 */
 	private static $pagenumber_start_at = 10000;
 	
+	/**
+	 * allow the use of key/value pairs in comments <!-- page: 2 -->
+	 * @var bool
+	 */
+	private static $meta_comments_enabled = false;
 	
 	/**
 	 * Return the allowed extensions
@@ -164,7 +169,26 @@ class DocumentationService {
 	 */
 	public static function get_pagenumber_start_at() {
 		return self::$pagenumber_start_at;
-	}	
+	}
+	
+	/**
+	 * allow the use of key/value pairs incomments?
+	 * Example (supported are title and page): <!-- page: 2 --> 
+	 * 
+	 * @param bool $allow
+	 */
+	public static function enable_meta_comments($allow = true) {
+		self::$meta_comments_enabled = ($allow)? true: false;
+	}
+
+	/**
+	 * can we use key/value pairs from <!--   --> comments?
+	 * 
+	 * @return bool
+	 */
+	public static function meta_comments_enabled() {
+		return self::$meta_comments_enabled;
+	}
 	
 	/**
 	 * Return the entities which are listed for documentation. Optionally only 
