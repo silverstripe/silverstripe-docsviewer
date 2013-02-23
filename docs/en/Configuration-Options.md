@@ -51,8 +51,43 @@ to new structures.
 	DocumentationPermalinks::add(array(
 		'debugging' => 'sapphire/en/topics/debugging',
 		'templates' => 'sapphire/en/topics/templates'
-	));
-	
-	
+		));
 
-	
+## Custom metadata and pagesorting
+
+Custom metadata can be added to the file by creating a commentblock to the head
+of the markdown file like this:
+
+	<!--
+	pagenumber: 1
+	title: A custom title
+	-->
+
+To enable the use of these metadata, add the following to your _config.php
+
+	```php
+	// enable reading the metadata commentblock, allowing
+	// for custom page sorting
+	DocumentationService::enable_meta_comments();
+	```
+
+### Custom page sorting	
+
+By default pages in the lefthand menu are sorted alphabetically and recieve a 
+pagenumber starting at 10000. Adding a custom pagenumber, like in the example 
+above, allows for custom pagenumbering. Pages that have no custom pagenumber, 
+keep their original sortorder.
+
+You can change the starting point for default pagenumbers:
+
+
+	```php
+	DocumentationService:: start_pagenumbers_at(80);
+	```
+
+### Other key-value pairs
+
+Basically all DocumentationPage properties can be added to the metadata
+comment block. Beware though that the outcome isn't always predictable. Adding
+a title property to the block will change the menu title, but the
+breadcrumbs are not (yet) affected.
