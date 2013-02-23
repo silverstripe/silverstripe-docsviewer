@@ -292,7 +292,7 @@ class DocumentationPage extends ViewableData {
 	 */
 	public function getMetadataFromComments($md = '') {
 		if($md && DocumentationService::meta_comments_enabled()) {
-			$pattern = '/<!--(.*?)-->/Uis';
+			$pattern = '/^<!--(.*?)-->/Uis';
 			$matches = preg_match($pattern, $md, $block);
 			if($matches && $block[1]) {
 				$pattern = '/(?<key>[A-Za-z][A-Za-z0-9_-]+)[\t]*:[\t]*(?<value>[^:\n\r\/]+)/x';
