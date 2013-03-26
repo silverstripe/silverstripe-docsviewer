@@ -30,9 +30,9 @@
 						<div id="entities-nav" class="documentation-nav clearfix">
 							<h2>Modules:</h2>
 								<ul>
-								<% control Entities %>
+								<% loop Entities %>
 									<li><a href="$Link" class="$LinkingMode">$Title</a></li>
-								<% end_control %>
+								<% end_loop %>
 							</ul>
 
 							<div class="clear"><!-- --></div>
@@ -43,9 +43,9 @@
 						<div id="versions-nav" class="documentation-nav clearfix">
 							<h2>Versions:</h2>
 								<ul>
-								<% control Versions %>
+								<% loop Versions %>
 									<li><a href="$Link" class="$LinkingMode">$Title</a></li>
-								<% end_control %>
+								<% end_loop %>
 							</ul>
 						</div>
 						<% end_if %>

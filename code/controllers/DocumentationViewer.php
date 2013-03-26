@@ -14,7 +14,7 @@
 
 class DocumentationViewer extends Controller {
 
-	public static $allowed_actions = array(
+	private static $allowed_actions = array(
 		'home',
 		'LanguageForm',
 		'doLanguageForm',

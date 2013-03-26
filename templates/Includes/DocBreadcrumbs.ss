@@ -1,7 +1,7 @@
 <div class="doc-breadcrumbs">
 <p>
-	<% control Breadcrumbs %>
+	<% loop Breadcrumbs %>
 		<a href="$Link">$Title</a> <% if Last %><% else %>&rsaquo;<% end_if %>
-	<% end_control %>
+	<% end_loop %>
 </p>
 </div>

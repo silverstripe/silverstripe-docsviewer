@@ -11,12 +11,12 @@
 	<opensearch:startIndex>$StartResult</opensearch:startIndex>
 	<opensearch:itemsPerPage>$PageLength</opensearch:itemsPerPage>
 	<opensearch:Query role="request" searchTerms="$Query" startIndex="$StartResult" count="$PageLength"></opensearch:Query>
-	<% control Results %>
+	<% loop Results %>
 	<entry>
 		<title><% if BreadcrumbTitle %>$BreadcrumbTitle<% else %>$Title<% end_if %></title>
 		<link href="$Link">$Link</link>
 		<id>urn:uuid:$ID</id>
 		<content type="text">$Content.LimitCharacters(200)</content>
 	</entry>
-	<% end_control %>
+	<% end_loop %>
 </feed>

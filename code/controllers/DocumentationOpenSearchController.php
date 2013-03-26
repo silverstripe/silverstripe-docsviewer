@@ -9,7 +9,7 @@
 
 class DocumentationOpenSearchController extends Controller {
 	
-	public static $allowed_actions = array(
+	private static $allowed_actions = array(
 		'description'
 	);
 	

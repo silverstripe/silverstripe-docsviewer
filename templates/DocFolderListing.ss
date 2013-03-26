@@ -3,9 +3,9 @@
 	
 	<% if Pages %>
 		<ul>
-			<% control Pages %>
+			<% loop Pages %>
 				<li><a href="$Link">$Title</a></li>
-			<% end_control %>
+			<% end_loop %>
 		</ul>
 	<% else %>
 		<p>No documentation pages found for $Title. If you need help writing documentation please consult the README.</p>

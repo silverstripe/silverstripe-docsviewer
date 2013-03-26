@@ -8,10 +8,10 @@
 		<% if Results %>
 	    	<p>Showing page $ThisPage of $TotalPages</p>
 	
-			<% control Results %>
+			<% loop Results %>
 				<h2><a href="$Link"><% if BreadcrumbTitle %>$BreadcrumbTitle<% else %>$Title<% end_if %></a></h2>
 				<p>$Content.LimitCharacters(200)</p>
-			<% end_control %>
+			<% end_loop %>
 			
 			<% if SearchPages %>
 				<ul class="pagination">
@@ -19,7 +19,7 @@
 						<li class="prev"><a href="$PrevUrl">Prev</a></li>
 					<% end_if %>               
 					
-					<% control SearchPages %>
+					<% loop SearchPages %>
 						<% if IsEllipsis %>
 							<li class="ellipsis">...</li>
 						<% else %>
@@ -29,7 +29,7 @@
 								<li><a href="$Link">$PageNumber</a></li>
 							<% end_if %>
 						<% end_if %>
-					<% end_control %>
+					<% end_loop %>
 					
 					<% if NextUrl = false %>
 					<% else %>

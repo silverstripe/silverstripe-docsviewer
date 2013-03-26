@@ -26,7 +26,7 @@ class DocumentationEntity extends ViewableData {
 	/**
 	 * @var array
 	 */
-	static $casting = array(
+	private static $casting = array(
 		'Name' => 'Text'
 	);
 	
