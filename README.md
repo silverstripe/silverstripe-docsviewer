@@ -1,5 +1,7 @@
 # Documentation Viewer Module
 
+[![Build Status](https://secure.travis-ci.org/silverstripe/silverstripe-docsviewer.png?branch=master)](http://travis-ci.org/silverstripe/silverstripe-docsviewer)
+
 ## Maintainer Contact
 
 * Will Rossiter (Nickname: willr, wrossiter) 
