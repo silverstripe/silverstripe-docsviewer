@@ -193,7 +193,7 @@ class DocumentationParser {
 			if($urlParts && isset($urlParts['scheme'])) continue;
 			
 			// Rewrite URL (relative or absolute)
-			$baselink = Director::makeRelative(dirname($page->getPath()));
+			$baselink = Director::makeRelative(dirname($page->getPath(false, false)));
 			$relativeUrl = rtrim($baselink, '/') . '/' . ltrim($url, '/');
 			
 			// Resolve relative paths

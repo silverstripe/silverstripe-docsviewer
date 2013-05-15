@@ -100,15 +100,14 @@ class DocumentationPage extends ViewableData {
 	 *				will return the path of the first file in the folder
 	 * @return string 
 	 */
-	function getPath($defaultFile = false) {
+	function getPath($defaultFile = false, $realpath = true) {
 		if($this->entity) {
-			
 			$path = Controller::join_links(
 				$this->entity->getPath($this->getVersion(), $this->lang),
 				$this->getRelativePath()
 			);
 			
-			if(!is_dir($path)) $path = realpath($path);
+			if(!is_dir($path) && $realpath) $path = realpath($path);
 			else if($defaultFile) {
 				$file = DocumentationService::find_page($this->entity, explode('/', $this->getRelativePath()));
 
