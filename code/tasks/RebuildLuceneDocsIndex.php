@@ -26,6 +26,8 @@ class RebuildLuceneDocsIndex extends BuildTask {
 
 		ini_set("memory_limit", -1);
 		ini_set('max_execution_time', 0);
+
+		Filesystem::makeFolder(DocumentationSearch::get_index_location());
 	
 		// only rebuild the index if we have to. Check for either flush or the time write.lock.file
 		// was last altered
