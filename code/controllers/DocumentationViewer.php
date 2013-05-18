@@ -164,12 +164,21 @@ class DocumentationViewer extends Controller {
 		if(!$request->isGET() || isset($_GET['action_results'])) {
 			return parent::handleRequest($request, $model);
 		}
+		$languages = DocumentationService::get_language_mapping();
+		$action = $request->param('Action');
+		if (empty($action) || array_key_exists($action, $languages)) { 
 
-		$firstParam = ($request->param('Action')) ? $request->param('Action') : $request->shift();		
-		$secondParam = $request->shift();
+			$firstParam = 'home'; 
+			$secondParam = $request->param('Action');
+		}
+		else {
+			$firstParam = $request->param('Action');
+			$secondParam = $request->shift();
+		}
+
 		$thirdParam = $request->shift();
 		
-		$this->Remaining = $request->shift(10);
+		$this->Remaining = $request->shift(10);		
 		
 		// if no params passed at all then it's the homepage
 		if(!$firstParam && !$secondParam && !$thirdParam) {
@@ -356,7 +365,7 @@ class DocumentationViewer extends Controller {
 				)));
 			}
 		}
-		
+
 		return $output;
 	}
 	
@@ -737,10 +746,11 @@ class DocumentationViewer extends Controller {
 		$objEntity = $this->getEntity();
 		if ($objEntity && $objEntity->getStableVersion() == $version) $version = '';
 
+		$name = ($entity == 'home')? '': $entity;
 		$link = Controller::join_links(
 			Director::absoluteBaseURL(), 
 			self::get_link_base(), 
-			$entity, 
+			$name, 
 			($entity) ? $lang : "", // only include lang for entity - sapphire/en vs en/
 			($entity) ? $version :"",
 			$action
@@ -748,7 +758,7 @@ class DocumentationViewer extends Controller {
 
 		return $link;
 	} 
-	
+
 	/**
 	 * Build the language dropdown.
 	 *

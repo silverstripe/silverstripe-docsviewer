@@ -87,6 +87,15 @@ class DocumentationService {
 	}
 	
 	/**
+	 * Return the language_mapping
+	 *
+	 * @return array
+	 */
+	public static function get_language_mapping() {
+		return self::$language_mapping;
+	}	
+	
+	/**
 	 * Check to see if a given extension is a valid extension to be rendered.
 	 * Assumes that $ext has a leading dot as that is what $valid_extension uses.
 	 *
