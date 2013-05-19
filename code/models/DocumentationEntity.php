@@ -54,6 +54,11 @@ class DocumentationEntity extends ViewableData {
 	 * @var Array $langs a list of available langauges
 	 */
 	private $langs = array();
+
+	/**
+	 * @var string 
+	 */
+	private $rootPath = '';		
 	
 	/**
 	 * Constructor. You do not need to pass the langs to this as
@@ -100,6 +105,26 @@ class DocumentationEntity extends ViewableData {
 		else {
 			$this->langs[] = $language;
 		}
+	}
+	
+	/**
+	 * Return the path to the entity root (empty if equal to 
+	 * the docs directory)
+	 * 
+	 * @return type string
+	 */
+	public function getRootPath() {
+		return $this->rootPath;
+	}
+
+	/**
+	 * Set the path to the entity root if it is different from the
+	 * docs directory
+	 * 
+	 * @param string $rootPath
+	 */
+	public function setRootPath($rootPath) {
+		$this->rootPath = $rootPath;;
 	}
 	
 	/**
@@ -275,7 +300,13 @@ class DocumentationEntity extends ViewableData {
 	function getIndexPage($version, $lang = 'en') {
 		$path = $this->getPath($version, $lang);
 		$absFilepath = Controller::join_links($path, 'index.md');
-		
+
+		if (!file_exists($absFilepath)) 
+			$absFilepath = Controller::join_links($path, 'README.md');
+
+		if (!file_exists($absFilepath) && $path = $this->rootPath) 
+			$absFilepath = Controller::join_links($path, 'README.md');
+				
 		if(file_exists($absFilepath)) {
 			$relativeFilePath = str_replace($path, '', $absFilepath);
 			

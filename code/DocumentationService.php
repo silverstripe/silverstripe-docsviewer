@@ -76,6 +76,42 @@ class DocumentationService {
 	 * @var bool
 	 */
 	private static $automatic_registration = true;
+
+	/**
+	 * Rootpages are non-localized documentation pages that live in the
+	 * root of the entity. They are enabled by default.
+	 * 
+	 * @var bool
+	 */
+	private static $rootpages_enabled = true;	
+
+	/**
+	 * Disables the display of rootpages for single entities. By default
+	 * all entities adhere to the $rootpages_enabled setting
+	 * 
+	 * @var array
+	 */
+	private static $rootpages_disabled_for = array();
+	
+	/**
+	 * In the proper order: which files can serve as index file
+	 * 
+	 * @var array
+	 */
+	private static $valid_index_files = array('index', 'readme');	
+	
+	/**
+	 * by default pagenumbers start high at 10.000
+	 * 
+	 * @var int 
+	 */
+	private static $pagenumber_start_at = 10000;
+	
+	/**
+	 * allow the use of key/value pairs in comments <!-- page: 2 -->
+	 * @var bool
+	 */
+	private static $meta_comments_enabled = false;
 	
 	/**
 	 * Return the allowed extensions
@@ -137,6 +173,96 @@ class DocumentationService {
 	 */
 	public static function automatic_registration_enabled() {
 		return self::$automatic_registration;
+	}
+
+	/**
+	 * Rootpages are enabled glabally by default, disable by setting
+	 * DocumentationService::enable_rootpages(false);  
+	 * 
+	 * @param bool $enable
+	 */
+	public static function enable_rootpages($enabled = true) {
+		self::$rootpages_enabled = ($enabled)? true: false;
+	} 
+
+	/**
+	 * Exclude certain entities from displaying their rootpages
+	 * 
+	 * @param type $entities
+	 */
+	public static function disable_rootpages_for($entities) {
+		if (is_array($entities) && !empty($entities)) {
+			self::$rootpages_disabled_for = $entities;
+		}
+	}
+
+	/**
+	 * Return the valid index files (no extensions)
+	 *
+	 * @return array
+	 */	
+	public static function get_valid_index_files() {
+		return self::$valid_index_files;
+	}
+	
+	/**
+	 * Cset an array of valid index file (in order of importance, 
+	 * no extensions)
+	 * 
+	 * @return array
+	 */
+	public static function set_valid_index_files($indexes) {
+		self::$valid_index_files = $indexes;
+	}
+
+	/**
+	 * Are rootpages enabled for this entity? If no entity provided, 
+	 * return the global setting for all entities.
+	 * 
+	 * @return bool
+	 */
+	public static function get_rootpages_enabled($entity = '') {
+		if (!self::$rootpages_enabled) return false;
+		if ($entity && in_array($entity, self::$rootpages_disabled_for)) return false;
+		return true;
+	}	
+	
+	/** 
+	 * set the number to start default pagenumbering, allowing room for 
+	 * custom pagenumbers below.
+	 * 
+	 * @param int $number
+	 */
+	public static function start_pagenumbers_at($number = 10000) {
+		if (is_int($number)) self::$pagenumber_start_at = $number;
+	}
+
+	/**
+	 * return the startlevel for default pagenumbering
+	 * 
+	 * @return int
+	 */
+	public static function get_pagenumber_start_at() {
+		return self::$pagenumber_start_at;
+	}
+	
+	/**
+	 * allow the use of key/value pairs incomments?
+	 * Example (supported are title and page): <!-- page: 2 --> 
+	 * 
+	 * @param bool $allow
+	 */
+	public static function enable_meta_comments($allow = true) {
+		self::$meta_comments_enabled = ($allow)? true: false;
+	}
+
+	/**
+	 * can we use key/value pairs from <!--   --> comments?
+	 * 
+	 * @return bool
+	 */
+	public static function meta_comments_enabled() {
+		return self::$meta_comments_enabled;
 	}
 	
 	/**
@@ -203,9 +329,14 @@ class DocumentationService {
 	 *
 	 * @return DocumentationEntity
 	 */
-	public static function register($entity, $path, $version = '', $title = false, $latest = false) {
+	public static function register($entity, $path, $version = 'current', $title = false, $latest = false) {
 		if(!file_exists($path)) throw new InvalidArgumentException(sprintf('Path "%s" doesn\'t exist', $path));
+
+		if (!$version) $version = 'current';
 		
+		$rootPath = '';
+		self::configure_paths($entity, $path, $rootPath);
+				
 		// add the entity to the registered array
 		if(!isset(self::$registered_entities[$entity])) {
 			// entity is completely new
@@ -218,6 +349,8 @@ class DocumentationService {
 			$output = self::$registered_entities[$entity];
 			$output->addVersion($version, $path);
 		}
+		if (!empty($rootPath)) 
+			$output->setRootPath($rootPath);
 		
 		if($latest)
 			$output->setStableVersion($version);
@@ -269,15 +402,21 @@ class DocumentationService {
 
 			if($entities) {
 				foreach($entities as $key => $entity) {
-					$dir = is_dir(Controller::join_links(BASE_PATH, $entity));
+					$entityRoot = Controller::join_links(BASE_PATH, $entity);
+					$dir = is_dir($entityRoot);
 					$ignored = in_array($entity, self::get_ignored_files(), true);
 					
 					if($dir && !$ignored) {
-						// check to see if it has docs
-						$docs = Director::baseFolder() . '/' . Controller::join_links($entity, 'docs');
-	
+						$docs = Controller::join_links($entityRoot, 'docs');
 						if(is_dir($docs)) {
 							self::register($entity, $docs, 'current', $entity, true);
+						} elseif (self::get_rootpages_enabled($entity)) {	
+							//check if there are files in the root and displaying them is allowed
+							$rootPages = array();
+							self::get_pages_from_folder_recursive($entityRoot, '', false, $rootPages, true);
+							if (count($rootPages) > 0) {
+								self::register($entity, $entityRoot, 'current', $entity, true);
+							}
 						}
 					}
 				}
@@ -317,9 +456,16 @@ class DocumentationService {
 	 */
 	static function find_page($entity, $path, $version = '', $lang = 'en') {	
 		if($entity = self::is_registered_entity($entity, $version, $lang)) {
-			return self::find_page_recursive($entity->getPath($version, $lang), $path);
+			$result = self::find_page_recursive($entity->getPath($version, $lang), $path);
+			
+			// if nothing is found, this might be a rootpage, so search the root,
+			// without recursion!
+			if (!$result && $rootPath = $entity->getRootPath()) {
+				$result = self::find_page_recursive($rootPath, $path, false);
+			}			
+			return $result;
 		}
-		
+	
 		return false;
 	}
 	
@@ -329,11 +475,11 @@ class DocumentationService {
 	 *
 	 * @return string
 	 */
-	private static function find_page_recursive($base, $goal) {
+	private static function find_page_recursive($base, $goal, $recursive=true) {
 		$handle = (is_dir($base)) ? opendir($base) : false;
 
 		$name = self::trim_extension_off(strtolower(array_shift($goal)));
-		if(!$name || $name == '/') $name = 'index';
+		$arrName = (!$name || $name == '/') ? self::$valid_index_files : array($name);
 
 
 		if($handle) {
@@ -347,33 +493,36 @@ class DocumentationService {
 				
 				$formatted = self::trim_extension_off(strtolower($file));
 				
-				// the folder is the one that we are looking for.
-				if(strtolower($name) == strtolower($formatted)) {
-					
-					// if this file is a directory we could be displaying that
-					// or simply moving towards the goal.
-					if(is_dir(Controller::join_links($base, $file))) {
-						
-						$base = $base . trim($file, '/') .'/';
-						
-						// if this is a directory check that there is any more states to get
-						// to in the goal. If none then what we want is the 'index.md' file
-						if(count($goal) > 0) {
-							return self::find_page_recursive($base, $goal);
+				foreach ($arrName as $aName) {
+					// the folder is the one that we are looking for.
+					if(strtolower($aName) == strtolower($formatted)) {
+
+						// if this file is a directory we could be displaying that
+						// or simply moving towards the goal.
+						if(is_dir(Controller::join_links($base, $file))) {
+							if ($recursive) {
+								$base = $base . trim($file, '/') .'/';
+
+								// if this is a directory check that there is any more states to get
+								// to in the goal. If none then what we want is the 'index.md' file
+								if(count($goal) > 0) {
+									return self::find_page_recursive($base, $goal);
+								}
+								else {
+									// recurse but check for an index.md file next time around
+									return self::find_page_recursive($base, array('index'));
+								}
+							}
 						}
 						else {
-							// recurse but check for an index.md file next time around
-							return self::find_page_recursive($base, array('index'));
+							// goal state. End of recursion.
+							// tidy up the URLs with single trailing slashes
+							$result =  $base . ltrim($file, '/');
+
+							if(is_dir($result)) $result = (rtrim($result, '/') . '/');
+
+							return $result;
 						}
-					}
-					else {
-						// goal state. End of recursion.
-						// tidy up the URLs with single trailing slashes
-						$result =  $base . ltrim($file, '/');
-
-						if(is_dir($result)) $result = (rtrim($result, '/') . '/');
-
-						return $result;
 					}
 				}
 			}
@@ -459,6 +608,7 @@ class DocumentationService {
 	 */
 	public static function get_pages_from_folder($entity, $relativePath = false, $recursive = true, $version = 'trunk', $lang = 'en') {
 		$output = new ArrayList();
+		$metaCommentsEnabled = self::meta_comments_enabled();
 		$pages = array();
 		
 		if(!$entity instanceof DocumentationEntity) 
@@ -469,13 +619,24 @@ class DocumentationService {
 		
 		if(self::is_registered_entity($entity)) {
 			self::get_pages_from_folder_recursive($path, $relativePath, $recursive, $pages);
+			if(count($pages) > 0) natcasesort($pages);
+			if (empty($relativePath) && $rootPath = $entity->getRootPath()) {
+				$rootPages = array();
+				self::get_pages_from_folder_recursive($rootPath, $relativePath, $recursive, $rootPages, true);
+				if(count($rootPages) > 0) {
+					natcasesort($rootPages);
+					foreach ($rootPages as $page) {
+						if (!in_array($page, $pages)) $pages[] = $page;
+					}
+				}
+			}			
 		}
 		else {
 			return user_error("$entity is not registered", E_USER_WARNING);
 		}
 
 		if(count($pages) > 0) {
-			natsort($pages);
+			$pagenumber = self::get_pagenumber_start_at();
 			
 			foreach($pages as $key => $pagePath) {
 				
@@ -497,12 +658,16 @@ class DocumentationService {
 				// does this page act as a folder?
 				$path = $page->getPath();
 				if (is_dir($path)) { $page->setIsFolder(true); }
+				
+				$page->setPagenumber($pagenumber++);
+				// we need the markdown to get the comments
+				if ($metaCommentsEnabled) $page->getMarkdown();
 
 				$output->push($page);
 			}
 		}
 		
-		return $output;
+		return ($metaCommentsEnabled)? $output->sort('pagenumber') : $output;
 	}
 	
 	/**
@@ -510,8 +675,8 @@ class DocumentationService {
 	 *
 	 * @see {@link DocumentationService::get_pages_from_folder}
 	 */ 
-	private static function get_pages_from_folder_recursive($base, $relative, $recusive, &$pages) {
-		if(!is_dir($base)) throw new Exception(sprintf('%s is not a folder', $folder));
+	private static function get_pages_from_folder_recursive($base, $relative, $recusive, &$pages, $filesOnly=false) {
+		//if(!is_dir($base)) throw new Exception(sprintf('%s is not a folder', $folder));
 
 		$folder = Controller::join_links($base, $relative);
 		
@@ -529,7 +694,7 @@ class DocumentationService {
 					$path = Controller::join_links($folder, $file);
 					$relativeFilePath = Controller::join_links($relative, $file);
 
-					if(is_dir($path)) {
+					if(is_dir($path) && !$filesOnly) {
 						// dir
 						$pages[] = $relativeFilePath;
 						
@@ -545,4 +710,34 @@ class DocumentationService {
 
 		closedir($handle);
 	}
+
+	/**
+	 * On default registration, the path wil point to the root of the 
+	 * entity. On manual registration of entities that follow the 
+	 * SilverStripe standards having a /docs folder, the path can
+	 * still point to the /docs folder (backwards compatibility)
+	 * 
+	 * For entities without a docs folder, the rootfolder will be equal to 
+	 * the path, But the entity can still have separate rootfiles, as all 
+	 * localized docs will always live in language/version directories. 
+	 * 
+	 * @param string reference $path
+	 * @param string reference $rootPath
+	 */
+	private static function configure_paths($entity, &$path, &$rootPath) {
+		$path = rtrim($path, '/');	
+		$docsPath = Controller::join_links($path, 'docs');
+		if (is_dir($docsPath)) {
+			$path = $docsPath;
+		} 
+		
+		if (self::get_rootpages_enabled($entity)) {
+			$rootPath = $path;
+			if ('/docs' == substr($path, -5, 5)) {
+				$subPath = substr($path, 0, -5);
+				if ($subPath != BASE_PATH) $rootPath = $subPath;				
+			} 
+		}
+	}
+	
 }

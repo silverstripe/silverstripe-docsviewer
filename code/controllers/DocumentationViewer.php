@@ -430,7 +430,12 @@ class DocumentationViewer extends Controller {
 				$entity->getPath($this->getVersion(), $this->getLang()), 
 				implode('/', $this->Remaining)
 			));
-			
+			if (!$has_dir && $rootPath = $entity->getRootPath()){
+				$has_dir = is_dir(Controller::join_links(
+					$rootPath, 
+					implode('/', $this->Remaining)
+				));	
+			}
 			if($has_dir) return 2;
 			
 			$has_page = DocumentationService::find_page(
@@ -465,8 +470,12 @@ class DocumentationViewer extends Controller {
 		);
 		
 		if($absFilepath) {
+			$path = $entity->getPath($version, $lang);
+			if (!stristr($absFilepath, $path)) {
+				$path = $entity->getRootPath();
+			}			
 			$relativeFilePath = str_replace(
-				$entity->getPath($version, $lang),
+				$path,
 				'', 
 				$absFilepath
 			);
@@ -496,8 +505,16 @@ class DocumentationViewer extends Controller {
 			$pages = DocumentationService::get_pages_from_folder($entity, null, self::$recursive_submenu, $this->getVersion(), $this->getLang());
 
 			if($pages) {
+				$version = $this->getVersion();
+				$lang = $this->getLang();
+				$index = 'index';
+				if ($indexPage = $entity->getIndexPage($version, $lang)) {
+					$index = trim($indexPage->getRelativePath(), '/');
+					$index = DocumentationService::trim_extension_off($index);
+				}	
+
 				foreach($pages as $page) {
-					if(strtolower($page->Title) == "index") {
+					if(strtolower($page->Title) == strtolower($index)) {
 						$pages->remove($page);
 						
 						continue;

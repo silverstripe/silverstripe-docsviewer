@@ -21,3 +21,7 @@ DocumentationService::set_ignored_files(array(
 	'.', '..', '.DS_Store',
 	'.svn', '.git', 'assets', 'themes', '_images', '_resources'
 ));
+
+// enable reading the metadata commentblock, allowing
+// for custom page sorting
+DocumentationService::enable_meta_comments();
