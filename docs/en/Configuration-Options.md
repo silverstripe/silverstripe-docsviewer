@@ -54,5 +54,56 @@ to new structures.
 	));
 	
 	
+## Custom metadata and pagesorting
 
+Custom metadata can be added to the head of the MarkDown file like this:  
+
+	pagenumber: 1
+	title: A custom title
+	
+
+Make sure to add an empty line to separate the metadata from the content of
+the file. To make the metadata invisible on the page, you can use a comment tag:
+
+	<!--
+	pagenumber: 1
+	title: A custom title
+	-->
+
+You now need to explicitly enable the use of metadata by adding the following to 
+your _config.php:
+
+	```php
+	DocumentationService::enable_meta_comments();
+	```
+
+**Note:** SilverStripe needs to read the contents of each page to retrieve the 
+metadata. This is expensive, so if you do not plan to use custom sorting, 
+do not enable this feature:
+
+### Custom page sorting
+
+By default pages in the lefthand menu are sorted alphabetically. Adding a 
+pagenumber to the metadata, like in the example above, allows for custom 
+pagenumbering.
+
+**Note:** although folders appear in the menu as 'pages', you obviously can't  
+number them, so you need to number their index.php page instead.
+
+Pages that have no custom pagenumber, keep their original 
+order, but for them not to interfere with custom sort, they also receive a 
+pagenumber, starting at 10.000. 
+
+You can change this starting point for default pagenumbers:
+
+	```php
+	DocumentationService:: start_pagenumbers_at(80);
+	```
+
+### Other key-value pairs
+
+Basically all DocumentationPage properties can be added to the metadata comment 
+block. Beware that the outcome isn't always predictable. Adding a title 
+property to the block will change the menu title, but the breadcrumbs 
+are at this time not yet supported.
 	

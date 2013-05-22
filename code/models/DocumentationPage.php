@@ -43,6 +43,12 @@ class DocumentationPage extends ViewableData {
 	protected $isFolder = false;
 
 	/**
+	 *
+	 * @var integer
+	 */
+	protected $pagenumber = 0; 	
+	
+	/**
 	 * @param Boolean
 	 */
 	public function setIsFolder($isFolder = false) {
@@ -56,6 +62,14 @@ class DocumentationPage extends ViewableData {
 		return $this->isFolder;
 	}
 
+	/**
+	 * 
+	 * @param int $number
+	 */
+	public function setPagenumber($number = 0) {
+		if (is_int($number )) $this->pagenumber = $number;
+	} 
+	
 	/**
 	 * @return DocumentationEntity
 	 */
@@ -247,10 +261,13 @@ class DocumentationPage extends ViewableData {
 
 			if($path) {
 				$ext = $this->getExtension();
-				
-				if(DocumentationService::is_valid_extension($ext)) {
-					return file_get_contents($path);
-				}
+								
+				if(empty($ext) || DocumentationService::is_valid_extension($ext)) {
+					if ($md = file_get_contents($path)) {
+						if ($this->title != 'Index') $this->getMetadataFromComments($md);
+					}  
+					return $md;
+				}   
 			}
 		}
 		catch(InvalidArgumentException $e) {}
@@ -268,4 +285,28 @@ class DocumentationPage extends ViewableData {
 	function getHTML($version, $lang = 'en') {
 		return DocumentationParser::parse($this, $this->entity->getRelativeLink($version, $lang));
 	}
+	
+	/**
+	 * get metadata from the first html comments block in the page
+	 * 
+	 * @param DocumentationPage $md
+	 */
+	public function getMetadataFromComments($md = '') {
+		if($md && DocumentationService::meta_comments_enabled()) {
+			//$pattern = '/^<!--(.*?)-->/Uis';
+			$pattern = "/^(.+)\n(\r)*\n/Uis";
+			$matches = preg_match($pattern, $md, $block);
+			if($matches && $block[1]) {
+				$pattern = '/(?<key>[A-Za-z][A-Za-z0-9_-]+)[\t]*:[\t]*(?<value>[^:\n\r\/]+)/x';
+				$matches = preg_match_all($pattern, $block[1], $meta);
+				foreach($meta['key'] as $index => $key) {
+					if(isset($meta['value'][$index])) {
+						if (property_exists(get_class(), $key)) {
+							$this->setMetaData($key, $meta['value'][$index]);
+						}  
+					}
+				}        
+			}
+		}
+	} 	
 }

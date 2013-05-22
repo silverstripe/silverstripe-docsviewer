@@ -76,6 +76,20 @@ class DocumentationService {
 	 * @var bool
 	 */
 	private static $automatic_registration = true;
+
+	/**
+	* by default pagenumbers start high at 10.000
+	* 
+	* @var integer 
+	*/
+	private static $pagenumber_start_at = 10000; 
+
+	/**
+	 * allow the use of key/value pairs in comments 
+	 *  
+	 * @var boolean 
+	 */
+	private static $meta_comments_enabled = false;	
 	
 	/**
 	 * Return the allowed extensions
@@ -138,6 +152,43 @@ class DocumentationService {
 	public static function automatic_registration_enabled() {
 		return self::$automatic_registration;
 	}
+
+	/** 
+	 * set the number to start default pagenumbering, allowing room for 
+	 * custom pagenumbers below.
+	 * 
+	 * @param int $number
+	 */
+	public static function start_pagenumbers_at($number = 10000) {
+		if (is_int($number)) self::$pagenumber_start_at = $number;
+	}
+
+	/**
+	 * return the startlevel for default pagenumbering
+	 * 
+	 * @return int
+	 */
+	public static function get_pagenumber_start_at() {
+		return self::$pagenumber_start_at;
+	} 
+
+	/**
+	 * Allow the use of key/value pairs in comments? 
+	 * 
+	 * @param bool $allow
+	 */
+	public static function enable_meta_comments($allow = true) {
+		self::$meta_comments_enabled = ($allow)? true: false;
+	} 
+	
+	/**
+	 * can we use key/value pairs 
+	 * 
+	 * @return bool
+	 */
+	public static function meta_comments_enabled() {
+		return self::$meta_comments_enabled;
+	}	
 	
 	/**
 	 * Return the entities which are listed for documentation. Optionally only 
@@ -459,6 +510,7 @@ class DocumentationService {
 	 */
 	public static function get_pages_from_folder($entity, $relativePath = false, $recursive = true, $version = 'trunk', $lang = 'en') {
 		$output = new ArrayList();
+		$metaCommentsEnabled = self::meta_comments_enabled(); 
 		$pages = array();
 		
 		if(!$entity instanceof DocumentationEntity) 
@@ -475,6 +527,7 @@ class DocumentationService {
 		}
 
 		if(count($pages) > 0) {
+			$pagenumber = self::get_pagenumber_start_at(); 
 			natsort($pages);
 			
 			foreach($pages as $key => $pagePath) {
@@ -497,12 +550,17 @@ class DocumentationService {
 				// does this page act as a folder?
 				$path = $page->getPath();
 				if (is_dir($path)) { $page->setIsFolder(true); }
-
+				
+				$page->setPagenumber($pagenumber++); 
+				
+				// we need the markdown to get the comments
+				if ($metaCommentsEnabled) $page->getMarkdown();
+				
 				$output->push($page);
 			}
 		}
 		
-		return $output;
+		return ($metaCommentsEnabled)? $output->sort('pagenumber') : $output; 
 	}
 	
 	/**
