@@ -63,12 +63,7 @@ Custom metadata can be added to the head of the MarkDown file like this:
 	
 
 Make sure to add an empty line to separate the metadata from the content of
-the file. To make the metadata invisible on the page, you can use a comment tag:
-
-	<!--
-	pagenumber: 1
-	title: A custom title
-	-->
+the file. 
 
 You now need to explicitly enable the use of metadata by adding the following to 
 your _config.php:

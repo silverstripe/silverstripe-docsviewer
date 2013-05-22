@@ -255,7 +255,7 @@ class DocumentationPage extends ViewableData {
 	 *
 	 * @return string
 	 */
-	function getMarkdown() {
+	function getMarkdown($removeMetaData = false) {
 		try {
 			$path = $this->getPath(true);
 
@@ -264,7 +264,7 @@ class DocumentationPage extends ViewableData {
 								
 				if(empty($ext) || DocumentationService::is_valid_extension($ext)) {
 					if ($md = file_get_contents($path)) {
-						if ($this->title != 'Index') $this->getMetadataFromComments($md);
+						if ($this->title != 'Index') $this->getMetadataFromComments($md, $removeMetaData);
 					}  
 					return $md;
 				}   
@@ -287,25 +287,39 @@ class DocumentationPage extends ViewableData {
 	}
 	
 	/**
-	 * get metadata from the first html comments block in the page
+	 * get metadata from the first html block in the page, then remove the 
+	 * block on request
 	 * 
 	 * @param DocumentationPage $md
+	 * @param bool $remove
 	 */
-	public function getMetadataFromComments($md = '') {
+	public function getMetadataFromComments(&$md, $removeMetaData = false) {
 		if($md && DocumentationService::meta_comments_enabled()) {
-			//$pattern = '/^<!--(.*?)-->/Uis';
-			$pattern = "/^(.+)\n(\r)*\n/Uis";
-			$matches = preg_match($pattern, $md, $block);
+			
+			// get the text up to the first whiteline
+			$extPattern = "/^(.+)\n(\r)*\n/Uis";
+			$matches = preg_match($extPattern, $md, $block);
 			if($matches && $block[1]) {
-				$pattern = '/(?<key>[A-Za-z][A-Za-z0-9_-]+)[\t]*:[\t]*(?<value>[^:\n\r\/]+)/x';
-				$matches = preg_match_all($pattern, $block[1], $meta);
+				$metaDataFound = false;
+				
+				// find the key/value pairs
+				$intPattern = '/(?<key>[A-Za-z][A-Za-z0-9_-]+)[\t]*:[\t]*(?<value>[^:\n\r\/]+)/x';
+				$matches = preg_match_all($intPattern, $block[1], $meta);
+				
 				foreach($meta['key'] as $index => $key) {
 					if(isset($meta['value'][$index])) {
+						
+						// check if a property exists for this key
 						if (property_exists(get_class(), $key)) {
 							$this->setMetaData($key, $meta['value'][$index]);
+							$metaDataFound = true;
 						}  
 					}
-				}        
+				}
+				// optionally remove the metadata block (only on the page that is displayed)
+				if ($metaDataFound && $removeMetaData) {
+					$md = preg_replace($extPattern, '', $md);
+				}
 			}
 		}
 	} 	

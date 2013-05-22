@@ -178,7 +178,7 @@ class DocumentationService {
 	 * @param bool $allow
 	 */
 	public static function enable_meta_comments($allow = true) {
-		self::$meta_comments_enabled = ($allow)? true: false;
+		self::$meta_comments_enabled = (bool) $allow;
 	} 
 	
 	/**
