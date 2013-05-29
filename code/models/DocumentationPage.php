@@ -148,12 +148,12 @@ class DocumentationPage extends ViewableData {
 	/**
 	 * Returns the public accessible link for this page.
 	 *
+	 * @param Boolean Absolute URL (incl. domain), or relative to webroot
 	 * @return string
 	 */
-	function getLink() {
+	function getLink($absolute=true) {
 		if($entity = $this->getEntity()) {
-			$link = Controller::join_links($entity->Link($this->getVersion(), $this->lang), $this->getRelativeLink());
-
+			$link = $this->getRelativeLink();
 			$link = rtrim(DocumentationService::trim_extension_off($link), '/');
 			
 			// folders should have a / on them. Looks nicer
@@ -166,7 +166,13 @@ class DocumentationPage extends ViewableData {
 			$link = $this->getPath(true);
 		}
 
-		return $link;
+		if($absolute) {
+			$fullLink = Controller::join_links($entity->Link($this->getVersion(), $this->lang), $link);
+		} else {
+			$fullLink = Controller::join_links($entity->getRelativeLink($this->getVersion(), $this->lang), $link);
+		}
+
+		return $fullLink;
 	}
 	
 	/**
