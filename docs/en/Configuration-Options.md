@@ -53,6 +53,36 @@ to new structures.
 		'templates' => 'sapphire/en/topics/templates'
 	));
 	
-	
+## Documentation in your site root
 
+If you want to register a modules documentation in your site root, use 'home' as the name of your registration. Using the docsviewer docs as an example, add the following settings in _config.php:
+
+	:::php
+	DocumentationService::set_automatic_registration(false);
+
+	DocumentationViewer::set_link_base('');
+
+	try {   
+		DocumentationService::register(
+			$name = 'home', 
+			$path = BASE_PATH . '/docsviewer/docs/', 
+			$version = '3.1',
+			$title = 'Great Documentation',
+			$latest = true
+		);
+	} catch(InvalidArgumentException $e) {
+	}
+
+Next you need to set up the rules in your _config/routes.yml, replacing the default rules from the framework/_config/routes.yml:
+
+	---
+	Name: docs
+	After: framework/routes#adminroutes
+	---
+	Director:
+	  rules:
+	    '$Action': 'DocumentationViewer'    
+	    '': 'DocumentationViewer'
+	    'DocumentationOpenSearchController//$Action': 'DocumentationOpenSearchController'
 	
+**Note**: You'll be able to reach the admin section, but using /dev/ will not (yet) work with these settings...

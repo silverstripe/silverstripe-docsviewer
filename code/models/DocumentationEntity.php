@@ -258,9 +258,10 @@ class DocumentationEntity extends ViewableData {
 		if(!$lang) $lang = 'en';
 		if($version == $this->getStableVersion()) $version = false;
 		
+		$folder = ($folder = $this->getFolder() && 'home' == $folder)? '': $folder;
 		return Controller::join_links(
 			DocumentationViewer::get_link_base(), 
-			$this->getFolder(),
+			$folder,
 			$lang,
 			$version
 		);
