@@ -44,7 +44,7 @@ class DocumentationParser {
 	public static function parse(DocumentationPage $page, $baselink = null) {
 		if(!$page || (!$page instanceof DocumentationPage)) return false;
 
-		$md = $page->getMarkdown();
+		$md = $page->getMarkdown(true);
 		
 		// Pre-processing
 		$md = self::rewrite_image_links($md, $page);
