@@ -108,11 +108,10 @@ class DocumentationViewerTest extends FunctionalTest {
 		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3/subfolder/'), DataModel::inst());
 		$pages = $v->getEntityPages();
 
-		$arr = $pages->toArray();
-		
-		$page = $arr[2];
-		
-		$this->assertEquals('Subfolder', $page->Title);
+		$this->assertEquals(
+			$pages->column('Title'),
+			array('Sort', 'Subfolder', 'Test')
+		);
 	}
 	
 	function testGetEntityPages() {
@@ -137,27 +136,20 @@ class DocumentationViewerTest extends FunctionalTest {
 		$this->assertStringEndsWith('DocumentationViewerTests/en/2.3/subfolder/', $links[1]);
 		$this->assertStringEndsWith('DocumentationViewerTests/en/2.3/test', $links[2]);
 		
-		// Children
-		$pagesArr = $pages->toArray();
-		$child1 = $pagesArr[1];
-	
-		$this->assertFalse($child1->Children);
-		$child2 = $pagesArr[2];
+		$pageSort = $pages->find('Title', 'Sort');
+		$this->assertFalse($pageSort->Children);
 		
+		$pageSubfolder = $pages->find('Title', 'Subfolder');
 		$this->assertEquals(
 			array('subfolder/subpage.md', 'subfolder/subsubfolder/'),
-			$child2->Children->column('Filename')
+			$pageSubfolder->Children->column('Filename')
 		);
 	
-		$children = $child2->Children;
-		
+		$children = $pageSubfolder->Children;
 		foreach($children as $child) {
 			$child->setVersion('2.3');
 		}
-		
 		$child2Links = $children->column('Link');
-		$subpage = $children->First();
-	
 		$this->assertStringEndsWith('DocumentationViewerTests/en/2.3/subfolder/subpage', $child2Links[0]);
 		$this->assertStringEndsWith('DocumentationViewerTests/en/2.3/subfolder/subsubfolder/', $child2Links[1]);
 	}
