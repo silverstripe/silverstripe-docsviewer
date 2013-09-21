@@ -33,7 +33,7 @@
   font-size: 1em !important;
   min-height: inherit !important;
   min-height: auto !important;
-  font-family: Monaco, 'Courier New', monospace !important;  
+  font-family: Monaco, 'Courier New', monospace !important;
 }
 
 .syntaxhighlighter {
@@ -240,7 +240,7 @@
 	color: #000 !important;
 }
 
-.syntaxhighlighter.printing .line .content 
+.syntaxhighlighter.printing .line .content
 {
 	border: 0 !important;
 }
@@ -291,25 +291,26 @@
 
 .syntaxhighlighter .comments,
 .syntaxhighlighter .comments a
-{ 
+{
 	color: #999988 !important;
 	font-style: italic !important;
+  line-height: 13px !important;
 }
 
 .syntaxhighlighter .string,
 .syntaxhighlighter .string a
 {
-	color: #D81745 !important; 
+	color: #D81745 !important;
 }
 
 .syntaxhighlighter .keyword
-{ 
-	font-weight: bold !important; 
+{
+	font-weight: bold !important;
 }
 
-.syntaxhighlighter .preprocessor 
-{ 
-	color: gray !important; 
+.syntaxhighlighter .preprocessor
+{
+	color: gray !important;
 }
 
 .syntaxhighlighter .regex
@@ -332,48 +333,48 @@
   font-style: italic;
 }
 
-.syntaxhighlighter .variable 
-{ 
-	color: #177F80 !important; 
+.syntaxhighlighter .variable
+{
+	color: #177F80 !important;
 }
 
 .syntaxhighlighter .value
-{ 
-	color: red !important; 
+{
+	color: red !important;
 }
 
 .syntaxhighlighter .functions
-{ 
-	color: #990000 !important; 
+{
+	color: #990000 !important;
 	font-weight:bold !important;
 }
 
 .syntaxhighlighter .constants
-{ 
-	color: #177F80 !important; 
+{
+	color: #177F80 !important;
 }
 
 .syntaxhighlighter .script
-{ 
+{
 	background-color: yellow !important;
 }
 
 .syntaxhighlighter .color1,
 .syntaxhighlighter .color1 a
-{ 
-	color: #177F80 !important; 
+{
+	color: #177F80 !important;
 }
 
 .syntaxhighlighter .color2,
 .syntaxhighlighter .color2 a
-{ 
-	color: #960B73 !important; 
+{
+	color: #960B73 !important;
 }
 
 .syntaxhighlighter .color3,
 .syntaxhighlighter .color3 a
-{ 
-	color: red !important; 
+{
+	color: red !important;
 }
 
 /** end ugliness */
