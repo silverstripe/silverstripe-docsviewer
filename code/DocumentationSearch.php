@@ -205,10 +205,15 @@ class DocumentationSearch {
 			self::$index_location = DOCSVIEWER_DIR;
 		}
 		
-		return Controller::join_links(
-			TEMP_FOLDER, 
-			trim(self::$index_location, '/')
-		);
+		if(file_exists(self::$index_location)) {
+			return self::$index_location;
+		} else {
+			return Controller::join_links(
+				TEMP_FOLDER, 
+				trim(self::$index_location, '/')
+			);	
+		}
+		
 	}
 	
 	/**
