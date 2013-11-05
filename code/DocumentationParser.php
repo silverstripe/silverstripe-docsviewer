@@ -388,7 +388,7 @@ class DocumentationParser {
 				
 				// Resolve relative paths
 				while(strpos($relativeUrl, '..') !== FALSE) {
-					$relativeUrl = preg_replace('/\w+\/\.\.\//', '', $relativeUrl);
+					$relativeUrl = preg_replace('/[-\w]+\/\.\.\//', '', $relativeUrl);
 				}
 			
 				// Replace any double slashes (apart from protocol)
