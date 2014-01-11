@@ -244,6 +244,8 @@ class DocumentationViewer extends Controller {
 	 * @return HttpResponse
 	 */
 	function throw404() {
+		$this->init();
+		
 		$class = get_class($this);
 		
 		$body = $this->renderWith(array("{$class}_error", $class));
