@@ -15,5 +15,8 @@
 	}],
 	"require": {
 		"silverstripe/framework": "~3.1"
-	}
+	},
+	"suggest": {
+        "silverstripe/staticpublisher": "Allows publishing documentation as HTML"
+    }
 }
