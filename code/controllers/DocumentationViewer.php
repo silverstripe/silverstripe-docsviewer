@@ -68,24 +68,30 @@ class DocumentationViewer extends Controller {
 	private static $edit_links = array();
 	
 	/**
-	 * @return boolean
+	 * @var boolean $separate_submenu
 	 */
 	protected static $separate_submenu = true;
 
 	/**
-	 * @return boolean
+	 * @var bool $recursive_submenu
 	 */
 	protected static $recursive_submenu = false;
 
+	/**
+	 * @param bool $separate_submenu
+	 */
 	public static function set_separate_submenu($separate_submenu = true) {
 		self::$separate_submenu = $separate_submenu;
 	}
 
+	/**
+	 * @param bool $recursive_submenu
+	 */
 	public static function set_recursive_submenu($recursive_submenu = false) {
 		self::$recursive_submenu = $recursive_submenu;
 	}
 
-	function init() {
+	public function init() {
 		parent::init();
 
 		if(!$this->canView()) return Security::permissionFailure($this);
@@ -129,10 +135,15 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @param $request
 	 * @param $action
+	 *
 	 * @return SS_HTTPResponse
 	 */
 	public function handleAction($request, $action) {
 		try {
+			if(preg_match('/DocumentationSearchForm/', $request->getURL())) {
+				$action = 'results';
+			}
+
 			$response = parent::handleAction($request, $action);
 		} catch(SS_HTTPResponse_Exception $e) {
 			if(strpos($e->getMessage(), 'does not exist') !== FALSE) {
@@ -758,7 +769,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return Form
 	 */
-	function LanguageForm() {
+	public function LanguageForm() {
 		$langs = $this->getLanguages();
 		
 		$fields = new FieldList(
@@ -783,30 +794,30 @@ class DocumentationViewer extends Controller {
 	 * Process the language change
 	 *
 	 */
-	function doLanguageForm($data, $form) {
+	public function doLanguageForm($data, $form) {
 		$this->Lang = (isset($data['LangCode'])) ? $data['LangCode'] : 'en';
 
 		return $this->redirect($this->Link());
 	}
 	
 	/**
-	 * @param String
+	 * @param string
 	 */
-	static function set_link_base($base) {
+	public static function set_link_base($base) {
 		self::$link_base = $base;
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
-	static function get_link_base() {
+	public static function get_link_base() {
 		return self::$link_base;
 	}
 	
 	/**
 	 * @see {@link Form::FormObjectLink()}
 	 */
-	function FormObjectLink($name) {
+	public function FormObjectLink($name) {
 		return $name;
 	}
 	
@@ -816,8 +827,11 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return Form
 	 */
-	function DocumentationSearchForm() {
-		if(!DocumentationSearch::enabled()) return false;
+	public function DocumentationSearchForm() {
+		if(!DocumentationSearch::enabled()) {
+			return false;
+		}
+
 		$q = ($q = $this->getSearchQuery()) ? $q->NoHTML() : "";
 
 		$entities = $this->getSearchedEntities();
@@ -876,7 +890,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return array
 	 */
-	function getSearchedVersions() {
+	public function getSearchedVersions() {
 		$versions = array();
 		
 		if(!empty($_REQUEST['Versions'])) {
@@ -902,7 +916,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return HTMLText|null
 	 */
-	function getSearchQuery() {
+	public function getSearchQuery() {
 		if(isset($_REQUEST['Search'])) {
 			return DBField::create_field('HTMLText', $_REQUEST['Search']);
 		}
@@ -911,7 +925,7 @@ class DocumentationViewer extends Controller {
 	/**
 	 * Past straight to results, display and encode the query
 	 */
-	function results($data, $form = false) {
+	public function results($data, $form = false) {
 		$query = (isset($_REQUEST['Search'])) ? $_REQUEST['Search'] : false;
 
 		$search = new DocumentationSearch();
@@ -931,7 +945,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return Form
 	 */
-	function AdvancedSearchForm() {
+	public function AdvancedSearchForm() {
 		$entities = DocumentationService::get_registered_entities();
 		$versions = array();
 		
@@ -995,7 +1009,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return false|ArrayData
 	 */
-	function VersionWarning() {
+	public function VersionWarning() {
 		$version = $this->getVersion();
 		$entity = $this->getEntity();
 		

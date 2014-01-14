@@ -23,7 +23,7 @@ For more documentation on how to use the module please read /docs/Writing-Docume
 
 **Note** This module assumes you are using numeric values for your versions.
 
-### Static Publisher
+### HTML Publishing
 
 If you wish to generate a truly static version of your documentation after it 
 has been rendered through the website, add the [Static Publisher](https://github.com/silverstripe-labs/silverstripe-staticpublisher) 
