@@ -275,7 +275,7 @@ fieldset { border: none; }
 	#language input.action { float: right; margin-top: 4px;}
 	
 /* Footer */
-#footer { width: 960px; 
+#footer { 
 	margin: 21px auto; 
 }
 	#footer p { 
@@ -561,7 +561,6 @@ span.is-folder {float: right;}
 
 
 .container {
-	min-width: 540px; 
 	max-width: 960px; 
 	margin: auto;
 }
@@ -577,6 +576,15 @@ span.is-folder {float: right;}
 		width: 100%;
 		float: none;
 		border: none;
+	}
+
+	#content-column img {
+		max-width: 90%;
+		border: 1px solid #ccc;
+		box-shadow: 0 0 6px #ddd;
+		padding: 6px;
+		margin: 7px 0;
+		border-radius: 3px;
 	}
 
 #sidebar-column {
@@ -768,8 +776,12 @@ span.is-folder {float: right;}
 	#sidebar-column .sidebar-box input.text {
 		padding: 3px 3px 4px 3px;
 	}
+
 /* Footer */
-#footer { width: 960px; margin: 22px auto; }
+#footer { 
+	padding: 21px 1.25%; 
+	max-width: 960px; 
+}
 	#footer p { font-size: 11px; line-height: 18px; color: #798D85;}
 		#footer p a { color: #798D85; text-decoration: underline; }
 		#footer .cc-logo { float: right; }
@@ -969,4 +981,41 @@ ul.pagination {
 .typography a[href$=".EXE"],
 .typography a.application {
 	padding: 2px; padding-left: 20px; background: url(../../docsviewer/images/icons/application.png) no-repeat left center; 
+}
+
+@media screen and (max-width: 540px) {
+	#content-column {
+		width: 100%;
+		padding: 0;
+	}
+
+	#container {
+		padding: 15px;
+	}
+
+	#sidebar-column {
+		width: 100%;
+	}
+
+	#sidebar-column .sidebar-box {
+		padding: 10px;
+	}
+
+	#footer {
+		padding: 20px;
+	}
+
+	.pinned { position: absolute; left: 0; top: 0; background: #fff; width: 35%; overflow: hidden; overflow-x: scroll; border-right: 1px solid #ccc; border-left: 1px solid #ccc; }
+	.pinned table { border-right: none; border-left: none; width: 100%; }
+	.pinned table th, .pinned table td { white-space: nowrap; }
+	.pinned td:last-child { border-bottom: 0; }
+	
+	div.table-wrapper { position: relative; margin-bottom: 20px; overflow: hidden; border-right: 1px solid #ccc; }
+	div.table-wrapper div.scrollable table { margin-left: 35%; }
+	div.table-wrapper div.scrollable { overflow: scroll; overflow-y: hidden; }	
+	
+	table td, table th { position: relative; white-space: nowrap; overflow: hidden; }
+	table th:first-child, table td:first-child, table td:first-child, .pinned table td { display: none; }
+	.pinned table td:first-child,
+	.pinned table th:first-child { display: block; }
 }
