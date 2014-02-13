@@ -27,10 +27,10 @@ class DocumentationOpenSearchController extends Controller {
 		$link = Director::absoluteBaseUrl() .
 		$data['SearchPageLink'] = Controller::join_links(
 			$viewer->Link(),
-			'results/?Search={searchTerms}&amp;start={startIndex}&amp;length={count}&amp;action_results=1'
+			'results/?Search={searchTerms}&start={startIndex}&length={count}&action_results=1'
 		);
 		
-		$data['SearchPageAtom'] = $data['SearchPageLink'] . '&amp;format=atom';
+		$data['SearchPageAtom'] = $data['SearchPageLink'] . '&format=atom';
 		
 		return $this->customise(
 			new ArrayData($data)

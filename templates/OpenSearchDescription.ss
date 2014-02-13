@@ -6,7 +6,7 @@
 	<% if Tags %><Tags>$Tags</Tags><% end_if %>
 	<% if Contact %><Contact>$Content</Contact><% end_if %>
   	
-	<% if SearchPageLink %><Url type="text/html" template="$SearchPageLink"></Url><% end_if %>
-	<% if SearchPageAtom %><Url type="application/atom+xml" template="$SearchPageAtom"></Url><% end_if %>
-	<% if SearchPageJson %><Url type="application/x-suggestions+json" template="$SearchPageJson"></Url><% end_if %>
+	<% if SearchPageLink %><Url type="text/html" template="$SearchPageLink.XML"></Url><% end_if %>
+	<% if SearchPageAtom %><Url type="application/atom+xml" template="$SearchPageAtom.XML"></Url><% end_if %>
+	<% if SearchPageJson %><Url type="application/x-suggestions+json" template="$SearchPageJson.XML"></Url><% end_if %>
 </OpenSearchDescription>
