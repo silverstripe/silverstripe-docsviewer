@@ -96,7 +96,7 @@ class DocumentationParser {
 					$inner = true;
 				}
 			} 
-			elseif(preg_match('/^\t(.*)/', $line, $matches)) {
+			elseif(preg_match('/^[\ ]{0,3}?[\t](.*)/', $line, $matches)) {
 				// inner line of block, or first line of standard markdown code block
 				// regex removes first tab (any following tabs are part of the code).
 				$output[$i] = ($started) ? '' : '<pre>' . "\n";
