@@ -72,6 +72,12 @@ class DocumentationParser {
 		$output = array();
 
 		foreach($lines as $i => $line) {
+			// if line just contains whitespace, continue down the page.
+			// Prevents code blocks with leading tabs adding an extra line.
+			if(preg_match('/^\s$/', $line)) {
+				continue;
+			}
+
 			if(!$started && preg_match('/^\t*:::\s*(.*)/', $line, $matches)) {
 				// first line with custom formatting
 				$started = true;
