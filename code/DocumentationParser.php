@@ -53,13 +53,9 @@ class DocumentationParser {
 		$md = self::rewrite_api_links($md, $page);
 		$md = self::rewrite_heading_anchors($md, $page);
 		$md = self::rewrite_code_blocks($md);
-	
-		require_once(DOCSVIEWER_PATH .'/thirdparty/markdown/markdown.php');
 		
-		$parser = new MarkdownExtra_Parser();
-		$parser->no_markup = true;
-		
-		return $parser->transform($md);
+		$parser = new ParsedownExtra();
+		return $parser->text($md);
 	}
 	
 	public static function rewrite_code_blocks($md) {
@@ -78,18 +74,16 @@ class DocumentationParser {
 				continue;
 			}
 
-			if(!$started && preg_match('/^\t*:::\s*(.*)/', $line, $matches)) {
+			if(!$started && preg_match('/^[\t]*:::\s*(.*)/', $line, $matches)) {
 				// first line with custom formatting
 				$started = true;
 				$mode = self::CODE_BLOCK_COLON;
 				$output[$i] = sprintf('<pre class="brush: %s">', (isset($matches[1])) ? $matches[1] : "");
-			} 
-			elseif(!$started && preg_match('/^\t*```\s*(.*)/', $line, $matches)) {
+			} else if(!$started && preg_match('/^\t*```\s*(.*)/', $line, $matches)) {
 				$started = true;
 				$mode = self::CODE_BLOCK_BACKTICK;
 				$output[$i] = sprintf('<pre class="brush: %s">', (isset($matches[1])) ? $matches[1] : "");
-			} 
-			elseif($started && $mode == self::CODE_BLOCK_BACKTICK) {
+			} else if($started && $mode == self::CODE_BLOCK_BACKTICK) {
 				// inside a backtick fenced box
 				if(preg_match('/^\t*```\s*/', $line, $matches)) {
 					// end of the backtick fenced box. Unset the line that contains the backticks
@@ -101,23 +95,20 @@ class DocumentationParser {
 					$output[$i] .= htmlentities($line, ENT_COMPAT, 'UTF-8');
 					$inner = true;
 				}
-			} 
-			elseif(preg_match('/^[\ ]{0,3}?[\t](.*)/', $line, $matches)) {
+			} else if(preg_match('/^[\ ]{0,3}?[\t](.*)/', $line, $matches)) {
 				// inner line of block, or first line of standard markdown code block
 				// regex removes first tab (any following tabs are part of the code).
 				$output[$i] = ($started) ? '' : '<pre>' . "\n";
 				$output[$i] .= htmlentities($matches[1], ENT_COMPAT, 'UTF-8');
 				$inner = true;
 				$started = true;
-			}
-			elseif($started && $inner && $mode == self::CODE_BLOCK_COLON && trim($line) === "") {
+			} else if($started && $inner && $mode == self::CODE_BLOCK_COLON && trim($line) === "") {
 				// still inside a colon based block, if the line is only whitespace 
 				// then continue with  with it. We can continue with it for now as 
 				// it'll be tidied up later in the $end section.
 				$inner = true;
 				$output[$i] = $line;
-			}
-			elseif($started && $inner) {
+			} else if($started && $inner) {
 				// line contains something other than whitespace, or tabbed. E.g
 				// 	> code
 				//	> \n
@@ -130,8 +121,7 @@ class DocumentationParser {
 				$end = true;
 				$output[$i] = $line;
 				$i = $i -1;
-			}
-			else {
+			} else {
 				$output[$i] = $line;
 			}
 
@@ -257,7 +247,7 @@ class DocumentationParser {
 				$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getFolder());
 				$md = str_replace(
 					$match, 
-					sprintf('[%s](%s)', $title, $url),
+					sprintf('<code>[%s](%s)</code>', $title, $url),
 					$md
 				);
 			}
@@ -278,7 +268,7 @@ class DocumentationParser {
 				$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getFolder());
 				$md = str_replace(
 					$match, 
-					sprintf('[%s](%s)', $subject, $url),
+					sprintf('<code>[%s](%s)</code>', $subject, $url),
 					$md
 				);
 			}
