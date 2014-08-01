@@ -246,26 +246,6 @@ HTML;
 		$this->assertEquals("Foo Bar's Test page.", $page->Title);
 	}
 	
-	function testParserConvertsSpecialCharacters() {
-		$page = new DocumentationPage();
-		$page->setRelativePath('CodeSnippets.md');
-		$page->setEntity(new DocumentationEntity('parser', '2.4', DOCSVIEWER_PATH . '/tests/docs-parser/'));
-
-		$parsed = DocumentationParser::parse($page, '/'.DOCSVIEWER_DIR .'/tests/docs-parser/');
-		
-		// header elements parsed
-		$this->assertContains(
-			'&lt;% control Foo %&gt;',
-			$parsed
-		);
-		
-		// paragraphs
-		$this->assertContains(
-			'&lt;% foo %&gt;',
-			$parsed
-		);
-	}
-	
 	function testRewritingRelativeLinksToFiles() {
 		$folder = DOCSVIEWER_PATH . '/tests/docs-parser/';
 		
