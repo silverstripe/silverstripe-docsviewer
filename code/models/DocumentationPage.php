@@ -1,8 +1,10 @@
 <?php
 
 /**
- * A specific page within a {@link DocumentationEntity}. Maps 1 to 1 to a file on the 
- * filesystem.
+ * A specific documentation page within a {@link DocumentationEntity}. Maps to 
+ * a file on the file system. Note that the URL to access this documentation 
+ * page may not always be the file name. If the file contains meta data with
+ * a nicer URL then it will use that. 
  * 
  * @package docsviewer
  * @subpackage model
@@ -18,12 +20,12 @@ class DocumentationPage extends ViewableData {
 	 * Stores the relative path (from the {@link DocumentationEntity} to
 	 * this page. The actual file name can be accessed via {@link $this->getFilename()}
 	 *
-	 * @var String 
+	 * @var string 
 	 */
 	protected $relativePath;
 	
 	/**
-	 * @var String
+	 * @var string
 	 */
 	protected $lang = 'en';
 	
@@ -33,30 +35,29 @@ class DocumentationPage extends ViewableData {
 	protected $title;
 	
 	/**
-	 * @var String
+	 * @var string
 	 */
 	protected $version;
 	
 	/**
-	 * @var Boolean
+	 * @var boolean
 	 */
 	protected $isFolder = false;
 
 	/**
-	 *
 	 * @var integer
 	 */
 	protected $pagenumber = 0; 	
 	
 	/**
-	 * @param Boolean
+	 * @param boolean
 	 */
 	public function setIsFolder($isFolder = false) {
 		$this->isFolder = $isFolder;
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function getIsFolder($isFolder = false) {
 		return $this->isFolder;
@@ -101,7 +102,7 @@ class DocumentationPage extends ViewableData {
 	/**
 	 * @return string
 	 */
-	function getExtension() {
+	public function getExtension() {
 		return DocumentationService::get_extension($this->getRelativePath());
 	}
 	
@@ -114,7 +115,7 @@ class DocumentationPage extends ViewableData {
 	 *				will return the path of the first file in the folder
 	 * @return string 
 	 */
-	function getPath($defaultFile = false, $realpath = true) {
+	public function getPath($defaultFile = false, $realpath = true) {
 		if($this->entity) {
 			$path = Controller::join_links(
 				$this->entity->getPath($this->getVersion(), $this->lang),
@@ -148,7 +149,7 @@ class DocumentationPage extends ViewableData {
 	 *
 	 * @return string
 	 */
-	function getBreadcrumbTitle($divider = ' - ') {
+	public function getBreadcrumbTitle($divider = ' - ') {
 		$pathParts = explode('/', $this->getRelativePath());
 		
 		// add the module to the breadcrumb trail.
@@ -165,7 +166,7 @@ class DocumentationPage extends ViewableData {
 	 * @param Boolean Absolute URL (incl. domain), or relative to webroot
 	 * @return string
 	 */
-	function getLink($absolute=true) {
+	public function getLink($absolute = true) {
 		if($entity = $this->getEntity()) {
 			$link = $this->getRelativeLink();
 			$link = rtrim(DocumentationService::trim_extension_off($link), '/');
@@ -194,7 +195,7 @@ class DocumentationPage extends ViewableData {
 	 * 
 	 * @return string
 	 */
-	function getRelativeLink() {
+	public function getRelativeLink() {
 		$link = rtrim(DocumentationService::trim_extension_off($this->getRelativePath()), '/');
 		
 		// folders should have a / on them. Looks nicer
@@ -242,26 +243,27 @@ class DocumentationPage extends ViewableData {
 	/**
 	 * @return string
 	 */
-	function getFilename() {
+	public function getFilename() {
 		$path = rtrim($this->relativePath, '/');
 		
 		try {
 			return (is_dir($this->getPath())) ? $path . '/' : $path;
 		}
-		catch (Exception $e) {}
+		catch (Exception $e) {
+
+		}
 		
 		return $path;
 	}
 
 	/**
-	 * Return the raw markdown for a given documentation page. Will throw
-	 * an error if the path isn't a file.
+	 * Return the raw markdown for a given documentation page. 
 	 *
-	 * Will return empty if the type is not readable
+	 * @param boolean $removeMetaData
 	 *
 	 * @return string
 	 */
-	function getMarkdown($removeMetaData = false) {
+	public function getMarkdown($removeMetaData = false) {
 		try {
 			$path = $this->getPath(true);
 
@@ -282,13 +284,13 @@ class DocumentationPage extends ViewableData {
 	}
 	
 	/**
-	 * Parse a file (with a lang and a version).
+	 * Parse a file and return the parsed HTML version.
 	 *
 	 * @param string $baselink 
 	 *
 	 * @return string
 	 */
-	function getHTML($version, $lang = 'en') {
+	public function getHTML($version, $lang = 'en') {
 		return DocumentationParser::parse($this, $this->entity->getRelativeLink($version, $lang));
 	}
 	
@@ -328,5 +330,25 @@ class DocumentationPage extends ViewableData {
 				}
 			}
 		}
-	} 	
+	} 
+	
+	/**
+	 * Returns the next page. Either retrieves the sibling of the current page
+	 * or return the next sibling of the parent page.
+	 *
+	 * @return DocumentationPage
+	 */
+	public function getNextPage() {
+
+	}	
+
+	/**
+	 * Returns the previous page. Either returns the previous sibling or the 
+	 * parent of this page
+	 *
+	 * @return DocumentationPage
+	 */
+	public function getPreviousPage() {
+
+	}
 }

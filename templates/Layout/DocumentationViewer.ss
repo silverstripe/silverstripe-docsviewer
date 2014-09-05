@@ -5,25 +5,15 @@
 <div id="documentation-page">
 	<div id="content-column">
 		<% if Breadcrumbs %>
-			<% include DocBreadcrumbs %>
+			<% include DocumentationBreadcrumbs %>
 		<% end_if %>
 		
 		$Content
 
 		<% if EditLink %>
-			<div id="edit-link">
-				<p>
-					<a target="_blank" href="$EditLink">
-						Edit this page <small>(requires github.com login)</small>
-					</a>
-				</p>
-			</div>
+			<% include DocumentationEditLink %>
 		<% end_if %>
 	</div>
-
-	<% if Content %>
-	<div id="sidebar-column">
-		<% include DocInThisModule %>
-	</div>
-	<% end_if %>
 </div>
+
+<% include DocumentationComments %>

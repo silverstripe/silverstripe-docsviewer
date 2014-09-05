@@ -60,7 +60,7 @@ class RebuildLuceneDocsIndex extends BuildTask {
 		}
 
 		// includes registration
-		$pages = DocumentationSearch::get_all_documentation_pages();
+		$pages = DocumentationHelper::get_all_documentation_pages();
 		
 		if($pages) {
 			$count = 0;
@@ -91,8 +91,13 @@ class RebuildLuceneDocsIndex extends BuildTask {
 					// custom boosts
 					$titleField->boost = 3;
 					$breadcrumbField->boost = 1.5;
-					foreach(DocumentationSearch::$boost_by_path as $pathExpr => $boost) {
-						if(preg_match($pathExpr, $page->getRelativePath())) $doc->boost = $boost;
+
+					$boost = Config::inst()->get('DocumentationSearch', 'boost_by_path');
+
+					foreach($boost as $pathExpr => $boost) {
+						if(preg_match($pathExpr, $page->getRelativePath())) {
+							$doc->boost = $boost;
+						}
 					}
 					
 					$index->addDocument($doc);

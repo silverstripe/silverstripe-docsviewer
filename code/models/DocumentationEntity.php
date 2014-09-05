@@ -1,14 +1,16 @@
 <?php
 
 /**
- * A {@link DocumentationEntity} is created when registering a module path 
- * with {@link DocumentationService::register()}. A {@link DocumentationEntity} 
- * represents a module or folder with documentation rather than a specific 
- * page. Individual pages are handled by {@link DocumentationPage}
+ * A {@link DocumentationEntity} is created when registering a path with 
+ * {@link DocumentationService::register()}. 
  *
- * Each folder must have at least one language subfolder, which is automatically
+ * A {@link DocumentationEntity} represents a module or folder with 
+ * documentation not an individual page. Individual documentation pages are 
+ * represented by a {@link DocumentationPage}
+ *
+ * Each entity folder must have at least one language sub folder, which is.
  * determined through {@link addVersion()} and should not be included in the 
- * $path argument.
+ * $path argument. 
  * 
  * Versions are assumed to be in numeric format (e.g. '2.4'),
  *
@@ -64,7 +66,7 @@ class DocumentationEntity extends ViewableData {
 	 * @param string $path Absolute path to this module (excluding language folders)
 	 * @param string $title
 	 */
-	function __construct($folder, $version, $path, $title = false) {
+	public function __construct($folder, $version, $path, $title = false) {
 		$this->addVersion($version, $path);
 		$this->title = (!$title) ? $folder : $title;
 		$this->folder = $folder;
@@ -139,6 +141,7 @@ class DocumentationEntity extends ViewableData {
 			return $this->stableVersion;
 		} else {
 			$sortedVersions = $this->getVersions();
+			
 			usort($sortedVersions, create_function('$a,$b', 'return version_compare($a,$b);'));
 			
 			return array_pop($sortedVersions);
@@ -149,7 +152,10 @@ class DocumentationEntity extends ViewableData {
 	 * @param String $version
 	 */
 	public function setStableVersion($version) {
-		if(!$this->hasVersion($version)) throw new InvalidArgumentException(sprintf('Version "%s" does not exist', $version));
+		if(!$this->hasVersion($version)) {
+			throw new InvalidArgumentException(sprintf('Version "%s" does not exist', $version));
+		}
+
 		$this->stableVersion = $version;
 	}
 	
@@ -198,11 +204,13 @@ class DocumentationEntity extends ViewableData {
 		
 		if($langs) {
 			foreach($langs as $key => $lang) {
-				if(!is_dir($path . $lang) || strlen($lang) > 2 || in_array($lang, DocumentationService::get_ignored_files(), true)) 
+				if(!is_dir($path . $lang) || strlen($lang) > 2 || in_array($lang, DocumentationService::get_ignored_files(), true)) {
 					$lang = 'en';
+				}
 				
-				if(!in_array($lang, $available))
+				if(!in_array($lang, $available)) {
 					$available[] = $lang;
+				}
 			}
 		}
 		
@@ -228,8 +236,13 @@ class DocumentationEntity extends ViewableData {
 	 * @return string
 	 */
 	public function getPath($version = false, $lang = false) {
-		if(!$version) $version = $this->getStableVersion();
-		if(!$lang) $lang = 'en';
+		if(!$version) {
+			$version = $this->getStableVersion();
+		}
+
+		if(!$lang) {
+			$lang = 'en';
+		}
 		
 		if($this->hasVersion($version)) {
 			$path = $this->versions[$version];
@@ -254,9 +267,14 @@ class DocumentationEntity extends ViewableData {
 		);
 	}
 	
-	function getRelativeLink($version = false, $lang = false) {
-		if(!$lang) $lang = 'en';
-		if($version == $this->getStableVersion()) $version = false;
+	public function getRelativeLink($version = false, $lang = false) {
+		if(!$lang) {
+			$lang = 'en';
+		}
+
+		if($version == $this->getStableVersion()) {
+			$version = false;
+		}
 		
 		return Controller::join_links(
 			DocumentationViewer::get_link_base(), 
@@ -272,7 +290,7 @@ class DocumentationEntity extends ViewableData {
 	 *
 	 * @return DocumentationPage
 	 */
-	function getIndexPage($version, $lang = 'en') {
+	public function getIndexPage($version, $lang = 'en') {
 		$path = $this->getPath($version, $lang);
 		$absFilepath = Controller::join_links($path, 'index.md');
 		
@@ -286,6 +304,8 @@ class DocumentationEntity extends ViewableData {
 			$page->setVersion($version);
 			
 			return $page;
+		} else {
+			// fall back to reading the modules README.md
 		}
 		
 		return false;
@@ -294,7 +314,7 @@ class DocumentationEntity extends ViewableData {
 	/**
 	 * @return string
 	 */
-	function __toString() {
+	public function __toString() {
 		return sprintf('DocumentationEntity: %s)', $this->getPath());
 	}
 }

@@ -4,6 +4,11 @@ This module has been developed to read and display content from markdown and
 plain text files in web browser. It provides an easy way to bundle end user 
 documentation within a SilverStripe installation or module.
 
+
+	:::bash
+	$> composer require
+
+
 ## Setup
 
 The module includes the ability to read documentation from any folder on your

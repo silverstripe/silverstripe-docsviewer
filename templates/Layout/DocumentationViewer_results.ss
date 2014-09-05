@@ -1,10 +1,11 @@
 <div id="documentation-page">
 	<div id="content-column">
 		<p>Your search for <strong>&quot;$Query.XML&quot;</strong> found $TotalResults result<% if TotalResults != 1 %>s<% end_if %>.</p>
-		<% if Modules || Versions %>
-			<p>Limited search to <% if Modules %>$Modules <% if Versions %>of<% end_if %><% end_if %> <% if Versions %>versions $Versions<% end_if %>
+		<% if AdvancedSearchEnabled %>
+		<h4><% _t('ADVANCEDSEARCH', 'Advanced Search') %></h4>
+		$AdvancedSearchForm
 		<% end_if %>
-		
+
 		<% if Results %>
 	    	<p>Showing page $ThisPage of $TotalPages</p>
 	
@@ -43,13 +44,5 @@
 		<% end_if %>
 	</div>
 
-	<% if AdvancedSearchEnabled %>
-		<div id="sidebar-column">
-			<div class="sidebar-box">
-				<h4><% _t('ADVANCEDSEARCH', 'Advanced Search') %></h4>
-				$AdvancedSearchForm
-			</div>
-		</div>
-	<% end_if %>
-
+	
 </div>

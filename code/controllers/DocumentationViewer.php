@@ -4,10 +4,10 @@
  * Documentation Viewer.
  *
  * Reads the bundled markdown files from documentation folders and displays the 
- * output (either via markdown or plain text)
+ * output (either via markdown or plain text).
  *
  * For more documentation on how to use this class see the documentation in the
- * docs folder
+ * docs folder.
  *
  * @package docsviewer
  */
@@ -26,6 +26,11 @@ class DocumentationViewer extends Controller {
 		'results'
 	);
 	
+	/**
+	 * @var string
+	 */
+	private static $google_analytics_code = '';
+
 	/**
 	 * @var string
 	 */
@@ -69,35 +74,16 @@ class DocumentationViewer extends Controller {
 	 * @see {@link getEditLink()}
 	 */
 	private static $edit_links = array();
-	
-	/**
-	 * @var boolean $separate_submenu
-	 */
-	protected static $separate_submenu = true;
 
 	/**
-	 * @var bool $recursive_submenu
+	 *
 	 */
-	protected static $recursive_submenu = false;
-
-	/**
-	 * @param bool $separate_submenu
-	 */
-	public static function set_separate_submenu($separate_submenu = true) {
-		self::$separate_submenu = $separate_submenu;
-	}
-
-	/**
-	 * @param bool $recursive_submenu
-	 */
-	public static function set_recursive_submenu($recursive_submenu = false) {
-		self::$recursive_submenu = $recursive_submenu;
-	}
-
 	public function init() {
 		parent::init();
 
-		if(!$this->canView()) return Security::permissionFailure($this);
+		if(!$this->canView()) {
+			return Security::permissionFailure($this);
+		}
 
 		Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');		
 		Requirements::combine_files(
@@ -116,12 +102,19 @@ class DocumentationViewer extends Controller {
 		
 		Requirements::javascript(DOCSVIEWER_DIR .'/javascript/DocumentationViewer.js');
 		Requirements::css(DOCSVIEWER_DIR .'/css/shSilverStripeDocs.css');
-		Requirements::css(DOCSVIEWER_DIR .'/css/DocumentationViewer.css');
+		Requirements::combine_files('docs.css', array(
+			DOCSVIEWER_DIR .'/css/normalize.css',
+			DOCSVIEWER_DIR .'/css/utilities.css',
+			DOCSVIEWER_DIR .'/css/typography.css',
+			DOCSVIEWER_DIR .'/css/forms.css',
+			DOCSVIEWER_DIR .'/css/layout.css',
+			DOCSVIEWER_DIR .'/css/small.css'
+		));
 	}
 	
 	/**
-	 * Can the user view this documentation. Hides all functionality for 
-	 * private wikis.
+	 * Can the user view this documentation. Hides all functionality for private 
+	 * wikis.
 	 *
 	 * @return bool
 	 */
@@ -405,7 +398,8 @@ class DocumentationViewer extends Controller {
 					'Title' 	  => $entity->getTitle(),
 					'Link'		  => $link,
 					'LinkingMode' => $mode,
-					'Content' 	  => $content
+					'Content' 	  => $content,
+					
 				)));
 			}
 		}
@@ -603,38 +597,13 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
-	 * @return DocumentationPage
-	 */
-	public function getCurrentLevelOnePage() {
-		return $this->currentLevelOnePage;
-	}
-
-	/**
-	 * returns 'separate' if the submenu should be displayed in a separate
-	 * block, 'nested' otherwise. If no currentDocPage is defined, there is
-	 * no submenu, so an empty string is returned.
-	 *
-	 * @return string
-	 */
-	public function getSubmenuLocation() {
-		if ($this->currentLevelOnePage) {
-			if (self::$separate_submenu && !self::$recursive_submenu) {
-				return 'separate';
-			} else {
-				return 'nested';
-			}
-		}
-		return '';
-	}
-
-	/**
 	 * Return the content for the page. If its an actual documentation page then
 	 * display the content from the page, otherwise display the contents from
 	 * the index.md file if its a folder
 	 *
 	 * @return HTMLText
 	 */
-	function getContent() {
+	public function getContent() {
 		$page = $this->getPage();
 		
 		if($page) {
@@ -659,27 +628,29 @@ class DocumentationViewer extends Controller {
 				'Content' => false,
 				'Title' => DocumentationService::clean_page_name(array_pop($url)),
 				'Pages' => $pages
-			))->renderWith('DocFolderListing');
+			))->renderWith('DocumentationFolderListing');
 		}
 		else {
 			return $this->customise(array(
 				'Content' => false,
 				'Title' => _t('DocumentationViewer.MODULES', 'Modules'),
 				'Pages' => $this->getEntities()
-			))->renderWith('DocFolderListing');
+			))->renderWith('DocumentationFolderListing');
 		}
 	
 		return false;
 	}
 	
 	/**
-	 * Generate a list of breadcrumbs for the user. Based off the remaining params
-	 * in the url
+	 * Generate a list of breadcrumbs for the user. Based off the remaining 
+	 * params in the url
 	 *
 	 * @return ArrayList
 	 */
 	public function getBreadcrumbs() {
-		if(!$this->Remaining) $this->Remaining = array();
+		if(!$this->Remaining) {
+			$this->Remaining = array();
+		}
 		
 		$pages = array_merge(array($this->entity), $this->Remaining);
 		$output = new ArrayList();
@@ -870,7 +841,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return array
 	 */
-	function getSearchedEntities() {
+	public function getSearchedEntities() {
 		$entities = array();
 
 		if(!empty($_REQUEST['Entities'])) {
@@ -958,7 +929,7 @@ class DocumentationViewer extends Controller {
 		}
 		
 		// get a list of all the unique versions
-		$uniqueVersions = array_unique(self::array_flatten(array_values($versions)));
+		$uniqueVersions = array_unique(ArrayLib::flatten(array_values($versions)));
 		asort($uniqueVersions);
 		$uniqueVersions = array_combine($uniqueVersions,$uniqueVersions);
 		
@@ -1113,25 +1084,14 @@ class DocumentationViewer extends Controller {
 		return false;
 	}
 	
-	/** 
-	 * Flattens an array
-	 *
-	 * @param array
-	 * @return array
-	 */ 
-	public static function array_flatten($array) { 
-		if(!is_array($array)) return false; 
-		
-		$output = array(); 
-		foreach($array as $k => $v) { 
-			if(is_array($v)) { 
-				$output = array_merge($output, self::array_flatten($v)); 
-			} 
-			else { 
-				$output[$k] = $v; 
-			} 
+	/**
+	 * @return string
+	 */
+	public function getGoogleAnalyticsCode() {
+		$code = Config::inst()->get('DocumentationViewer', 'google_analytics_code');
+
+		if($code) {
+			return $code;
 		}
-		
-		return $output; 
 	}
 }

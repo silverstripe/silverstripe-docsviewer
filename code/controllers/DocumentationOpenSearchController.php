@@ -34,6 +34,8 @@ class DocumentationOpenSearchController extends Controller {
 		
 		return $this->customise(
 			new ArrayData($data)
-		)->renderWith(array('OpenSearchDescription'));
+		)->renderWith(array(
+			'OpenSearchDescription'
+		));
 	}
 }

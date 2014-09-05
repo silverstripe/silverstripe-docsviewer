@@ -167,7 +167,7 @@ class DocumentationParser {
 		return $output;				
 	}
 	
-	static function rewrite_image_links($md, $page) {
+	public static function rewrite_image_links($md, $page) {
 		// Links with titles
 		$re = '/
 			!
@@ -227,7 +227,7 @@ class DocumentationParser {
 	 * @param DocumentationPage $page
 	 * @return String
 	 */
-	static function rewrite_api_links($md, $page) {
+	public static function rewrite_api_links($md, $page) {
 		// Links with titles
 		$re = '/
 			`?
@@ -287,6 +287,9 @@ class DocumentationParser {
 		return $md; 
 	}
 	
+	/**
+	 *
+	 */
 	public static function _rewrite_heading_anchors_callback($matches) {
 		$heading = $matches[0];
 		$headingText = $matches[1];
@@ -309,7 +312,7 @@ class DocumentationParser {
 	 * 
 	 * @return String
 	 */ 
-	static function generate_html_id($title) {
+	public static function generate_html_id($title) {
 		$t = $title;
 		$t = str_replace('&amp;','-and-',$t);
 		$t = str_replace('&','-and-',$t);
@@ -329,7 +332,7 @@ class DocumentationParser {
 	 * @param String $baselink
 	 * @return String Markdown
 	 */
-	static function rewrite_relative_links($md, $page, $baselink = null) {
+	public static function rewrite_relative_links($md, $page, $baselink = null) {
 		if(!$baselink) $baselink = $page->getEntity()->getRelativeLink();
 
 		$re = '/
