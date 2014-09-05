@@ -34,6 +34,11 @@ class DocumentationViewer extends Controller {
 	/**
 	 * @var string
 	 */
+	private static $documentation_title = 'SilverStripe Documentation';
+
+	/**
+	 * @var string
+	 */
 	public $version = "";
 	
 	/**
@@ -399,7 +404,7 @@ class DocumentationViewer extends Controller {
 					'Link'		  => $link,
 					'LinkingMode' => $mode,
 					'Content' 	  => $content,
-					
+
 				)));
 			}
 		}
@@ -686,7 +691,7 @@ class DocumentationViewer extends Controller {
 			$output = "";
 			
 			foreach($pages as $page) {
-				$output = $page->Title .' - '. $output;
+				$output = $page->Title .' &#8211; '. $output;
 			}
 			
 			return $output;
@@ -922,60 +927,22 @@ class DocumentationViewer extends Controller {
 	 */
 	public function AdvancedSearchForm() {
 		$entities = DocumentationService::get_registered_entities();
-		$versions = array();
-		
-		foreach($entities as $entity) {
-			$versions[$entity->getFolder()] = $entity->getVersions();
-		}
-		
-		// get a list of all the unique versions
-		$uniqueVersions = array_unique(ArrayLib::flatten(array_values($versions)));
-		asort($uniqueVersions);
-		$uniqueVersions = array_combine($uniqueVersions,$uniqueVersions);
-		
-		$q = ($q = $this->getSearchQuery()) ? $q->NoHTML() : "";
-		
-		// klude to take an array of objects down to a simple map
-		$entities = new ArrayList($entities);
-		$entities = $entities->map('Folder', 'Title');
-		
-		// if we haven't gone any search limit then we're searching everything
-		$searchedEntities = $this->getSearchedEntities();
-		if(count($searchedEntities) < 1) $searchedEntities = $entities;
-		
-		$searchedVersions = $this->getSearchedVersions();
-		if(count($searchedVersions) < 1) $searchedVersions = $uniqueVersions;
 
-		$fields = new FieldList(
-			new TextField('Search', _t('DocumentationViewer.KEYWORDS', 'Keywords'), $q),
-			new CheckboxSetField('Entities', _t('DocumentationViewer.MODULES', 'Modules'), $entities, $searchedEntities),
-			new CheckboxSetField('Versions', _t('DocumentationViewer.VERSIONS', 'Versions'),
-			 	$uniqueVersions, $searchedVersions
-			)
-		);
-		
-		$actions = new FieldList(
-			new FormAction('results', _t('DocumentationViewer.SEARCH', 'Search'))
-		);
-		$required = new RequiredFields(array('Search'));
-		
-		$form = new Form($this, 'AdvancedSearchForm', $fields, $actions, $required);
-		$form->disableSecurityToken();
-		$form->setFormMethod('GET');
-		$form->setFormAction(self::$link_base . 'DocumentationSearchForm');
-	
-		return $form;
+		return new DocumentationAdvancedSearchForm($this);
 	}
 
 	/**
-	 * check if the Advanced SearchForm can be displayed
-	 * enabled by default, to disable use: 
+	 * Check if the Advanced SearchForm can be displayed. It is enabled by 
+	 * default, to disable use: 
+	 *
+	 * <code>
 	 * DocumentationSearch::enable_advanced_search(false);
-	 * 
+	 * </code>
+	 *
 	 * @return bool
 	 */
 	public function getAdvancedSearchEnabled() {
-		return 	DocumentationSearch::advanced_search_enabled(); 
+		return DocumentationSearch::advanced_search_enabled(); 
 	}
 	
 	/**
@@ -1093,5 +1060,12 @@ class DocumentationViewer extends Controller {
 		if($code) {
 			return $code;
 		}
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getDocumentationTitle() {
+		return Config::inst()->get('DocumentationViewer', 'documentation_title');
 	}
 }

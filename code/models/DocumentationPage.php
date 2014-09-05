@@ -1,10 +1,11 @@
 <?php
 
 /**
- * A specific documentation page within a {@link DocumentationEntity}. Maps to 
- * a file on the file system. Note that the URL to access this documentation 
- * page may not always be the file name. If the file contains meta data with
- * a nicer URL then it will use that. 
+ * A specific documentation page within a {@link DocumentationEntity}. 
+ *
+ * Maps to a file on the file system. Note that the URL to access this page may 
+ * not always be the file name. If the file contains meta data with a nicer URL 
+ * sthen it will use that. 
  * 
  * @package docsviewer
  * @subpackage model

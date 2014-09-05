@@ -4,7 +4,7 @@
 	<head>
 		<% base_tag %>
 		<meta charset="utf-8" />
-		<title><% if PageTitle %>$PageTitle &#8211;<% end_if %>SilverStripe Documentation</title>
+		<title><% if PageTitle %>$PageTitle<% end_if %>$DocumentationTitle</title>
 	</head>
 	
 	<body>
