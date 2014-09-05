@@ -14,6 +14,9 @@
 
 class DocumentationViewer extends Controller {
 
+	/**
+	 * @var array
+	 */
 	private static $allowed_actions = array(
 		'home',
 		'LanguageForm',
@@ -106,6 +109,7 @@ class DocumentationViewer extends Controller {
 				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushXml.js',
 				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushCss.js',
 				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushYaml.js',
+				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushBash.js',
 				DOCSVIEWER_DIR . '/javascript/shBrushSS.js'
 			)
 		);
