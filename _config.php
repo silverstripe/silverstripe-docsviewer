@@ -15,9 +15,3 @@ if(!defined('DOCSVIEWER_DIR')) {
 
 	define('DOCSVIEWER_DIR', array_pop($dir));
 }
-
-// define filetypes to ignore
-DocumentationService::set_ignored_files(array(
-	'.', '..', '.DS_Store',
-	'.svn', '.git', 'assets', 'themes', '_images', '_resources'
-));

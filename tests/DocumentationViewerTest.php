@@ -12,14 +12,16 @@ class DocumentationViewerTest extends FunctionalTest {
 
 	protected $autoFollowRedirection = false;
 	
-	function setUpOnce() {
+	public function setUpOnce() {
 		parent::setUpOnce();
 		
 		$this->origEnabled = DocumentationService::automatic_registration_enabled();
 		DocumentationService::set_automatic_registration(false);
 		$this->origModules = DocumentationService::get_registered_entities();
-		$this->origLinkBase = DocumentationViewer::get_link_base();
-		DocumentationViewer::set_link_base('dev/docs/');
+		
+		$this->origLinkBase = Config::inst()->get('DocumentationViewer', 'link_base');
+		Config::inst()->update('DocumentationViewer', 'link_base', 'dev/docs/');
+
 		foreach($this->origModules as $module) {
 			DocumentationService::unregister($module->getFolder());
 		}
@@ -33,12 +35,13 @@ class DocumentationViewerTest extends FunctionalTest {
 		DocumentationService::register("DocumentationViewerAltModule2", DOCSVIEWER_PATH . "/tests/docs-search/", '1.0');
 	}
 	
-	function tearDownOnce() {
+	public function tearDownOnce() {
 		parent::tearDownOnce();
 		
 		DocumentationService::unregister("DocumentationViewerTests");
 		DocumentationService::set_automatic_registration($this->origEnabled);
-		DocumentationViewer::set_link_base($this->origLinkBase);
+
+		Config::inst()->update('DocumentationViewer', 'link_base', $this->origLinkBase);
 	}
 	
 	/**

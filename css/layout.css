@@ -57,6 +57,11 @@ html {
 		padding: 15px 15px 14px;
 	}
 
+	#sidebar .nav .current {
+		background: #f6f7f8;
+		font-weight: bold;
+	}
+
 #layout {
 	padding-bottom: 20px;
 }

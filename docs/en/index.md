@@ -84,7 +84,7 @@ By default, the documentation is available in `dev/docs`. If you want it to
 live on the webroot instead of a subfolder or on another url address, add the 
 following configuration to your _config.php file:
 
-	DocumentationViewer::set_link_base('');
+	Config::inst()->update('DocumentationViewer', 'link_base', '');
 	
 	Director::addRules(1, array(
 		'$Action' => 'DocumentationViewer',

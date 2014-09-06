@@ -108,7 +108,8 @@ Currently this is not supported, as all HTML is generated on the fly.
 
 ### Can I contribute to the parser and rendering project?
 
-Of course, the `docsviewer` code is BSD licensed - we're looking forward to your contributions!
+Of course, the `docsviewer` code is BSD licensed - we're looking forward to your 
+contributions!
 
 ## Related ##
 

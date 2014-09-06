@@ -348,7 +348,7 @@ class DocumentationParser {
 		
 		// relative path (relative to module base folder), without the filename.
 		// For "sapphire/en/current/topics/templates", this would be "templates"
-		$relativePath = dirname($page->getRelativePath());
+		$relativePath = dirname($page->Link());
 		if($relativePath == '.') $relativePath = '';
 		
 		// file base link

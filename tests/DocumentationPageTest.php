@@ -4,10 +4,9 @@
  * @package docsviewer
  * @subpackage tests
  */
-
 class DocumentationPageTest extends SapphireTest {
 	
-	function testGetLink() {
+	public function testGetLink() {
 		$entity = new DocumentationEntity('testmodule', null, DOCSVIEWER_PATH .'/tests/docs/');
 		
 		$page = new DocumentationPage();
@@ -43,8 +42,7 @@ class DocumentationPageTest extends SapphireTest {
 		$this->assertStringEndsWith('versionlinks/en/1/test', $page->Link);
 	}
 	
-	
-	function testGetRelativePath() {
+	public function testGetRelativePath() {
 		$page = new DocumentationPage();
 		$page->setRelativePath('test.md');
 		$page->setEntity(new DocumentationEntity('mymodule', null, DOCSVIEWER_PATH . '/tests/docs/'));
@@ -58,7 +56,7 @@ class DocumentationPageTest extends SapphireTest {
 		$this->assertEquals('subfolder/subpage.md', $page->getRelativePath());
 	}
 	
-	function testGetPath() {
+	public function testGetPath() {
 		$absPath = DOCSVIEWER_PATH .'/tests/docs/';
 		$page = new DocumentationPage();
 		$page->setRelativePath('test.md');
@@ -73,7 +71,7 @@ class DocumentationPageTest extends SapphireTest {
 		$this->assertEquals($absPath . 'en/subfolder/subpage.md', $page->getPath());
 	}
 	
-	function testGetBreadcrumbTitle() {
+	public function testGetBreadcrumbTitle() {
 		$entity = new DocumentationEntity('testmodule', null, DOCSVIEWER_PATH . '/tests/docs/');
 		
 		$page = new DocumentationPage();

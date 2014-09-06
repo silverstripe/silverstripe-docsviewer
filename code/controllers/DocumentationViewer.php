@@ -35,16 +35,6 @@ class DocumentationViewer extends Controller {
 	 * @var string
 	 */
 	private static $documentation_title = 'SilverStripe Documentation';
-
-	/**
-	 * @var string
-	 */
-	public $version = "";
-	
-	/**
-	 * @var string
-	 */
-	public $language = "en";
 	
 	/**
 	 * The string name of the currently accessed {@link DocumentationEntity}
@@ -52,33 +42,39 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @var string
 	 */
-	public $entity = '';
-	
-	/**
-	 * @var array
-	 */
-	public $remaining = array();
-	
+	protected $entity = '';
+
 	/**
 	 * @var DocumentationPage
 	 */
-	public $currentLevelOnePage;
+	protected $record;
 
 	/**
-	 * @var String Same as the routing pattern set through Director::addRules().
+	 * @config
+	 *
+	 * @var string same as the routing pattern set through Director::addRules().
 	 */
-	protected static $link_base = 'dev/docs/';
+	private static $link_base = 'dev/docs/';
 	
 	/**
-	 * @var String|array Optional permission check
+	 * @config
+	 *
+	 * @var string|array Optional permission check
 	 */
-	static $check_permission = 'ADMIN';
+	private static $check_permission = 'ADMIN';
 
 	/**
 	 * @var array map of modules to edit links.
 	 * @see {@link getEditLink()}
 	 */
 	private static $edit_links = array();
+
+	/**
+	 * @var array
+	 */
+	private static $url_handlers = array(
+		'$Action' => 'handleAction'
+	);
 
 	/**
 	 *
@@ -162,217 +158,84 @@ class DocumentationViewer extends Controller {
 	 * Handle the url parsing for the documentation. In order to make this
 	 * user friendly this does some tricky things..
 	 *
-	 * The urls which should work
-	 * / - index page
-	 * /en/sapphire - the index page of sapphire (shows versions)
-	 * /2.4/en/sapphire - the docs for 2.4 sapphire.
-	 * /2.4/en/sapphire/installation/
-	 *
 	 * @return SS_HTTPResponse
 	 */
 	public function handleRequest(SS_HTTPRequest $request, DataModel $model) {
-		DocumentationService::load_automatic_registration();
-		
+		$response = parent::handleRequest($request, $model);
+
 		// if we submitted a form, let that pass
 		if(!$request->isGET() || isset($_GET['action_results'])) {
-			return parent::handleRequest($request, $model);
-		}
-
-		$firstParam = ($request->param('Action')) ? $request->param('Action') : $request->shift();		
-		$secondParam = $request->shift();
-		$thirdParam = $request->shift();
-		
-		$this->Remaining = $request->shift(10);
-		
-		// if no params passed at all then it's the homepage
-		if(!$firstParam && !$secondParam && !$thirdParam) {
-			return parent::handleRequest($request, $model);
+			return $response;
 		}
 		
-		if($firstParam) {
-			// allow assets
-			if($firstParam == "assets") {
-				return parent::handleRequest($request, $model);
-			}
-			
-			// check for permalinks
-			if($link = DocumentationPermalinks::map($firstParam)) {
-				// the first param is a shortcode for a page so redirect the user to
-				// the short code.
-				$this->response = new SS_HTTPResponse();
-				$this->redirect($link, 301); // 301 permanent redirect
-			
-				return $this->response;
-				
-			}
+		// look up the manifest to see find the nearest match against the
+		// list of the URL. If the URL exists then set that as the current
+		// page to match against.
+		if($record = $this->getManifest()->getPage($this->request->getURL())) {
+			$this->record = $record;
 
-			// check to see if the request is a valid entity. If it isn't, then we
-			// need to throw a 404.
-			if(!DocumentationService::is_registered_entity($firstParam)) {
-				return $this->throw404();
-			}
-			
-			$this->entity = $firstParam;
-			$this->language = $secondParam;
-			
-			if(isset($thirdParam) && (is_numeric($thirdParam) || in_array($thirdParam, array('master', 'trunk')))) {
-				$this->version = $thirdParam;	
-			}
-			else {
-				// current version so store one area para
-				array_unshift($this->Remaining, $thirdParam);
-				
-				$this->version = false;
-			}
-		}
-		
-		// 'current' version mapping
-		$entity = DocumentationService::is_registered_entity($this->entity, null, $this->getLang());
+			$type = get_class($this->record);
+			$body = $this->renderWith(array(
+				"DocumentationViewer_{$type}",
+				"DocumentationViewer"
+			));
 
-		if($entity) {
-			$current = $entity->getStableVersion();
-			$version = $this->getVersion();
-			
-			if(!$version) {
-				$this->version = $current;
-			}
-			
-			// Check if page exists, otherwise return 404
-			if(!$this->locationExists()) {
-				return $this->throw404();
-			}
-			
-			
-			return parent::handleRequest($request, $model);
-		}
-		
-		return $this->throw404();
-	}
-		
-	
-	/**
-	 * Helper function for throwing a 404 error from the {@link handleRequest}
-	 * method.
-	 *
-	 * @return HttpResponse
-	 */
-	function throw404() {
-		$this->init();
-		
-		$class = get_class($this);
-		
-		$body = $this->renderWith(array("{$class}_error", $class));
-		$this->response = new SS_HTTPResponse($body, 404);
-		
-		return $this->response;
-	}
-	
-	/**
-	 * Custom templates for each of the sections. 
-	 */
-	function getViewer($action) {
-		// count the number of parameters after the language, version are taken
-		// into account. This automatically includes ' ' so all the counts
-		// are 1 more than what you would expect
-
-		if($this->entity || $this->Remaining) {
-
-			$paramCount = count($this->Remaining);
-			
-			if($paramCount == 0) {
-				return parent::getViewer('folder');
-			}
-			else if($entity = $this->getEntity()) {
-				// if this is a folder return the folder listing
-				if($this->locationExists() == 2) {
-					return parent::getViewer('folder');
-				}
-			}
+			return new SS_HTTPResponse($body, 200);
 		}
 		else {
-			return parent::getViewer('home');
-		}
+			$this->init();
 		
-		return parent::getViewer($action);
+			$class = get_class($this);
+			$body = $this->renderWith(array("{$class}_error", $class));
+
+			return new SS_HTTPResponse($body, 404);
+		}
 	}
-	
+
 	/**
 	 * Returns the current version. If no version is set then it is the current
 	 * set version so need to pull that from the {@link Entity}.
 	 *
-	 * @return String
+	 * @return string
 	 */
-	function getVersion() {
-		if($this->version) return $this->version;
-		
-		if($entity = $this->getEntity()) {
-			$this->version = $entity->getStableVersion();
-			
-			return $this->version;
-		} 
-		
-		return false;
+	public function getVersion() {
+		return ($this->record) ? $this->record->getEntity()->getVersion() : null;
 	}
 	
 	/**
-	 * Returns the current language
+	 * Returns the current language.
 	 *
-	 * @return String
+	 * @return string
 	 */
-	function getLang() {
-		return $this->language;
+	public function getLanguage() {
+		return ($this->record) ? $this->record->getEntity()->getLanguage() : null;
 	}
 	
+	/**
+	 *
+	 */
+	public function getManifest() {
+	 	return new DocumentationManifest((isset($_GET['flush'])));
+	}
+
 	/**
 	 * Return all the available languages for the {@link Entity}.
 	 *
 	 * @return array
 	 */
-	function getLanguages() {
-		$entity = $this->getEntity();
-			
-		if($entity) {
-			return $entity->getLanguages();
-		}
-		
-		return array('en' => 'English');
+	public function getLanguages() {
+		return ($this->record) ? $this->record->getEntity()->getSupportedLanguages() : null;
 	}
 
 	/**
 	 * Get all the versions loaded for the current {@link DocumentationEntity}. 
-	 * the filesystem then they are loaded under the 'Current' namespace.
+	 * the file system then they are loaded under the 'Current' name space.
 	 *
 	 * @param String $entity name of {@link Entity} to limit it to eg sapphire
 	 * @return ArrayList
 	 */
-	function getVersions($entity = false) {
-		if(!$entity) $entity = $this->entity;
-
-		$entity = DocumentationService::is_registered_entity($entity);
-		if(!$entity) return false;
-
-		$versions = $entity->getVersions();
-		$output = new ArrayList();
-
-		if($versions) {
-			$lang = $this->getLang();
-			$currentVersion = $this->getVersion();
-
-			foreach($versions as $key => $version) {
-				if(!$version) continue;
-
-				$linkingMode = ($currentVersion == $version) ? 'current' : 'link';
-
-				$output->push(new ArrayData(array(
-					'Title' => $version,
-					'Link' => $this->Link(implode('/',$this->Remaining), $entity->getFolder(), $version),
-					'LinkingMode' => $linkingMode,
-					'Version' => $version // separate from title, we may want to make title nicer.
-				)));
-			}
-		}
-		
-		return $output;
+	public function getVersions() {
+		return ($this->record) ? $this->record->getEntity()->getVersions() : null;
 	}
 	
 	/**
@@ -381,8 +244,8 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return DataObject
 	 */ 
-	public function getEntities($version = false, $lang = false) {
-		$entities = DocumentationService::get_registered_entities($version, $lang);
+	public function getEntities() {
+		$entities = DocumentationService::get_registered_entities();
 		$output = new ArrayList();
 		
 		$currentEntity = $this->getEntity();
@@ -392,12 +255,13 @@ class DocumentationViewer extends Controller {
 				$mode = ($entity === $currentEntity) ? 'current' : 'link';
 				$folder = $entity->getFolder();
 				
-				$link = $this->Link(array(), $folder, false, $lang);
+				$link = $entity->Link();
 				
 				$content = false;
-				if($page = $entity->getIndexPage($version, $lang)) {
-					$content = DBField::create_field('HTMLText', DocumentationParser::parse($page, $link));
-				}
+
+	//			if($page = $entity->getIndexPage()) {
+	//				$content = DBField::create_field('HTMLText', DocumentationParser::parse($page, $link));
+	//			}
 				
 				$output->push(new ArrayData(array(
 					'Title' 	  => $entity->getTitle(),
@@ -415,7 +279,7 @@ class DocumentationViewer extends Controller {
 	/**
 	 * Get the currently accessed entity from the site.
 	 *
-	 * @return false|DocumentationEntity
+	 * @return DocumentationEntity
 	 */
 	public function getEntity() {
 		if($this->entity) {
@@ -426,179 +290,7 @@ class DocumentationViewer extends Controller {
 			);
 		}
 
-		return false;
-	}
-	
-	/**
-	 * Simple way to check for existence of page of folder
-	 * without constructing too much object state. Useful for 
-	 * generating 404 pages. Returns 0 for not a page or
-	 * folder, returns 1 for a page and 2 for folder
-	 *
-	 * @return int
-	 */
-	public function locationExists() {
-		$entity = $this->getEntity();
-		
-		if($entity) {
-			
-			$has_dir = is_dir(Controller::join_links(
-				$entity->getPath($this->getVersion(), $this->getLang()), 
-				implode('/', $this->Remaining)
-			));
-			
-			if($has_dir) return 2;
-			
-			$has_page = DocumentationService::find_page(
-				$entity, 
-				$this->Remaining, 
-				$this->getVersion(), 
-				$this->getLang()
-			);
-
-			if($has_page) return 1;
-		}
-
-		return 0;
-	}
-	
-	/**
-	 * @return DocumentationPage
-	 */
-	function getPage() {
-		$entity = $this->getEntity();
-
-		if(!$entity) return false;
-
-		$version = $this->getVersion();
-		$lang = $this->getLang();
-		
-		$absFilepath = DocumentationService::find_page(
-			$entity, 
-			$this->Remaining, 
-			$version,
-			$lang
-		);
-		
-		if($absFilepath) {
-			$relativeFilePath = str_replace(
-				$entity->getPath($version, $lang),
-				'', 
-				$absFilepath
-			);
-			
-			$page = new DocumentationPage();
-			$page->setRelativePath($relativeFilePath);
-			$page->setEntity($entity);
-			$page->setLang($lang);
-			$page->setVersion($version);
-
-			return $page;
-		}
-
-		return false;
-	}
-	
-	/**
-	 * Get the related pages to the current {@link DocumentationEntity} and 
-	 * the children to those pages
-	 *
-	 * @todo this only handles 2 levels. Could make it recursive
-	 *
-	 * @return false|ArrayList
-	 */
-	function getEntityPages() {
-		if($entity = $this->getEntity()) {
-			$pages = DocumentationService::get_pages_from_folder($entity, null, self::$recursive_submenu, $this->getVersion(), $this->getLang());
-
-			if($pages) {
-				foreach($pages as $page) {
-					if(strtolower($page->Title) == "index") {
-						$pages->remove($page);
-						
-						continue;
-					}
-					
-					$page->LinkingMode = 'link';
-					$page->Children = $this->_getEntityPagesNested($page, $entity);
-
-					if (!empty($page->Children)) {
-						$this->currentLevelOnePage = $page;
-					}
-				}
-			}
-
-			return $pages;
-		}
-
-		return false;
-	}
-	
-	/**
-	 * Get all the pages under a given page. Recursive call for {@link getEntityPages()}
-	 *
-	 * @todo Need to rethink how to support pages which are pulling content from their children
-	 *		i.e if a folder doesn't have 2 then it will load the first file in the folder
-	 *		however it doesn't yet pass the highlighting to it.
-	 *
-	 * @param ArrayData CurrentPage
-	 * @param DocumentationEntity 
-	 * @param int Depth of page in the tree
-	 *
-	 * @return ArrayList|false
-	 */
-	private function _getEntityPagesNested(&$page, $entity, $level = 0) {
-		if(isset($this->Remaining[$level])) {
-			// compare segment successively, e.g. with "changelogs/alpha/2.4.0-alpha",
-			// first comparison on $level=0 is against "changelogs",
-			// second comparison on $level=1 is against "changelogs/alpha", etc.
-			$segments = array_slice($this->Remaining, 0, $level+1);
-			
-			if(strtolower(implode('/', $segments)) == strtolower(trim($page->getRelativeLink(), '/'))) {
-				
-				// its either in this section or is the actual link
-				$page->LinkingMode = (isset($this->Remaining[$level + 1])) ? 'section' : 'current';
-				
-				$relativePath = Controller::join_links(
-					$entity->getPath($this->getVersion(), $this->getLang()),
-					$page->getRelativePath()
-				);
-
-				if(is_dir($relativePath)) {
-					$children = DocumentationService::get_pages_from_folder(
-						$entity, 
-						$page->getRelativePath(), 
-						self::$recursive_submenu,
-						$this->getVersion(), 
-						$this->getLang()
-					);
-
-					$segments = array();
-					for($x = 0; $x <= $level; $x++) {
-						$segments[] = $this->Remaining[$x];
-					}
-					
-					foreach($children as $child) {
-						if(strtolower($child->Title) == "index") {
-							$children->remove($child);
-							
-							continue;
-						}
-						
-						$child->LinkingMode = 'link';
-						$child->Children = $this->_getEntityPagesNested($child, $entity, $level + 1);
-					}
-					
-					return $children;
-				}
-			} else {
-				if ($page->getRelativeLink() == $this->Remaining[$level]) {
-					$page->LinkingMode = 'current';
-				}
-			}
-		}
-		
-		return false;
+		return null;
 	}
 	
 	/**
@@ -612,7 +304,9 @@ class DocumentationViewer extends Controller {
 		$page = $this->getPage();
 		
 		if($page) {
-			return DBField::create_field("HTMLText", $page->getHTML($this->getVersion(), $this->getLang()));
+			return DBField::create_field("HTMLText", $page->getHTML(
+				$this->getVersion(), $this->getLanguage()
+			));
 		}
 		
 		// If no page found then we may want to get the listing of the folder.
@@ -621,13 +315,7 @@ class DocumentationViewer extends Controller {
 		$url = $this->Remaining;
 		
 		if($url && $entity) {
-			$pages = DocumentationService::get_pages_from_folder(
-				$entity, 
-				implode('/', $url), 
-				false,
-				$this->getVersion(),
-				$this->getLang()
-			);
+			// @todo manifest
 			
 			return $this->customise(array(
 				'Content' => false,
@@ -647,96 +335,40 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
-	 * Generate a list of breadcrumbs for the user. Based off the remaining 
-	 * params in the url
+	 * Generate a list of breadcrumbs for the user.
 	 *
 	 * @return ArrayList
 	 */
 	public function getBreadcrumbs() {
-		if(!$this->Remaining) {
-			$this->Remaining = array();
+		if($this->record) {
+			return $this->getManifest()->generateBreadcrumbs($this->record);
 		}
-		
-		$pages = array_merge(array($this->entity), $this->Remaining);
-		$output = new ArrayList();
-		
-		if($pages) {
-			$path = array();
-			$version = $this->getVersion();
-			$lang = $this->getLang();
-			
-			foreach($pages as $i => $title) {
-				if($title) {
-					// Don't add entity name, already present in Link()
-					if($i > 0) $path[] = $title;
-					
-					$output->push(new ArrayData(array(
-						'Title' => DocumentationService::clean_page_name($title),
-						'Link' => rtrim($this->Link($path, false, $version, $lang), "/"). "/"
-					)));
-				}
-			}
-		}
-		
-		return $output;
 	}
-	
+
+	/**
+ 	 * @return DocumentationPage
+ 	 */
+	public function getPage() {
+		return $this->record;
+	}
 	/**
 	 * Generate a string for the title tag in the URL.
 	 *
 	 * @return string
 	 */
 	public function getPageTitle() {
-		if($pages = $this->getBreadcrumbs()) {
-			$output = "";
-			
-			foreach($pages as $page) {
-				$output = $page->Title .' &#8211; '. $output;
-			}
-			
-			return $output;
-		}
-		
-		return false;
+		return ($this->record) ? $this->record->getBreadcrumbTitle() : null;
 	}
 	
 	/**
-	 * Return the base link to this documentation location
+	 * Return the base link to this documentation location.
 	 *
-	 * @param string $path - subfolder path
-	 * @param string $entity - name of entity
-	 * @param float $version - optional version
-	 * @param string $lang - optional lang
-	 *
-	 * @return String
+	 * @return string
 	 */
-	public function Link($path = false, $entity = false, $version = false, $lang = false) {
-		$version = ($version === null) ? $this->getVersion() : $version;
-		
-		$lang = (!$lang) ? $this->getLang() : $lang;
-		
-		$entity = (!$entity && $this->entity) ? $this->entity : $entity;
-		$action = '';
-		
-		if(is_string($path)) {
-			$action = $path;
-		}
-		else if(is_array($path)) {
-			$action = implode('/', $path);
-		}
-
-		// check for stable version: if so, remove version from link
-		// (see DocumentationEntity->getRelativeLink() )
-		$objEntity = $this->getEntity();
-		if ($objEntity && $objEntity->getStableVersion() == $version) $version = '';
-
+	public function Link() {
 		$link = Controller::join_links(
 			Director::absoluteBaseURL(), 
-			self::get_link_base(), 
-			$entity, 
-			($entity) ? $lang : "", // only include lang for entity - sapphire/en vs en/
-			($entity) ? $version :"",
-			$action
+			Config::inst()->get('DocumentationViewer', 'link_base')
 		);
 
 		return $link;
@@ -751,7 +383,7 @@ class DocumentationViewer extends Controller {
 	 */
 	public function LanguageForm() {
 		$langs = $this->getLanguages();
-		
+
 		$fields = new FieldList(
 			$dropdown = new DropdownField(
 				'LangCode', 
@@ -764,9 +396,7 @@ class DocumentationViewer extends Controller {
 		$actions = new FieldList(
 			new FormAction('doLanguageForm', _t('DocumentationViewer.CHANGE', 'Change'))
 		);
-		
-		$dropdown->setDisabled(true);
-		
+
 		return new Form($this, 'LanguageForm', $fields, $actions);
 	}
 	
@@ -781,27 +411,6 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
-	 * @param string
-	 */
-	public static function set_link_base($base) {
-		self::$link_base = $base;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public static function get_link_base() {
-		return self::$link_base;
-	}
-	
-	/**
-	 * @see {@link Form::FormObjectLink()}
-	 */
-	public function FormObjectLink($name) {
-		return $name;
-	}
-	
-	/**
 	 * Documentation Search Form. Allows filtering of the results by many entities
 	 * and multiple versions.
 	 *
@@ -811,140 +420,11 @@ class DocumentationViewer extends Controller {
 		if(!DocumentationSearch::enabled()) {
 			return false;
 		}
-
-		$q = ($q = $this->getSearchQuery()) ? $q->NoHTML() : "";
-
-		$entities = $this->getSearchedEntities();
-		$versions = $this->getSearchedVersions();
 		
-		$fields = new FieldList(
-			new TextField('Search', _t('DocumentationViewer.SEARCH', 'Search'), $q)
-		);
-		
-		if ($entities) $fields->push(
-			new HiddenField('Entities', '', implode(',', array_keys($entities)))
-		);
-		
-		if ($versions) $fields->push(
-			new HiddenField('Versions', '', implode(',', $versions))
-		);
-
-		$actions = new FieldList(
-			new FormAction('results', 'Search')
-		);
-
-		$form = new Form($this, 'DocumentationSearchForm', $fields, $actions);
-		$form->disableSecurityToken();
-		$form->setFormMethod('GET');
-		$form->setFormAction(self::$link_base . 'DocumentationSearchForm');
-		
-		return $form;
+		return new DocumentationSearchForm($this);
 	}
 	
-	/**
-	 * Return an array of folders and titles
-	 *
-	 * @return array
-	 */
-	public function getSearchedEntities() {
-		$entities = array();
 
-		if(!empty($_REQUEST['Entities'])) {
-			if(is_array($_REQUEST['Entities'])) {
-				$entities = Convert::raw2att($_REQUEST['Entities']);
-			}
-			else {
-				$entities = explode(',', Convert::raw2att($_REQUEST['Entities']));
-				$entities = array_combine($entities, $entities);
-			}
-		}
-		else if($entity = $this->getEntity()) {
-			$entities[$entity->getFolder()] = Convert::raw2att($entity->getTitle());
-		}
-		
-		return $entities;
-	}
-	
-	/**
-	 * Return an array of versions that we're allowed to return
-	 *
-	 * @return array
-	 */
-	public function getSearchedVersions() {
-		$versions = array();
-		
-		if(!empty($_REQUEST['Versions'])) {
-			if(is_array($_REQUEST['Versions'])) {
-				$versions = Convert::raw2att($_REQUEST['Versions']);
-				$versions = array_combine($versions, $versions);
-			}
-			else {
-				$version = Convert::raw2att($_REQUEST['Versions']);
-				$versions[$version] = $version;
-			}
-		}
-		else if($version = $this->getVersion()) {
-			$version =  Convert::raw2att($version);
-			$versions[$version] = $version;
-		}
-
-		return $versions;
-	}
-	
-	/**
-	 * Return the current search query
-	 *
-	 * @return HTMLText|null
-	 */
-	public function getSearchQuery() {
-		if(isset($_REQUEST['Search'])) {
-			return DBField::create_field('HTMLText', $_REQUEST['Search']);
-		}
-	}
-	
-	/**
-	 * Past straight to results, display and encode the query
-	 */
-	public function results($data, $form = false) {
-		$query = (isset($_REQUEST['Search'])) ? $_REQUEST['Search'] : false;
-
-		$search = new DocumentationSearch();
-		$search->setQuery($query);
-		$search->setVersions($this->getSearchedVersions());
-		$search->setModules($this->getSearchedEntities());
-		$search->setOutputController($this);
-		
-		return $search->renderResults();
-	}
-	
-	/**
-	 * Returns an search form which allows people to express more complex rules
-	 * and options than the plain search form.
-	 *
-	 * @todo client side filtering of checkable option based on the module selected.
-	 *
-	 * @return Form
-	 */
-	public function AdvancedSearchForm() {
-		$entities = DocumentationService::get_registered_entities();
-
-		return new DocumentationAdvancedSearchForm($this);
-	}
-
-	/**
-	 * Check if the Advanced SearchForm can be displayed. It is enabled by 
-	 * default, to disable use: 
-	 *
-	 * <code>
-	 * DocumentationSearch::enable_advanced_search(false);
-	 * </code>
-	 *
-	 * @return bool
-	 */
-	public function getAdvancedSearchEnabled() {
-		return DocumentationSearch::advanced_search_enabled(); 
-	}
-	
 	/**
 	 * Check to see if the currently accessed version is out of date or
 	 * perhaps a future version rather than the stable edition
@@ -1026,7 +506,7 @@ class DocumentationViewer extends Controller {
 			if($entity && isset(self::$edit_links[$entity->title])) {
 				// build the edit link, using the version defined
 				$url = self::$edit_links[$entity->title];
-				$version = $page->getVersion();
+				$version = $this->getVersion();
 
 				if($version == "trunk" && (isset($url['options']['rewritetrunktomaster']))) {
 					if($url['options']['rewritetrunktomaster']) {
@@ -1037,10 +517,10 @@ class DocumentationViewer extends Controller {
 				return str_replace(
 					array('%entity%', '%lang%', '%version%', '%path%'),
 					array(
-						$entity->getFolder(), 
-						$page->getLang(), 
+						$entity->getBaseFolder(), 
+						$this->getLanguage(), 
 						$version, 
-						ltrim($page->getRelativePath(), '/')
+						ltrim($page->getPath(), '/')
 					),
 
 					$url['url']
@@ -1049,6 +529,27 @@ class DocumentationViewer extends Controller {
 		}
 
 		return false;
+	}
+
+
+	/**
+	 * Returns the next page. Either retrieves the sibling of the current page
+	 * or return the next sibling of the parent page.
+	 *
+	 * @return DocumentationPage
+	 */
+	public function getNextPage() {
+		return ($this->record) ? $this->getManifest()->getNextPage($this->record->getPath()) : null;
+	}	
+
+	/**
+	 * Returns the previous page. Either returns the previous sibling or the 
+	 * parent of this page
+	 *
+	 * @return DocumentationPage
+	 */
+	public function getPreviousPage() {
+		return ($this->record) ? $this->getManifest()->getPreviousPage($this->record->getPath()) : null;
 	}
 	
 	/**

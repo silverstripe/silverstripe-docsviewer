@@ -1,24 +1,12 @@
 <?php
 
 /**
- * A {@link DocumentationEntity} is created when registering a path with 
- * {@link DocumentationService::register()}. 
- *
  * A {@link DocumentationEntity} represents a module or folder with 
- * documentation not an individual page. Individual documentation pages are 
- * represented by a {@link DocumentationPage}
- *
- * Each entity folder must have at least one language sub folder, which is.
- * determined through {@link addVersion()} and should not be included in the 
- * $path argument. 
+ * documentation not an individual page. Entities are loaded via 
+ * {@link DocumentationService::register()} and individual pages are represented 
+ * by a {@link DocumentationPage} and are loaded by the manifest.
  * 
- * Versions are assumed to be in numeric format (e.g. '2.4'),
- *
- * They're also parsed through version_compare() in {@link getStableVersion()} 
- * which assumes a certain format:
- *
- * @see http://php.net/manual/en/function.version-compare.php
- *
+ * 
  * @package docsviewer
  * @subpackage models
  */
@@ -29,92 +17,39 @@ class DocumentationEntity extends ViewableData {
 	 * @var array
 	 */
 	private static $casting = array(
-		'Name' => 'Text'
+		'Title' => 'Text'
 	);
 	
 	/**
-	 * @var string $folder folder name
+	 * @var string $title
 	 */
-	private $folder;
-	
-	/**
-	 * @var string $title nice title
-	 */
-	private $title;
+	protected $title;
 
 	/**
-	 * @var array $version version numbers and the paths to each
+	 * @var string $folder
 	 */
-	private $versions = array();
-	
+	protected $folder;
+
 	/**
-	 * @var array
+	 * @var ArrayList $versions
 	 */
-	private $stableVersion;
-	
-	/**
-	 * @var Array $langs a list of available langauges
-	 */
-	private $langs = array();
+	protected $versions;
 	
 	/**
 	 * Constructor. You do not need to pass the langs to this as
 	 * it will work out the languages from the filesystem
 	 *
 	 * @param string $folder folder name
-	 * @param string $version version of this module
-	 * @param string $path Absolute path to this module (excluding language folders)
 	 * @param string $title
 	 */
-	public function __construct($folder, $version, $path, $title = false) {
-		$this->addVersion($version, $path);
-		$this->title = (!$title) ? $folder : $title;
+	public function __construct($folder, $title = false) {
+		$this->versions = new ArrayList();
 		$this->folder = $folder;
+		$this->title = (!$title) ? $folder : $title;
 	}
 	
 	/**
-	 * Return the languages which are available
-	 *
-	 * @return array
-	 */
-	public function getLanguages() {
-		return $this->langs;
-	}
-	
-	/**
-	 * Return whether this entity has a given language
-	 *
-	 * @return bool
-	 */
-	public function hasLanguage($lang) {
-		return (in_array($lang, $this->langs));
-	}
-	
-	/**
-	 * Add a langauge or languages to the entity
-	 *
-	 * @param Array|String languages
-	 */
-	public function addLanguage($language) {
-		if(is_array($language)) {
-			$this->langs = array_unique(array_merge($this->langs, $language));
-		}
-		else {
-			$this->langs[] = $language;
-		}
-	}
-	
-	/**
-	 * Get the folder name of this module
-	 *
-	 * @return String
-	 */
-	public function getFolder() {
-		return $this->folder;
-	}
-	
-	/**
-	 * Get the title of this module
+	 * Get the title of this module.
 	 *
 	 * @return String
 	 */
@@ -128,35 +63,22 @@ class DocumentationEntity extends ViewableData {
 	 * @return array
 	 */
 	public function getVersions() {
-		return array_keys($this->versions);
+		return $this->versions;
 	}
 	
 	/**
 	 * @return string|boo
 	 */
 	public function getStableVersion() {
-		if(!$this->hasVersions()) return false;
-		
-		if($this->stableVersion) {
-			return $this->stableVersion;
-		} else {
-			$sortedVersions = $this->getVersions();
-			
-			usort($sortedVersions, create_function('$a,$b', 'return version_compare($a,$b);'));
-			
-			return array_pop($sortedVersions);
-		}
-	}
-	
-	/**
-	 * @param String $version
-	 */
-	public function setStableVersion($version) {
-		if(!$this->hasVersion($version)) {
-			throw new InvalidArgumentException(sprintf('Version "%s" does not exist', $version));
+		if(!$this->hasVersions()) {
+			return false;
 		}
 
-		$this->stableVersion = $version;
+		$sortedVersions = $this->getVersions();
+			
+		usort($sortedVersions, create_function('$a,$b', 'return version_compare($a,$b);'));
+			
+		return array_pop($sortedVersions);
 	}
 	
 	/**
@@ -179,7 +101,7 @@ class DocumentationEntity extends ViewableData {
 	 * @return bool
 	 */
 	public function hasVersion($version) {
-		return (isset($this->versions[$version]));
+		return $this->versions->find('Version', $version);
 	}
 	
 	/**
@@ -188,127 +110,58 @@ class DocumentationEntity extends ViewableData {
 	 * @return bool
 	 */
 	public function hasVersions() {
-		return (sizeof($this->versions) > 0);
+		return $this->versions->count() > 0;
 	}
 	
 	/**
 	 * Add another version to this entity
 	 *
-	 * @param Float $version Version number
-	 * @param String $path path to folder
+	 * @param DocumentationEntityVersion
 	 */
-	public function addVersion($version = '', $path) {
+	public function addVersion($version) {
+		$this->versions->push($version);
 
-		$langs = scandir($path);
-		$available = array();
-		
-		if($langs) {
-			foreach($langs as $key => $lang) {
-				if(!is_dir($path . $lang) || strlen($lang) > 2 || in_array($lang, DocumentationService::get_ignored_files(), true)) {
-					$lang = 'en';
-				}
-				
-				if(!in_array($lang, $available)) {
-					$available[] = $lang;
-				}
-			}
-		}
-		
-		$this->addLanguage($available);
-		$this->versions[$version] = $path;
+		return $this;
 	}
 	
 	/**
 	 * Remove a version from this entity
 	 *
-	 * @param Float $version
+	 * @param float $version
+	 *
 	 */
-	public function removeVersion($version = '') {
-		if(isset($this->versions[$version])) {
-			unset($this->versions[$version]);
-		}
+	public function removeVersion($version) {
+		$this->versions->remove('Version', $version);
+
+		return $this;
 	}
 	
 	/**
-	 * Return the absolute path to this documentation entity on the
-	 * filesystem
+	 * Return the absolute path to this documentation entity.
 	 *
 	 * @return string
 	 */
-	public function getPath($version = false, $lang = false) {
-		if(!$version) {
-			$version = $this->getStableVersion();
-		}
-
-		if(!$lang) {
-			$lang = 'en';
-		}
-		
-		if($this->hasVersion($version)) {
-			$path = $this->versions[$version];
-		}	
-		else {
-			$versions = $this->getVersions();
-			$path = $this->versions[$versions[0]]; 
-		}
-		
-		return Controller::join_links($path, $lang);
+	public function getPath() {
+		return $this->path;
 	}
 	
+	/**
+	 * @return string
+	 */
+	public function getFolder() {
+		return $this->folder;
+	}
+
 	/**
 	 * Returns the web accessible link to this Entity
 	 *
 	 * @return string
 	 */
-	public function Link($version = false, $lang = false) {
+	public function Link() {
 		return Controller::join_links(
-			Director::absoluteBaseURL(),
-			$this->getRelativeLink($version, $lang)
+			Config::inst()->get('DocumentationViewer', 'link_base'), 
+			$this->getFolder()
 		);
-	}
-	
-	public function getRelativeLink($version = false, $lang = false) {
-		if(!$lang) {
-			$lang = 'en';
-		}
-
-		if($version == $this->getStableVersion()) {
-			$version = false;
-		}
-		
-		return Controller::join_links(
-			DocumentationViewer::get_link_base(), 
-			$this->getFolder(),
-			$lang,
-			$version
-		);
-	}
-	
-	/**
-	 * Return the summary / index text for this entity. Either pulled
-	 * from an index file or some other summary field
-	 *
-	 * @return DocumentationPage
-	 */
-	public function getIndexPage($version, $lang = 'en') {
-		$path = $this->getPath($version, $lang);
-		$absFilepath = Controller::join_links($path, 'index.md');
-		
-		if(file_exists($absFilepath)) {
-			$relativeFilePath = str_replace($path, '', $absFilepath);
-			
-			$page = new DocumentationPage();
-			$page->setRelativePath($relativeFilePath);
-			$page->setEntity($this);
-			$page->setLang($lang);
-			$page->setVersion($version);
-			
-			return $page;
-		} else {
-			// fall back to reading the modules README.md
-		}
-		
-		return false;
 	}
 	
 	/**
@@ -317,4 +170,5 @@ class DocumentationEntity extends ViewableData {
 	public function __toString() {
 		return sprintf('DocumentationEntity: %s)', $this->getPath());
 	}
+
 }

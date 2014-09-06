@@ -77,7 +77,7 @@
 		 *
 		 * Transform a #table-of-contents div to a nested list
 		 */
-		if($("#content-column").length > 0) {
+		if($("#table-contents-holder").length > 0) {
 			var toc = '<div id="table-of-contents" class="open">' +
 				  '<h4>Table of contents<span class="updown">&#9660;</span></h4><ul style="display: none;">';
 
@@ -85,7 +85,7 @@
 			var pageURL = window.location.href.replace(/#[a-zA-Z0-9\-\_]*/g, '');
 
 			var itemCount = 0;
-			$('#content-column h1[id], #content-column h2[id], #content-column h3[id], #content-column h4[id]').each(function(i) {
+			$('#content h1[id], #content h2[id], #content h3[id], #content h4[id]').each(function(i) {
 				var current = $(this);
 				var tagName = current.prop("tagName");
 				if(typeof tagName == "String") tagName = tagName.toLowerCase();
@@ -99,15 +99,15 @@
 			toc += '</ul></div>';
 
 			// Table of content location
-			var title = $('#content-column h1:first');
+			var title = $('#content h1:first');
 			if (title.length > 0) {
 				title.after(toc);
 			} else {
-				var breadcrums = $('#content-column .doc-breadcrumbs');
+				var breadcrums = $('#content .doc-breadcrumbs');
 				if (breadcrums.length > 0) {
 					breadcrums.after(toc);
 				} else {
-					$('#content-column').prepend(toc);
+					$('#content').prepend(toc);
 				}
 			}
 
@@ -133,7 +133,7 @@
 		 */
 		var url = window.location.href;
 		
-		$("#content-column h1[id], #content-column h2[id], #content-column h3[id], #content-column h4[id], #content-column h5[id], #content-column h6[id]").each(function() {
+		$("#content h1[id], #content h2[id], #content h3[id], #content h4[id], #content h5[id], #content h6[id]").each(function() {
 			var link = '<a class="heading-anchor-link" title="Link to this section" href="'+ url + '#' + $(this).attr('id') + '">&para;</a>';
 			$(this).append(' ' + link);
 		}); 
