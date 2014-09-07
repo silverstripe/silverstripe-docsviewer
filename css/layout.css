@@ -393,3 +393,15 @@ html {
 	#content .warningBoxBottom a:hover { color: #f3fbfe; }
 	#content .warningBoxBottom ul { margin: 0 0 0 40px; }
 	#content .warningBoxBottom li { background: none; margin-bottom: 0; }
+
+.doc-breadcrumbs {
+	margin-top: -10px;
+}
+	.doc-breadcrumbs p { 
+		font-size: 11px; 
+		margin: 0; 
+		color: #999;
+	}
+		.doc-breadcrumbs p a { 
+			color: #999; 
+		}

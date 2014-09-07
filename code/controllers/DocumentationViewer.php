@@ -178,7 +178,10 @@ class DocumentationViewer extends Controller {
 			return $response;
 		}
 
-		if($response->getStatusCode() !== 200) {
+		$action = $request->param('Action');
+		$allowed = $this->config()->allowed_actions;
+
+		if(!in_array($action, $allowed) || $response->getStatusCode() !== 200) {
 			// look up the manifest to see find the nearest match against the
 			// list of the URL. If the URL exists then set that as the current
 			// page to match against.
@@ -292,6 +295,7 @@ class DocumentationViewer extends Controller {
 					'Title' 	  => $entity->getTitle(),
 					'Link'		  => $link,
 					'LinkingMode' => $mode,
+					'DefaultEntity' => $entity,
 					'Children' => $children
 				)));
 			}
@@ -309,7 +313,7 @@ class DocumentationViewer extends Controller {
 	 */
 	public function getContent() {
 		$page = $this->getPage();
-		
+
 		return DBField::create_field("HTMLText", $page->getHTML());
 	}
 	
@@ -320,7 +324,10 @@ class DocumentationViewer extends Controller {
 	 */
 	public function getBreadcrumbs() {
 		if($this->record) {
-			return $this->getManifest()->generateBreadcrumbs($this->record);
+			return $this->getManifest()->generateBreadcrumbs(
+				$this->record,
+				$this->record->getEntity()
+			);
 		}
 	}
 
@@ -335,8 +342,8 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return string
 	 */
-	public function getPageTitle() {
-		return ($this->record) ? $this->record->getBreadcrumbTitle() : null;
+	public function getTitle() {
+		return ($this->record) ? $this->record->getTitle() : null;
 	}
 	
 	/**

@@ -29,8 +29,6 @@
  */
 class DocumentationManifest {
 
-	const TEMPLATES_DIR = 'documentation';
-
 	/**
 	 * @config
 	 *
@@ -119,6 +117,10 @@ class DocumentationManifest {
 			);
 
 			$entity->addVersion($version);
+
+			if(isset($details['DefaultEntity']) && $details['DefaultEntity']) {
+				$entity->setDefaultEntity(true);
+			}
 		}
 	}
 
@@ -290,6 +292,9 @@ class DocumentationManifest {
 			$this->entity, $basename, $path
 		);
 
+		// populate any meta data
+		$page->getMarkdown();
+
 		$this->pages[$page->Link()] = array(
 			'title' => $page->getTitle(),
 			'filepath' => $path,
@@ -302,12 +307,32 @@ class DocumentationManifest {
 	/**
 	 * Generate an {@link ArrayList} of the pages to the given page.
 	 *
+	 * @param DocumentationPage
+	 * @param DocumentationEntityLanguage
+	 *
 	 * @return ArrayList
 	 */
-	public function generateBreadcrumbs($record) {
+	public function generateBreadcrumbs($record, $base) {
 		$output = new ArrayList();
 
-		// @todo
+		$parts = explode('/', $record->getRelativeLink());
+		$output->push(new ArrayData(array(
+			'Link' => $base->Link(),
+			'Title' => $base->Title
+		)));
+
+		$progress = $base->Link();
+
+		foreach($parts as $part) {
+			if($part) {
+				$progress = Controller::join_links($progress, $part, '/');
+
+				$output->push(new ArrayData(array(
+					'Link' => $progress,
+					'Title' => DocumentationHelper::clean_page_name($part)
+				)));
+			}
+		}
 
 		return $output;
 	}
@@ -380,24 +405,33 @@ class DocumentationManifest {
 	 *
 	 * @return ArrayList
 	 */
-	public function getChildrenFor($base, $record) {
+	public function getChildrenFor($base, $record, $recursive = true) {
 		$output = new ArrayList();
 		$depth = substr_count($base, '/');
 
 		foreach($this->getPages() as $url => $page) {
 			if(strstr($url, $base) !== false) {
-				// children
 				if(substr_count($url, '/') == ($depth + 1)) {
+					// found a child
 					if($base !== $record) {
 						$mode = (strstr($url, $record) !== false) ? 'current' : 'link';
 					} else {
 						$mode = 'link';
 					}
 
+					$children = new ArrayList();
+
+					if($mode == 'current') {
+						if($recursive) {
+							$children = $this->getChildrenFor($url, $url, false);
+						}
+					}
+
 					$output->push(new ArrayData(array(
 						'Link' => $url,
 						'Title' => $page['title'],
-						'LinkingMode' => $mode
+						'LinkingMode' => $mode,
+						'Children' => $children
 					)));
 				}
 			}

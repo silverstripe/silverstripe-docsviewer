@@ -115,9 +115,7 @@ class DocumentationPage extends ViewableData {
 	public function getMarkdown($removeMetaData = false) {
 		try {
 			if ($md = file_get_contents($this->path)) {
-				if ($this->title != 'Index') {
-					$this->populateMetaDataFromText($md, $removeMetaData);
-				}
+				$this->populateMetaDataFromText($md, $removeMetaData);
 			
 				return $md;
 			}

@@ -41,7 +41,16 @@ class DocumentationEntity extends ViewableData {
 	 * @var ArrayList $versions
 	 */
 	protected $versions;
-	
+
+	/**
+	 * If the system is setup to only document one entity then you may only 
+	 * want to show a single entity in the URL and the sidebar. Set this when
+	 * you register the entity with the key `DefaultEntity`
+	 *
+	 * @var boolean $default_entity
+	 */
+	protected $defaultEntity;
+
 	/**
 	 * Constructor. You do not need to pass the langs to this as
 	 * it will work out the languages from the filesystem
@@ -153,10 +162,12 @@ class DocumentationEntity extends ViewableData {
 	 * @return string
 	 */
 	public function Link() {
-		return Controller::join_links(
-			Config::inst()->get('DocumentationViewer', 'link_base'), 
-			$this->getFolder()
-		);
+		return ($this->getDefaultEntity()) 
+			? Config::inst()->get('DocumentationViewer', 'link_base')
+			: Controller::join_links(
+				Config::inst()->get('DocumentationViewer', 'link_base'), 
+				$this->getFolder()
+			);
 	}
 	
 	/**
@@ -177,5 +188,18 @@ class DocumentationEntity extends ViewableData {
 				return true;
 			}
 		}
+	}
+
+	/**
+	 * @param boolean $bool
+	 */
+	public function setDefaultEntity($bool) {
+		$this->defaultEntity = $bool;
+
+		return $this;
+	}
+
+	public function getDefaultEntity() {
+		return $this->defaultEntity;
 	}
 }
