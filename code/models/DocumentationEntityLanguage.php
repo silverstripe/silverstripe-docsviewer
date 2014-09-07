@@ -28,7 +28,9 @@ class DocumentationEntityLanguage extends ViewableData {
 	 * @return string
 	 */
 	public function Link() {
-		return Controller::join_links($this->entity->Link(), $this->language);
+		return Controller::join_links(
+			$this->entity->Link(), $this->language
+		);
 	}
 
 

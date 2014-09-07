@@ -3,4 +3,6 @@ name: docsviewer
 ---
 DocumentationViewer:
   google_analytics_code: ''
+DocumentationManifest:
+  automatic_registration: true
 

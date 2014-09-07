@@ -6,6 +6,8 @@
 	<% if Breadcrumbs %>
 		<% include DocumentationBreadcrumbs %>
 	<% end_if %>
+
+	<% include DocumentationTableContents %>
 		
 	$Content
 

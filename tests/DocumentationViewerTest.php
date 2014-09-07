@@ -232,27 +232,7 @@ class DocumentationViewerTest extends FunctionalTest {
 		}
 	}
 	
-	function testVersionWarning() {
-		$v = new DocumentationViewer();
-		
-		// the current version is set to 2.4, no notice should be shown on that page
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.4'), DataModel::inst());
-		$this->assertFalse($v->VersionWarning());
-		
-		// 2.3 is an older release, hitting that should return us an outdated flag
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/2.3'), DataModel::inst());
-		$warn = $v->VersionWarning();
-		
-		$this->assertTrue($warn->OutdatedRelease);
-		$this->assertNull($warn->FutureRelease);
-		
-		// 3.0 is a future release
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'DocumentationViewerTests/en/3.0'), DataModel::inst());
-		$warn = $v->VersionWarning();
-		
-		$this->assertNull($warn->OutdatedRelease);
-		$this->assertTrue($warn->FutureRelease);
-	}
+
 
 	/**
 	 * Test that the pages comes back sorted by filename

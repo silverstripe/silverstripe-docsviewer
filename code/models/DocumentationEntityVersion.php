@@ -127,4 +127,17 @@ class DocumentationEntityVersion extends ViewableData {
 	public function getTitle() {
 		return $this->entity->getTitle();
 	}
+
+
+	/**
+	 * Returns an integer value based on if a given version is the latest 
+	 * version. Will return -1 for if the version is older, 0 if versions are 
+	 * the same and 1 if the version is greater than.
+	 *
+	 * @param string $version
+	 * @return int
+	 */
+	public function compare(DocumentationEntityVersion $other) {
+		return version_compare($this->getVersion(), $other->getVersion());
+	}
 }

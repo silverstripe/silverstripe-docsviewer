@@ -104,10 +104,11 @@
 				title.after(toc);
 			} else {
 				var breadcrums = $('#content .doc-breadcrumbs');
+				
 				if (breadcrums.length > 0) {
 					breadcrums.after(toc);
 				} else {
-					$('#content').prepend(toc);
+					$('#table-contents-holder').prepend(toc);
 				}
 			}
 

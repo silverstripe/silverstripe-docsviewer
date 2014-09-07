@@ -17,6 +17,13 @@ class DocumentationViewer extends Controller {
 	/**
 	 * @var array
 	 */
+	private static $extensions = array(
+		'DocumentationViewerVersionWarning'
+	);
+	
+	/**
+	 * @var array
+	 */
 	private static $allowed_actions = array(
 		'home',
 		'LanguageForm',
@@ -245,52 +252,30 @@ class DocumentationViewer extends Controller {
 	 * @return DataObject
 	 */ 
 	public function getEntities() {
-		$entities = DocumentationService::get_registered_entities();
+		$entities = $this->getManifest()->getEntities();
 		$output = new ArrayList();
-		
-		$currentEntity = $this->getEntity();
 
 		if($entities) {
 			foreach($entities as $entity) {
-				$mode = ($entity === $currentEntity) ? 'current' : 'link';
-				$folder = $entity->getFolder();
-				
-				$link = $entity->Link();
-				
-				$content = false;
+				$mode = 'link';
 
-	//			if($page = $entity->getIndexPage()) {
-	//				$content = DBField::create_field('HTMLText', DocumentationParser::parse($page, $link));
-	//			}
+				if($this->record) {
+					if($entity->hasRecord($this->record)) {
+						$mode = 'current';
+					}
+				}
+
+				$link = $entity->Link();
 				
 				$output->push(new ArrayData(array(
 					'Title' 	  => $entity->getTitle(),
 					'Link'		  => $link,
-					'LinkingMode' => $mode,
-					'Content' 	  => $content,
-
+					'LinkingMode' => $mode
 				)));
 			}
 		}
 
 		return $output;
-	}
-	
-	/**
-	 * Get the currently accessed entity from the site.
-	 *
-	 * @return DocumentationEntity
-	 */
-	public function getEntity() {
-		if($this->entity) {
-			return DocumentationService::is_registered_entity(
-				$this->entity, 
-				$this->version, 
-				$this->language
-			);
-		}
-
-		return null;
 	}
 	
 	/**
@@ -303,35 +288,7 @@ class DocumentationViewer extends Controller {
 	public function getContent() {
 		$page = $this->getPage();
 		
-		if($page) {
-			return DBField::create_field("HTMLText", $page->getHTML(
-				$this->getVersion(), $this->getLanguage()
-			));
-		}
-		
-		// If no page found then we may want to get the listing of the folder.
-		// In case no folder exists, show a "not found" page.
-		$entity = $this->getEntity();
-		$url = $this->Remaining;
-		
-		if($url && $entity) {
-			// @todo manifest
-			
-			return $this->customise(array(
-				'Content' => false,
-				'Title' => DocumentationService::clean_page_name(array_pop($url)),
-				'Pages' => $pages
-			))->renderWith('DocumentationFolderListing');
-		}
-		else {
-			return $this->customise(array(
-				'Content' => false,
-				'Title' => _t('DocumentationViewer.MODULES', 'Modules'),
-				'Pages' => $this->getEntities()
-			))->renderWith('DocumentationFolderListing');
-		}
-	
-		return false;
+		return DBField::create_field("HTMLText", $page->getHTML());
 	}
 	
 	/**
@@ -422,43 +379,6 @@ class DocumentationViewer extends Controller {
 		}
 		
 		return new DocumentationSearchForm($this);
-	}
-	
-
-	/**
-	 * Check to see if the currently accessed version is out of date or
-	 * perhaps a future version rather than the stable edition
-	 *
-	 * @return false|ArrayData
-	 */
-	public function VersionWarning() {
-		$version = $this->getVersion();
-		$entity = $this->getEntity();
-		
-		if($entity) {
-			$compare = $entity->compare($version);
-			$stable = $entity->getStableVersion();
-
-			// same
-			if($version == $stable) return false;
-			
-			// check for trunk, if trunk and not the same then it's future
-			// also run through compare
-			if($version == "trunk" || $compare > 0) {
-				return $this->customise(new ArrayData(array(
-					'FutureRelease' => true,
-					'StableVersion' => DBField::create_field('HTMLText', $stable)
-				)));				
-			}
-			else {
-				return $this->customise(new ArrayData(array(
-					'OutdatedRelease' => true,
-					'StableVersion' => DBField::create_field('HTMLText', $stable)
-				)));
-			}
-		}
-		
-		return false;
 	}
 
 	/**

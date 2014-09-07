@@ -1,7 +1,8 @@
 <?php
 
 /**
- *
+ * @package docsviewer
+ * @subpackage tests
  */
 class DocumentationManifestTests extends SapphireTest {
 

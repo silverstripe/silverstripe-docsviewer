@@ -31,6 +31,20 @@ class DocumentationManifest {
 
 	const TEMPLATES_DIR = 'documentation';
 
+	/**
+	 * @config
+	 *
+	 * @var boolean $automatic_registration
+	 */
+	private static $automatic_registration = true;
+
+	/**
+	 * @config
+	 *
+	 * @var array $registered_entities
+	 */
+	private static $register_entities = array();
+
 	protected $base;
 	protected $cache;
 	protected $cacheKey;
@@ -41,6 +55,11 @@ class DocumentationManifest {
 	private $entity;
 
 	/**
+	 * @var array
+	 */
+	private $registeredEntities = array();
+
+	/**
 	 * Constructs a new template manifest. The manifest is not actually built
 	 * or loaded from cache until needed.
 	 *
@@ -48,6 +67,7 @@ class DocumentationManifest {
 	 * @param bool $forceRegen Force the manifest to be regenerated.
 	 */
 	public function __construct($forceRegen = false) {
+		$this->setupEntities();
 		$this->cacheKey   = 'manifest';
 		$this->forceRegen = $forceRegen;
 
@@ -57,6 +77,93 @@ class DocumentationManifest {
 		));
 	}
 
+	/**
+	 * Sets up the top level entities.
+	 *
+	 * Either manually registered through the YAML syntax or automatically 
+	 * loaded through investigating the file system for `docs` folder.
+	 */
+	public function setupEntities() {
+		if(Config::inst()->get('DocumentationManifest', 'automatic_registration')) {
+			$this->populateEntitiesFromInstall();
+		}
+
+		$registered = Config::inst()->get('DocumentationManifest', 'register_entities');
+
+		foreach($registered as $details) {
+			// validate the details provided through the YAML configuration
+			$required = array('Path', 'Version', 'Title');
+
+			foreach($required as $require) {
+				if(!isset($details[$require])) {
+					throw new Exception("$require is a required key in DocumentationManifest.register_entities");
+				}
+			}
+
+			if(isset($this->registeredEntities[$details['Title']])) {
+				$entity = $this->registeredEntities[$details['Title']];
+			} else {
+				$entity = new DocumentationEntity(
+					$details['Path'],
+					$details['Title']
+				);
+
+				$this->registeredEntities[$details['Title']] = $entity;
+			}
+
+			$version = new DocumentationEntityVersion(
+				$entity,
+				Controller::join_links(BASE_PATH, $details['Path']),
+				$details['Version'],
+				(isset($details['Stable'])) ? $details['Stable'] : false
+			);
+
+			$entity->addVersion($version);
+		}
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getEntities() {
+		return $this->registeredEntities;
+	}
+
+	/**
+	 * Scans the current installation and picks up all the SilverStripe modules
+	 * that contain a `docs` folder.
+	 *
+	 * @return void
+	 */
+	public function populateEntitiesFromInstall() {
+		$entities = array();
+
+		foreach(scandir(BASE_PATH) as $key => $entity) {
+			if($key == "themes") {
+				continue;
+			}
+
+			$dir = is_dir(Controller::join_links(BASE_PATH, $entity));
+			
+			if($dir) {
+				// check to see if it has docs
+				$docs = Controller::join_links($dir, 'docs');
+
+				if(is_dir($docs)) {
+					$entities[] = array(
+						'BasePath' => $entity,
+						'Folder' => $key,
+						'Version' => 'master',
+						'Stable' => true
+					);
+				}
+			}
+		}
+
+		Config::inst()->update(
+			'DocumentationManifest', 'registered_entities', $entities
+		);
+	}
 
 	/**
 	 *
@@ -91,16 +198,16 @@ class DocumentationManifest {
 	 */
 	public function getPage($url) {
 		$pages = $this->getPages();
+		$url = rtrim($url, '/') . '/';
 
 		if(!isset($pages[$url])) {
 			return null;
 		}
 
+
 		$record = $pages[$url];
 
-		DocumentationService::load_automatic_registration();
-
-		foreach(DocumentationService::get_registered_entities() as $entity) {
+		foreach($this->getEntities() as $entity) {
 			foreach($entity->getVersions() as $version) {
 				foreach($version->getSupportedLanguages() as $language) {
 					if(strpos($record['filepath'], $language->getPath()) !== false) {
@@ -130,8 +237,7 @@ class DocumentationManifest {
 			'file_callback'  => array($this, 'handleFile')
 		));
 
-		DocumentationService::load_automatic_registration();
-		foreach(DocumentationService::get_registered_entities() as $entity) {
+		foreach($this->getEntities() as $entity) {
 			foreach($entity->getVersions() as $version) {
 
 				foreach($version->getSupportedLanguages() as $k => $v) {

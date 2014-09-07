@@ -3,45 +3,28 @@
 ## Registering what to document
 	
 By default the documentation system will parse all the directories in your 
-project and include the documentation. If you want to only specify a few folders 
-you can disable it and register your paths manually
+project and include the documentation from those modules `docs` directory. 
 
-	:::php
-	// turns off automatic parsing of filesystem
-	DocumentationService::set_automatic_registration(false);
-	
-	// registers module 'sapphire'
-	try {	
-		DocumentationService::register("sapphire", BASE_PATH ."/sapphire/docs/", 'trunk');
-		
-	} catch(InvalidArgumentException $e) {
-		
-	} 
-		
-	
-If you only want to disable documentation for one module you can correspondingly 
-call unregister()
+If you want to only specify a few folders or have documentation in a non 
+standard location you can disable the autoload behaviour and register your 
+folders manually through the `Config` API.
 
-	:::php
-	DocumentationService::unregister($module, $version = false, $lang = false)
+In YAML this looks like:
 
-Unregister a module. You can specify the module, the version and the lang. If 
-no version is specified then all folders of that lang are removed. If you do 
-not specify a version or lang the whole module will be removed from the 
-documentation.
+`mysite/_config/docsviewer.yml`
 
+	:::yaml
+	---
+	name: docsviewer
+	after: docsviewer#docsviewer
+	---
+	DocumentationManifest:
+	  automatic_registration: false
+	  register_entities:
+	    - 
+	      Path: "framework/docs/"
+	      Title: "Framework Documentation"
 
-## Hiding files from listing
-
-If you want to ignore (hide) certain file types from being included in the 
-listings. By default this is the list of hidden files
-
-	:::php
-	$files = array(
-		'.', '..', '.DS_Store', '.svn', '.git', 'assets', 'themes', '_images'
-	);
-	
-	DocumentationService::set_ignored_files($files);
 
 ## Permalinks 
 
@@ -58,72 +41,26 @@ to new structures.
 
 Custom metadata can be added to the head of the MarkDown file like this:  
 
-	pagenumber: 1
 	title: A custom title
-	
 
 Make sure to add an empty line to separate the metadata from the content of
 the file. 
 
-**Note:** SilverStripe needs to read the contents of each page to retrieve the 
-metadata. This is expensive, so if you do not plan to use custom sorting, 
-do not enable this feature:
+The currently utilized metadata tags for the module are
+
+	title: 'A custom title for menus, breadcrumbs'
+	summary: 'A custom introduction text'
 
 ### Custom page sorting
 
-By default pages in the lefthand menu are sorted alphabetically. Adding a 
-pagenumber to the metadata, like in the example above, allows for custom 
-pagenumbering.
-
-**Note:** although folders appear in the menu as 'pages', you obviously can't  
-number them, so you need to number their index.php page instead.
-
-Pages that have no custom pagenumber, keep their original 
-order, but for them not to interfere with custom sort, they also receive a 
-pagenumber, starting at 10.000. 
-
-You can change this starting point for default pagenumbers:
-
-	```php
-	DocumentationService:: start_pagenumbers_at(80);
-	```
-
-### Other key-value pairs
-
-Basically all DocumentationPage properties can be added to the metadata comment 
-block. Beware that the outcome isn't always predictable. Adding a title 
-property to the block will change the menu title, but the breadcrumbs 
-are at this time not yet supported.
+By default pages in the left hand menu are sorted as how they appear in the file
+system. You can manually set the order by prefixing filenames with numbers. For
+example:
 	
+	00_file-first.md
+	01_second-file.md
 
-The files have to end with the __.md__ or __.markdown__ extension. The 
-documentation viewer will automatically replace hyphens (-) with spaces.
-
-	my-documentation-file.md
-	
-Translates to:
-
-	My documentation file
-	
-The module also support number prefixing for specifying the order of pages in
-the index pages and navigation trees.
-
-	03-foo.md
-	1-bar.md
-	4-baz.md
-	
-Will be output as the following in the listing views.
-
-	Bar
-	Foo
-	Baz
-
-## Localization
-
-All documentation folder should be localized. Even if you do not plan on supporting 
-multiple languages you need to write your documentation in a 'en' subfolder
-
-	/module/docs/en/
+The leading numbers will be scrubbed from the URL and page link.
 	
 
 ## Syntax
@@ -150,7 +87,7 @@ default behaviour is to display an ordered list of links.
 ## Table of Contents
 
 The table of contents on each module page is generated based on where and what 
-headers you use. 
+headers you use.
 
 ## Images and Files
 

@@ -47,7 +47,7 @@ class DocumentationPage extends ViewableData {
 	 * @return string
 	 */
 	public function getExtension() {
-		return DocumentationService::get_extension($this->filename);
+		return DocumentationHelper::get_extension($this->filename);
 	}
 	
 	/**
@@ -61,7 +61,9 @@ class DocumentationPage extends ViewableData {
 		// add the module to the breadcrumb trail.
 		array_unshift($pathParts, $this->entity->getTitle());
 		
-		$titleParts = array_map(array('DocumentationHelper', 'clean_page_name'), $pathParts);
+		$titleParts = array_map(array(
+			'DocumentationHelper', 'clean_page_name'
+		), $pathParts);
 		
 		return implode($divider, $titleParts + array($this->getTitle()));
 	}

@@ -2,9 +2,16 @@
 
 /**
  * A {@link DocumentationEntity} represents a module or folder with 
- * documentation not an individual page. Entities are loaded via 
- * {@link DocumentationService::register()} and individual pages are represented 
- * by a {@link DocumentationPage} and are loaded by the manifest.
+ * documentation. An entity not an individual page but a `section` of 
+ * documentation.
+ *
+ * Each section must have a version (defaults to `master`) which stores the 
+ * actual path to the documentation (i.e framework 3.0, 3.1 docs point to 
+ * different paths).
+ *
+ * Under each {@link DocumentationEntityVersion} contains languages. Most people
+ * will just have the one `en` folder but that translates to the
+ * {@link DocumentationEntityLanguage} instance to which the page relates to.
  * 
  * 
  * @package docsviewer
@@ -82,20 +89,6 @@ class DocumentationEntity extends ViewableData {
 	}
 	
 	/**
-	 * Returns an integer value based on if a given version is the latest 
-	 * version. Will return -1 for if the version is older, 0 if versions are 
-	 * the same and 1 if the version is greater than.
-	 *
-	 * @param string $version
-	 * @return int
-	 */
-	public function compare($version) {
-		$latest = $this->getStableVersion();
-		
-		return version_compare($version, $latest);
-	}
-	
-	/**
 	 * Return whether we have a given version of this entity
 	 *
 	 * @return bool
@@ -153,7 +146,9 @@ class DocumentationEntity extends ViewableData {
 	}
 
 	/**
-	 * Returns the web accessible link to this Entity
+	 * Returns the web accessible link to this entity. This does not include any
+	 * of the language information, the URL without the language should be a 
+	 * permanent direct to 'en' documentation or the first language.
 	 *
 	 * @return string
 	 */
@@ -169,6 +164,21 @@ class DocumentationEntity extends ViewableData {
 	 */
 	public function __toString() {
 		return sprintf('DocumentationEntity: %s)', $this->getPath());
+	}
+
+	/**
+	 * @param DocumentationPage $page
+	 *
+	 * @return boolean
+	 */
+	public function hasRecord(DocumentationPage $page) {
+		foreach($this->getVersions() as $version) {
+			foreach($version->getSupportedLanguages() as $lang) {
+				if($lang === $page->getEntity()) {
+					return true;
+				}
+			}
+		}
 	}
 
 }

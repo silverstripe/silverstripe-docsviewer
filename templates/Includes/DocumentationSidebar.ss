@@ -2,7 +2,7 @@
 	<ul class="nav">
 	<% loop Entities %>
 		<% if DefaultEntity %>
-
+	
 		<% else %>
 			<li><a href="$Link" class="$LinkingMode top">$Title <% if IsFolder %><span class="is-folder">&#9658;</span><% end_if %></a>
 				<% if LinkingMode == current %>

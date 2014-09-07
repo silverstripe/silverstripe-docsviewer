@@ -87,8 +87,6 @@ class DocumentationSearchController extends DocumentationViewer {
 	 * @return Form
 	 */
 	public function AdvancedSearchForm() {
-		$entities = DocumentationService::get_registered_entities();
-
 		return new DocumentationAdvancedSearchForm($this);
 	}
 

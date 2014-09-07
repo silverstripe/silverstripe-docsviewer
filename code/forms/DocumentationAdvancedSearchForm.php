@@ -6,7 +6,7 @@
 class DocumentationAdvancedSearchForm extends Form {
 
 	public function __construct($controller) {
-		$entities = DocumentationService::get_registered_entities();
+		$entities = $controller->getEntities();
 		$versions = array();
 		
 		foreach($entities as $entity) {
