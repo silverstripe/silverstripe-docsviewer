@@ -68,13 +68,13 @@ p {
 
 /*! lists */
 ul { 
-	margin: 15px 0 20px 20px; 
+	margin: 10px 0 20px 20px; 
 	padding: 0;
 }
 
 li, dd { 
-	font-size: 12px; 
-	margin: 0;
+	font-size: 13px; 
+	margin: 0 0 5px 0;
 	line-height: 20px;
 }
 

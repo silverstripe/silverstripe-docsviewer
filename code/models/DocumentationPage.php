@@ -83,7 +83,19 @@ class DocumentationPage extends ViewableData {
 			return $this->title;
 		}
 
-		return DocumentationHelper::clean_page_name($this->filename);
+		$page = DocumentationHelper::clean_page_name($this->filename);
+
+		if($page == "Index") {
+			// look at the folder name
+			$parts = explode("/", $this->getPath());
+			array_pop($parts); // name
+
+			$page = DocumentationHelper::clean_page_name(
+				array_pop($parts)
+			);
+		}
+
+		return $page;
 	}
 	
 	/**

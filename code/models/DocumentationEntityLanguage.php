@@ -29,7 +29,9 @@ class DocumentationEntityLanguage extends ViewableData {
 	 */
 	public function Link() {
 		return Controller::join_links(
-			$this->entity->Link(), $this->language
+			$this->entity->Link(), 
+			$this->language,
+			'/'
 		);
 	}
 
@@ -66,7 +68,10 @@ class DocumentationEntityLanguage extends ViewableData {
 	 * @return string
 	 */
 	public function getPath() {
-		return Controller::join_links($this->entity->getPath(), $this->language);
+		return Controller::join_links(
+			$this->entity->getPath(), 
+			$this->language
+		);
 	}
 
 	/**

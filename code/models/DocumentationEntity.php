@@ -173,12 +173,9 @@ class DocumentationEntity extends ViewableData {
 	 */
 	public function hasRecord(DocumentationPage $page) {
 		foreach($this->getVersions() as $version) {
-			foreach($version->getSupportedLanguages() as $lang) {
-				if($lang === $page->getEntity()) {
-					return true;
-				}
+			if(strstr($page->getPath(), $version->getPath()) !== false) {
+				return true;
 			}
 		}
 	}
-
 }

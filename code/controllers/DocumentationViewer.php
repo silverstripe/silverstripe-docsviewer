@@ -219,14 +219,14 @@ class DocumentationViewer extends Controller {
 	/**
 	 * Returns the current language.
 	 *
-	 * @return string
+	 * @return DocumentationEntityLanguage
 	 */
 	public function getLanguage() {
-		return ($this->record) ? $this->record->getEntity()->getLanguage() : null;
+		return ($this->record) ? $this->record->getEntity() : null;
 	}
 	
 	/**
-	 *
+	 * @return DocumentationManifest
 	 */
 	public function getManifest() {
 	 	return new DocumentationManifest((isset($_GET['flush'])));
@@ -272,10 +272,17 @@ class DocumentationViewer extends Controller {
 		if($entities) {
 			foreach($entities as $entity) {
 				$mode = 'link';
+				$children = new ArrayList();
 
 				if($this->record) {
 					if($entity->hasRecord($this->record)) {
 						$mode = 'current';
+
+						// add children
+						$children = $this->getManifest()->getChildrenFor(
+							$this->getLanguage()->Link(),
+							$this->record->Link()
+						);
 					}
 				}
 
@@ -284,7 +291,8 @@ class DocumentationViewer extends Controller {
 				$output->push(new ArrayData(array(
 					'Title' 	  => $entity->getTitle(),
 					'Link'		  => $link,
-					'LinkingMode' => $mode
+					'LinkingMode' => $mode,
+					'Children' => $children
 				)));
 			}
 		}

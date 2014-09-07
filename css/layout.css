@@ -62,14 +62,29 @@ html {
 		padding: 15px 15px 14px;
 	}
 
-	#sidebar .nav .current {
+	#sidebar .nav .current .top {
 		background: #f6f7f8;
+		border: none;
 		font-weight: bold;
 	}
+	
+	#sidebar .nav .current li {
+		font-weight: normal;
+		padding: 5px 0;
+		list-style: none;
+		font-size: 13px;
+	}
+		#sidebar .nav .current a {
+			color: rgb(51, 67, 72);
+		}
 
 	#sidebar .minor-nav a {
 		color: #181C17;
 		opacity: 0.4;
+	}
+
+	#sidebar .nav a.current {
+		font-weight: bold;
 	}
 
 #layout {

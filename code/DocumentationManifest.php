@@ -370,4 +370,40 @@ class DocumentationManifest {
 
 		return null;
 	}
+
+	/**
+	 * Return the children of the provided record path.
+	 *
+	 * Looks for any pages in the manifest which have one more slash attached.
+	 *
+	 * @param string $path
+	 *
+	 * @return ArrayList
+	 */
+	public function getChildrenFor($base, $record) {
+		$output = new ArrayList();
+		$depth = substr_count($base, '/');
+
+		foreach($this->getPages() as $url => $page) {
+			if(strstr($url, $base) !== false) {
+				// children
+				if(substr_count($url, '/') == ($depth + 1)) {
+					if($base !== $record) {
+						$mode = (strstr($url, $record) !== false) ? 'current' : 'link';
+					} else {
+						$mode = 'link';
+					}
+
+					$output->push(new ArrayData(array(
+						'Link' => $url,
+						'Title' => $page['title'],
+						'LinkingMode' => $mode
+					)));
+				}
+			}
+		}
+
+		return $output;
+	}
+
 }

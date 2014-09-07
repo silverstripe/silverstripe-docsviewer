@@ -5,7 +5,7 @@
 			<% if DefaultEntity %>
 		
 			<% else %>
-				<li><a href="$Link" class="$LinkingMode top">$Title <% if IsFolder %><span class="is-folder">&#9658;</span><% end_if %></a>
+				<li class="$LinkingMode"><a href="$Link" class="top">$Title <% if IsFolder %><span class="is-folder">&#9658;</span><% end_if %></a>
 					<% if LinkingMode == current %>
 						<% if Children %>
 						<ul>
