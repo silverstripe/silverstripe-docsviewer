@@ -28,6 +28,10 @@ html {
 	border-radius: 3px;
 }
 
+.no-box {
+	padding: 15px;
+}
+
 /*! main content column */
 #content {
 	float: right;
@@ -41,7 +45,8 @@ html {
 	width: 25%;
 	float: left;
 }
-	#sidebar .nav {
+	#sidebar .nav,
+	#sidebar .minor-nav {
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -60,6 +65,11 @@ html {
 	#sidebar .nav .current {
 		background: #f6f7f8;
 		font-weight: bold;
+	}
+
+	#sidebar .minor-nav a {
+		color: #181C17;
+		opacity: 0.4;
 	}
 
 #layout {
@@ -165,8 +175,9 @@ html {
 #page-numbers a {
 	padding: 3px 5px;
 }
+
 #page-numbers span {
-	background-color: #ACD5CA;
+
 }
 	#page-numbers a:hover {
 		color: #FFFFFF;

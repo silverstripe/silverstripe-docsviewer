@@ -14,8 +14,9 @@ class DocumentationViewerVersionWarning extends Extension {
 		$version = $this->owner->getVersion();
 		$versions = $this->owner->getVersions();
 
-		if($page && $verions->count() > 0) {
+		if($version && $page && $versions->count() > 0) {
 			$stable = $this->owner->getStableVersion();
+
 			$compare = $version->compare($stable);
 			
 			// same

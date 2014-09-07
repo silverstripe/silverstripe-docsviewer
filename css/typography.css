@@ -62,6 +62,10 @@ p {
 	margin: 0 0 10px;
 }
 
+.text-wrap {
+	word-break: break-all;
+}
+
 /*! lists */
 ul { 
 	margin: 15px 0 20px 20px; 
@@ -95,11 +99,32 @@ dd {
 	margin: 5px 0 10px 20px; 
 }
 
+.semantic {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+ul.third {
+	overflow: hidden;
+}
+	ul.third li {
+		float: left;
+		width: 33.3%;
+		padding-right: 30px;
+		padding-bottom: 20px;
+	}
+
+	ul.third li:nth-child(3n+1) {
+		clear: both;
+	}
+
 /*! headers */
 h1 { 
 	font-size: 30px; 
 	line-height: 30px; 
 	margin-bottom: 10px; 
+	margin-top: 0;
 	letter-spacing: -1px;
 }
 

@@ -20,12 +20,13 @@ class DocumentationViewer extends Controller {
 	private static $extensions = array(
 		'DocumentationViewerVersionWarning'
 	);
-	
+
 	/**
 	 * @var array
 	 */
 	private static $allowed_actions = array(
 		'home',
+		'all',
 		'LanguageForm',
 		'doLanguageForm',
 		'handleRequest',
@@ -144,6 +145,8 @@ class DocumentationViewer extends Controller {
 	 * @return SS_HTTPResponse
 	 */
 	public function handleAction($request, $action) {
+		$action = $request->param('Action');
+
 		try {
 			if(preg_match('/DocumentationSearchForm/', $request->getURL())) {
 				$action = 'results';
@@ -174,29 +177,33 @@ class DocumentationViewer extends Controller {
 		if(!$request->isGET() || isset($_GET['action_results'])) {
 			return $response;
 		}
-		
-		// look up the manifest to see find the nearest match against the
-		// list of the URL. If the URL exists then set that as the current
-		// page to match against.
-		if($record = $this->getManifest()->getPage($this->request->getURL())) {
-			$this->record = $record;
 
-			$type = get_class($this->record);
-			$body = $this->renderWith(array(
-				"DocumentationViewer_{$type}",
-				"DocumentationViewer"
-			));
+		if($response->getStatusCode() !== 200) {
+			// look up the manifest to see find the nearest match against the
+			// list of the URL. If the URL exists then set that as the current
+			// page to match against.
+			if($record = $this->getManifest()->getPage($this->request->getURL())) {
+				$this->record = $record;
 
-			return new SS_HTTPResponse($body, 200);
+				$type = get_class($this->record);
+				$body = $this->renderWith(array(
+					"DocumentationViewer_{$type}",
+					"DocumentationViewer"
+				));
+
+				return new SS_HTTPResponse($body, 200);
+			}
+			else {
+				$this->init();
+			
+				$class = get_class($this);
+				$body = $this->renderWith(array("{$class}_error", $class));
+
+				return new SS_HTTPResponse($body, 404);
+			}
 		}
-		else {
-			$this->init();
-		
-			$class = get_class($this);
-			$body = $this->renderWith(array("{$class}_error", $class));
 
-			return new SS_HTTPResponse($body, 404);
-		}
+		return $response;
 	}
 
 	/**
@@ -243,6 +250,13 @@ class DocumentationViewer extends Controller {
 	 */
 	public function getVersions() {
 		return ($this->record) ? $this->record->getEntity()->getVersions() : null;
+	}
+
+	/**
+	 * @return DocumentationEntityVersion
+	 */
+	public function getStableVersion() {
+		return ($this->record) ? $this->record->getEntity()->getStableVersion() : null;
 	}
 	
 	/**
@@ -322,14 +336,30 @@ class DocumentationViewer extends Controller {
 	 *
 	 * @return string
 	 */
-	public function Link() {
+	public function Link($action = '') {
 		$link = Controller::join_links(
 			Director::absoluteBaseURL(), 
-			Config::inst()->get('DocumentationViewer', 'link_base')
+			Config::inst()->get('DocumentationViewer', 'link_base'),
+			$action
 		);
 
 		return $link;
-	} 
+	}
+
+	public function AllPages() {
+		$pages = $this->getManifest()->getPages();
+		$output = new ArrayList();
+
+		foreach($pages as $url => $page) {
+			$output->push(new ArrayData(array(
+				'Link' => $url,
+				'Title' => $page['title'],
+				'FirstLetter' => strtoupper(substr($page['title'], 0, 1))
+			)));
+		}
+
+		return GroupedList::create($output->sort('Title', 'ASC'));
+	}
 	
 	/**
 	 * Build the language dropdown.

@@ -35,10 +35,24 @@ class DocumentationEntityLanguage extends ViewableData {
 
 
 	/**
-	 * @return string
+	 * @return DocumentationEntityVersion
 	 */
 	public function getVersion() {
-		return $this->entity->getVersion();
+		return $this->entity;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getVersions() {
+		return $this->entity->getEntity()->getVersions();
+	}
+
+	/**
+	 * @return 
+	 */
+	public function getStableVersion() {
+		return $this->entity->getEntity()->getStableVersion();
 	}
 
 	/**

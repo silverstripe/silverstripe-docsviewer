@@ -81,7 +81,7 @@ class DocumentationEntity extends ViewableData {
 			return false;
 		}
 
-		$sortedVersions = $this->getVersions();
+		$sortedVersions = $this->getVersions()->toArray();
 			
 		usort($sortedVersions, create_function('$a,$b', 'return version_compare($a,$b);'));
 			

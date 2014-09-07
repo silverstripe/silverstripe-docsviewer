@@ -128,6 +128,12 @@ class DocumentationEntityVersion extends ViewableData {
 		return $this->entity->getTitle();
 	}
 
+	/**
+	 * @return DocumentationEntity
+	 */
+	public function getEntity() {
+		return $this->entity;
+	}
 
 	/**
 	 * Returns an integer value based on if a given version is the latest 
