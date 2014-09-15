@@ -9,7 +9,6 @@ test
 [link: with anchor](/test#anchor)
 [link: http](http://silverstripe.org)
 [link: api](api:DataObject)
-[link: relative](../a-relative-file.md)
 
 [api:DataObject::$has_one]
 

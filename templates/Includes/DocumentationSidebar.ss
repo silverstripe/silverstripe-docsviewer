@@ -1,35 +1,37 @@
 <div id="sidebar">
 	<div class="box">
+		$DocumentationSearchForm
+		
 		<ul class="nav">
-		<% loop Entities %>
-			<% if DefaultEntity %>
-				<% loop Children %>
-					<li class="$LinkingMode $FirstLast">
-						<a href="$Link" class="top">$Title</a>
+			<% loop Menu %>
+				<% if DefaultEntity %>
+					<% loop Children %>
+						<li class="$LinkingMode $FirstLast">
+							<a href="$Link" class="top">$Title</a>
 
+							<% if LinkingMode == current %>
+							<% if Children %>
+							<ul class="$FirstLast">
+								<% loop Children %>
+									<li><a href="$Link" class="$LinkingMode">$Title</a></li>
+								<% end_loop %>
+							</ul><% end_if %>
+							<% end_if %>
+						</li>
+					<% end_loop %>
+				<% else %>
+					<li class="$LinkingMode $FirstLast"><a href="$Link" class="top">$Title <% if IsFolder %><span class="is-folder">&#9658;</span><% end_if %></a>
 						<% if LinkingMode == current %>
-						<% if Children %>
-						<ul class="$FirstLast">
-							<% loop Children %>
-								<li><a href="$Link" class="$LinkingMode">$Title</a></li>
-							<% end_loop %>
-						</ul><% end_if %>
+							<% if Children %>
+							<ul class="$FirstLast">
+								<% loop Children %>
+									<li><a href="$Link" class="$LinkingMode">$Title</a></li>
+								<% end_loop %>
+							</ul><% end_if %>
 						<% end_if %>
 					</li>
-				<% end_loop %>
-			<% else %>
-				<li class="$LinkingMode $FirstLast"><a href="$Link" class="top">$Title <% if IsFolder %><span class="is-folder">&#9658;</span><% end_if %></a>
-					<% if LinkingMode == current %>
-						<% if Children %>
-						<ul class="$FirstLast">
-							<% loop Children %>
-								<li><a href="$Link" class="$LinkingMode">$Title</a></li>
-							<% end_loop %>
-						</ul><% end_if %>
-					<% end_if %>
-				</li>
-			<% end_if %>
-		<% end_loop %>
+				<% end_if %>
+			<% end_loop %>
 		</ul>
 	</div>
 

@@ -6,19 +6,25 @@
 class DocumentationAdvancedSearchForm extends Form {
 
 	public function __construct($controller) {
-		$entities = $controller->getEntities();
+		$entities = $controller->getManifest()->getEntities();
 		$versions = array();
 		
 		foreach($entities as $entity) {
-			$versions[$entity->getFolder()] = $entity->getVersions();
+			foreach($entity->getVersions() as $version) {
+				$versions[$version->getVersion()] = $version->getVersion();
+			}
 		}
 		
 		// get a list of all the unique versions
-		$uniqueVersions = array_unique(ArrayLib::flatten(array_values($versions)));
+		$uniqueVersions = array_unique(
+			ArrayLib::flatten(array_values($versions))
+		);
+		
 		asort($uniqueVersions);
+		
 		$uniqueVersions = array_combine($uniqueVersions,$uniqueVersions);
 		
-		$q = ($q = $this->getSearchQuery()) ? $q->NoHTML() : "";
+		$q = ($q = $controller->getSearchQuery()) ? $q->NoHTML() : "";
 		
 		// klude to take an array of objects down to a simple map
 		$entities = new ArrayList($entities);
@@ -40,11 +46,13 @@ class DocumentationAdvancedSearchForm extends Form {
 		$fields = new FieldList(
 			new TextField('Search', _t('DocumentationViewer.KEYWORDS', 'Keywords'), $q),
 			new CheckboxSetField('Entities', _t('DocumentationViewer.MODULES', 'Modules'), $entities, $searchedEntities),
-			new CheckboxSetField('Versions', _t('DocumentationViewer.VERSIONS', 'Versions'),
+			new CheckboxSetField(
+				'Versions', 
+				_t('DocumentationViewer.VERSIONS', 'Versions'),
 			 	$uniqueVersions, $searchedVersions
 			)
 		);
-		
+
 		$actions = new FieldList(
 			new FormAction('results', _t('DocumentationViewer.SEARCH', 'Search'))
 		);
@@ -61,6 +69,6 @@ class DocumentationAdvancedSearchForm extends Form {
 		
 		$this->disableSecurityToken();
 		$this->setFormMethod('GET');
-		$this->setFormAction(self::$link_base . 'DocumentationSearchForm');
-	
+		$this->setFormAction($controller->Link('search'));
 	}
+}

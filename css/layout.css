@@ -87,17 +87,39 @@ html {
 		font-weight: bold;
 	}
 
+	#sidebar .search {
+
+	}
+		#sidebar .search fieldset {
+			border-bottom: 1px solid #eee;
+			padding: 15px 10px 14px;
+		}
+
+		#sidebar .search label,
+		#sidebar .search .Actions {
+			display: none;
+		}
+
+		#sidebar .search input {
+			width: 100%;
+			outline: none;
+			border-radius: 2px;
+			border: 1px solid #ddd;
+			box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+			padding: 9px;
+		}
+
+		#sidebar .search input:focus {
+			border-color: #1389ce;
+		}
+
 #layout {
 	padding-bottom: 20px;
 }
 
 /*! language */
 #language { 
-	position: absolute; 
-	top: 12px; 
-	left: 50%; 
-	margin-left: -480px; 
-	width: 960px; 
+
 }
 
 	#language label { 
@@ -364,27 +386,29 @@ html {
 	}
 
 /* Used on 404 page not found */
-.warningBox { margin:9px 0 18px; }
+.warningBox { margin: 0 0 18px; }
+
 #content .warningBox p { 
 	margin: 0;
 }
 
 .warningBoxTop {
-	background-color: #F9FAFA;
-	border: 1px solid #d3d9dc;
-	padding: 13px 9px 13px 66px;
-	background: #F9FAFA url(../../docsviewer/images/warning.png) no-repeat 18px 14px;
+	padding: 10px 10px 10px 70px;
+	background: url(../../docsviewer/images/warning.png) no-repeat 18px 14px;
 }
 
 #content .warningBoxTop h1 { 
-	font-size: 27px; margin-bottom: 0; letter-spacing: 0; 
+	margin-bottom: 0;
 }
+
 #content .warningBoxTop ul { 
 	margin: 9px 0 18px; 
 }
+
 #content .warningBoxTop li { 
-	margin-bottom: 4px; 
+	margin-bottom: 0; 
 }
+
 #content .warningBoxBottom { 
 	background-color: #0973A6; 
 	padding: 12px 0 16px;

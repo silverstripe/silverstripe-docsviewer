@@ -6,70 +6,88 @@
  */
 class DocumentationManifestTests extends SapphireTest {
 
-	private $manifest, $pages;
+	private $manifest;
 
-	public function setUpOnce() {
-		parent::setUpOnce();
-		
-		$this->origEnabled = DocumentationService::automatic_registration_enabled();
-		DocumentationService::set_automatic_registration(false);
-		$this->origModules = DocumentationService::get_registered_entities();
-		
-		$this->origLinkBase = Config::inst()->get('DocumentationViewer', 'link_base');
-		Config::inst()->update('DocumentationViewer', 'link_base', 'dev/docs/');
+	public function setUp() {
+		parent::setUp();
 
-		foreach($this->origModules as $module) {
-			DocumentationService::unregister($module->getFolder());
-		}
+		Config::nest();
 
-		// We set 3.0 as current, and test most assertions against 2.4 - to avoid 'current' rewriting issues
-		DocumentationService::register("testdocs", DOCSVIEWER_PATH . "/tests/docs/", '2.3');
-		DocumentationService::register("testdocs", DOCSVIEWER_PATH . "/tests/docs-v2.4/", '2.4', 'Doc Test', true);
-		DocumentationService::register("testdocs", DOCSVIEWER_PATH . "/tests/docs-v3.0/", '3.0', 'Doc Test');
+		// explicitly use dev/docs. Custom paths should be tested separately 
+		Config::inst()->update(
+			'DocumentationViewer', 'link_base', 'dev/docs'
+		);
 
+		// disable automatic module registration so modules don't interfere.
+		Config::inst()->update(
+			'DocumentationManifest', 'automatic_registration', false
+		);
+
+		Config::inst()->remove('DocumentationManifest', 'register_entities');
+
+		Config::inst()->update(
+			'DocumentationManifest', 'register_entities', array(
+				array(
+					'Path' => DOCSVIEWER_PATH . "/tests/docs/",
+					'Title' => 'Doc Test',
+					'Key' => 'testdocs',
+					'Version' => '2.3'
+				),
+				array(
+					'Path' => DOCSVIEWER_PATH . "/tests/docs-v2.4/",
+					'Title' => 'Doc Test',
+					'Version' => '2.4',
+					'Key' => 'testdocs',
+					'Stable' => true
+				),
+				array(
+					'Path' => DOCSVIEWER_PATH . "/tests/docs-v3.0/",
+					'Title' => 'Doc Test',
+					'Key' => 'testdocs',
+					'Version' => '3.0'
+				)
+			)
+		);
 
 		$this->manifest = new DocumentationManifest(true);
-		$this->pages = $this->manifest->getPages();
 	}
 	
-	public function tearDownOnce() {
-		parent::tearDownOnce();
+	public function tearDown() {
+		parent::tearDown();
 		
-		DocumentationService::unregister("testdocs");
-		DocumentationService::set_automatic_registration($this->origEnabled);
-
-		Config::inst()->update('DocumentationViewer', 'link_base', $this->origLinkBase);
+		Config::unnest();
 	}
+
 
 	/**
 	 * Check that the manifest matches what we'd expect.
 	 */
 	public function testRegenerate() {
 		$match = array(
-			'dev/docs/testdocs/2.3/de/',
-			'dev/docs/testdocs/2.3/de/german/',
-			'dev/docs/testdocs/2.3/de/test/',
-			'dev/docs/testdocs/2.3/en/',
-			'dev/docs/testdocs/2.3/en/sort/',
-			'dev/docs/testdocs/2.3/en/subfolder/',
-			'dev/docs/testdocs/2.3/en/test/',
-			'dev/docs/testdocs/2.3/en/sort/basic/',
-			'dev/docs/testdocs/2.3/en/sort/some-page/',
-			'dev/docs/testdocs/2.3/en/sort/intermediate/',
-			'dev/docs/testdocs/2.3/en/sort/another-page/',
-			'dev/docs/testdocs/2.3/en/sort/advanced/',
-			'dev/docs/testdocs/2.3/en/subfolder/subpage/',
-			'dev/docs/testdocs/2.3/en/subfolder/subsubfolder/',
-			'dev/docs/testdocs/2.3/en/subfolder/subsubfolder/subsubpage/',
-			'dev/docs/testdocs/en/',
-			'dev/docs/testdocs/en/test/',
-			'dev/docs/testdocs/3.0/en/',
-			'dev/docs/testdocs/3.0/en/changelog/',
-			'dev/docs/testdocs/3.0/en/tutorials/',
-			'dev/docs/testdocs/3.0/en/empty/'
+			'de/testdocs/2.3/',
+			'de/testdocs/2.3/german/',
+			'de/testdocs/2.3/test/',
+			'en/testdocs/2.3/',
+			'en/testdocs/2.3/sort/',
+			'en/testdocs/2.3/subfolder/',
+			'en/testdocs/2.3/test/',
+			'en/testdocs/2.3/sort/basic/',
+			'en/testdocs/2.3/sort/some-page/',
+			'en/testdocs/2.3/sort/intermediate/',
+			'en/testdocs/2.3/sort/another-page/',
+			'en/testdocs/2.3/sort/advanced/',
+			'en/testdocs/2.3/subfolder/subpage/',
+			'en/testdocs/2.3/subfolder/subsubfolder/',
+			'en/testdocs/2.3/subfolder/subsubfolder/subsubpage/',
+			'en/testdocs/',
+			'en/testdocs/test/',
+			'en/testdocs/3.0/',
+			'en/testdocs/3.0/changelog/',
+			'en/testdocs/3.0/tutorials/',
+			'en/testdocs/3.0/empty/'
 		);
 
-		$this->assertEquals($match, array_keys($this->pages));
+		$this->assertEquals($match, array_keys($this->manifest->getPages()));
 	}
 
 	public function testGetNextPage() {
@@ -82,5 +100,21 @@ class DocumentationManifestTests extends SapphireTest {
 
 	public function testGetPage() {
 
+	}
+
+	public function testGenerateBreadcrumbs() {
+
+	}
+
+	public function testGetChildrenFor() {
+
+	}
+
+	public function testGetAllVersions() {
+
+	}
+
+	public function testGetStableVersion() {
+		
 	}
 }

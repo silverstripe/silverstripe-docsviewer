@@ -18,22 +18,10 @@ class DocumentationViewer extends Controller {
 	 * @var array
 	 */
 	private static $extensions = array(
-		'DocumentationViewerVersionWarning'
+		'DocumentationViewerVersionWarning',
+		'DocumentationSearchExtension'
 	);
 
-	/**
-	 * @var array
-	 */
-	private static $allowed_actions = array(
-		'home',
-		'all',
-		'LanguageForm',
-		'doLanguageForm',
-		'handleRequest',
-		'DocumentationSearchForm',
-		'results'
-	);
-	
 	/**
 	 * @var string
 	 */
@@ -44,6 +32,22 @@ class DocumentationViewer extends Controller {
 	 */
 	private static $documentation_title = 'SilverStripe Documentation';
 	
+	/**
+	 * @var array
+	 */
+	private static $url_handlers = array(
+		'$Lang/$Action' => 'handleAction'
+	);
+	
+	/**
+	 * @var array
+	 */
+	private static $allowed_actions = array(
+		'all',
+		'results',
+		'handleAction'
+	);
+
 	/**
 	 * The string name of the currently accessed {@link DocumentationEntity}
 	 * object. To access the entire object use {@link getEntity()}
@@ -76,13 +80,6 @@ class DocumentationViewer extends Controller {
 	 * @see {@link getEditLink()}
 	 */
 	private static $edit_links = array();
-
-	/**
-	 * @var array
-	 */
-	private static $url_handlers = array(
-		'$Action' => 'handleAction'
-	);
 
 	/**
 	 *
@@ -134,6 +131,14 @@ class DocumentationViewer extends Controller {
 		);
 	}
 
+	public function hasAction($action) {
+		return true;
+	}
+
+	public function checkAccessAction($action) {
+		return true;
+	}
+
 	/**
 	 * Overloaded to avoid "action doesn't exist" errors - all URL parts in 
 	 * this controller are virtual and handled through handleRequest(), not 
@@ -145,48 +150,103 @@ class DocumentationViewer extends Controller {
 	 * @return SS_HTTPResponse
 	 */
 	public function handleAction($request, $action) {
-		$action = $request->param('Action');
+		// if we submitted a form, let that pass
+		if(!$request->isGET()) {
+			return parent::handleAction($request, $action);
+		}
 
-		try {
-			if(preg_match('/DocumentationSearchForm/', $request->getURL())) {
-				$action = 'results';
-			}
+		$url = $request->getURL();
 
-			$response = parent::handleAction($request, $action);
-		} catch(SS_HTTPResponse_Exception $e) {
-			if(strpos($e->getMessage(), 'does not exist') !== FALSE) {
-				return $this;
-			} else {
-				throw $e;
-			}
+		//
+		// If the current request has an extension attached to it, strip that 
+		// off and redirect the user to the page without an extension.
+		//
+		if(DocumentationHelper::get_extension($url)) {
+			$this->response = new SS_HTTPResponse();
+			$this->response->redirect(
+				DocumentationHelper::trim_extension_off($url) .'/', 
+				301
+			);
+
+			$request->shift();
+			$request->shift();
+
+			return $this->response; 
+		}
+
+		//
+		// Strip off the base url
+		//
+		$base = ltrim(
+			Config::inst()->get('DocumentationViewer', 'link_base'), '/'
+		);
+
+		if($base && strpos($url, $base) !== false) {
+			$url = substr(
+				ltrim($url, '/'), 
+				strlen($base)
+			);
+		} else {
+
 		}
 		
-		return $response;
-	}
-	
-	/**
-	 * Handle the url parsing for the documentation. In order to make this
-	 * user friendly this does some tricky things..
-	 *
-	 * @return SS_HTTPResponse
-	 */
-	public function handleRequest(SS_HTTPRequest $request, DataModel $model) {
-		$response = parent::handleRequest($request, $model);
+		//
+		// Handle any permanent redirections that the developer has defined.
+		// 
+		if($link = DocumentationPermalinks::map($url)) {
+			// the first param is a shortcode for a page so redirect the user to
+			// the short code.
+			$this->response = new SS_HTTPResponse();
+			$this->response->redirect($link, 301);
+			
+			$request->shift();
+			$request->shift();
 
-		// if we submitted a form, let that pass
-		if(!$request->isGET() || isset($_GET['action_results'])) {
-			return $response;
+			return $this->response;
+		}
+
+		//
+		// Validate the language provided. Language is a required URL parameter.
+		// as we use it for generic interfaces and language selection. If 
+		// language is not set, redirects to 'en'
+		//
+		$languages = i18n::get_common_languages();
+
+		if(!$request->param('Lang')) {
+			return $this->redirect($this->Link('en'));
+		} else if(!isset($languages[$request->param('Lang')])) {
+			return $this->httpError(404);
 		}
 
 		$action = $request->param('Action');
 		$allowed = $this->config()->allowed_actions;
 
-		if(!in_array($action, $allowed) || $response->getStatusCode() !== 200) {
+		$request->shift();
+		$request->shift();
+
+		if(in_array($action, $allowed)) {
+			//
+			// if it's one of the allowed actions such as search or all then the
+			// URL must be prefixed with one of the allowed languages.
+			//
+			return parent::handleAction($request, $action);
+		} else {
+			//
 			// look up the manifest to see find the nearest match against the
 			// list of the URL. If the URL exists then set that as the current
 			// page to match against.
-			if($record = $this->getManifest()->getPage($this->request->getURL())) {
+
+			// strip off any extensions.
+
+
+			// if($cleaned !== $url) {
+			// 	$redirect = new SS_HTTPResponse();
+
+			// 	return $redirect->redirect($cleaned, 302);
+			// }
+			if($record = $this->getManifest()->getPage($url)) {
 				$this->record = $record;
+				$this->init();
 
 				$type = get_class($this->record);
 				$body = $this->renderWith(array(
@@ -195,110 +255,96 @@ class DocumentationViewer extends Controller {
 				));
 
 				return new SS_HTTPResponse($body, 200);
-			}
-			else {
-				$this->init();
-			
-				$class = get_class($this);
-				$body = $this->renderWith(array("{$class}_error", $class));
+			} else if(!$url || $url == $request->param('Lang')) {
+				$body = $this->renderWith(array(
+					"DocumentationViewer_DocumentationFolder",
+					"DocumentationViewer"
+				));
 
-				return new SS_HTTPResponse($body, 404);
+				return new SS_HTTPResponse($body, 200);
 			}
 		}
-
-		return $response;
+		
+		return $this->httpError(404);
 	}
 
 	/**
-	 * Returns the current version. If no version is set then it is the current
-	 * set version so need to pull that from the {@link Entity}.
+	 * @param int $status
+	 * @param string $message
 	 *
-	 * @return string
+	 * @return SS_HTTPResponse
 	 */
-	public function getVersion() {
-		return ($this->record) ? $this->record->getEntity()->getVersion() : null;
+	public function httpError($status, $message = null) {
+		$this->init();
+			
+		$class = get_class($this);
+		$body = $this->customise(new ArrayData(array(
+			'Message' => $message
+		)))->renderWith(array("{$class}_error", $class));
+
+		return new SS_HTTPResponse($body, $status);
 	}
-	
-	/**
-	 * Returns the current language.
-	 *
-	 * @return DocumentationEntityLanguage
-	 */
-	public function getLanguage() {
-		return ($this->record) ? $this->record->getEntity() : null;
-	}
-	
+
 	/**
 	 * @return DocumentationManifest
 	 */
 	public function getManifest() {
-	 	return new DocumentationManifest((isset($_GET['flush'])));
+		$flush = SapphireTest::is_running_test() || (isset($_GET['flush']));
+		
+	 	return new DocumentationManifest($flush);
 	}
 
 	/**
-	 * Return all the available languages for the {@link Entity}.
-	 *
-	 * @return array
+	 * @return string
 	 */
-	public function getLanguages() {
-		return ($this->record) ? $this->record->getEntity()->getSupportedLanguages() : null;
+	public function getLanguage() {
+		return $this->request->param('Lang');
 	}
 
-	/**
-	 * Get all the versions loaded for the current {@link DocumentationEntity}. 
-	 * the file system then they are loaded under the 'Current' name space.
-	 *
-	 * @param String $entity name of {@link Entity} to limit it to eg sapphire
-	 * @return ArrayList
-	 */
-	public function getVersions() {
-		return ($this->record) ? $this->record->getEntity()->getVersions() : null;
-	}
+
 
 	/**
-	 * @return DocumentationEntityVersion
-	 */
-	public function getStableVersion() {
-		return ($this->record) ? $this->record->getEntity()->getStableVersion() : null;
-	}
-	
-	/**
-	 * Generate a list of entities which have been registered and which can 
+	 * Generate a list of {@link Documentation } which have been registered and which can 
 	 * be documented. 
 	 *
 	 * @return DataObject
 	 */ 
-	public function getEntities() {
+	public function getMenu() {
 		$entities = $this->getManifest()->getEntities();
 		$output = new ArrayList();
+		$record = $this->getPage();
+		$current = $this->getEntity();
 
-		if($entities) {
-			foreach($entities as $entity) {
-				$mode = 'link';
-				$children = new ArrayList();
-
-				if($this->record) {
-					if($entity->hasRecord($this->record)) {
-						$mode = 'current';
-
-						// add children
-						$children = $this->getManifest()->getChildrenFor(
-							$this->getLanguage()->Link(),
-							$this->record->Link()
-						);
-					}
-				}
-
-				$link = $entity->Link();
-				
-				$output->push(new ArrayData(array(
-					'Title' 	  => $entity->getTitle(),
-					'Link'		  => $link,
-					'LinkingMode' => $mode,
-					'DefaultEntity' => $entity,
-					'Children' => $children
-				)));
+		foreach($entities as $entity) {
+			// only show entities with the same language
+			if($entity->getLanguage() !== $this->getLanguage()) {
+				continue;
 			}
+
+			$mode = 'link';	
+			$children = new ArrayList();
+			if($entity->hasRecord($record) || $entity->getIsDefaultEntity()) {
+				$mode = 'current';
+
+				// add children
+				$children = $this->getManifest()->getChildrenFor(
+					$entity->getPath()
+				);
+			} else {
+				if($current && $current->getKey() == $entity->getKey()) {
+					continue;
+				}
+			}
+
+			$link = $entity->Link();
+
+			$output->push(new ArrayData(array(
+				'Title' 	  => $entity->getTitle(),
+				'Link'		  => $link,
+				'LinkingMode' => $mode,
+				'DefaultEntity' => $entity->getIsDefaultEntity(),
+				'Children' => $children
+			)));
 		}
 
 		return $output;
@@ -337,6 +383,18 @@ class DocumentationViewer extends Controller {
 	public function getPage() {
 		return $this->record;
 	}
+
+	/**
+	 * @return DocumentationEntity
+	 */
+	public function getEntity() {
+		return ($this->record) ? $this->record->getEntity() : null;
+	}
+
+	public function getVersions() {
+		return $this->manifest->getVersions($this->getEntity);
+	}
+
 	/**
 	 * Generate a string for the title tag in the URL.
 	 *
@@ -347,69 +405,54 @@ class DocumentationViewer extends Controller {
 	}
 	
 	/**
+	 * @return string
+	 */
+	public function AbsoluteLink($action) {
+		return Controller::join_links(
+			Director::absoluteBaseUrl(),
+			$this->Link($action)
+		);
+	}
+
+	/**
 	 * Return the base link to this documentation location.
 	 *
 	 * @return string
 	 */
 	public function Link($action = '') {
 		$link = Controller::join_links(
-			Director::absoluteBaseURL(), 
 			Config::inst()->get('DocumentationViewer', 'link_base'),
-			$action
+			$this->getLanguage(),
+			$action,
+			'/'
 		);
 
 		return $link;
 	}
 
+	/**
+	 * Generate a list of all the pages in the documentation grouped by the 
+	 * first letter of the page.
+	 *
+	 * @return GroupedList
+	 */
 	public function AllPages() {
 		$pages = $this->getManifest()->getPages();
 		$output = new ArrayList();
 
 		foreach($pages as $url => $page) {
-			$output->push(new ArrayData(array(
-				'Link' => $url,
-				'Title' => $page['title'],
-				'FirstLetter' => strtoupper(substr($page['title'], 0, 1))
-			)));
+			$first = strtoupper(trim(substr($page['title'], 0, 1)));
+
+			if($first) {
+				$output->push(new ArrayData(array(
+					'Link' => $url,
+					'Title' => $page['title'],
+					'FirstLetter' => $first
+				)));
+			}
 		}
 
 		return GroupedList::create($output->sort('Title', 'ASC'));
-	}
-	
-	/**
-	 * Build the language dropdown.
-	 *
-	 * @todo do this on a page by page rather than global
-	 *
-	 * @return Form
-	 */
-	public function LanguageForm() {
-		$langs = $this->getLanguages();
-
-		$fields = new FieldList(
-			$dropdown = new DropdownField(
-				'LangCode', 
-				_t('DocumentationViewer.LANGUAGE', 'Language'),
-				$langs,
-				$this->Lang
-			)
-		);
-		
-		$actions = new FieldList(
-			new FormAction('doLanguageForm', _t('DocumentationViewer.CHANGE', 'Change'))
-		);
-
-		return new Form($this, 'LanguageForm', $fields, $actions);
-	}
-	
-	/**
-	 * Process the language change
-	 *
-	 */
-	public function doLanguageForm($data, $form) {
-		$this->Lang = (isset($data['LangCode'])) ? $data['LangCode'] : 'en';
-
-		return $this->redirect($this->Link());
 	}
 	
 	/**
@@ -419,7 +462,7 @@ class DocumentationViewer extends Controller {
 	 * @return Form
 	 */
 	public function DocumentationSearchForm() {
-		if(!DocumentationSearch::enabled()) {
+		if(!Config::inst()->get('DocumentationSearch','enabled')) {
 			return false;
 		}
 		
@@ -497,6 +540,7 @@ class DocumentationViewer extends Controller {
 	}
 
 
+
 	/**
 	 * Returns the next page. Either retrieves the sibling of the current page
 	 * or return the next sibling of the parent page.
@@ -504,7 +548,9 @@ class DocumentationViewer extends Controller {
 	 * @return DocumentationPage
 	 */
 	public function getNextPage() {
-		return ($this->record) ? $this->getManifest()->getNextPage($this->record->getPath()) : null;
+		return ($this->record) 
+			? $this->getManifest()->getNextPage($this->record->getPath()) 
+			: null;
 	}	
 
 	/**
@@ -514,14 +560,16 @@ class DocumentationViewer extends Controller {
 	 * @return DocumentationPage
 	 */
 	public function getPreviousPage() {
-		return ($this->record) ? $this->getManifest()->getPreviousPage($this->record->getPath()) : null;
+		return ($this->record) 
+			? $this->getManifest()->getPreviousPage($this->record->getPath()) 
+			: null;
 	}
 	
 	/**
 	 * @return string
 	 */
 	public function getGoogleAnalyticsCode() {
-		$code = Config::inst()->get('DocumentationViewer', 'google_analytics_code');
+		$code = $this->config()->get('google_analytics_code');
 
 		if($code) {
 			return $code;
@@ -532,6 +580,6 @@ class DocumentationViewer extends Controller {
 	 * @return string
 	 */
 	public function getDocumentationTitle() {
-		return Config::inst()->get('DocumentationViewer', 'documentation_title');
+		return $this->config()->get('documentation_title');
 	}
 }

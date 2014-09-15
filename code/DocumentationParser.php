@@ -42,7 +42,9 @@ class DocumentationParser {
 	 * @return String
 	 */
 	public static function parse(DocumentationPage $page, $baselink = null) {
-		if(!$page || (!$page instanceof DocumentationPage)) return false;
+		if(!$page || (!$page instanceof DocumentationPage)) {
+			return false;
+		}
 
 		$md = $page->getMarkdown(true);
 		
@@ -55,6 +57,7 @@ class DocumentationParser {
 		$md = self::rewrite_code_blocks($md);
 		
 		$parser = new ParsedownExtra();
+		
 		return $parser->text($md);
 	}
 	
@@ -179,36 +182,55 @@ class DocumentationParser {
 			\)
 		/x';
 		preg_match_all($re, $md, $images);
-		if($images) foreach($images[0] as $i => $match) {
-			$title = $images[1][$i];
-			$url = $images[2][$i];
-			
-			// Don't process absolute links (based on protocol detection)
-			$urlParts = parse_url($url);
 
-			if($urlParts && isset($urlParts['scheme'])) continue;
-			
-			// Rewrite URL (relative or absolute)
-			$baselink = Director::makeRelative(dirname($page->getPath(false, false)));
-			$relativeUrl = rtrim($baselink, '/') . '/' . ltrim($url, '/');
-			
-			// Resolve relative paths
-			while(strpos($relativeUrl, '/..') !== FALSE) {
-				$relativeUrl = preg_replace('/\w+\/\.\.\//', '', $relativeUrl);
+		if($images) {
+			foreach($images[0] as $i => $match) {
+				$title = $images[1][$i];
+				$url = $images[2][$i];
+				
+				// Don't process absolute links (based on protocol detection)
+				$urlParts = parse_url($url);
+
+				if($urlParts && isset($urlParts['scheme'])) {
+					continue;
+				}
+				
+				// Rewrite URL (relative or absolute)
+				$baselink = Director::makeRelative(
+					dirname($page->getPath())
+				);
+
+				// if the image starts with a slash, it's absolute
+				if(substr($url, 0, 1) == '/') {
+					$relativeUrl = str_replace(BASE_PATH, '', Controller::join_links(
+						$page->getEntity()->getPath(),
+						$url
+					));
+				} else {
+					$relativeUrl = rtrim($baselink, '/') . '/' . ltrim($url, '/');
+				}
+
+				// Resolve relative paths
+				while(strpos($relativeUrl, '/..') !== FALSE) {
+					$relativeUrl = preg_replace('/\w+\/\.\.\//', '', $relativeUrl);
+				}
+				
+				// Make it absolute again
+				$absoluteUrl = Controller::join_links(
+					Director::absoluteBaseURL(), 
+					$relativeUrl
+				);
+				
+				// Replace any double slashes (apart from protocol)
+//				$absoluteUrl = preg_replace('/([^:])\/{2,}/', '$1/', $absoluteUrl);
+				
+				// Replace in original content
+				$md = str_replace(
+					$match, 
+					sprintf('![%s](%s)', $title, $absoluteUrl),
+					$md
+				);
 			}
-			
-			// Replace any double slashes (apart from protocol)
-			$relativeUrl = preg_replace('/([^:])\/{2,}/', '$1/', $relativeUrl);
-			
-			// Make it absolute again
-			$absoluteUrl = Director::absoluteBaseURL() . $relativeUrl;
-			
-			// Replace in original content
-			$md = str_replace(
-				$match, 
-				sprintf('![%s](%s)', $title, $absoluteUrl),
-				$md
-			);
 		}
 		
 		return $md;
@@ -244,7 +266,14 @@ class DocumentationParser {
 			foreach($linksWithTitles[0] as $i => $match) {
 				$title = $linksWithTitles[1][$i];
 				$subject = $linksWithTitles[2][$i];
-				$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getFolder());
+				
+				$url = sprintf(
+					self::$api_link_base, 
+					$subject, 
+					$page->getVersion(), 
+					$page->getEntity()->getKey()
+				);
+
 				$md = str_replace(
 					$match, 
 					sprintf('<code>[%s](%s)</code>', $title, $url),
@@ -265,7 +294,13 @@ class DocumentationParser {
 		if($links) {
 			foreach($links[0] as $i => $match) {
 				$subject = $links[1][$i];
-				$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getFolder());
+				$url = sprintf(
+					self::$api_link_base, 
+					$subject, 
+					$page->getVersion(), 
+					$page->getEntity()->getKey()
+				);
+
 				$md = str_replace(
 					$match, 
 					sprintf('<code>[%s](%s)</code>', $subject, $url),
@@ -329,12 +364,12 @@ class DocumentationParser {
 	 * 
 	 * @param String $md Markdown content
 	 * @param DocumentationPage $page
-	 * @param String $baselink
+	 *
 	 * @return String Markdown
 	 */
-	public static function rewrite_relative_links($md, $page, $baselink = null) {
-		if(!$baselink) $baselink = $page->getEntity()->getRelativeLink();
-
+	public static function rewrite_relative_links($md, $page) {
+		$baselink = $page->getEntity()->Link();
+		
 		$re = '/
 			([^\!]?) # exclude image format
 			\[
@@ -348,8 +383,11 @@ class DocumentationParser {
 		
 		// relative path (relative to module base folder), without the filename.
 		// For "sapphire/en/current/topics/templates", this would be "templates"
-		$relativePath = dirname($page->Link());
-		if($relativePath == '.') $relativePath = '';
+		$relativePath = dirname($page->getRelativeLink());
+		
+		if($relativePath == '.') {
+			$relativePath = '';
+		}
 		
 		// file base link
 		$fileBaseLink = Director::makeRelative(dirname($page->getPath()));
@@ -392,7 +430,7 @@ class DocumentationParser {
 			
 				// Replace any double slashes (apart from protocol)
 				$relativeUrl = preg_replace('/([^:])\/{2,}/', '$1/', $relativeUrl);
-			
+
 				// Replace in original content
 				$md = str_replace(
 					$match, 

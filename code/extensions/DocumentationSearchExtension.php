@@ -1,6 +1,6 @@
 <?php
 
-class DocumentationSearchController extends DocumentationViewer {
+class DocumentationSearchExtension extends Extension {
 	
 	/**
 	 * Return an array of folders and titles
@@ -18,9 +18,6 @@ class DocumentationSearchController extends DocumentationViewer {
 				$entities = explode(',', Convert::raw2att($_REQUEST['Entities']));
 				$entities = array_combine($entities, $entities);
 			}
-		}
-		else if($entity = $this->getEntity()) {
-			$entities[$entity->getFolder()] = Convert::raw2att($entity->getTitle());
 		}
 		
 		return $entities;
@@ -44,36 +41,34 @@ class DocumentationSearchController extends DocumentationViewer {
 				$versions[$version] = $version;
 			}
 		}
-		else if($version = $this->getVersion()) {
-			$version =  Convert::raw2att($version);
-			$versions[$version] = $version;
-		}
 
 		return $versions;
 	}
 	
 	/**
-	 * Return the current search query
+	 * Return the current search query.
 	 *
 	 * @return HTMLText|null
 	 */
 	public function getSearchQuery() {
 		if(isset($_REQUEST['Search'])) {
 			return DBField::create_field('HTMLText', $_REQUEST['Search']);
+		} else if(isset($_REQUEST['q'])) {
+			return DBField::create_field('HTMLText', $_REQUEST['q']);
 		}
 	}
 
 	/**
-	 * Past straight to results, display and encode the query
+	 * Past straight to results, display and encode the query.
 	 */
-	public function results($data, $form = false) {
-		$query = (isset($_REQUEST['Search'])) ? $_REQUEST['Search'] : false;
+	public function getSearchResults() {
+		$query = $this->getSearchQuery();
 
 		$search = new DocumentationSearch();
 		$search->setQuery($query);
 		$search->setVersions($this->getSearchedVersions());
 		$search->setModules($this->getSearchedEntities());
-		$search->setOutputController($this);
+		$search->setOutputController($this->owner);
 		
 		return $search->renderResults();
 	}
@@ -82,26 +77,17 @@ class DocumentationSearchController extends DocumentationViewer {
 	 * Returns an search form which allows people to express more complex rules
 	 * and options than the plain search form.
 	 *
-	 * @todo client side filtering of checkable option based on the module selected.
-	 *
 	 * @return Form
 	 */
 	public function AdvancedSearchForm() {
-		return new DocumentationAdvancedSearchForm($this);
+		return new DocumentationAdvancedSearchForm($this->owner);
 	}
 
 	/**
-	 * Check if the Advanced SearchForm can be displayed. It is enabled by 
-	 * default, to disable use: 
-	 *
-	 * <code>
-	 * DocumentationSearch::enable_advanced_search(false);
-	 * </code>
-	 *
 	 * @return bool
 	 */
 	public function getAdvancedSearchEnabled() {
-		return DocumentationSearch::advanced_search_enabled(); 
+		return Config::inst()->get("DocumentationSearch", 'advanced_search_enabled'); 
 	}
 	
 }

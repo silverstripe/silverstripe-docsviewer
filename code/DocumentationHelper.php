@@ -82,7 +82,7 @@ class DocumentationHelper {
 	 * @return string
 	 */
 	public static function get_extension($name) {
-		if(strrpos($name,'.') !== false) {
+		if(preg_match('/\.[a-z]+$/', $name)) {
 			return substr($name, strrpos($name,'.') + 1);
 		}
 

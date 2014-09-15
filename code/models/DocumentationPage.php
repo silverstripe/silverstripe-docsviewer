@@ -23,21 +23,28 @@ class DocumentationPage extends ViewableData {
 	protected $summary;
 
 	/**
-	 * @var DocumentationEntityLanguage
+	 * @var DocumentationEntity
 	 */
 	protected $entity;
 
 	/**
 	 * @var string
 	 */
-	protected $path, $filename;
+	protected $path;
 
 	/**
-	 * @param DocumentationEntityLanguage $entity
+	 * Filename
+	 *
+	 * @var string
+	 */
+	protected $filename;
+
+	/**
+	 * @param DocumentationEntity $entity
 	 * @param string $filename
 	 * @param string $path
 	 */
-	public function __construct(DocumentationEntityLanguage $entity, $filename, $path) {
+	public function __construct(DocumentationEntity $entity, $filename, $path) {
 		$this->filename = $filename;
 		$this->path = $path;
 		$this->entity = $entity;
@@ -56,20 +63,25 @@ class DocumentationPage extends ViewableData {
 	 * @return string
 	 */
 	public function getBreadcrumbTitle($divider = ' - ') {
-		$pathParts = explode('/', $this->getRelativeLink());
+		$pathParts = explode('/', trim($this->getRelativeLink(), '/'));
 		
+		// from the page from this
+		array_pop($pathParts);
+
 		// add the module to the breadcrumb trail.
-		array_unshift($pathParts, $this->entity->getTitle());
+		$pathParts[] = $this->entity->getTitle();
 		
 		$titleParts = array_map(array(
 			'DocumentationHelper', 'clean_page_name'
 		), $pathParts);
 		
-		return implode($divider, $titleParts + array($this->getTitle()));
+		array_unshift($titleParts, $this->getTitle());
+
+		return implode($divider, $titleParts);
 	}
 	
 	/**
-	 * @return DocumentationEntityLanguage
+	 * @return DocumentationEntity
 	 */
 	public function getEntity() {
 		return $this->entity;
@@ -114,7 +126,7 @@ class DocumentationPage extends ViewableData {
 	 */
 	public function getMarkdown($removeMetaData = false) {
 		try {
-			if ($md = file_get_contents($this->path)) {
+			if ($md = file_get_contents($this->getPath())) {
 				$this->populateMetaDataFromText($md, $removeMetaData);
 			
 				return $md;
@@ -125,6 +137,12 @@ class DocumentationPage extends ViewableData {
 		}
 		
 		return false;
+	}
+
+	public function setMetaData($key, $value) {
+		$key = strtolower($key);
+
+		$this->$key = $value;
 	}
 	
 	/**
@@ -140,19 +158,19 @@ class DocumentationPage extends ViewableData {
 			$this->entity->Link()
 		);
 	}
-
+	
 	/**
 	 * @return string
 	 */
 	public function getRelativeLink() {
-		$path = str_replace($this->entity->getPath(), '', $this->path);
+		$path = str_replace($this->entity->getPath(), '', $this->getPath());
 		$url = explode('/', $path);
 
 		$url = implode('/', array_map(function($a) {
 			return DocumentationHelper::clean_page_url($a);
 		}, $url));
 
-		$url = rtrim($url, '/') . '/';
+		$url = trim($url, '/') . '/';
 
 		return $url;
 	}
@@ -174,10 +192,10 @@ class DocumentationPage extends ViewableData {
 	 * @return string
 	 */
 	public function Link() {
-		return Controller::join_links(
+		return ltrim(Controller::join_links(
 			$this->entity->Link(),
 			$this->getRelativeLink()
-		);
+		), '/');
 	}
 	
 	/**
@@ -220,4 +238,12 @@ class DocumentationPage extends ViewableData {
 			}
 		}
 	} 
+
+	public function getVersion() {
+		return $this->entity->getVersion();
+	}
+
+	public function __toString() {
+		return sprintf(get_class($this) .': %s)', $this->getPath());
+	}
 }

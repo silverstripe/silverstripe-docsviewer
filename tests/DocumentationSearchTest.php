@@ -7,29 +7,56 @@
 
 class DocumentationSearchTest extends FunctionalTest {
 	
-	function setUp() {
+	public function setUp() {
 		parent::setUp();
-		
-		if(!DocumentationSearch::enabled()) return;
-		
-		DocumentationService::set_automatic_registration(false);
-		DocumentationService::register('docs-search', DOCSVIEWER_PATH . '/tests/docs-search/');
+
+		Config::nest();
+
+		// explicitly use dev/docs. Custom paths should be tested separately 
+		Config::inst()->update(
+			'DocumentationViewer', 'link_base', 'dev/docs'
+		);
+
+		// disable automatic module registration so modules don't interfere.
+		Config::inst()->update(
+			'DocumentationManifest', 'automatic_registration', false
+		);
+
+		Config::inst()->remove('DocumentationManifest', 'register_entities');
+		Config::inst()->update('DocumentationSearch', 'enabled', true);
+		Config::inst()->update(
+			'DocumentationManifest', 'register_entities', array(
+				array(
+					'Path' => DOCSVIEWER_PATH . "/tests/docs-search/",
+					'Title' => 'Docs Search Test',			)
+			)
+		);
+
+		$this->manifest = new DocumentationManifest(true);
 	}
 	
-	function testOpenSearchControllerAccessible() {
+	public function tearDown() {
+		parent::tearDown();
+		
+		Config::unnest();
+	}
+	
+	public function testOpenSearchControllerAccessible() {
 		$c = new DocumentationOpenSearchController();
-
 		$response = $c->handleRequest(new SS_HTTPRequest('GET', ''), DataModel::inst());
 		$this->assertEquals(404, $response->getStatusCode());
 		
-		// test accessing it when the search isn't active
-		DocumentationSearch::enable(false);
+		Config::inst()->update('DocumentationSearch', 'enabled', false);
+
 		$response = $c->handleRequest(new SS_HTTPRequest('GET', 'description/'), DataModel::inst());
 		$this->assertEquals(404, $response->getStatusCode());
 		
-		// test we get a response to the description. The meta data test will check
-		// that the individual fields are valid but we should check urls are there
-		DocumentationSearch::enable(true);
+		// test we get a response to the description. The meta data test will 
+		// check that the individual fields are valid but we should check urls 
+		// are there
+		
+		Config::inst()->update('DocumentationSearch', 'enabled', true);
+
 		$response = $c->handleRequest(new SS_HTTPRequest('GET', 'description'), DataModel::inst());
 		$this->assertEquals(200, $response->getStatusCode());
 		

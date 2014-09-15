@@ -59,7 +59,7 @@ a.application {
 p { 
 	font-size: 14px; 
 	line-height: 20px; 
-	margin: 0 0 10px;
+	margin: 0 0 25px;
 }
 
 .text-wrap {
@@ -128,7 +128,7 @@ h1 {
 	letter-spacing: -1px;
 }
 
-	h1 + p {
+	#table-of-contents + p {
 		font-size: 18px;
 		line-height: 20px;
 	}
@@ -204,7 +204,7 @@ img {
 
 /*! code */
 pre { 
-	margin: 20px 0; 
+	margin: 20px 0 30px; 
 	font: 13px/20px Monaco, 'Bitstream Vera Sans Mono',  'Courier New', monospace; 
 	background-color: #f6f7f8;
 	border: 1px solid #e9eaed;

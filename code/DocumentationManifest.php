@@ -43,13 +43,20 @@ class DocumentationManifest {
 	 */
 	private static $register_entities = array();
 
-	protected $base;
 	protected $cache;
 	protected $cacheKey;
+
 	protected $inited;
 	protected $forceRegen;
+
+	/**
+	 * @var array $pages
+	 */
 	protected $pages = array();
 
+	/**
+	 * @var DocumentationEntity
+	 */
 	private $entity;
 
 	/**
@@ -65,7 +72,6 @@ class DocumentationManifest {
 	 * @param bool $forceRegen Force the manifest to be regenerated.
 	 */
 	public function __construct($forceRegen = false) {
-		$this->setupEntities();
 		$this->cacheKey   = 'manifest';
 		$this->forceRegen = $forceRegen;
 
@@ -73,6 +79,8 @@ class DocumentationManifest {
 			'automatic_serialization' => true,
 			'lifetime' => null
 		));
+
+		$this->setupEntities();
 	}
 
 	/**
@@ -90,7 +98,7 @@ class DocumentationManifest {
 
 		foreach($registered as $details) {
 			// validate the details provided through the YAML configuration
-			$required = array('Path', 'Version', 'Title');
+			$required = array('Path', 'Title');
 
 			foreach($required as $require) {
 				if(!isset($details[$require])) {
@@ -98,30 +106,55 @@ class DocumentationManifest {
 				}
 			}
 
-			if(isset($this->registeredEntities[$details['Title']])) {
-				$entity = $this->registeredEntities[$details['Title']];
-			} else {
-				$entity = new DocumentationEntity(
-					$details['Path'],
-					$details['Title']
-				);
+			// if path is not an absolute value then assume it is relative from
+			// the BASE_PATH.
+			$path = $this->getRealPath($details['Path']);
 
-				$this->registeredEntities[$details['Title']] = $entity;
+			$key = (isset($details['Key'])) ? $details['Key'] : $details['Title'];
+	
+			if(!is_dir($path)) {
+				throw new Exception($path . ' is not a valid documentation directory');
 			}
 
-			$version = new DocumentationEntityVersion(
-				$entity,
-				Controller::join_links(BASE_PATH, $details['Path']),
-				$details['Version'],
-				(isset($details['Stable'])) ? $details['Stable'] : false
-			);
+			$version = (isset($details['Version'])) ? $details['Version'] : '';
 
-			$entity->addVersion($version);
+			$langs = scandir($path);
+			
+			if($langs) {
+				$possible = i18n::get_common_languages(true);
+	
+				foreach($langs as $k => $lang) {
+					if(isset($possible[$lang])) {
+						$entity = Injector::inst()->create(
+							'DocumentationEntity', $key
+						);
 
-			if(isset($details['DefaultEntity']) && $details['DefaultEntity']) {
-				$entity->setDefaultEntity(true);
+						$entity->setPath(Controller::join_links($path, $lang, '/'));
+						$entity->setTitle($details['Title']);
+						$entity->setLanguage($lang);
+						$entity->setVersion($version);
+
+						if(isset($details['Stable'])) {
+							$entity->setIsStable($details['Stable']);
+						}
+
+						if(isset($details['DefaultEntity'])) {
+							$entity->setIsDefaultEntity($details['DefaultEntity']);
+						}
+
+						$this->registeredEntities[] = $entity;
+					}
+				}
 			}
 		}
+	}
+
+	public function getRealPath($path) {
+		if(substr($path, 0, 1) != '/') {
+			$path = realpath(Controller::join_links(BASE_PATH, $path));
+		}
+
+		return $path;
 	}
 
 	/**
@@ -200,7 +233,7 @@ class DocumentationManifest {
 	 */
 	public function getPage($url) {
 		$pages = $this->getPages();
-		$url = rtrim($url, '/') . '/';
+		$url = $this->normalizeUrl($url);
 
 		if(!isset($pages[$url])) {
 			return null;
@@ -210,19 +243,15 @@ class DocumentationManifest {
 		$record = $pages[$url];
 
 		foreach($this->getEntities() as $entity) {
-			foreach($entity->getVersions() as $version) {
-				foreach($version->getSupportedLanguages() as $language) {
-					if(strpos($record['filepath'], $language->getPath()) !== false) {
-						$page =  Injector::inst()->create(
-							$record['type'], 
-							$language,
-							$record['basename'],
-							$record['filepath']
-						);
+			if(strpos($record['filepath'], $entity->getPath()) !== false) {
+				$page =  Injector::inst()->create(
+					$record['type'], 
+					$entity,
+					$record['basename'],
+					$record['filepath']
+				);
 
-						return $page;
-					}
-				}
+				return $page;
 			}
 		}
 	}
@@ -240,15 +269,10 @@ class DocumentationManifest {
 		));
 
 		foreach($this->getEntities() as $entity) {
-			foreach($entity->getVersions() as $version) {
-
-				foreach($version->getSupportedLanguages() as $k => $v) {
-					$this->entity = $v;
-					$this->handleFolder('', $this->entity->getPath(), 0);
-					
-					$finder->find($this->entity->getPath());
-				}
-			}
+			$this->entity = $entity;
+		
+			$this->handleFolder('', $this->entity->getPath(), 0);
+			$finder->find($this->entity->getPath());
 		}
 		
 		if ($cache) {
@@ -266,7 +290,13 @@ class DocumentationManifest {
 			'DocumentationFolder', $this->entity, $basename, $path
 		);
 
-		$this->pages[$folder->Link()] = array(
+		$link = ltrim(str_replace(
+			Config::inst()->get('DocumentationViewer', 'link_base'), 
+			'', 
+			$folder->Link()
+		), '/');
+
+		$this->pages[$link] = array(
 			'title' => $folder->getTitle(),
 			'basename' => $basename,
 			'filepath' => $path,
@@ -295,7 +325,13 @@ class DocumentationManifest {
 		// populate any meta data
 		$page->getMarkdown();
 
-		$this->pages[$page->Link()] = array(
+		$link = ltrim(str_replace(
+			Config::inst()->get('DocumentationViewer', 'link_base'), 
+			'', 
+			$page->Link()
+		), '/');
+		
+		$this->pages[$link] = array(
 			'title' => $page->getTitle(),
 			'filepath' => $path,
 			'basename' => $basename,
@@ -315,7 +351,13 @@ class DocumentationManifest {
 	public function generateBreadcrumbs($record, $base) {
 		$output = new ArrayList();
 
-		$parts = explode('/', $record->getRelativeLink());
+		$parts = explode('/', trim($record->getRelativeLink(), '/'));
+		
+		// the first part of the URL should be the language, so shift that off
+		// so we just have the core pages.
+		array_shift($parts);
+
+		// Add the base link.
 		$output->push(new ArrayData(array(
 			'Link' => $base->Link(),
 			'Title' => $base->Title
@@ -397,6 +439,15 @@ class DocumentationManifest {
 	}
 
 	/**
+	 * @param string
+	 *
+	 * @return string
+	 */
+	public function normalizeUrl($url) {
+		return trim($url, '/') .'/';
+	}
+
+	/**
 	 * Return the children of the provided record path.
 	 *
 	 * Looks for any pages in the manifest which have one more slash attached.
@@ -405,39 +456,112 @@ class DocumentationManifest {
 	 *
 	 * @return ArrayList
 	 */
-	public function getChildrenFor($base, $record, $recursive = true) {
+	public function getChildrenFor($path, $recursive = true) {
 		$output = new ArrayList();
-		$depth = substr_count($base, '/');
+		$base = Config::inst()->get('DocumentationViewer', 'link_base');
+		$path = $this->normalizeUrl($path);
+		$depth = substr_count($path, '/');
 
 		foreach($this->getPages() as $url => $page) {
-			if(strstr($url, $base) !== false) {
-				if(substr_count($url, '/') == ($depth + 1)) {
-					// found a child
-					if($base !== $record) {
-						$mode = (strstr($url, $record) !== false) ? 'current' : 'link';
-					} else {
-						$mode = 'link';
-					}
+			$pagePath = $this->normalizeUrl($page['filepath']);
 
-					$children = new ArrayList();
+			// check to see if this page is under the given path
+			if(strpos($pagePath, $path) === false) {
+				continue;
+			}
 
-					if($mode == 'current') {
-						if($recursive) {
-							$children = $this->getChildrenFor($url, $url, false);
-						}
-					}
+			// if the page is the index page then hide it from the menu 
+			if(strpos(strtolower($pagePath), '/index.md/')) {
+				continue;
+			}
 
-					$output->push(new ArrayData(array(
-						'Link' => $url,
-						'Title' => $page['title'],
-						'LinkingMode' => $mode,
-						'Children' => $children
-					)));
+			// only pull it up if it's one more level depth
+			if(substr_count($pagePath, DIRECTORY_SEPARATOR) == ($depth + 1)) {
+				// found a child
+				$mode = ($pagePath == $path) ? 'current' : 'link';
+				$children = new ArrayList();
+
+				if($mode == 'current' && $recursive) {
+				//	$children = $this->getChildrenFor($url, false);
 				}
+
+				$output->push(new ArrayData(array(
+					'Link' => Controller::join_links($base, $url, '/'),
+					'Title' => $page['title'],
+					'LinkingMode' => $mode,
+					'Children' => $children
+				)));
 			}
 		}
 
 		return $output;
 	}
 
+	/**
+	 * @param DocumentationEntity
+	 *
+	 * @return ArrayList
+	 */	
+	public function getAllVersions(DocumentationEntity $entity) {
+		$all = new ArrayList();
+
+		foreach($this->getEntities() as $check) {
+			if($check->getKey() == $entity->getKey()) {
+				if($check->getLanguage() == $entity->getLanguage()) {
+					$all->push($check);
+				}
+			}
+		}
+
+		return $all;
+	}
+
+	/**
+	 * @param DocumentationEntity
+	 *
+	 * @return DocumentationEntity
+	 */	
+	public function getStableVersion(DocumentationEntity $entity) {
+		foreach($this->getEntities() as $check) {
+			if($check->getKey() == $entity->getKey()) {
+				if($check->getLanguage() == $entity->getLanguage()) {
+					if($check->getIsStable()) {
+						return $check;
+					}
+				}
+			}
+		}
+
+		return $entity;
+	}
+
+	/**
+	 * @param DocumentationEntity
+	 *
+	 * @return ArrayList
+	 */	
+	public function getVersions($entity) {
+		if(!$entity) {
+			return null;
+		}
+
+		$output = new ArrayList();
+
+		foreach($this->getEntities() as $check) {
+			if($check->getKey() == $entity->getKey()) {
+				if($check->getLanguage() == $entity->getLanguage()) {
+					$same = ($check->getVersion() == $entity->getVersion());
+
+					$output->push(new ArrayList(array(
+						'Title' => $entity->getTitle(),
+						'Link' => $entity->getLink(),
+						'LinkingMode' => ($same) ? 'current' : 'link'
+					)));
+
+				}
+			}
+		}
+
+		return $output;
+	}
 }

@@ -11,10 +11,6 @@
 		<div class="wrapper">
 			<div id="header">
 				<h1><a href="$Link"><% _t('SILVERSTRIPEDOCUMENTATION', 'SilverStripe Documentation') %></a></h1>
-				
-				<div id="language">
-				 	$LanguageForm
-				</div>
 			</div>
 			
 			<div id="layout" class="clearfix">
@@ -36,7 +32,7 @@
 				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-				ga('create', '$GoogleAnalyticsCode', 'auto');  // Replace with your property ID.
+				ga('create', '$GoogleAnalyticsCode', 'auto');
 				ga('send', 'pageview');
 			</script>
 		<% end_if %>

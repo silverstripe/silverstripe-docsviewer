@@ -146,6 +146,58 @@
 		$("h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]").mouseleave(function() {
 			$(this).removeClass('hover');
 		});
+
+		$(".search input").live("keyup", function(e) {
+			clearTimeout($.data(this, 'timer'));
+
+			var string = $(this).val();
+			var self = $(this);
+
+			if (string == '') {
+				$(".search .autocomplete-results").hide();
+			} else {
+				var container;
+
+				if($(this).siblings('.autocomplete-results').length == 0) {
+					container = $("<div class='autocomplete-results'></div");
+					
+					$(this).after(container);
+				} else {
+					container = $(this).siblings('.autocomplete-results').first();
+				}
+
+				$(this).data('timer', setTimeout(function() {
+					if(string !== '') {
+						$.getJSON(
+							self.parents('form').attr('action'),
+							{ query: string },
+							function(results) {
+								if(results) {
+									var list = $("<ul></ul>");
+
+									$.each(results, function(i, elem) {
+										list.append(
+											$("<li></li>")
+												.append(
+													$("<a></a>").attr('href', elem.link).text(elem.title)
+												).append(
+													elem.path
+												)
+										);
+									});
+
+									container.append(list);
+								} else {
+									container.hide().removeClass('loading');
+								}
+							}
+						);
+					}
+
+					return false;
+				}, 100));
+			};
+		});
 		
 		/** ---------------------------------------------
 		 * LANGAUGE SELECTER

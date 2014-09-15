@@ -16,12 +16,11 @@ class RebuildLuceneDocsIndex extends BuildTask {
 	protected $description = "
 		Rebuilds the indexes used for the search engine in the docsviewer.";
 	
-	function run($request) {
+	public function run($request) {
 		$this->rebuildIndexes();
 	}
 	
-	function rebuildIndexes($quiet = false) {
-		require_once(DOCSVIEWER_PATH .'/thirdparty/markdown/markdown.php');
+	public function rebuildIndexes($quiet = false) {
 		require_once 'Zend/Search/Lucene.php';
 
 		ini_set("memory_limit", -1);
@@ -60,7 +59,8 @@ class RebuildLuceneDocsIndex extends BuildTask {
 		}
 
 		// includes registration
-		$pages = DocumentationHelper::get_all_documentation_pages();
+		$manifest = new DocumentationManifest(true);
+		$pages = $manifest->getPages();
 		
 		if($pages) {
 			$count = 0;
@@ -70,40 +70,54 @@ class RebuildLuceneDocsIndex extends BuildTask {
 			$error = error_reporting();
 			error_reporting('E_ALL ^ E_NOTICE');
 			
-			foreach($pages as $page) {
+			if(!Director::is_cli()) {
+				echo "<ul>";
+			}
+			foreach($pages as $url => $record) {
 				$count++;
+				$page = $manifest->getPage($url);
+				
+				$doc = new Zend_Search_Lucene_Document();
+				$content = $page->getHTML();
+				
+				$doc->addField(Zend_Search_Lucene_Field::Text('content', $content));
+				$doc->addField($titleField = Zend_Search_Lucene_Field::Text('Title', $page->getTitle()));
+				$doc->addField($breadcrumbField = Zend_Search_Lucene_Field::Text('BreadcrumbTitle', $page->getBreadcrumbTitle()));
 
-				if(!is_dir($page->getPath())) {
-					$doc = new Zend_Search_Lucene_Document();
-					$content = $page->getMarkdown();
-					if($content) $content = Markdown($content);
+				$doc->addField(Zend_Search_Lucene_Field::Keyword(
+					'Version', $page->getEntity()->getVersion()->getVersion()
+				));
 
-					$entity = ($entity = $page->getEntity()) ? $entity->getTitle() : "";
-					
-					$doc->addField(Zend_Search_Lucene_Field::Text('content', $content));
-					$doc->addField($titleField = Zend_Search_Lucene_Field::Text('Title', $page->getTitle()));
-					$doc->addField($breadcrumbField = Zend_Search_Lucene_Field::Text('BreadcrumbTitle', $page->getBreadcrumbTitle()));
-					$doc->addField(Zend_Search_Lucene_Field::Keyword('Version', $page->getVersion()));
-					$doc->addField(Zend_Search_Lucene_Field::Keyword('Language', $page->getLang()));
-					$doc->addField(Zend_Search_Lucene_Field::Keyword('Entity', $entity));
-					$doc->addField(Zend_Search_Lucene_Field::Keyword('Link', $page->getLink(false)));
-					
-					// custom boosts
-					$titleField->boost = 3;
-					$breadcrumbField->boost = 1.5;
+				$doc->addField(Zend_Search_Lucene_Field::Keyword(
+					'Language', $page->getEntity()->getLanguage()
+				));
 
-					$boost = Config::inst()->get('DocumentationSearch', 'boost_by_path');
+				$doc->addField(Zend_Search_Lucene_Field::Keyword(
+					'Entity', $entity
+				));
 
-					foreach($boost as $pathExpr => $boost) {
-						if(preg_match($pathExpr, $page->getRelativePath())) {
-							$doc->boost = $boost;
-						}
+				$doc->addField(Zend_Search_Lucene_Field::Keyword(
+					'Link', $page->Link()
+				));
+				
+				// custom boosts
+				$titleField->boost = 3;
+				$breadcrumbField->boost = 1.5;
+
+				$boost = Config::inst()->get('DocumentationSearch', 'boost_by_path');
+
+				foreach($boost as $pathExpr => $boost) {
+					if(preg_match($pathExpr, $page->getRelativeLink())) {
+						$doc->boost = $boost;
 					}
-					
-					$index->addDocument($doc);
 				}
 				
-				if(!$quiet) echo "adding ". $page->getPath() ."\n";
+				$index->addDocument($doc);
+				
+				if(!$quiet) {
+					if(Director::is_cli()) echo " * adding ". $page->getPath() ."\n";
+					else echo "<li>adding ". $page->getPath() ."</li>\n";
+				}
 			}
 			
 			error_reporting($error);
@@ -111,7 +125,9 @@ class RebuildLuceneDocsIndex extends BuildTask {
 
 		$index->commit();
 		
-		if(!$quiet) echo "complete.";
+		if(!$quiet) {
+			echo "complete.";
+		}
 	}
 }
 
@@ -121,7 +137,7 @@ class RebuildLuceneDocsIndex extends BuildTask {
  */
 class RebuildLuceneDocusIndex_Hourly extends HourlyTask {
 	
-	function process() {
+	public function process() {
 		$reindex = new RebuildLuceneDocusIndex();
 		
 		$reindex->rebuildIndexes(true);
