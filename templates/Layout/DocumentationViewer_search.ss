@@ -1,16 +1,19 @@
-<p>Your search for <strong>&quot;$SearchQuery.XML&quot;</strong> found $TotalResults result<% if TotalResults != 1 %>s<% end_if %>.</p>
-
 <% if AdvancedSearchEnabled %>
-	<h4><% _t('ADVANCEDSEARCH', 'Advanced Search') %></h4>
-	$AdvancedSearchForm
+	<div class="well">
+		$AdvancedSearchForm
+	</div>
 <% end_if %>
 
+
 <% if Results %>
-	<p>Showing page $ThisPage of $TotalPages</p>
+	<p class="intro">Your search for <strong>&quot;$SearchQuery.XML&quot;</strong> found $TotalResults result<% if TotalResults != 1 %>s<% end_if %>. Showing page $ThisPage of $TotalPages</p>
 
 	<% loop Results %>
-		<h2><a href="$Link"><% if BreadcrumbTitle %>$BreadcrumbTitle<% else %>$Title<% end_if %></a></h2>
-		<p>$Content.LimitCharacters(200)</p>
+		<div class="result">
+			<h2><a href="$Link">$Title</a></h2>
+			<p><small>$BreadcrumbTitle</small></p>
+			<p>$Content.LimitCharacters(200)</p>
+		</div>
 	<% end_loop %>
 	
 	<% if SearchPages %>

@@ -98,19 +98,7 @@
 
 			toc += '</ul></div>';
 
-			// Table of content location
-			var title = $('#content h1:first');
-			if (title.length > 0) {
-				title.after(toc);
-			} else {
-				var breadcrums = $('#content .doc-breadcrumbs');
-				
-				if (breadcrums.length > 0) {
-					breadcrums.after(toc);
-				} else {
-					$('#table-contents-holder').prepend(toc);
-				}
-			}
+			$('#table-contents-holder').prepend(toc);
 
 			// Toggle the TOC
 			$('#table-of-contents').attr('href', 'javascript:void()').toggle(

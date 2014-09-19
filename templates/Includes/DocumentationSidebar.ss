@@ -3,10 +3,12 @@
 		$DocumentationSearchForm
 		
 		<ul class="nav">
+			<li><a href="$BaseHref" class="top">Home</a></li>
+
 			<% loop Menu %>
 				<% if DefaultEntity %>
 					<% loop Children %>
-						<li class="$LinkingMode $FirstLast">
+						<li class="$LinkingMode <% if Last %>last<% end_if %>">
 							<a href="$Link" class="top">$Title</a>
 
 							<% if LinkingMode == current %>
@@ -20,7 +22,7 @@
 						</li>
 					<% end_loop %>
 				<% else %>
-					<li class="$LinkingMode $FirstLast"><a href="$Link" class="top">$Title <% if IsFolder %><span class="is-folder">&#9658;</span><% end_if %></a>
+					<li class="$LinkingMode <% if Last %>last<% end_if %>"><a href="$Link" class="top">$Title <% if IsFolder %><span class="is-folder">&#9658;</span><% end_if %></a>
 						<% if LinkingMode == current %>
 							<% if Children %>
 							<ul class="$FirstLast">

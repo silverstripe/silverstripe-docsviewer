@@ -22,7 +22,7 @@ class DocumentationViewerVersionWarning extends Extension {
 			return false;
 		}
 
-		$versions = $this->owner->getManifest()->getAllVersions($entity);
+		$versions = $this->owner->getManifest()->getAllVersionsOfEntity($entity);
 
 		if($entity->getIsStable()) {
 			return false;

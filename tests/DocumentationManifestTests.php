@@ -114,6 +114,10 @@ class DocumentationManifestTests extends SapphireTest {
 
 	}
 
+	public function testGetAllEntityVersions() {
+		
+	}
+
 	public function testGetStableVersion() {
 		
 	}

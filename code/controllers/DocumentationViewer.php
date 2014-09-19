@@ -359,8 +359,33 @@ class DocumentationViewer extends Controller {
 	 */
 	public function getContent() {
 		$page = $this->getPage();
+		$html = $page->getHTML();
+		$html = $this->replaceChildrenCalls($html);
 
-		return DBField::create_field("HTMLText", $page->getHTML());
+		return DBField::create_field("HTMLText", $html);
+	}
+
+	public function replaceChildrenCalls($html) {
+		$codes = new ShortcodeParser();
+		$codes->register('CHILDREN',  array($this, 'includeChildren'));
+
+		return $codes->parse($html);
+	}
+
+	public function includeChildren($args) {
+		if(isset($args['Folder'])) {
+			$children = $this->getManifest()->getChildrenFor(
+					Controller::join_links(dirname($this->record->getPath()), $args['Folder'])
+			);
+		} else {
+			$children = $this->getManifest()->getChildrenFor(
+				dirname($this->record->getPath())
+			);
+		}
+
+		return $this->customise(new ArrayData(array(
+			'Children' => $children
+		)))->renderWith('Includes/DocumentationPages');
 	}
 	
 	/**

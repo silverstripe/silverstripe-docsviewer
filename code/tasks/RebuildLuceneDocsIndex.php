@@ -67,8 +67,6 @@ class RebuildLuceneDocsIndex extends BuildTask {
 			
 			// iconv complains about all the markdown formatting
 			// turn off notices while we parse
-			$error = error_reporting();
-			error_reporting('E_ALL ^ E_NOTICE');
 			
 			if(!Director::is_cli()) {
 				echo "<ul>";
@@ -76,16 +74,19 @@ class RebuildLuceneDocsIndex extends BuildTask {
 			foreach($pages as $url => $record) {
 				$count++;
 				$page = $manifest->getPage($url);
-				
+
 				$doc = new Zend_Search_Lucene_Document();
+				$error = error_reporting();
+				error_reporting(E_ALL ^ E_NOTICE);
 				$content = $page->getHTML();
-				
+				error_reporting($error);
+
 				$doc->addField(Zend_Search_Lucene_Field::Text('content', $content));
 				$doc->addField($titleField = Zend_Search_Lucene_Field::Text('Title', $page->getTitle()));
 				$doc->addField($breadcrumbField = Zend_Search_Lucene_Field::Text('BreadcrumbTitle', $page->getBreadcrumbTitle()));
 
 				$doc->addField(Zend_Search_Lucene_Field::Keyword(
-					'Version', $page->getEntity()->getVersion()->getVersion()
+					'Version', $page->getEntity()->getVersion()
 				));
 
 				$doc->addField(Zend_Search_Lucene_Field::Keyword(
@@ -93,13 +94,13 @@ class RebuildLuceneDocsIndex extends BuildTask {
 				));
 
 				$doc->addField(Zend_Search_Lucene_Field::Keyword(
-					'Entity', $entity
+					'Entity', $page->getEntity()
 				));
 
 				$doc->addField(Zend_Search_Lucene_Field::Keyword(
 					'Link', $page->Link()
 				));
-				
+	
 				// custom boosts
 				$titleField->boost = 3;
 				$breadcrumbField->boost = 1.5;
@@ -107,20 +108,16 @@ class RebuildLuceneDocsIndex extends BuildTask {
 				$boost = Config::inst()->get('DocumentationSearch', 'boost_by_path');
 
 				foreach($boost as $pathExpr => $boost) {
-					if(preg_match($pathExpr, $page->getRelativeLink())) {
+					if(preg_match($pathExpr, $page->getRelativePath())) {
 						$doc->boost = $boost;
 					}
 				}
-				
 				$index->addDocument($doc);
-				
 				if(!$quiet) {
 					if(Director::is_cli()) echo " * adding ". $page->getPath() ."\n";
 					else echo "<li>adding ". $page->getPath() ."</li>\n";
 				}
 			}
-			
-			error_reporting($error);
 		}
 
 		$index->commit();

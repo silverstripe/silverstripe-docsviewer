@@ -16,13 +16,8 @@ class DocumentationSearchForm extends Form {
 
 		$this->disableSecurityToken();
 		$this->setFormMethod('GET');
+		$this->setFormAction($controller->Link('results'));
 		
-		if($controller->getPage()) {
-			$this->setFormAction($controller->getPage()->getEntity()->Link());
-		} else {
-			$this->setFormAction($controller->Link());
-		}
-
 		$this->addExtraClass('search');
 	}
 }

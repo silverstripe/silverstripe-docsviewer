@@ -15,12 +15,7 @@ class DocumentationPage extends ViewableData {
 	/**
 	 * @var string
 	 */
-	protected $title;
-
-	/**
-	 * @var string
-	 */
-	protected $summary;
+	protected $title, $summary, $introduction;
 
 	/**
 	 * @var DocumentationEntity
@@ -38,6 +33,8 @@ class DocumentationPage extends ViewableData {
 	 * @var string
 	 */
 	protected $filename;
+
+	protected $read = false;
 
 	/**
 	 * @param DocumentationEntity $entity
@@ -63,7 +60,7 @@ class DocumentationPage extends ViewableData {
 	 * @return string
 	 */
 	public function getBreadcrumbTitle($divider = ' - ') {
-		$pathParts = explode('/', trim($this->getRelativeLink(), '/'));
+		$pathParts = explode('/', trim($this->getRelativePath(), '/'));
 		
 		// from the page from this
 		array_pop($pathParts);
@@ -74,8 +71,16 @@ class DocumentationPage extends ViewableData {
 		$titleParts = array_map(array(
 			'DocumentationHelper', 'clean_page_name'
 		), $pathParts);
-		
-		array_unshift($titleParts, $this->getTitle());
+
+		$titleParts = array_filter($titleParts, function($val) {
+			if($val) {
+				return $val;
+			}
+		});
+
+		if($this->getTitle()) {
+			array_unshift($titleParts, $this->getTitle());
+		}
 
 		return implode($divider, $titleParts);
 	}
@@ -131,6 +136,8 @@ class DocumentationPage extends ViewableData {
 			
 				return $md;
 			}
+
+			$this->read = true;
 		}
 		catch(InvalidArgumentException $e) {
 
@@ -143,6 +150,14 @@ class DocumentationPage extends ViewableData {
 		$key = strtolower($key);
 
 		$this->$key = $value;
+	}
+
+	public function getIntroduction() {
+		if(!$this->read) {
+			$this->getMarkdown();
+		}
+		
+		return $this->introduction;
 	}
 	
 	/**
@@ -160,12 +175,15 @@ class DocumentationPage extends ViewableData {
 	}
 	
 	/**
+	 * This should return the link from the entity root to the page. The link
+	 * value has the cleaned version of the folder names. See 
+	 * {@link getRelativePath()} for the actual file path.
+	 *
 	 * @return string
 	 */
 	public function getRelativeLink() {
-		$path = str_replace($this->entity->getPath(), '', $this->getPath());
+		$path = $this->getRelativePath();
 		$url = explode('/', $path);
-
 		$url = implode('/', array_map(function($a) {
 			return DocumentationHelper::clean_page_url($a);
 		}, $url));
@@ -173,6 +191,17 @@ class DocumentationPage extends ViewableData {
 		$url = trim($url, '/') . '/';
 
 		return $url;
+	}
+
+	/**
+	 * This should return the link from the entity root to the page. For the url
+	 * polished version, see {@link getRelativeLink()}.
+	 *
+	 * @return string
+	 */
+	public function getRelativePath() {
+		return str_replace($this->entity->getPath(), '', $this->getPath());
+		
 	}
 
 	/**
@@ -217,14 +246,12 @@ class DocumentationPage extends ViewableData {
 				// find the key/value pairs
 				$intPattern = '/(?<key>[A-Za-z][A-Za-z0-9_-]+)[\t]*:[\t]*(?<value>[^:\n\r\/]+)/x';
 				$matches = preg_match_all($intPattern, $block[1], $meta);
-				
+	
 				foreach($meta['key'] as $index => $key) {
 					if(isset($meta['value'][$index])) {
-						
 						// check if a property exists for this key
 						if (property_exists(get_class(), $key)) {
 							$this->$key = $meta['value'][$index];
-
 							$metaDataFound = true;
 						}  
 					}

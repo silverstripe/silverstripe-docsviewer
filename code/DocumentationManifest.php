@@ -60,9 +60,9 @@ class DocumentationManifest {
 	private $entity;
 
 	/**
-	 * @var array
+	 * @var ArrayList
 	 */
-	private $registeredEntities = array();
+	private $registeredEntities;
 
 	/**
 	 * Constructs a new template manifest. The manifest is not actually built
@@ -74,6 +74,7 @@ class DocumentationManifest {
 	public function __construct($forceRegen = false) {
 		$this->cacheKey   = 'manifest';
 		$this->forceRegen = $forceRegen;
+		$this->registeredEntities = new ArrayList();
 
 		$this->cache = SS_Cache::factory('DocumentationManifest', 'Core', array(
 			'automatic_serialization' => true,
@@ -142,7 +143,7 @@ class DocumentationManifest {
 							$entity->setIsDefaultEntity($details['DefaultEntity']);
 						}
 
-						$this->registeredEntities[] = $entity;
+						$this->registeredEntities->push($entity);
 					}
 				}
 			}
@@ -158,7 +159,7 @@ class DocumentationManifest {
 	}
 
 	/**
-	 * @return array
+	 * @return ArrayList
 	 */
 	public function getEntities() {
 		return $this->registeredEntities;
@@ -300,7 +301,8 @@ class DocumentationManifest {
 			'title' => $folder->getTitle(),
 			'basename' => $basename,
 			'filepath' => $path,
-			'type' => 'DocumentationFolder'
+			'type' => 'DocumentationFolder',
+			'summary' => ''
 		);
 	}
 
@@ -472,7 +474,7 @@ class DocumentationManifest {
 
 			// if the page is the index page then hide it from the menu 
 			if(strpos(strtolower($pagePath), '/index.md/')) {
-				continue;
+				$pagePath = substr($pagePath, 0, strpos($pagePath, "index.md/"));
 			}
 
 			// only pull it up if it's one more level depth
@@ -489,6 +491,7 @@ class DocumentationManifest {
 					'Link' => Controller::join_links($base, $url, '/'),
 					'Title' => $page['title'],
 					'LinkingMode' => $mode,
+					'Summary' => $page['summary'],
 					'Children' => $children
 				)));
 			}
@@ -502,7 +505,7 @@ class DocumentationManifest {
 	 *
 	 * @return ArrayList
 	 */	
-	public function getAllVersions(DocumentationEntity $entity) {
+	public function getAllVersionsOfEntity(DocumentationEntity $entity) {
 		$all = new ArrayList();
 
 		foreach($this->getEntities() as $check) {
@@ -563,5 +566,24 @@ class DocumentationManifest {
 		}
 
 		return $output;
+	}
+
+	/**
+	 * Returns a sorted array of all the unique versions registered
+	 */
+	public function getAllVersions() {
+		$versions = array();
+		
+		foreach($this->getEntities() as $entity) {
+			$versions[$entity->getVersion()] = $entity->getVersion();
+		}
+		
+		$uniqueVersions = array_unique(
+			ArrayLib::flatten(array_values($versions))
+		);
+		
+		asort($uniqueVersions);
+		
+		return array_combine($uniqueVersions, $uniqueVersions);
 	}
 }

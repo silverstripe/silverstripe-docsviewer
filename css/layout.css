@@ -28,6 +28,27 @@ html {
 	border-radius: 3px;
 }
 
+.introduction {
+	margin: -30px -30px 30px;
+	padding: 30px;
+	background: rgb(3, 91, 136);
+}
+	.introduction h1 {
+		color: #fff;
+		margin-bottom: 20px;
+	}
+
+	.introduction p {
+		font-size: 16px;
+		line-height: 22px;
+		margin-bottom: 10px;
+		max-width: 80%;
+		text-shadow: 0 -1px rgba(0, 0, 0, 0.1);
+		color: #fff;
+		color: rgba(255, 255, 255, 0.8);
+	}
+
+
 .no-box {
 	padding: 15px;
 }
@@ -169,7 +190,9 @@ html {
 	float: left;
 }
 	#breadcrumbs p { 
-		font-size: 11px; margin: 0; color: #798D85;
+		font-size: 11px; 
+		margin: 0 0 5px 0; 
+		color: #798D85;
 	}
 
 
@@ -429,3 +452,55 @@ html {
 		.doc-breadcrumbs p a { 
 			color: #999; 
 		}
+
+.well {
+	min-height: 20px;
+	padding: 19px;
+	margin-bottom: 40px;
+	background-color: #f5f5f5;
+	border: 1px solid #e3e3e3;
+	border-radius: 4px;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+}
+	.well h4 {
+		margin-top: 0;
+	}
+
+.result {
+
+}
+	.result h2 {
+		margin-bottom: 0;
+	}
+
+.documentation_children {
+	overflow: hidden;
+	padding-bottom: 20px;
+}
+
+	.documentation_children ul {
+		margin: 0;
+	}
+
+	.documentation_children h3 {
+		font-size: 16px;
+		margin-bottom: 0 0 2px 0;
+	}
+
+	.documentation_children li {
+		float: left;
+		width: 33%;
+		margin: 0;
+		padding: 0 3% 0 0;
+		list-style: none;
+	}
+
+	.documentation_children li:nth-child(3n+1) {
+		clear: both;
+	}
+
+	.documentation_children p {
+		font-size: 13px;
+		opacity: 0.9;
+	}
