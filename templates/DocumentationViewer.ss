@@ -9,10 +9,6 @@
 	
 	<body>
 		<div class="wrapper">
-			<div id="header">
-				<h1><a href="$Link"><% _t('SILVERSTRIPEDOCUMENTATION', 'SilverStripe Documentation') %></a></h1>
-			</div>
-			
 			<div id="layout" class="clearfix">
 				<% include DocumentationSidebar %>
 
