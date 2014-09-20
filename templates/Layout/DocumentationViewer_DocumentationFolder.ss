@@ -7,8 +7,16 @@
 				<p>$Introduction</p>
 			<% end_if %>
 		</div>
+
+		<% if Breadcrumbs %>
+			<% include DocumentationBreadcrumbs %>
+		<% end_if %>
 	<% else %>
-		<h2>$Title</h2>
+		<% if Breadcrumbs %>
+			<% include DocumentationBreadcrumbs %>
+		<% end_if %>
+
+		<h1>$Title</h1>
 	<% end_if %>
 
 	<% include DocumentationVersions %>
@@ -17,14 +25,20 @@
 		<% include DocumentationVersion_warning %>
 	<% end_if %>
 
-
 	<% include DocumentationTableContents %>
 
-	<% loop Children %>
-		<ul>
-			<li><a href="$Link">$Title</a></li>
-		</ul>
-	<% end_loop %>
+	<% if Children %>
+		<div class="documentation_children">
+			<ul>
+				<% loop Children %>
+					<li>
+						<h3><a href="$Link">$Title</a></h3>
+						<% if Summary %><p>$Summary</p><% end_if %>
+					</li>
+				<% end_loop %>
+			</ul>
+		</div>
+	<% end_if %>
 
 	<% include DocumentationNextPrevious %>
 </div>
