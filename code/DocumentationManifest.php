@@ -275,7 +275,40 @@ class DocumentationManifest {
 			$this->handleFolder('', $this->entity->getPath(), 0);
 			$finder->find($this->entity->getPath());
 		}
+	
+		// groupds
+		$grouped = array();
+
+		foreach($this->pages as $url => $page) {
+			if(!isset($grouped[$page['entitypath']])) {
+				$grouped[$page['entitypath']] = array();
+			}
+
+			$grouped[$page['entitypath']][$url] = $page;
+		}
+
+		$this->pages = array();
+
+		foreach($grouped as $entity) {
+			uasort($entity, function($a, $b) {
+				// ensure parent directories are first
+				$a['filepath'] = str_replace('index.md', '', $a['filepath']);
+				$b['filepath'] = str_replace('index.md', '', $b['filepath']);
+
+				if(strpos($b['filepath'], $a['filepath']) === 0) {
+					return -1;
+				}
+
+				if ($a['filepath'] == $b['filepath']) {
+					return 0;
+				}
 		
+				return ($a['filepath'] < $b['filepath']) ? -1 : 1;
+			});
+
+			$this->pages = array_merge($this->pages, $entity);
+		}
+
 		if ($cache) {
 			$this->cache->save($this->pages, $this->cacheKey);
 		}
@@ -302,6 +335,7 @@ class DocumentationManifest {
 			'basename' => $basename,
 			'filepath' => $path,
 			'type' => 'DocumentationFolder',
+			'entitypath' => $this->entity->getPath(),
 			'summary' => ''
 		);
 	}
@@ -336,6 +370,7 @@ class DocumentationManifest {
 		$this->pages[$link] = array(
 			'title' => $page->getTitle(),
 			'filepath' => $path,
+			'entitypath' => $this->entity->getPath(),
 			'basename' => $basename,
 			'type' => 'DocumentationPage',
 			'summary' => $page->getSummary()
@@ -383,15 +418,17 @@ class DocumentationManifest {
 	 * Relies on the fact when the manifest was built, it was generated in 
 	 * order.
 	 *
-	 * @param string
+	 * @param string $filepath
+	 * @param string $entityBase
 	 *
 	 * @return ArrayData
 	 */
-	public function getNextPage($filepath) {
+	public function getNextPage($filepath, $entityBase) {
 		$grabNext = false;
+		$fallback = null;
 
 		foreach($this->getPages() as $url => $page) {
-			if($grabNext) {
+			if($grabNext && strpos($page['filepath'], $entityBase) !== false) {
 				return new ArrayData(array(
 					'Link' => $url,
 					'Title' => $page['title']
@@ -400,7 +437,17 @@ class DocumentationManifest {
 
 			if($filepath == $page['filepath']) {
 				$grabNext = true;
+			} else if(!$fallback && strpos($page['filepath'], $filepath) !== false) {
+				$fallback = new ArrayData(array(
+					'Link' => $url,
+					'Title' => $page['title'],
+					'Fallback' => true
+				));
 			}
+		}
+
+		if(!$grabNext) {
+			return $fallback;
 		}
 
 		return null;
@@ -412,11 +459,12 @@ class DocumentationManifest {
 	 * Relies on the fact when the manifest was built, it was generated in 
 	 * order.
 	 *
-	 * @param string
+	 * @param string $filepath
+	 * @param string $entityBase
 	 *
 	 * @return ArrayData
 	 */
-	public function getPreviousPage($filepath) {
+	public function getPreviousPage($filepath, $entityPath) {
 		$previousUrl = $previousPage = null;
 
 		foreach($this->getPages() as $url => $page) {
@@ -429,8 +477,10 @@ class DocumentationManifest {
 				}
 			}
 
-			$previousUrl = $url;
-			$previousPage = $page;
+			if(strpos($page['filepath'], $entityPath) !== false) {
+				$previousUrl = $url;
+				$previousPage = $page;
+			}
 		}
 
 		return null;
@@ -578,15 +628,15 @@ class DocumentationManifest {
 		$versions = array();
 		
 		foreach($this->getEntities() as $entity) {
-			$versions[$entity->getVersion()] = $entity->getVersion();
+			if($entity->getVersion()) {
+				$versions[$entity->getVersion()] = $entity->getVersion();
+			} else {
+				$versions['0.0'] = _t('DocumentationManifest.MASTER', 'Master');
+			}
 		}
 		
-		$uniqueVersions = array_unique(
-			ArrayLib::flatten(array_values($versions))
-		);
+		asort($versions);
 		
-		asort($uniqueVersions);
-		
-		return array_combine($uniqueVersions, $uniqueVersions);
+		return $versions;
 	}
 }

@@ -351,7 +351,7 @@ html {
 .hint,
 .note {
 	border: 1px dotted #a5b5b0;
-	padding: 13px 10px 0px 60px;
+	padding: 14px 10px 14px 60px;
 	clear: both;
 	margin: 9px 0 18px;
 	background: #f9fafa url(../../docsviewer/images/lightbulb.png) no-repeat 21px 14px;
