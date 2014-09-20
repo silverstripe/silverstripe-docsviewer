@@ -168,7 +168,15 @@ class DocumentationViewerTest extends FunctionalTest {
 	}
 
 
+	public function testGetLanguage() {
+		$v = new DocumentationViewer();
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.3/'), DataModel::inst());
 
+		$this->assertEquals('en', $v->getLanguage());
+
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.3/subfolder/subsubfolder/subsubpage/'), DataModel::inst());
+		$this->assertEquals('en', $v->getLanguage());
+	}
 	
 
 	public function testAccessingAll() {
