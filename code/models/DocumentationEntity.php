@@ -260,4 +260,17 @@ class DocumentationEntity extends ViewableData {
 	public function compare(DocumentationEntity $other) {
 		return version_compare($this->getVersion(), $other->getVersion());
 	}
+
+	/**
+	 * @return array
+	 */
+	public function toMap() {
+		return array(
+			'Key' => $this->key,
+			'Path' => $this->getPath(),
+			'Version' => $this->getVersion(),
+			'IsStable' => $this->getIsStable(),
+			'Language' => $this->getLanguage()
+		);
+	}
 }
