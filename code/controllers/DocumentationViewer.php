@@ -205,17 +205,22 @@ class DocumentationViewer extends Controller {
 		//
 		$languages = i18n::get_common_languages();
 
-		if(!$request->param('Lang')) {
+		if(!$lang = $request->param('Lang')) {
+			$lang = $request->param('Action');
+			$action = $request->param('ID');
+		} else {
+			$action = $request->param('Action');
+		}
+
+		if(!$lang) {
 			return $this->redirect($this->Link('en'));
-		} else if(!isset($languages[$request->param('Lang')])) {
+		} else if(!isset($languages[$lang])) {
 			return $this->httpError(404);
 		}
 
-		$action = $request->param('Action');
-		$allowed = $this->config()->allowed_actions;
+		$request->shift(10);
 
-		$request->shift();
-		$request->shift();
+		$allowed = $this->config()->allowed_actions;
 
 		if(in_array($action, $allowed)) {
 			//
@@ -246,9 +251,9 @@ class DocumentationViewer extends Controller {
 					"DocumentationViewer_{$type}",
 					"DocumentationViewer"
 				));
-
+				
 				return new SS_HTTPResponse($body, 200);
-			} else if(!$url || $url == $request->param('Lang')) {
+			} else if(!$url || $url == $lang) {
 				$body = $this->renderWith(array(
 					"DocumentationViewer_DocumentationFolder",
 					"DocumentationViewer"
@@ -257,7 +262,7 @@ class DocumentationViewer extends Controller {
 				return new SS_HTTPResponse($body, 200);
 			}
 		}
-		
+
 		return $this->httpError(404);
 	}
 
@@ -291,7 +296,11 @@ class DocumentationViewer extends Controller {
 	 * @return string
 	 */
 	public function getLanguage() {
-		return $this->request->param('Lang');
+		if(!$lang = $this->request->param('Lang')) {
+			$lang = $this->request->param('Action');
+		}
+
+		return $lang;
 	}
 
 
@@ -308,7 +317,10 @@ class DocumentationViewer extends Controller {
 		$record = $this->getPage();
 		$current = $this->getEntity();
 
+
+
 		foreach($entities as $entity) {
+
 			// only show entities with the same language
 			if($entity->getLanguage() !== $this->getLanguage()) {
 				continue;
@@ -393,11 +405,13 @@ class DocumentationViewer extends Controller {
 			return $this->getManifest()->getChildrenFor(
 				$this->record->getPath()
 			);
-		} else {
+		} else if($this->record) {
 			return $this->getManifest()->getChildrenFor(
 				dirname($this->record->getPath())
 			);
 		}
+
+		return new ArrayList();
 	}
 	
 	/**
@@ -589,7 +603,8 @@ class DocumentationViewer extends Controller {
 	 */
 	public function getNextPage() {
 		return ($this->record) 
-			? $this->getManifest()->getNextPage($this->record->getPath()) 
+			? $this->getManifest()->getNextPage(
+				$this->record->getPath(), $this->getEntity()->getPath()) 
 			: null;
 	}	
 
@@ -601,7 +616,8 @@ class DocumentationViewer extends Controller {
 	 */
 	public function getPreviousPage() {
 		return ($this->record) 
-			? $this->getManifest()->getPreviousPage($this->record->getPath()) 
+			? $this->getManifest()->getPreviousPage(
+				$this->record->getPath(), $this->getEntity()->getPath()) 
 			: null;
 	}
 	

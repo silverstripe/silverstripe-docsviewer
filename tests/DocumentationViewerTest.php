@@ -60,6 +60,8 @@ class DocumentationViewerTest extends FunctionalTest {
 			)
 		);
 
+		Config::inst()->update('SSViewer', 'theme_enabled', false);
+
 		$this->manifest = new DocumentationManifest(true);
 	}
 	
@@ -69,45 +71,20 @@ class DocumentationViewerTest extends FunctionalTest {
 		Config::unnest();
 	}
 
-
-	public function testGetMenu() {
-		$v = new DocumentationViewer();
-		// check with children
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.3/'), DataModel::inst());
-
-		$expected = array(
-			'dev/docs/en/doc_test/2.3/sort/' => 'Sort',
-			'dev/docs/en/doc_test/2.3/subfolder/' => 'Subfolder',
-			'dev/docs/en/doc_test/2.3/test/' => 'Test'
-		);
-
-		$actual = $v->getMenu()->first()->Children->map('Link', 'Title');
-		$this->assertEquals($expected, $actual);
-
-
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/'), DataModel::inst());
-		$this->assertEquals('current', $v->getMenu()->first()->LinkingMode);
-
-		// 2.4 stable release has 1 child page (not including index)
-		$this->assertEquals(1, $v->getMenu()->first()->Children->count());
-
-		// menu should contain all the english entities
-		$expected = array(
-			'dev/docs/en/doc_test/' => 'Doc Test',
-			'dev/docs/en/documentationvieweraltmodule1/' => 'DocumentationViewerAltModule1',
-			'dev/docs/en/documentationvieweraltmodule2/' => 'DocumentationViewerAltModule2'
-		);
-
-		$this->assertEquals($expected, $v->getMenu()->map('Link', 'Title'));
-
-		
-	}
-
 	/**
 	 * This tests that all the locations will exist if we access it via the urls.
 	 */
 	public function testLocationsExists() {
 		$this->autoFollowRedirection = false;
+
+		$response = $this->get('dev/docs/en/doc_test/2.3/subfolder/');
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
+
+		$response = $this->get('dev/docs/en/doc_test/2.3/subfolder/subsubfolder/');
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
+
+		$response = $this->get('dev/docs/en/doc_test/2.3/subfolder/subsubfolder/subsubpage/');
+		$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
 
 		$response = $this->get('dev/docs/en/');
 		$this->assertEquals($response->getStatusCode(), 200, 'Lists the home index');
@@ -115,10 +92,6 @@ class DocumentationViewerTest extends FunctionalTest {
 		$response = $this->get('dev/docs/');
 		$this->assertEquals($response->getStatusCode(), 302, 'Go to english view');
 
-
-		$response = $this->get('dev/docs/en/doc_test/2.3/subfolder/');
-		$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
-		
 
 		$response = $this->get('dev/docs/en/doc_test/3.0/empty.md');
 		$this->assertEquals(301, $response->getStatusCode(), 'Direct markdown links also work. They should redirect to /empty/');
@@ -166,6 +139,41 @@ class DocumentationViewerTest extends FunctionalTest {
 		$response = $this->get('dev/docs/dk/');
 		$this->assertEquals($response->getStatusCode(), 404, 'Access a language that doesn\'t exist');
 	}
+
+
+	public function testGetMenu() {
+		$v = new DocumentationViewer();
+		// check with children
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.3/'), DataModel::inst());
+
+		$expected = array(
+			'dev/docs/en/doc_test/2.3/sort/' => 'Sort',
+			'dev/docs/en/doc_test/2.3/subfolder/' => 'Subfolder',
+			'dev/docs/en/doc_test/2.3/test/' => 'Test'
+		);
+
+		$actual = $v->getMenu()->first()->Children->map('Link', 'Title');
+		$this->assertEquals($expected, $actual);
+
+
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/'), DataModel::inst());
+		$this->assertEquals('current', $v->getMenu()->first()->LinkingMode);
+
+		// 2.4 stable release has 1 child page (not including index)
+		$this->assertEquals(1, $v->getMenu()->first()->Children->count());
+
+		// menu should contain all the english entities
+		$expected = array(
+			'dev/docs/en/doc_test/' => 'Doc Test',
+			'dev/docs/en/documentationvieweraltmodule1/' => 'DocumentationViewerAltModule1',
+			'dev/docs/en/documentationvieweraltmodule2/' => 'DocumentationViewerAltModule2'
+		);
+
+		$this->assertEquals($expected, $v->getMenu()->map('Link', 'Title'));
+
+		
+	}
+
 
 
 	public function testGetLanguage() {
