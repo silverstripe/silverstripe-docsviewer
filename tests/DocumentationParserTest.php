@@ -6,7 +6,7 @@
  */
 class DocumentationParserTest extends SapphireTest {
 	
-	protected $entity, $entityAlt, $page, $subPage, $subSubPage, $filePage, $metaDataPage;
+	protected $entity, $entityAlt, $page, $subPage, $subSubPage, $filePage, $metaDataPage, $indexPage;
 
 	public function tearDown() {
 		parent::tearDown();
@@ -65,7 +65,118 @@ class DocumentationParserTest extends SapphireTest {
 			DOCSVIEWER_PATH . '/tests/docs-parser/en/MetaDataTest.md'
 		);
 
+		$this->indexPage = new DocumentationPage(
+			$this->entity,
+			'index.md',
+			DOCSVIEWER_PATH. '/tests/docs/en/index.md'
+		);
+
 		$manifest = new DocumentationManifest(true);
+	}
+
+	public function testRelativeLinks() {
+		// index.md
+		$result = DocumentationParser::rewrite_relative_links(
+			$this->indexPage->getMarkdown(), 
+			$this->indexPage
+		);
+		
+		$this->assertContains(
+			'[link: subfolder index](dev/docs/en/documentationparsertest/2.4/subfolder/)',
+			$result
+		);
+
+		// test.md
+
+		$result = DocumentationParser::rewrite_relative_links(
+			$this->page->getMarkdown(), 
+			$this->page
+		);
+		
+		$this->assertContains(
+			'[link: subfolder index](dev/docs/en/documentationparsertest/2.4/subfolder/)',
+			$result
+		);
+		$this->assertContains(
+			'[link: subfolder page](dev/docs/en/documentationparsertest/2.4/subfolder/subpage/)',
+			$result
+		);
+		$this->assertContains(
+			'[link: http](http://silverstripe.org)',
+			$result
+		);
+		$this->assertContains(
+			'[link: api](api:DataObject)',
+			$result
+		);
+
+		
+		$result = DocumentationParser::rewrite_relative_links(
+			$this->subPage->getMarkdown(), 
+			$this->subPage
+		);
+
+		# @todo this should redirect to /subpage/
+		$this->assertContains(
+			'[link: relative](dev/docs/en/documentationparsertest/2.4/subfolder/subpage.md/)',
+			$result
+		);
+		
+		$this->assertContains(
+			'[link: absolute index](dev/docs/en/documentationparsertest/2.4/)',
+			$result
+		);
+
+		# @todo this should redirect to /
+		$this->assertContains(
+			'[link: absolute index with name](dev/docs/en/documentationparsertest/2.4/index/)',
+			$result
+		);
+
+		$this->assertContains(
+			'[link: relative index](dev/docs/en/documentationparsertest/2.4/)',
+			$result
+		);
+		
+		$this->assertContains(
+			'[link: relative parent page](dev/docs/en/documentationparsertest/2.4/test/)',
+			$result
+		);
+		
+		$this->assertContains(
+			'[link: absolute parent page](dev/docs/en/documentationparsertest/2.4/test/)',
+			$result
+		);
+		
+		$result = DocumentationParser::rewrite_relative_links(
+			$this->subSubPage->getMarkdown(), 
+			$this->subSubPage
+		);
+		
+		$this->assertContains(
+			'[link: absolute index](dev/docs/en/documentationparsertest/2.4/)',
+			$result
+		);
+
+		$this->assertContains(
+			'[link: relative index](dev/docs/en/documentationparsertest/2.4/subfolder/)',
+			$result
+		);
+
+		$this->assertContains(
+			'[link: relative parent page](dev/docs/en/documentationparsertest/2.4/subfolder/subpage/)',
+			$result
+		);
+
+		$this->assertContains(
+			'[link: relative grandparent page](dev/docs/en/documentationparsertest/2.4/test/)',
+			$result
+		);
+
+		$this->assertContains(
+			'[link: absolute page](dev/docs/en/documentationparsertest/2.4/test/)',
+			$result
+		);
 	}
 
 	public function testGenerateHtmlId() {
@@ -207,92 +318,7 @@ HTML;
 		
 	}
 		
-	public function testRelativeLinks() {
-		$result = DocumentationParser::rewrite_relative_links(
-			$this->page->getMarkdown(), 
-			$this->page
-		);
 
-		$this->assertContains(
-			'[link: subfolder index](dev/docs/en/documentationparsertest/2.4/subfolder/)',
-			$result
-		);
-		$this->assertContains(
-			'[link: subfolder page](dev/docs/en/documentationparsertest/2.4/subfolder/subpage)',
-			$result
-		);
-		$this->assertContains(
-			'[link: http](http://silverstripe.org)',
-			$result
-		);
-		$this->assertContains(
-			'[link: api](api:DataObject)',
-			$result
-		);
-		
-		$result = DocumentationParser::rewrite_relative_links(
-			$this->subPage->getMarkdown(), 
-			$this->subPage
-		);
-
-		$this->assertContains(
-			'[link: relative](dev/docs/en/documentationparsertest/2.4/subfolder/subpage.md)',
-			$result
-		);
-		
-		$this->assertContains(
-			'[link: absolute index](dev/docs/en/documentationparsertest/2.4/)',
-			$result
-		);
-		$this->assertContains(
-			'[link: absolute index with name](dev/docs/en/documentationparsertest/2.4/index)',
-			$result
-		);
-		$this->assertContains(
-			'[link: relative index](dev/docs/en/documentationparsertest/2.4/)',
-			$result
-		);
-		
-		$this->assertContains(
-			'[link: relative parent page](dev/docs/en/documentationparsertest/2.4/test)',
-			$result
-		);
-		
-		$this->assertContains(
-			'[link: absolute parent page](dev/docs/en/documentationparsertest/2.4/test)',
-			$result
-		);
-		
-		$result = DocumentationParser::rewrite_relative_links(
-			$this->subSubPage->getMarkdown(), 
-			$this->subSubPage
-		);
-		
-		$this->assertContains(
-			'[link: absolute index](dev/docs/en/documentationparsertest/2.4/)',
-			$result
-		);
-
-		$this->assertContains(
-			'[link: relative index](dev/docs/en/documentationparsertest/2.4/subfolder/)',
-			$result
-		);
-
-		$this->assertContains(
-			'[link: relative parent page](dev/docs/en/documentationparsertest/2.4/subfolder/subpage)',
-			$result
-		);
-
-		$this->assertContains(
-			'[link: relative grandparent page](dev/docs/en/documentationparsertest/2.4/test)',
-			$result
-		);
-
-		$this->assertContains(
-			'[link: absolute page](dev/docs/en/documentationparsertest/2.4/test)',
-			$result
-		);
-	}
 
 	public function testRetrieveMetaData() {
 		DocumentationParser::retrieve_meta_data($this->metaDataPage);

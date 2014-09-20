@@ -384,9 +384,19 @@ class DocumentationParser {
 		// relative path (relative to module base folder), without the filename.
 		// For "sapphire/en/current/topics/templates", this would be "templates"
 		$relativePath = dirname($page->getRelativePath());
-		
+
+		if(strpos($page->getRelativePath(), 'index.md')) {
+			$relativeLink = $page->getRelativeLink();
+		} else {
+			$relativeLink = dirname($page->getRelativeLink());
+		}
+
 		if($relativePath == '.') {
 			$relativePath = '';
+		}
+
+		if($relativeLink == ".") {
+			$relativeLink = '';
 		}
 		
 		// file base link
@@ -416,10 +426,10 @@ class DocumentationParser {
 					// Rewrite public URL
 					if(preg_match('/^\//', $url)) {
 						// Absolute: Only path to module base
-						$relativeUrl = Controller::join_links($baselink, $url);
+						$relativeUrl = Controller::join_links($baselink, $url, '/');
 					} else {
 						// Relative: Include path to module base and any folders
-						$relativeUrl = Controller::join_links($baselink, $relativePath, $url);
+						$relativeUrl = Controller::join_links($baselink, $relativeLink, $url, '/');
 					}
 				}
 				
