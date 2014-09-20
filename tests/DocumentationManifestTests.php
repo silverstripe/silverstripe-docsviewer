@@ -91,34 +91,69 @@ class DocumentationManifestTests extends SapphireTest {
 	}
 
 	public function testGetNextPage() {
-
+		$this->markTestIncomplete();
 	}
 
 	public function testGetPreviousPage() {
-
+		$this->markTestIncomplete();
 	}
 
 	public function testGetPage() {
-
+		$this->markTestIncomplete();
 	}
 
 	public function testGenerateBreadcrumbs() {
-
+		$this->markTestIncomplete();
 	}
 
 	public function testGetChildrenFor() {
+		$expected = array(
+			array('Title' => 'Test', 'LinkingMode' => 'link')
+		);
 
+		$this->assertDOSContains($expected, $this->manifest->getChildrenFor(
+			DOCSVIEWER_PATH . "/tests/docs/en/"
+		));
+
+		$expected = array(
+			array('Title' => 'ChangeLog', 'LinkingMode' => 'current'),
+			array('Title' => 'Tutorials'),
+			array('Title' => 'Empty')
+		);
+
+		$this->assertDOSContains($expected, $this->manifest->getChildrenFor(
+			DOCSVIEWER_PATH . '/tests/docs-v3.0/en/',
+			DOCSVIEWER_PATH . '/tests/docs-v3.0/en/ChangeLog.md'
+		));
 	}
 
 	public function testGetAllVersions() {
+		$expected = array(
+			'2.3' => '2.3',
+			'2.4' => '2.4',
+			'3.0' => '3.0'
+		);
 
+		$this->assertEquals($expected, $this->manifest->getAllVersions());
 	}
 
 	public function testGetAllEntityVersions() {
+		$expected = array(
+			'Version' => '2.3',
+			'Version' => '2.4',
+			'Version' => '3.0'
+		);
+
+		$entity = $this->manifest->getEntities()->find('Language', 'en');
+
+		$this->assertEquals(3, $this->manifest->getAllVersionsOfEntity($entity)->count());
+
+		$entity = $this->manifest->getEntities()->find('Language', 'de');
 		
+		$this->assertEquals(1, $this->manifest->getAllVersionsOfEntity($entity)->count());
 	}
 
 	public function testGetStableVersion() {
-		
+		$this->markTestIncomplete();
 	}
 }
