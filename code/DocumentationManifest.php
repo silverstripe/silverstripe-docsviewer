@@ -355,10 +355,6 @@ class DocumentationManifest {
 
 		$parts = explode('/', trim($record->getRelativeLink(), '/'));
 		
-		// the first part of the URL should be the language, so shift that off
-		// so we just have the core pages.
-		array_shift($parts);
-
 		// Add the base link.
 		$output->push(new ArrayData(array(
 			'Link' => $base->Link(),
@@ -446,7 +442,14 @@ class DocumentationManifest {
 	 * @return string
 	 */
 	public function normalizeUrl($url) {
-		return trim($url, '/') .'/';
+		$url = trim($url, '/') .'/';
+
+		// if the page is the index page then hide it from the menu 
+		if(strpos(strtolower($url), '/index.md/')) {
+			$url = substr($url, 0, strpos($url, "index.md/"));
+		}
+
+		return $url;
 	}
 
 	/**
@@ -458,33 +461,33 @@ class DocumentationManifest {
 	 *
 	 * @return ArrayList
 	 */
-	public function getChildrenFor($path, $recursive = true) {
+	public function getChildrenFor($entityPath, $recordPath = null) {
+		if(!$recordPath) {
+			$recordPath = $entityPath;
+		}
+		
 		$output = new ArrayList();
 		$base = Config::inst()->get('DocumentationViewer', 'link_base');
-		$path = $this->normalizeUrl($path);
-		$depth = substr_count($path, '/');
+		$entityPath = $this->normalizeUrl($entityPath);
+		$recordPath = $this->normalizeUrl($recordPath);
+
+		$depth = substr_count($entityPath, '/');
 
 		foreach($this->getPages() as $url => $page) {
 			$pagePath = $this->normalizeUrl($page['filepath']);
 
 			// check to see if this page is under the given path
-			if(strpos($pagePath, $path) === false) {
+			if(strpos($pagePath, $entityPath) === false) {
 				continue;
-			}
-
-			// if the page is the index page then hide it from the menu 
-			if(strpos(strtolower($pagePath), '/index.md/')) {
-				$pagePath = substr($pagePath, 0, strpos($pagePath, "index.md/"));
 			}
 
 			// only pull it up if it's one more level depth
 			if(substr_count($pagePath, DIRECTORY_SEPARATOR) == ($depth + 1)) {
-				// found a child
-				$mode = ($pagePath == $path) ? 'current' : 'link';
+				$mode = (strpos($recordPath, $pagePath) !== false) ? 'current' : 'link';
 				$children = new ArrayList();
 
-				if($mode == 'current' && $recursive) {
-				//	$children = $this->getChildrenFor($url, false);
+				if($mode == 'current') {
+					$children = $this->getChildrenFor($pagePath, $recordPath);
 				}
 
 				$output->push(new ArrayData(array(

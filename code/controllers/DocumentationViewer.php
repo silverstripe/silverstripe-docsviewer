@@ -35,13 +35,6 @@ class DocumentationViewer extends Controller {
 	/**
 	 * @var array
 	 */
-	private static $url_handlers = array(
-		'$Lang/$Action' => 'handleAction'
-	);
-	
-	/**
-	 * @var array
-	 */
 	private static $allowed_actions = array(
 		'all',
 		'results',
@@ -323,12 +316,13 @@ class DocumentationViewer extends Controller {
 
 			$mode = 'link';	
 			$children = new ArrayList();
+
 			if($entity->hasRecord($record) || $entity->getIsDefaultEntity()) {
 				$mode = 'current';
 
 				// add children
 				$children = $this->getManifest()->getChildrenFor(
-					$entity->getPath()
+					$entity->getPath(), ($record) ? $record->getPath() : $entity->getPath()
 				);
 			} else {
 				if($current && $current->getKey() == $entity->getKey()) {
@@ -372,6 +366,9 @@ class DocumentationViewer extends Controller {
 		return $codes->parse($html);
 	}
 
+	/**
+	 * Short code parser
+	 */
 	public function includeChildren($args) {
 		if(isset($args['Folder'])) {
 			$children = $this->getManifest()->getChildrenFor(
@@ -386,6 +383,21 @@ class DocumentationViewer extends Controller {
 		return $this->customise(new ArrayData(array(
 			'Children' => $children
 		)))->renderWith('Includes/DocumentationPages');
+	}
+
+	/**
+	 * @return ArrayList
+	 */
+	public function getChildren() {
+		if($this->record instanceof DocumentationFolder) {
+			return $this->getManifest()->getChildrenFor(
+				$this->record->getPath()
+			);
+		} else {
+			return $this->getManifest()->getChildrenFor(
+				dirname($this->record->getPath())
+			);
+		}
 	}
 	
 	/**
@@ -416,6 +428,9 @@ class DocumentationViewer extends Controller {
 		return ($this->record) ? $this->record->getEntity() : null;
 	}
 
+	/**
+	 * @return ArrayList
+	 */
 	public function getVersions() {
 		return $this->manifest->getVersions($this->getEntity);
 	}
