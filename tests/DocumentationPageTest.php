@@ -77,5 +77,14 @@ class DocumentationPageTest extends SapphireTest {
 		);
 		
 		$this->assertEquals('Basic - Sort - Doctest', $page->getBreadcrumbTitle());
+
+		$page = new DocumentationFolder(
+			$this->entity,
+			'',
+			DOCSVIEWER_PATH . '/tests/docs/en/sort/'
+		);
+
+		$this->assertEquals('Sort - Doctest', $page->getBreadcrumbTitle());
+		
 	}
 }
