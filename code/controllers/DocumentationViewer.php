@@ -55,6 +55,11 @@ class DocumentationViewer extends Controller {
 	protected $record;
 
 	/**
+	 * @var DocumentationManifest
+	 */
+	protected $manifest;
+
+	/**
 	 * @config
 	 *
 	 * @var string same as the routing pattern set through Director::addRules().
@@ -287,9 +292,13 @@ class DocumentationViewer extends Controller {
 	 * @return DocumentationManifest
 	 */
 	public function getManifest() {
-		$flush = SapphireTest::is_running_test() || (isset($_GET['flush']));
+		if(!$this->manifest) {
+			$flush = SapphireTest::is_running_test() || (isset($_GET['flush']));
 		
-	 	return new DocumentationManifest($flush);
+	 		$this->manifest = new DocumentationManifest($flush);
+	 	}
+
+	 	return $this->manifest;
 	}
 
 	/**
@@ -316,8 +325,6 @@ class DocumentationViewer extends Controller {
 		$output = new ArrayList();
 		$record = $this->getPage();
 		$current = $this->getEntity();
-
-
 
 		foreach($entities as $entity) {
 
@@ -637,5 +644,9 @@ class DocumentationViewer extends Controller {
 	 */
 	public function getDocumentationTitle() {
 		return $this->config()->get('documentation_title');
+	}
+
+	public function getDocumentationBaseHref() {
+		return Config::inst()->get('DocumentationViewer', 'link_base');
 	}
 }
