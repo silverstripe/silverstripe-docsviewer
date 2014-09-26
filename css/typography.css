@@ -72,9 +72,9 @@ ul {
 	padding: 0;
 }
 
-li, dd { 
+li, dd, li p { 
 	font-size: 13px; 
-	margin: 0 0 5px 0;
+	margin: 0 0 15px 0;
 	line-height: 20px;
 }
 
@@ -131,6 +131,10 @@ h1 {
 	#table-of-contents + p {
 		font-size: 18px;
 		line-height: 20px;
+	}
+
+	h1 + p {
+		margin-top: 30px;
 	}
 
 h2 { 
@@ -216,10 +220,12 @@ pre {
 }
 	pre code { 
 		background: none; 
+		font-weight: normal;
 	}
 	
 code {
-	font: 11px/15px Monaco, 'Bitstream Vera Sans Mono', Courier, monospace;
+	font: 13px/15px Monaco, 'Bitstream Vera Sans Mono', Courier, monospace;
+	background: #dff1ff;
 }
 	code a { 
 		color: #4E5661; 

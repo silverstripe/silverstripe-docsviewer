@@ -88,6 +88,10 @@ html {
 		border: none;
 		font-weight: bold;
 	}
+
+	#sidebar li {
+		margin: 0;
+	}
 	
 	#sidebar .nav .current li {
 		font-weight: normal;
@@ -349,61 +353,48 @@ html {
 }
 
 .hint,
-.note {
-	border: 1px dotted #a5b5b0;
-	padding: 14px 10px 14px 60px;
+.note,
+.notice,
+.warning,
+.info,
+.pageSkip {
+	border: 1px solid #ddd;
+	padding: 24px 20px 24px 60px;
 	clear: both;
-	margin: 9px 0 18px;
-	background: #f9fafa url(../../docsviewer/images/lightbulb.png) no-repeat 21px 14px;
+	position: relative;
+	margin: 10px 0 20px;
+	background: #f9fafa url(../../docsviewer/images/lightbulb.png) no-repeat 16px 26px;
+	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
 }
 	.typography .note h3,
 	.typography .hint h3 {
 		line-height: 27px;
 	}
+
 .pageSkip {
 	background-color: #f9fafa;
 	border: 1px solid #a5b5b0;
-	padding: 8px 10px 8px 10px;
 	text-align: center;
-	margin: 9px 0 18px;
 }
+
 .notice {
-	border: 1px solid #D3C200;
-	padding: 13px 10px 0px 60px;
-	margin: 9px 0 18px;
-	position: relative;
+	border-color: #D3C200;
 	background: #FFFAC6 url(../../docsviewer/images/notification.png) no-repeat 18px 11px;
 }
-	p.notice {
-		padding-bottom: 18px;
-	}
+
 .warning {
-	border: 1px solid #f8c3cd;
-	padding: 13px 10px 13px 60px;
-	clear: both;
-	margin: 7px 0 21px;
-	position: relative;
-	background: #fdf1f3 url(../../docsviewer/images/error_button.png) no-repeat 18px 11px;
+	border-color: #f8c3cd;
+	background: #fdf1f3 url(../../docsviewer/images/error_button.png) no-repeat 12px 17px;
 }
+
 .info {
-	border: 1px solid #6baad8;
-	padding: 13px 10px 0px 60px;
-	clear: both;
-	margin: 9px 0 18px;
-	position: relative;
+	border-color: #6baad8;
 	background: #f7fcff url(../../docsviewer/images/info_button.png) no-repeat 18px 11px;
 }
 
 	.warning p {
 		margin-bottom: 0;
 	}
-
-/* Used on 404 page not found */
-.warningBox { margin: 0 0 18px; }
-
-#content .warningBox p { 
-	margin: 0;
-}
 
 .warningBoxTop {
 	padding: 10px 10px 10px 70px;
@@ -475,7 +466,10 @@ html {
 
 	.documentation_children h3 {
 		font-size: 16px;
-		margin-bottom: 0 0 2px 0;
+		border-top: 1px solid #ddd;
+		padding-top: 19px;
+		margin-top: 0;
+		margin-bottom: 0 0 1px 0;
 	}
 
 	.documentation_children li {
