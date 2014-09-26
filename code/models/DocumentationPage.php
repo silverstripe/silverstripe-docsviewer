@@ -103,16 +103,28 @@ class DocumentationPage extends ViewableData {
 		$page = DocumentationHelper::clean_page_name($this->filename);
 
 		if($page == "Index") {
-			// look at the folder name
-			$parts = explode("/", $this->getPath());
-			array_pop($parts); // name
-
-			$page = DocumentationHelper::clean_page_name(
-				array_pop($parts)
-			);
+			return $this->getTitleFromFolder();
 		}
 
 		return $page;
+	}
+
+	public function getTitleFromFolder() {
+		$folder = $this->getPath();
+		$entity = $this->getEntity()->getPath();
+
+		$folder = str_replace('index.md', '', $folder);
+		
+		// if it's the root of the entity then we want to use the entity name
+		// otherwise we'll get 'En' for the entity folder
+		if($folder == $entity) {
+			return $this->getEntity()->getTitle();
+		} else {
+			$path = explode(DIRECTORY_SEPARATOR, trim($folder, DIRECTORY_SEPARATOR));
+			$folderName = array_pop($path);
+		}
+
+		return DocumentationHelper::clean_page_name($folderName);
 	}
 	
 	/**

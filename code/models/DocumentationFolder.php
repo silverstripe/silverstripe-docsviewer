@@ -14,10 +14,7 @@ class DocumentationFolder extends DocumentationPage {
 	 * @return string
 	 */
 	public function getTitle() {
-		$path = explode(DIRECTORY_SEPARATOR, trim($this->getPath(), DIRECTORY_SEPARATOR));
-		$folderName = array_pop($path);
-
-		return DocumentationHelper::clean_page_name($folderName);
+		return $this->getTitleFromFolder();
 	}
 
 }
