@@ -60,6 +60,11 @@ class DocumentationManifest {
 	private $entity;
 
 	/**
+	 * @var boolean
+	 */
+	private $automaticallyPopulated = false;
+
+	/**
 	 * @var ArrayList
 	 */
 	private $registeredEntities;
@@ -91,6 +96,10 @@ class DocumentationManifest {
 	 * loaded through investigating the file system for `docs` folder.
 	 */
 	public function setupEntities() {
+		if($this->registeredEntities->Count() > 0) {
+			return;
+		}
+
 		if(Config::inst()->get('DocumentationManifest', 'automatic_registration')) {
 			$this->populateEntitiesFromInstall();
 		}
@@ -172,23 +181,26 @@ class DocumentationManifest {
 	 * @return void
 	 */
 	public function populateEntitiesFromInstall() {
-		$entities = array();
+		if($this->automaticallyPopulated) {
+			// already run
+			return;
+		}
 
 		foreach(scandir(BASE_PATH) as $key => $entity) {
 			if($key == "themes") {
 				continue;
 			}
 
-			$dir = is_dir(Controller::join_links(BASE_PATH, $entity));
-			
-			if($dir) {
+			$dir = Controller::join_links(BASE_PATH, $entity);
+		
+			if(is_dir($dir)) {
 				// check to see if it has docs
 				$docs = Controller::join_links($dir, 'docs');
 
 				if(is_dir($docs)) {
 					$entities[] = array(
-						'BasePath' => $entity,
-						'Folder' => $key,
+						'Path' => $docs,
+						'Title' => DocumentationHelper::clean_page_name($entity),
 						'Version' => 'master',
 						'Stable' => true
 					);
@@ -197,8 +209,10 @@ class DocumentationManifest {
 		}
 
 		Config::inst()->update(
-			'DocumentationManifest', 'registered_entities', $entities
+			'DocumentationManifest', 'register_entities', $entities
 		);
+
+		$this->automaticallyPopulated = true;
 	}
 
 	/**
