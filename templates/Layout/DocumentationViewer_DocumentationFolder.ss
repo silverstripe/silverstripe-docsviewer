@@ -38,6 +38,17 @@
 				<% end_loop %>
 			</ul>
 		</div>
+	<% else %>
+		<div class="documentation_children">
+			<ul>
+				<% loop Menu %>
+					<li>
+						<h3><a href="$Link">$Title</a></h3>
+						<% if Summary %><p>$Summary</p><% end_if %>
+					</li>
+				<% end_loop %>
+			</ul>
+		</div>
 	<% end_if %>
 
 	<% include DocumentationNextPrevious %>
