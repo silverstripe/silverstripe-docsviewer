@@ -168,10 +168,12 @@ class DocumentationPage extends ViewableData {
 	 * @return string
 	 */
 	public function getHTML() {
-		return DocumentationParser::parse(
+		$html = DocumentationParser::parse(
 			$this, 
 			$this->entity->Link()
 		);
+
+		return $html;
 	}
 	
 	/**

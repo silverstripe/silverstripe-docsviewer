@@ -54,11 +54,15 @@ class DocumentationParser {
 
 		$md = self::rewrite_api_links($md, $page);
 		$md = self::rewrite_heading_anchors($md, $page);
+
 		$md = self::rewrite_code_blocks($md);
-		
+
 		$parser = new ParsedownExtra();
-		
-		return $parser->text($md);
+		$parser->setBreaksEnabled(false);
+
+		$text = $parser->text($md);
+
+		return $text;
 	}
 	
 	public static function rewrite_code_blocks($md) {
@@ -66,46 +70,73 @@ class DocumentationParser {
 		$inner = false;
 		$mode = false;
 		$end = false;
+		$debug = false;
 
 		$lines = explode("\n", $md);
 		$output = array();
 
 		foreach($lines as $i => $line) {
+			if($debug) var_dump('Line '. ($i + 1) . ' '. $line);
+
 			// if line just contains whitespace, continue down the page.
 			// Prevents code blocks with leading tabs adding an extra line.
-			if(preg_match('/^\s$/', $line)) {
+			if(preg_match('/^\s$/', $line) && !$started) {
 				continue;
 			}
 
 			if(!$started && preg_match('/^[\t]*:::\s*(.*)/', $line, $matches)) {
 				// first line with custom formatting
+				if($debug) var_dump('Starts a new block with :::');
+
 				$started = true;
 				$mode = self::CODE_BLOCK_COLON;
-				$output[$i] = sprintf('<pre class="brush: %s">', (isset($matches[1])) ? $matches[1] : "");
+
+				$output[$i] = sprintf('```%s', (isset($matches[1])) ? trim($matches[1]) : "");
+
 			} else if(!$started && preg_match('/^\t*```\s*(.*)/', $line, $matches)) {
+				if($debug) var_dump('Starts a new block with ```'); 
+
 				$started = true;
 				$mode = self::CODE_BLOCK_BACKTICK;
-				$output[$i] = sprintf('<pre class="brush: %s">', (isset($matches[1])) ? $matches[1] : "");
+
+				$output[$i] = sprintf('```%s', (isset($matches[1])) ? trim($matches[1]) : "");
 			} else if($started && $mode == self::CODE_BLOCK_BACKTICK) {
 				// inside a backtick fenced box
 				if(preg_match('/^\t*```\s*/', $line, $matches)) {
+					if($debug) var_dump('End a block with ```'); 
+
 					// end of the backtick fenced box. Unset the line that contains the backticks
 					$end = true;
 				}
 				else {
+					if($debug) var_dump('Still in a block with ```'); 
+
 					// still inside the line.
-					$output[$i] = ($started) ? '' : '<pre>' . "\n";
-					$output[$i] .= htmlentities($line, ENT_COMPAT, 'UTF-8');
+					if(!$started) {
+						$output[$i - 1] = '```';
+					}
+
+					$output[$i] = $line;
 					$inner = true;
 				}
 			} else if(preg_match('/^[\ ]{0,3}?[\t](.*)/', $line, $matches)) {
+
 				// inner line of block, or first line of standard markdown code block
 				// regex removes first tab (any following tabs are part of the code).
-				$output[$i] = ($started) ? '' : '<pre>' . "\n";
-				$output[$i] .= htmlentities($matches[1], ENT_COMPAT, 'UTF-8');
+				if(!$started) {
+					if($debug) var_dump('Start code block because of tab. No fence'); 
+
+					$output[$i - 1] = '```';
+				} else {
+					if($debug) var_dump('Content is still tabbed so still inner');
+				}
+
+				$output[$i] = $matches[1];
 				$inner = true;
 				$started = true;
-			} else if($started && $inner && $mode == self::CODE_BLOCK_COLON && trim($line) === "") {
+			} else if($started && $inner && trim($line) === "") {
+				if($debug) var_dump('Inner line of code block'); 
+
 				// still inside a colon based block, if the line is only whitespace 
 				// then continue with  with it. We can continue with it for now as 
 				// it'll be tidied up later in the $end section.
@@ -121,14 +152,19 @@ class DocumentationParser {
 				// and include this line. The edge case where this will fail is
 				// new the following segment contains a code block as well as it
 				// will not open.
+				if($debug) {
+					var_dump('Contains something that isnt code. So end the code.');
+				}
+
 				$end = true;
 				$output[$i] = $line;
-				$i = $i -1;
+				$i = $i - 1;
 			} else {
 				$output[$i] = $line;
 			}
 
 			if($end) {
+				if($debug) var_dump('End of code block');
 				$output = self::finalize_code_output($i, $output);
 
 				// reset state
@@ -137,34 +173,27 @@ class DocumentationParser {
 		}
 
 		if($started) {
-			$output = self::finalize_code_output($i, $output);
+			$output = self::finalize_code_output($i+1, $output);
 		}
 
-		return join("\n", $output);
+		return implode("\n", $output);
 
 	}
 
 	/**
+	 * Adds the closing code backticks. Removes trailing whitespace.
+	 *
 	 * @param int
 	 * @param array
 	 *
 	 * @return array
 	 */
 	private static function finalize_code_output($i, $output) {
-		$j = $i;
-
-		while(isset($output[$j]) && trim($output[$j]) === "") {
-			unset($output[$j]);
-		
-			$j--;
+		if(isset($output[$i]) && trim($output[$i])) {
+			$output[$i] .= "\n```\n";
 		}
-				
-		if(isset($output[$j])) {
-			$output[$j] .= "</pre>\n";
-		}
-
 		else {
-			$output[$j] = "</pre>\n\n";
+			$output[$i] = "```";
 		}
 
 		return $output;				

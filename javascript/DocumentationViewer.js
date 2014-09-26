@@ -198,6 +198,23 @@
 			$("#Form_LanguageForm").submit();
 		});
 		
+		/** ---------------------------------------------
+		 * SYNTAX HIGHLIGHTER 
+		 *
+		 * As the Markdown parser now uses the GFM structure (```yml) this does
+		 * not work with SyntaxHighlighter. The below translates the GFM output
+		 * to one SyntaxHighter can use
+		 */
+		$("pre").each(function(i, elem) {
+			var code = $(elem).find('code[class^=language]');
+
+			if(code.length > 0) {
+				var brush = code.attr('class').replace('language-', '');
+				$(elem).attr('class', 'brush: '+ brush);
+				$(elem).html(code.html());
+			}
+		});
+		
 		SyntaxHighlighter.defaults.toolbar = false;
 		SyntaxHighlighter.all();
 	});

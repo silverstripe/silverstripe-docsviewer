@@ -19,10 +19,13 @@ test
 		and tab indent
 		and escaped < brackets
 		
+
 Normal text after code block
 
 	code block
 	without formatting prefix
+
+How about fences?
 
 ```
 Fenced code block

@@ -24,7 +24,7 @@
 
 	<% include DocumentationTableContents %>
 		
-	$Content
+	$Content.RAW
 
 	<% include DocumentationNextPrevious %>
 

@@ -368,7 +368,7 @@ class DocumentationViewer extends Controller {
 		$html = $page->getHTML();
 		$html = $this->replaceChildrenCalls($html);
 
-		return DBField::create_field("HTMLText", $html);
+		return $html;
 	}
 
 	public function replaceChildrenCalls($html) {

@@ -73,6 +73,93 @@ class DocumentationParserTest extends SapphireTest {
 
 		$manifest = new DocumentationManifest(true);
 	}
+	public function testRewriteCodeBlocks() {
+		$codePage = new DocumentationPage(
+			$this->entityAlt,
+			'CodeSnippets.md',
+			DOCSVIEWER_PATH . '/tests/docs-parser/en/CodeSnippets.md'
+		);
+
+		$result = DocumentationParser::rewrite_code_blocks(
+			$codePage->getMarkdown()
+		);
+
+		$expected = <<<HTML
+#### <% control Foo %>
+```
+code block
+<% without formatting prefix %>
+```
+Paragraph with a segment of <% foo %>
+```
+code block
+
+that has a line in it
+```
+This is a yaml block
+
+```yaml
+foo: bar
+
+baz: qux
+```
+This is a yaml block with tab in that new line
+
+```yaml
+foo: bar
+
+baz: qux
+```
+HTML;
+
+		$this->assertEquals($expected, $result, 'Code blocks support line breaks');
+
+		$result = DocumentationParser::rewrite_code_blocks(
+			$this->page->getMarkdown()
+		);
+
+		$expected = <<<HTML
+```php
+code block
+with multiple
+lines
+	and tab indent
+	and escaped < brackets
+	
+```
+Normal text after code block
+HTML;
+
+		$this->assertContains($expected, $result, 'Custom code blocks with ::: prefix');		
+		
+		$expected = <<<HTML
+```
+code block
+without formatting prefix
+```
+HTML;
+		$this->assertContains($expected, $result, 'Traditional markdown code blocks');
+
+		$expected = <<<HTML
+```
+Fenced code block
+```
+HTML;
+		$this->assertContains($expected, $result, 'Backtick code blocks');
+		
+		$expected = <<<HTML
+```php
+Fenced box with
+
+new lines in
+
+between
+
+content
+```
+HTML;
+		$this->assertContains($expected, $result, 'Backtick with newlines');
+	}
 
 	public function testRelativeLinks() {
 		// index.md
@@ -188,52 +275,7 @@ class DocumentationParserTest extends SapphireTest {
 		$this->assertEquals('title-one', DocumentationParser::generate_html_id('Title--one'));
 	}
 
-	public function testRewriteCodeBlocks() {
-		$result = DocumentationParser::rewrite_code_blocks(
-			$this->page->getMarkdown()
-		);
 
-		$expected = <<<HTML
-<pre class="brush: php">
-code block
-with multiple
-lines
-	and tab indent
-	and escaped &lt; brackets</pre>
-
-Normal text after code block
-HTML;
-
-
-		$this->assertContains($expected, $result, 'Custom code blocks with ::: prefix');		
-		
-		$expected = <<<HTML
-<pre>
-code block
-without formatting prefix</pre>
-HTML;
-		$this->assertContains($expected, $result, 'Traditional markdown code blocks');
-
-		$expected = <<<HTML
-<pre class="brush: ">
-Fenced code block
-</pre>
-HTML;
-		$this->assertContains($expected, $result, 'Backtick code blocks');
-		
-		$expected = <<<HTML
-<pre class="brush: php">
-Fenced box with
-
-new lines in
-
-between
-
-content
-</pre>
-HTML;
-		$this->assertContains($expected, $result, 'Backtick with newlines');
-	}
 	
 	public function testImageRewrites() {
 		
@@ -317,7 +359,6 @@ HTML;
 		$this->assertContains('## Heading duplicate {#heading-duplicate-3}', $result);
 		
 	}
-		
 
 
 	public function testRetrieveMetaData() {
