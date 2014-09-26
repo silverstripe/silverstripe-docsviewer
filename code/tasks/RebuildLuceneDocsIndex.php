@@ -127,16 +127,3 @@ class RebuildLuceneDocsIndex extends BuildTask {
 		}
 	}
 }
-
-/**
- * @package docsviewer
- * @subpackage tasks
- */
-class RebuildLuceneDocusIndex_Hourly extends HourlyTask {
-	
-	public function process() {
-		$reindex = new RebuildLuceneDocusIndex();
-		
-		$reindex->rebuildIndexes(true);
-	}
-}
