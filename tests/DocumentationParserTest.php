@@ -321,7 +321,7 @@ HTML;
 			$result
 		);
 		$this->assertContains(
-			'[DataObject::$has_one](http://api.silverstripe.org/search/lookup/?q=DataObject::$has_one&version=2.4&module=documentationparsertest)',
+			'[DataObject::$has_one](http://api.silverstripe.org/search/lookup/?q=DataObject%3A%3A%24has_one&version=2.4&module=documentationparsertest)',
 			$result
 		);
 	}

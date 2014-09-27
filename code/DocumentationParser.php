@@ -298,9 +298,9 @@ class DocumentationParser {
 				
 				$url = sprintf(
 					self::$api_link_base, 
-					$subject, 
-					$page->getVersion(), 
-					$page->getEntity()->getKey()
+					urlencode($subject), 
+					urlencode($page->getVersion()), 
+					urlencode($page->getEntity()->getKey())
 				);
 
 				$md = str_replace(
@@ -325,9 +325,9 @@ class DocumentationParser {
 				$subject = $links[1][$i];
 				$url = sprintf(
 					self::$api_link_base, 
-					$subject, 
-					$page->getVersion(), 
-					$page->getEntity()->getKey()
+					urlencode($subject), 
+					urlencode($page->getVersion()), 
+					urlencode($page->getEntity()->getKey())
 				);
 
 				$md = str_replace(

@@ -221,11 +221,13 @@ pre {
 	pre code { 
 		background: none; 
 		font-weight: normal;
+		padding: 0;
 	}
 	
 code {
 	font: 13px/15px Monaco, 'Bitstream Vera Sans Mono', Courier, monospace;
-	background: #dff1ff;
+	background: #fffde8;
+	padding: 2px;
 }
 	code a { 
 		color: #4E5661; 
