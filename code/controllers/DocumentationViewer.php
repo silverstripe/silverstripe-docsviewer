@@ -124,8 +124,8 @@ class DocumentationViewer extends Controller {
 	 */
 	public function canView() {
 		return (Director::isDev() || Director::is_cli() || 
-			!self::$check_permission || 
-			Permission::check(self::$check_permission)
+			!$this->config()->get('check_permission') || 
+			Permission::check($this->config()->get('check_permission'))
 		);
 	}
 
