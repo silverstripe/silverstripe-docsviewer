@@ -15,7 +15,7 @@ class DocumentationParser {
 	/**
 	 * @var string Rewriting of api links in the format "[api:MyClass]" or "[api:MyClass::$my_property]".
 	 */
-	public static $api_link_base = 'http://api.silverstripe.org/search/lookup/?q=%s&version=%s&module=%s';
+	public static $api_link_base = 'http://api.silverstripe.org/search/lookup/?q=%s&amp;version=%s&amp;module=%s';
 	
 	/**
 	 * @var array
@@ -305,7 +305,7 @@ class DocumentationParser {
 
 				$md = str_replace(
 					$match, 
-					sprintf('<code>[%s](%s)</code>', $title, $url),
+					sprintf('[%s](%s)', $title, $url),
 					$md
 				);
 			}
@@ -325,19 +325,19 @@ class DocumentationParser {
 				$subject = $links[1][$i];
 				$url = sprintf(
 					self::$api_link_base, 
-					urlencode($subject), 
-					urlencode($page->getVersion()), 
-					urlencode($page->getEntity()->getKey())
+					$subject, 
+					$page->getVersion(), 
+					$page->getEntity()->getKey()
 				);
 
 				$md = str_replace(
 					$match, 
-					sprintf('<code>[%s](%s)</code>', $subject, $url),
+					sprintf('[%s](%s)', $subject, $url),
 					$md
 				);
 			}
 		}
-		
+
 		return $md;
 	}
 	
