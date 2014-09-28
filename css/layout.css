@@ -399,8 +399,8 @@ html {
 }
 
 .info {
-	border-color: #6baad8;
-	background: #f7fcff url(../../docsviewer/images/info_button.png) no-repeat 18px 11px;
+	border-color: #BDDEF6;
+	background: #f7fcff url(../../docsviewer/images/info_button.png) no-repeat 18px 17px;
 }
 
 	.warning p {

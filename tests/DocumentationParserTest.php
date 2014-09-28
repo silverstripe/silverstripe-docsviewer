@@ -317,11 +317,11 @@ HTML;
 		);
 
 		$this->assertContains(
-			'[link: api](http://api.silverstripe.org/search/lookup/?q=DataObject&version=2.4&module=documentationparsertest)',
+			'[link: api](http://api.silverstripe.org/search/lookup/?q=DataObject&amp;version=2.4&amp;module=documentationparsertest)',
 			$result
 		);
 		$this->assertContains(
-			'[DataObject::$has_one](http://api.silverstripe.org/search/lookup/?q=DataObject%3A%3A%24has_one&version=2.4&module=documentationparsertest)',
+			'[DataObject::$has_one](http://api.silverstripe.org/search/lookup/?q=DataObject::$has_one&amp;version=2.4&amp;module=documentationparsertest)',
 			$result
 		);
 	}
