@@ -15,7 +15,17 @@
 							<% if Children %>
 							<ul class="$FirstLast">
 								<% loop Children %>
-									<li><a href="$Link" class="$LinkingMode">$Title</a></li>
+									<li><a href="$Link" class="$LinkingMode">$Title</a>
+										<% if LinkingMode == current %>
+										<% if Children %>
+											<ul class="$FirstLast">
+												<% loop Children %>
+													<li><a href="$Link" class="$LinkingMode">$Title</a></li>
+												<% end_loop %>
+											</ul>
+										<% end_if %>
+										<% end_if %>
+									</li>
 								<% end_loop %>
 							</ul><% end_if %>
 							<% end_if %>
@@ -27,7 +37,17 @@
 							<% if Children %>
 							<ul class="$FirstLast">
 								<% loop Children %>
-									<li><a href="$Link" class="$LinkingMode">$Title</a></li>
+									<li><a href="$Link" class="$LinkingMode">$Title</a>
+										<% if LinkingMode == current %>
+										<% if Children %>
+											<ul class="$FirstLast">
+												<% loop Children %>
+													<li><a href="$Link" class="$LinkingMode">$Title</a></li>
+												<% end_loop %>
+											</ul>
+										<% end_if %>
+										<% end_if %>
+									</li>
 								<% end_loop %>
 							</ul><% end_if %>
 						<% end_if %>
