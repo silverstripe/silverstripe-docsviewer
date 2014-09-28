@@ -356,6 +356,7 @@ html {
 .note,
 .notice,
 .warning,
+.alert,
 .info,
 .pageSkip {
 	border: 1px solid #ddd;
@@ -374,6 +375,7 @@ html {
 .hint p,
 .note p,
 .notice p,
+.alert p,
 .warning p,
 .info p {
 	margin-bottom: 0;
@@ -390,7 +392,8 @@ html {
 	background: #FFFAC6 url(../../docsviewer/images/notification.png) no-repeat 18px 18px;
 }
 
-.warning {
+.warning,
+.alert {
 	border-color: #f8c3cd;
 	background: #fdf1f3 url(../../docsviewer/images/error_button.png) no-repeat 12px 17px;
 }
