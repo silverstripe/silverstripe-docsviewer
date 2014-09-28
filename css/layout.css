@@ -371,15 +371,23 @@ html {
 		line-height: 27px;
 	}
 
+.hint p,
+.note p,
+.notice p,
+.warning p,
+.info p {
+	margin-bottom: 0;
+}
 .pageSkip {
 	background-color: #f9fafa;
 	border: 1px solid #a5b5b0;
 	text-align: center;
 }
 
-.notice {
+.notice,
+.note {
 	border-color: #D3C200;
-	background: #FFFAC6 url(../../docsviewer/images/notification.png) no-repeat 18px 11px;
+	background: #FFFAC6 url(../../docsviewer/images/notification.png) no-repeat 18px 18px;
 }
 
 .warning {
