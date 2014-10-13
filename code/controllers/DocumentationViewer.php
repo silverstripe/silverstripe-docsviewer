@@ -391,12 +391,24 @@ class DocumentationViewer extends Controller {
 	public function includeChildren($args) {
 		if(isset($args['Folder'])) {
 			$children = $this->getManifest()->getChildrenFor(
-					Controller::join_links(dirname($this->record->getPath()), $args['Folder'])
+				Controller::join_links(dirname($this->record->getPath()), $args['Folder'])
 			);
 		} else {
 			$children = $this->getManifest()->getChildrenFor(
 				dirname($this->record->getPath())
 			);
+		}
+
+		if(isset($args['Exclude'])) {
+			$exclude = explode(',', $args['Exclude']);
+
+			foreach($children as $k => $child) {
+				foreach($exclude as $e) {
+					if($child->Link == Controller::join_links($this->record->Link(), strtolower($e), '/')) {
+						unset($children[$k]);
+					}
+				}
+			}
 		}
 
 		return $this->customise(new ArrayData(array(
