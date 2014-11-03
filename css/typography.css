@@ -1,11 +1,9 @@
 /*! text selection */
-::-moz-selection {
-	background: #fff7a8; 
+::-moz-selection {	
 	text-shadow:none;
 }
 
-::selection { 
-	background: #fff7a8;
+::selection { 	
 	text-shadow: none;
 }
 
@@ -57,8 +55,8 @@ a.application {
 
 /*! pargraphs */
 p { 
-	font-size: 14px; 
-	line-height: 20px; 
+	font-size: 15px; 
+	line-height: 1.5; 
 	margin: 0 0 25px;
 }
 
@@ -73,9 +71,9 @@ ul {
 }
 
 li, dd, li p { 
-	font-size: 13px; 
+	font-size: 15px; 
 	margin: 0 0 10px 0;
-	line-height: 20px;
+	line-height: 1.5;
 }
 
 li { 
@@ -126,6 +124,7 @@ h1 {
 	margin-bottom: 10px; 
 	margin-top: 0;
 	letter-spacing: -1px;
+	color:rgb(3, 91, 136);
 }
 
 	#table-of-contents + p {
@@ -144,7 +143,7 @@ h2 {
 	border-top: 1px solid #eee;
 	padding-top: 29px;
 	letter-spacing: -1px;
-	color: #283134; 
+	color: rgb(3, 91, 136); 
 }
 
 h3 { 
@@ -199,8 +198,7 @@ h6 .heading-anchor-link {
 /*! images */
 img {
 	max-width: 100%;
-	border: 1px solid #ccc;
-	box-shadow: 0 0 6px #ddd;
+	border: 1px solid #ccc;	
 	padding: 6px;
 	margin: 10px 0;
 	border-radius: 3px;
@@ -226,7 +224,7 @@ pre {
 	
 code {
 	font: 13px/15px Monaco, 'Bitstream Vera Sans Mono', Courier, monospace;
-	background: #fffde8;
+	background: #ecf0f1;
 	padding: 2px;
 }
 	code a { 
@@ -283,7 +281,7 @@ table {
 	}
 		table thead th {
 			padding: 7px 10px 6px;
-			font-size: 12px;
+			font-size: 15px;
 			text-align: left;
 			border-right: 1px solid #c3cdca;
 		}
@@ -293,7 +291,7 @@ table {
 	}
 
 	table td { 
-		font-size: 12px; 
+		font-size: 15px; 
 		line-height: 21px;
 		padding: 7px;
 		border-right: 1px solid #c3cdca;

@@ -11,12 +11,12 @@
 						<li class="$LinkingMode <% if Last %>last<% end_if %>">
 							<a href="$Link" class="top">$Title</a>
 
-							<% if LinkingMode == current %>
+							<% if LinkingMode == section || LinkingMode == current %>
 							<% if Children %>
 							<ul class="$FirstLast">
 								<% loop Children %>
 									<li><a href="$Link" class="$LinkingMode">$Title</a>
-										<% if LinkingMode == current %>
+										<% if LinkingMode == section || LinkingMode == current %>
 										<% if Children %>
 											<ul class="$FirstLast">
 												<% loop Children %>
@@ -33,12 +33,12 @@
 					<% end_loop %>
 				<% else %>
 					<li class="$LinkingMode <% if Last %>last<% end_if %>"><a href="$Link" class="top">$Title <% if IsFolder %><span class="is-folder">&#9658;</span><% end_if %></a>
-						<% if LinkingMode == current %>
+						<% if LinkingMode == section || LinkingMode == current %>
 							<% if Children %>
 							<ul class="$FirstLast">
 								<% loop Children %>
 									<li><a href="$Link" class="$LinkingMode">$Title</a>
-										<% if LinkingMode == current %>
+										<% if LinkingMode == section || LinkingMode == current %>
 										<% if Children %>
 											<ul class="$FirstLast">
 												<% loop Children %>

@@ -210,12 +210,18 @@
 
 			if(code.length > 0) {
 				var brush = code.attr('class').replace('language-', '');
-				$(elem).attr('class', 'brush: '+ brush);
-				$(elem).html(code.html());
+				$(elem).attr('class', 'prettyprint lang-' + brush);
+//				$(elem).html(code.html());
 			}
 		});
+
+		$('.menu-toggle').on('click', function (e) {			
+			e.preventDefault();
+			var left = $('#sidebar').is('.visible') ? -270 : 0;
+			$('#sidebar').animate({ left: left}, 'fast', function() {
+				$(this).toggleClass('visible');
+			});
+		})
 		
-		SyntaxHighlighter.defaults.toolbar = false;
-		SyntaxHighlighter.all();
 	});
 })(jQuery);

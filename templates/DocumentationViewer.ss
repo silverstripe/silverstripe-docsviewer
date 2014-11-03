@@ -1,10 +1,26 @@
 <!DOCTYPE html>
 
 <html>
-	<% include DocumentationHead %>
-
+	<% include DocumentationHead %>	
+	
+	<div id="masthead">
+		<div class="wrapper">
+			<% if Breadcrumbs.count > 1 %>			
+				<% include DocumentationBreadcrumbs %>
+			<% else_if Page.Title %>
+				<h1>$Page.Title</h1>
+			<% end_if %>
+			<% if Page.Introduction %>
+				<div class="introduction">
+					<p>$Page.Introduction</p>
+				</div>
+			<% end_if %>
+		</div>
+	</div>	
+	
 	<div class="wrapper">
 		<div id="layout" class="clearfix">
+
 			<% include DocumentationSidebar %>
 
 			<div id="content">
