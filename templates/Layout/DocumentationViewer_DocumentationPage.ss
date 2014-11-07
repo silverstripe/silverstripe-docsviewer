@@ -1,15 +1,4 @@
 <div id="documentation-page" class="box">
-	<% if Page.Introduction %>
-		<% with Page %>
-			<div class="introduction">
-				<h1>$Title</h1>
-
-				<% if Introduction %>
-					<p>$Introduction</p>
-				<% end_if %>
-			</div>
-		<% end_with %>
-	<% end_if %>
 
 	<% include DocumentationVersions %>
 	
@@ -17,12 +6,8 @@
 		<% include DocumentationVersion_warning %>
 	<% end_if %>
 
-	<% if Breadcrumbs %>
-		<% include DocumentationBreadcrumbs %>
-	<% end_if %>
-
-
 	<% include DocumentationTableContents %>
+
 		
 	$Content.RAW
 

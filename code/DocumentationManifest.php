@@ -534,7 +534,8 @@ class DocumentationManifest {
 		$base = Config::inst()->get('DocumentationViewer', 'link_base');
 		$entityPath = $this->normalizeUrl($entityPath);
 		$recordPath = $this->normalizeUrl($recordPath);
-
+		$recordParts = explode(DIRECTORY_SEPARATOR, trim($recordPath,'/'));		
+		$currentRecordPath = end($recordParts);
 		$depth = substr_count($entityPath, '/');
 
 		foreach($this->getPages() as $url => $page) {
@@ -547,10 +548,21 @@ class DocumentationManifest {
 
 			// only pull it up if it's one more level depth
 			if(substr_count($pagePath, DIRECTORY_SEPARATOR) == ($depth + 1)) {
-				$mode = (strpos($recordPath, $pagePath) !== false) ? 'current' : 'link';
+				$pagePathParts = explode(DIRECTORY_SEPARATOR, trim($pagePath,'/'));		
+				$currentPagePath = end($pagePathParts);
+				if($currentPagePath == $currentRecordPath) {					
+					$mode = 'current';
+				}
+				else if(strpos($recordPath, $pagePath) !== false) {					
+					$mode = 'section';
+				}
+				else {
+					$mode = 'link';
+				}
+				
 				$children = new ArrayList();
 
-				if($mode == 'current') {
+				if($mode == 'section' || $mode == 'current') {
 					$children = $this->getChildrenFor($pagePath, $recordPath);
 				}
 

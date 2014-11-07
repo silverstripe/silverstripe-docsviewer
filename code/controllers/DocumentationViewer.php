@@ -88,24 +88,13 @@ class DocumentationViewer extends Controller {
 		if(!$this->canView()) {
 			return Security::permissionFailure($this);
 		}
+		Requirements::javascript('//use.typekit.net/emt4dhq.js');
+		Requirements::customScript('try{Typekit.load();}catch(e){}');
 
 		Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');		
-		Requirements::combine_files(
-			'syntaxhighlighter.js',
-			array(
-				DOCSVIEWER_DIR .'/thirdparty/syntaxhighlighter/scripts/shCore.js',
-				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushJScript.js',
-				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushPhp.js',
-				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushXml.js',
-				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushCss.js',
-				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushYaml.js',
-				DOCSVIEWER_DIR . '/thirdparty/syntaxhighlighter/scripts/shBrushBash.js',
-				DOCSVIEWER_DIR . '/javascript/shBrushSS.js'
-			)
-		);
+		Requirements::javascript('https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js');
 		
 		Requirements::javascript(DOCSVIEWER_DIR .'/javascript/DocumentationViewer.js');
-		Requirements::css(DOCSVIEWER_DIR .'/css/shSilverStripeDocs.css');
 		Requirements::combine_files('docs.css', array(
 			DOCSVIEWER_DIR .'/css/normalize.css',
 			DOCSVIEWER_DIR .'/css/utilities.css',
@@ -339,7 +328,7 @@ class DocumentationViewer extends Controller {
 			if($entity->hasRecord($record) || $entity->getIsDefaultEntity()) {
 				$mode = 'current';
 
-				// add children
+				// add children				
 				$children = $this->getManifest()->getChildrenFor(
 					$entity->getPath(), ($record) ? $record->getPath() : $entity->getPath()
 				);
