@@ -21,7 +21,6 @@ class RebuildLuceneDocsIndex extends BuildTask {
 	}
 	
 	function rebuildIndexes($quiet = false) {
-		require_once(DOCSVIEWER_PATH .'/thirdparty/markdown/markdown.php');
 		require_once 'Zend/Search/Lucene.php';
 
 		ini_set("memory_limit", -1);
@@ -76,7 +75,10 @@ class RebuildLuceneDocsIndex extends BuildTask {
 				if(!is_dir($page->getPath())) {
 					$doc = new Zend_Search_Lucene_Document();
 					$content = $page->getMarkdown();
-					if($content) $content = Markdown($content);
+					if($content) {
+						$md = new ParsedownExtra();
+						$content = $md->text($content);
+					}
 
 					$entity = ($entity = $page->getEntity()) ? $entity->getTitle() : "";
 					
