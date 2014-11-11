@@ -18,6 +18,6 @@
 		"erusev/parsedown-extra": "0.1.0"
 	},
 	"suggest": {
-        "silverstripe/staticpublisher": "Allows publishing documentation as HTML"
-    }
+		"silverstripe/staticpublisher": "Allows publishing documentation as HTML"
+	}
 }
