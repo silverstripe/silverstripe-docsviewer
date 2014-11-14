@@ -573,15 +573,20 @@ class DocumentationViewer extends Controller {
 	 * @return string
 	 */
 	public function getEditLink() {
+
 		$page = $this->getPage();
 
 		if($page) {
+
 			$entity = $page->getEntity();
 
-			if($entity && isset(self::$edit_links[$entity->title])) {
+
+
+			if($entity && isset(self::$edit_links[strtolower($entity->title)])) {
+
 				// build the edit link, using the version defined
-				$url = self::$edit_links[$entity->title];
-				$version = $this->getVersion();
+				$url = self::$edit_links[strtolower($entity->title)];
+				$version = $entity->getVersion();
 
 				if($version == "trunk" && (isset($url['options']['rewritetrunktomaster']))) {
 					if($url['options']['rewritetrunktomaster']) {
@@ -592,10 +597,10 @@ class DocumentationViewer extends Controller {
 				return str_replace(
 					array('%entity%', '%lang%', '%version%', '%path%'),
 					array(
-						$entity->getBaseFolder(), 
+						$entity->title, 
 						$this->getLanguage(), 
 						$version, 
-						ltrim($page->getPath(), '/')
+						ltrim($page->getRelativePath(), '/')
 					),
 
 					$url['url']
