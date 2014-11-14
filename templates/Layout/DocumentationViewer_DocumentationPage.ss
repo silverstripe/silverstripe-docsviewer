@@ -1,7 +1,4 @@
 <div id="documentation-page" class="box">
-
-	<% include DocumentationVersions %>
-	
 	<% if VersionWarning %>
 		<% include DocumentationVersion_warning %>
 	<% end_if %>

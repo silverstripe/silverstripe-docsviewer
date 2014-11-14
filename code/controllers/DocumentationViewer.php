@@ -322,6 +322,11 @@ class DocumentationViewer extends Controller {
 				continue;
 			}
 
+			// only show entities with the same version
+			if($entity->getVersion() !== $current->getVersion()) {
+				continue;
+			}
+
 			$mode = 'link';	
 			$children = new ArrayList();
 
@@ -454,7 +459,7 @@ class DocumentationViewer extends Controller {
 	 * @return ArrayList
 	 */
 	public function getVersions() {
-		return $this->manifest->getVersions($this->getEntity);
+		return $this->manifest->getVersions($this->getEntity());
 	}
 
 	/**

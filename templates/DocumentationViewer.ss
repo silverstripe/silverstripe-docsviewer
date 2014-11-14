@@ -3,7 +3,7 @@
 <html>
 	<% include DocumentationHead %>	
 	
-	<div id="masthead">
+	<div id="masthead" <% if Versions %>class="has_versions"<% end_if %>>
 		<div class="wrapper">
 			<% if Breadcrumbs.count > 1 %>			
 				<% include DocumentationBreadcrumbs %>
@@ -15,6 +15,8 @@
 					<p>$Page.Introduction</p>
 				</div>
 			<% end_if %>
+
+			<% include DocumentationVersions %>
 		</div>
 	</div>	
 	

@@ -19,8 +19,6 @@
 		<h1>$Title</h1>
 	<% end_if %>
 
-	<% include DocumentationVersions %>
-
 	<% if VersionWarning %>
 		<% include DocumentationVersion_warning %>
 	<% end_if %>

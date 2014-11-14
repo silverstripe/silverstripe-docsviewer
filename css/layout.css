@@ -159,11 +159,46 @@ html {
 }
 
 #masthead {
-	padding:50px 0;	
+	padding: 50px 0;	
 	background:#f6f7f8;
 	position:relative;
 }
+	#masthead.has_versions {
+		padding-bottom: 0;
+	}
 
+	#masthead .wrapper {
+		overflow: hidden;
+	}
+
+.versions {
+	float: right;
+}
+	.versions p {
+		margin: 0 0 5px;
+		font-size: 12px;
+	}
+
+	.versions ul {
+		margin: 0;
+		padding: 0;
+	}
+
+	.versions li {
+		list-style: none;
+		display: block;
+		float: left;
+		margin: 0 0 0 5px;
+	}
+
+		.versions li a {
+			padding: 10px 15px;
+			display: block;
+		}
+
+	.versions .current {
+		background: #fff;
+	}
 .menu-toggle {
 	position:absolute;
 	right:20px;
@@ -389,7 +424,8 @@ html {
 .warning,
 .alert,
 .info,
-.pageSkip {
+.pageSkip,
+.warningBox {
 	border-radius:4px;
 	padding: 10px 20px;
 	clear: both;
@@ -406,7 +442,8 @@ html {
 .notice p,
 .alert p,
 .warning p,
-.info p {
+.info p,
+.warningBox p {
 	margin-bottom: 0;
 	font-weight:400;
 }
@@ -417,7 +454,8 @@ html {
 }
 
 .notice,
-.note {
+.note,
+.warningBox {
 	background: #F9F17A;
 }
 
@@ -449,26 +487,30 @@ html {
 	background: url(../../docsviewer/images/warning.png) no-repeat 18px 14px;
 }
 
-#content .warningBoxTop h1 { 
+.warningBoxTop h1 { 
 	margin-bottom: 0;
 }
 
-#content .warningBoxTop ul { 
+.warningBoxTop ul { 
 	margin: 9px 0 18px; 
 }
 
-#content .warningBoxTop li { 
+.warningBoxTop li { 
 	margin-bottom: 0; 
 }
 
-#content .warningBoxBottom { 
+.warningBox {
+	margin-top: 0;
+}
+
+.warningBoxBottom { 
 	background-color: #0973A6; 
 	padding: 12px 0 16px;
 }
-	#content .warningBoxBottom a { color: #fff; }
-	#content .warningBoxBottom a:hover { color: #f3fbfe; }
-	#content .warningBoxBottom ul { margin: 0 0 0 40px; }
-	#content .warningBoxBottom li { background: none; margin-bottom: 0; }
+	.warningBoxBottom a { color: #fff; }
+	.warningBoxBottom a:hover { color: #f3fbfe; }
+	.warningBoxBottom ul { margin: 0 0 0 40px; }
+	.warningBoxBottom li { background: none; margin-bottom: 0; }
 
 .doc-breadcrumbs {
 }

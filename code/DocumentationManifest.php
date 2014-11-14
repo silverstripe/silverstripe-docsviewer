@@ -626,17 +626,17 @@ class DocumentationManifest {
 		if(!$entity) {
 			return null;
 		}
-
+		
 		$output = new ArrayList();
 
 		foreach($this->getEntities() as $check) {
 			if($check->getKey() == $entity->getKey()) {
 				if($check->getLanguage() == $entity->getLanguage()) {
 					$same = ($check->getVersion() == $entity->getVersion());
-
-					$output->push(new ArrayList(array(
-						'Title' => $entity->getTitle(),
-						'Link' => $entity->getLink(),
+					
+					$output->push(new ArrayData(array(
+						'Title' => $check->getVersion(),
+						'Link' => $check->Link(),
 						'LinkingMode' => ($same) ? 'current' : 'link'
 					)));
 
