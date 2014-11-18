@@ -122,8 +122,10 @@ class DocumentationManifest {
 
 			$key = (isset($details['Key'])) ? $details['Key'] : $details['Title'];
 	
-			if(!is_dir($path)) {
+			if($path && !is_dir($path)) {
 				throw new Exception($path . ' is not a valid documentation directory');
+			} else if(!$path) {
+				return;
 			}
 
 			$version = (isset($details['Version'])) ? $details['Version'] : '';

@@ -112,7 +112,10 @@ class RebuildLuceneDocsIndex extends BuildTask {
 						$doc->boost = $boost;
 					}
 				}
+				
+				error_reporting(E_ALL ^ E_NOTICE);
 				$index->addDocument($doc);
+
 				if(!$quiet) {
 					if(Director::is_cli()) echo " * adding ". $page->getPath() ."\n";
 					else echo "<li>adding ". $page->getPath() ."</li>\n";
