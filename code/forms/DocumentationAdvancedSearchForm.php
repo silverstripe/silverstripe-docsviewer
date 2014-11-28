@@ -8,11 +8,11 @@ class DocumentationAdvancedSearchForm extends Form {
 	public function __construct($controller) {
 		$versions = $controller->getManifest()->getAllVersions();
 		$entities = $controller->getManifest()->getEntities();
-		
+
 		$q = ($q = $controller->getSearchQuery()) ? $q->NoHTML() : "";
 
 		// klude to take an array of objects down to a simple map
-		$entities = $entities->map('Folder', 'Title');
+		$entities = $entities->map('Key', 'Title');
 
 		// if we haven't gone any search limit then we're searching everything
 		$searchedEntities = $controller->getSearchedEntities();
@@ -27,21 +27,21 @@ class DocumentationAdvancedSearchForm extends Form {
 			$searchedVersions = $versions;
 		}
 
-		$fields = new FieldList(
-			new TextField('q', _t('DocumentationViewer.KEYWORDS', 'Keywords'), $q),
-			new CheckboxSetField('Entities', _t('DocumentationViewer.MODULES', 'Modules'), $entities, $searchedEntities),
-			new CheckboxSetField(
+		$fields = FieldList::create(
+			TextField::create('q', _t('DocumentationViewer.KEYWORDS', 'Keywords'), $q),
+			//CheckboxSetField::create('Entities', _t('DocumentationViewer.MODULES', 'Modules'), $entities, $searchedEntities),
+			CheckboxSetField::create(
 				'Versions', 
 				_t('DocumentationViewer.VERSIONS', 'Versions'),
 			 	$versions, $searchedVersions
 			)
 		);
 
-		$actions = new FieldList(
-			new FormAction('results', _t('DocumentationViewer.SEARCH', 'Search'))
+		$actions = FieldList::create(
+			FormAction::create('results', _t('DocumentationViewer.SEARCH', 'Search'))
 		);
 		
-		$required = new RequiredFields(array('Search'));
+		$required = RequiredFields::create(array('Search'));
 		
 		parent::__construct(
 			$controller, 
