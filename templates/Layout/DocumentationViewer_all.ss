@@ -1,6 +1,4 @@
 <div id="documentation_index" class="box">
-	<h1>Documentation Index</h1>
-
 	<div id="page-numbers">
 		<span>
 			<% loop $AllPages.GroupedBy(FirstLetter) %>
