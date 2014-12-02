@@ -1,10 +1,14 @@
 /*! text selection */
 ::-moz-selection {	
 	text-shadow:none;
+	color: #ffffff;
+	background: #1389CE;
 }
 
 ::selection { 	
 	text-shadow: none;
+	color: #ffffff;
+	background: #1389CE;
 }
 
 /*! links */
