@@ -19,9 +19,8 @@ class DocumentationHelper {
 		$name = self::trim_sort_number($name);
 
 		$name = str_replace(array('-', '_'), ' ', $name);
-			
 
-		return ucwords(trim($name));
+		return ucfirst(trim($name));
 	}
 
 	/**
