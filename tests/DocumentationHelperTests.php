@@ -7,7 +7,7 @@
 class DocumentationHelperTests extends SapphireTest {
 
 	public function testCleanName() {
-		$this->assertEquals("File Path", DocumentationHelper::clean_page_name(
+		$this->assertEquals("File path", DocumentationHelper::clean_page_name(
 			'00_file-path.md'
 		));
 	}
