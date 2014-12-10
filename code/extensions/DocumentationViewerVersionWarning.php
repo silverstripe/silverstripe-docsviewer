@@ -30,17 +30,17 @@ class DocumentationViewerVersionWarning extends Extension {
 
 		$stable = $this->owner->getManifest()->getStableVersion($entity);
 		$compare = $entity->compare($stable);
-		
+
 		if($entity->getVersion() == "master" || $compare > 0) {
 			return $this->owner->customise(new ArrayData(array(
 				'FutureRelease' => true,
-				'StableVersion' => DBField::create_field('HTMLText', $stable)
+				'StableVersion' => DBField::create_field('HTMLText', $stable->getVersion())
 			)));				
 		}
 		else {
 			return $this->owner->customise(new ArrayData(array(
 				'OutdatedRelease' => true,
-				'StableVersion' => DBField::create_field('HTMLText', $stable)
+				'StableVersion' => DBField::create_field('HTMLText', $stable->getVersion())
 			)));
 		}
 	

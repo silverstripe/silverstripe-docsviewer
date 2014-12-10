@@ -1,6 +1,6 @@
 <div id="documentation-page" class="box">
 	<% if VersionWarning %>
-		<% include DocumentationVersion_warning %>
+		<% include DocumentationVersion_warning Version=$Entity.Version %>
 	<% end_if %>
 
 	<% include DocumentationTableContents %>
