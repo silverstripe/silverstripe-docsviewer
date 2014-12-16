@@ -316,15 +316,19 @@ class DocumentationViewer extends Controller {
 		$current = $this->getEntity();
 
 		foreach($entities as $entity) {
+			$checkLang = $entity->getLanguage();
+			$checkVers = $entity->getVersion();
 
-			// only show entities with the same language
-			if($entity->getLanguage() !== $this->getLanguage()) {
+			// only show entities with the same language or any entity that 
+			// isn't registered under any particular language (auto detected)
+			if($checkLang && $checkLang !== $this->getLanguage()) {
 				continue;
 			}
-
-			// only show entities with the same version
-			if($entity->getVersion() !== $current->getVersion()) {
-				continue;
+			
+			if($current && $checkVers) {
+				if($entity->getVersion() !== $current->getVersion()) {
+					continue;
+				}
 			}
 
 			$mode = 'link';	
@@ -459,7 +463,7 @@ class DocumentationViewer extends Controller {
 	 * @return ArrayList
 	 */
 	public function getVersions() {
-		return $this->manifest->getVersions($this->getEntity());
+		return $this->getManifest()->getVersions($this->getEntity());
 	}
 
 	/**

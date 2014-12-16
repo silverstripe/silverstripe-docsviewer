@@ -3,13 +3,12 @@
 class DocumentationSearchForm extends Form {
 
 	public function __construct($controller) {
+		$versions = HiddenField::create(
+			'Versions',
+			_t('DocumentationViewer.VERSIONS', 'Versions'), 
+			implode(',', $controller->getManifest()->getAllVersions())
+		);
 
-		//pass through the current version
-		$page = $controller->getPage();
-		if($page){
-			$versions = HiddenField::create('Versions','Versions',$page->getEntity()->getVersion());
-		}
-		
 		$fields = new FieldList(
 			TextField::create('q', _t('DocumentationViewer.SEARCH', 'Search'), '')
 				->setAttribute('placeholder', _t('DocumentationViewer.SEARCH', 'Search')),
