@@ -135,6 +135,7 @@
 			$(this).removeClass('hover');
 		});
 
+		/*
 		$(".search input").live("keyup", function(e) {
 			clearTimeout($.data(this, 'timer'));
 
@@ -186,7 +187,7 @@
 				}, 100));
 			};
 		});
-		
+		*/
 		/** ---------------------------------------------
 		 * LANGAUGE SELECTER
 		 *
