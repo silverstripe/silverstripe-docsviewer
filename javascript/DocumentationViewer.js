@@ -77,7 +77,7 @@
 		 *
 		 * Transform a #table-of-contents div to a nested list
 		 */
-		if($("#content-column").length > 0) {
+		if($("#table-contents-holder").length > 0) {
 			var toc = '<div id="table-of-contents" class="open">' +
 				  '<h4>Table of contents<span class="updown">&#9660;</span></h4><ul style="display: none;">';
 
@@ -85,7 +85,7 @@
 			var pageURL = window.location.href.replace(/#[a-zA-Z0-9\-\_]*/g, '');
 
 			var itemCount = 0;
-			$('#content-column h1[id], #content-column h2[id], #content-column h3[id], #content-column h4[id]').each(function(i) {
+			$('#content h1[id], #content h2[id], #content h3[id], #content h4[id]').each(function(i) {
 				var current = $(this);
 				var tagName = current.prop("tagName");
 				if(typeof tagName == "String") tagName = tagName.toLowerCase();
@@ -98,18 +98,7 @@
 
 			toc += '</ul></div>';
 
-			// Table of content location
-			var title = $('#content-column h1:first');
-			if (title.length > 0) {
-				title.after(toc);
-			} else {
-				var breadcrums = $('#content-column .doc-breadcrumbs');
-				if (breadcrums.length > 0) {
-					breadcrums.after(toc);
-				} else {
-					$('#content-column').prepend(toc);
-				}
-			}
+			$('#table-contents-holder').prepend(toc);
 
 			// Toggle the TOC
 			$('#table-of-contents').attr('href', 'javascript:void()').toggle(
@@ -133,7 +122,7 @@
 		 */
 		var url = window.location.href;
 		
-		$("#content-column h1[id], #content-column h2[id], #content-column h3[id], #content-column h4[id], #content-column h5[id], #content-column h6[id]").each(function() {
+		$("#content h1[id], #content h2[id], #content h3[id], #content h4[id], #content h5[id], #content h6[id]").each(function() {
 			var link = '<a class="heading-anchor-link" title="Link to this section" href="'+ url + '#' + $(this).attr('id') + '">&para;</a>';
 			$(this).append(' ' + link);
 		}); 
@@ -144,6 +133,58 @@
 		
 		$("h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]").mouseleave(function() {
 			$(this).removeClass('hover');
+		});
+
+		$(".search input").live("keyup", function(e) {
+			clearTimeout($.data(this, 'timer'));
+
+			var string = $(this).val();
+			var self = $(this);
+
+			if (string == '') {
+				$(".search .autocomplete-results").hide();
+			} else {
+				var container;
+
+				if($(this).siblings('.autocomplete-results').length == 0) {
+					container = $("<div class='autocomplete-results'></div");
+					
+					$(this).after(container);
+				} else {
+					container = $(this).siblings('.autocomplete-results').first();
+				}
+
+				$(this).data('timer', setTimeout(function() {
+					if(string !== '') {
+						$.getJSON(
+							self.parents('form').attr('action'),
+							{ query: string },
+							function(results) {
+								if(results) {
+									var list = $("<ul></ul>");
+
+									$.each(results, function(i, elem) {
+										list.append(
+											$("<li></li>")
+												.append(
+													$("<a></a>").attr('href', elem.link).text(elem.title)
+												).append(
+													elem.path
+												)
+										);
+									});
+
+									container.append(list);
+								} else {
+									container.hide().removeClass('loading');
+								}
+							}
+						);
+					}
+
+					return false;
+				}, 100));
+			};
 		});
 		
 		/** ---------------------------------------------
@@ -157,7 +198,30 @@
 			$("#Form_LanguageForm").submit();
 		});
 		
-		SyntaxHighlighter.defaults.toolbar = false;
-		SyntaxHighlighter.all();
+		/** ---------------------------------------------
+		 * SYNTAX HIGHLIGHTER 
+		 *
+		 * As the Markdown parser now uses the GFM structure (```yml) this does
+		 * not work with SyntaxHighlighter. The below translates the GFM output
+		 * to one SyntaxHighter can use
+		 */
+		$("pre").each(function(i, elem) {
+			var code = $(elem).find('code[class^=language]');
+
+			if(code.length > 0) {
+				var brush = code.attr('class').replace('language-', '');
+				$(elem).attr('class', 'prettyprint lang-' + brush);
+//				$(elem).html(code.html());
+			}
+		});
+
+		$('.menu-toggle').on('click', function (e) {			
+			e.preventDefault();
+			var left = $('#sidebar').is('.visible') ? -270 : 0;
+			$('#sidebar').animate({ left: left}, 'fast', function() {
+				$(this).toggleClass('visible');
+			});
+		})
+		
 	});
 })(jQuery);

@@ -1,0 +1,35 @@
+fieldset { 
+	border: none; 
+	margin: 0;
+	padding: 0 0 5px 0;
+}
+
+#DocumentationAdvancedSearchForm_AdvancedSearchForm_q {
+	width: 100%;
+	font-size: 15px;
+	padding: 10px 10px;
+}
+
+#DocumentationAdvancedSearchForm_AdvancedSearchForm #q {
+	width: 55%;
+	padding-right: 2%;
+	float: left;
+}
+
+#DocumentationAdvancedSearchForm_AdvancedSearchForm #Entities {
+	width: 25%;
+	padding-right: 2%;
+	float: left;
+}
+
+#DocumentationAdvancedSearchForm_AdvancedSearchForm #Versions {
+	width: 20%;
+	float: right;
+}
+
+.optionset ul {
+	margin: 0;
+}
+.optionset li {
+	list-style: none;
+}

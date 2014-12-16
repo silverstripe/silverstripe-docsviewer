@@ -1,63 +1,50 @@
 <!DOCTYPE html>
 
 <html>
-	<head>
-		<% base_tag %>
-		<meta charset="utf-8" />
-		<title>SilverStripe Documentation</title>
-		<% require css(docsviewer/css/DocumentationViewer.css) %>
-	</head>
+	<% include DocumentationHead %>	
 	
-	<body>
-		<div id="container" class="container">
-			<div id="header">
-				<h1><a href="$Link"><% _t('SILVERSTRIPEDOCUMENTATION', 'SilverStripe Documentation') %></a></h1>
+	<div id="masthead" <% if Versions %>class="has_versions"<% end_if %>>
+		<div class="wrapper">
+			<% if Breadcrumbs.count > 1 %>			
+				<% include DocumentationBreadcrumbs %>
+			<% else_if Page.Title %>
+				<h1>$Page.Title</h1>
+			<% end_if %>
+			<% if Page.Introduction %>
+				<div class="introduction">
+					<p>$Page.Introduction</p>
+				</div>
+			<% end_if %>
+
+			<% include DocumentationVersions %>
+		</div>
+	</div>	
+	
+	<div class="wrapper">
+		<div id="layout" class="clearfix">
+
+			<% include DocumentationSidebar %>
+
+			<div id="content">
+				$Layout
 				
-				<div id="language">
-				 	$LanguageForm
-				</div>
-			</div>
-			
-			<div id="layout">
-				<div id="search-bar">					
-
-					<div id="search">
-						$DocumentationSearchForm
-					</div>
-					
-					<div id="top-nav">
-						<% if Entities %>
-						<div id="entities-nav" class="documentation-nav clearfix">
-							<h2>Modules:</h2>
-								<ul>
-								<% loop Entities %>
-									<li><a href="$Link" class="$LinkingMode">$Title</a></li>
-								<% end_loop %>
-							</ul>
-
-							<div class="clear"><!-- --></div>
-						</div>
-						<% end_if %>
-
-						<% if Versions %>
-						<div id="versions-nav" class="documentation-nav clearfix">
-							<h2>Versions:</h2>
-								<ul>
-								<% loop Versions %>
-									<li><a href="$Link" class="$LinkingMode">$Title</a></li>
-								<% end_loop %>
-							</ul>
-						</div>
-						<% end_if %>
-					</div>
-				</div>
-				
-				<div id="content" class="typography">
-					$Layout
-				</div>
+				<% include DocumentationFooter %>
 			</div>
 		</div>
-		
-		<% include DocumentationFooter %>
-	</body>
+	</div>
+	
+
+	<% if GoogleAnalyticsCode %>
+		<script>
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+			ga('create', '$GoogleAnalyticsCode', 'auto');
+			ga('send', 'pageview');
+		</script>
+	<% end_if %>
+
+	<% include DocumentationEnd %>
 </html>

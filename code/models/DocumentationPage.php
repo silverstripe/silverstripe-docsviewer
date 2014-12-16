@@ -1,8 +1,11 @@
 <?php
 
 /**
- * A specific page within a {@link DocumentationEntity}. Maps 1 to 1 to a file on the 
- * filesystem.
+ * A specific documentation page within a {@link DocumentationEntity}. 
+ *
+ * Maps to a file on the file system. Note that the URL to access this page may 
+ * not always be the file name. If the file contains meta data with a nicer URL 
+ * sthen it will use that. 
  * 
  * @package docsviewer
  * @subpackage model
@@ -10,65 +13,77 @@
 class DocumentationPage extends ViewableData {
 	
 	/**
+	 * @var string
+	 */
+	protected $title, $summary, $introduction;
+
+	/**
 	 * @var DocumentationEntity
 	 */
 	protected $entity;
-	
-	/**
-	 * Stores the relative path (from the {@link DocumentationEntity} to
-	 * this page. The actual file name can be accessed via {@link $this->getFilename()}
-	 *
-	 * @var String 
-	 */
-	protected $relativePath;
-	
-	/**
-	 * @var String
-	 */
-	protected $lang = 'en';
-	
+
 	/**
 	 * @var string
 	 */
-	protected $title;
-	
-	/**
-	 * @var String
-	 */
-	protected $version;
-	
-	/**
-	 * @var Boolean
-	 */
-	protected $isFolder = false;
+	protected $path;
 
 	/**
+	 * Filename
 	 *
-	 * @var integer
+	 * @var string
 	 */
-	protected $pagenumber = 0; 	
+	protected $filename;
+
+	protected $read = false;
+
+	/**
+	 * @param DocumentationEntity $entity
+	 * @param string $filename
+	 * @param string $path
+	 */
+	public function __construct(DocumentationEntity $entity, $filename, $path) {
+		$this->filename = $filename;
+		$this->path = $path;
+		$this->entity = $entity;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getExtension() {
+		return DocumentationHelper::get_extension($this->filename);
+	}
 	
 	/**
-	 * @param Boolean
+	 * @param string - has to be plain text for open search compatibility.
+	 *
+	 * @return string
 	 */
-	public function setIsFolder($isFolder = false) {
-		$this->isFolder = $isFolder;
-	}
+	public function getBreadcrumbTitle($divider = ' - ') {
+		$pathParts = explode('/', trim($this->getRelativePath(), '/'));
+		
+		// from the page from this
+		array_pop($pathParts);
 
-	/**
-	 * @return Boolean
-	 */
-	public function getIsFolder($isFolder = false) {
-		return $this->isFolder;
-	}
+		// add the module to the breadcrumb trail.
+		$pathParts[] = $this->entity->getTitle();
+		
+		$titleParts = array_map(array(
+			'DocumentationHelper', 'clean_page_name'
+		), $pathParts);
 
-	/**
-	 * 
-	 * @param int $number
-	 */
-	public function setPagenumber($number = 0) {
-		if (is_int($number )) $this->pagenumber = $number;
-	} 
+		$titleParts = array_filter($titleParts, function($val) {
+			if($val) {
+				return $val;
+			}
+		});
+
+		if($this->getTitle()) {
+			array_unshift($titleParts, $this->getTitle());
+		}
+
+		return implode($divider, $titleParts);
+	}
 	
 	/**
 	 * @return DocumentationEntity
@@ -78,255 +93,198 @@ class DocumentationPage extends ViewableData {
 	}
 
 	/**
-	 * @param DocumentationEntity
-	 */
-	public function setEntity($entity) {
-		$this->entity = $entity;
-	}
-
-	/**
 	 * @return string
 	 */
-	public function getRelativePath() {
-		return $this->relativePath;
-	}
-
-	/**
-	 * @param string
-	 */
-	public function setRelativePath($path) {
-		$this->relativePath = $path;
-	}
-
-	/**
-	 * @return string
-	 */
-	function getExtension() {
-		return DocumentationService::get_extension($this->getRelativePath());
-	}
-	
-	/**
-	 * Absolute path including version and lang folder.
-	 * 
-	 * @throws InvalidArgumentException
-	 *
-	 * @param bool $defaultFile - If this is a folder and this is set to true then getPath
-	 *				will return the path of the first file in the folder
-	 * @return string 
-	 */
-	function getPath($defaultFile = false, $realpath = true) {
-		if($this->entity) {
-			$path = Controller::join_links(
-				$this->entity->getPath($this->getVersion(), $this->lang),
-				$this->getRelativePath()
-			);
-			
-			if(!is_dir($path) && $realpath) $path = realpath($path);
-			else if($defaultFile) {
-				$file = DocumentationService::find_page($this->entity, explode('/', $this->getRelativePath()));
-
-				if($file) $path = $file;
-			}
-		}
-		else {
-			$path = $this->getRelativePath();
-		}
-		if(!file_exists($path)) {
-			throw new InvalidArgumentException(sprintf(
-				'Path could not be found. Module path: %s, file path: %s', 
-				$this->entity->getPath(),
-				$this->getRelativePath()
-			));
-		}
-		
-		
-		return (is_dir($path)) ? rtrim($path, '/') . '/' : $path;
-	}
-	
-	/**
-	 * @param string - has to be plain text for open search compatibility.
-	 *
-	 * @return string
-	 */
-	function getBreadcrumbTitle($divider = ' - ') {
-		$pathParts = explode('/', $this->getRelativePath());
-		
-		// add the module to the breadcrumb trail.
-		array_unshift($pathParts, $this->entity->getTitle());
-		
-		$titleParts = array_map(array('DocumentationService', 'clean_page_name'), $pathParts);
-		
-		return implode($divider, $titleParts + array($this->getTitle()));
-	}
-	
-	/**
-	 * Returns the public accessible link for this page.
-	 *
-	 * @param Boolean Absolute URL (incl. domain), or relative to webroot
-	 * @return string
-	 */
-	function getLink($absolute=true) {
-		if($entity = $this->getEntity()) {
-			$link = $this->getRelativeLink();
-			$link = rtrim(DocumentationService::trim_extension_off($link), '/');
-			
-			// folders should have a / on them. Looks nicer
-			try {
-				if(is_dir($this->getPath())) $link .= '/';
-			}
-			catch (Exception $e) {}
-		}
-		else {
-			$link = $this->getPath(true);
+	public function getTitle() {
+		if($this->title) {
+			return $this->title;
 		}
 
-		if($absolute) {
-			$fullLink = Controller::join_links($entity->Link($this->getVersion(), $this->lang), $link);
+		$page = DocumentationHelper::clean_page_name($this->filename);
+
+		if($page == "Index") {
+			return $this->getTitleFromFolder();
+		}
+
+		return $page;
+	}
+
+	public function getTitleFromFolder() {
+		$folder = $this->getPath();
+		$entity = $this->getEntity()->getPath();
+
+		$folder = str_replace('index.md', '', $folder);
+		
+		// if it's the root of the entity then we want to use the entity name
+		// otherwise we'll get 'En' for the entity folder
+		if($folder == $entity) {
+			return $this->getEntity()->getTitle();
 		} else {
-			$fullLink = Controller::join_links($entity->getRelativeLink($this->getVersion(), $this->lang), $link);
+			$path = explode(DIRECTORY_SEPARATOR, trim($folder, DIRECTORY_SEPARATOR));
+			$folderName = array_pop($path);
 		}
 
-		return $fullLink;
-	}
-	
-	/**
-	 * Relative to the module base, not the webroot.
-	 * 
-	 * @return string
-	 */
-	function getRelativeLink() {
-		$link = rtrim(DocumentationService::trim_extension_off($this->getRelativePath()), '/');
-		
-		// folders should have a / on them. Looks nicer
-		try {
-			if(is_dir($this->getPath())) $link .= '/';
-		} catch (Exception $e) {};
-		
-		return $link;
-	}
-	
-	function getLang() {
-		return $this->lang;
-	}
-	
-	function setLang($lang) {
-		$this->lang = $lang;
-	}
-	
-	function getVersion() {
-		return $this->version ? $this->version : $this->entity->getStableVersion();
-	}
-	
-	function setVersion($version) {
-		$this->version = $version;
-	}
-	
-	function setTitle($title) {
-		$this->title = $title;
-	}
-	
-	function getTitle() {
-		return $this->title;
-	}
-
-	/**
-	 * Set a variable from the metadata field on this class
-	 *
-	 * @param string key
-	 * @param mixed value
-	 */
-	public function setMetaData($key, $value) {
-		$this->$key = $value;
+		return DocumentationHelper::clean_page_name($folderName);
 	}
 	
 	/**
 	 * @return string
 	 */
-	function getFilename() {
-		$path = rtrim($this->relativePath, '/');
-		
-		try {
-			return (is_dir($this->getPath())) ? $path . '/' : $path;
-		}
-		catch (Exception $e) {}
-		
-		return $path;
+	public function getSummary() {
+		return $this->summary;
 	}
 
 	/**
-	 * Return the raw markdown for a given documentation page. Will throw
-	 * an error if the path isn't a file.
+	 * Return the raw markdown for a given documentation page. 
 	 *
-	 * Will return empty if the type is not readable
+	 * @param boolean $removeMetaData
 	 *
 	 * @return string
 	 */
-	function getMarkdown($removeMetaData = false) {
+	public function getMarkdown($removeMetaData = false) {
 		try {
-			$path = $this->getPath(true);
-
-			if($path) {
-				$ext = $this->getExtension();
-								
-				if(empty($ext) || DocumentationService::is_valid_extension($ext)) {
-					if ($md = file_get_contents($path)) {
-						if ($this->title != 'Index') $this->getMetadataFromComments($md, $removeMetaData);
-					}  
-					return $md;
-				}   
+			if ($md = file_get_contents($this->getPath())) {
+				$this->populateMetaDataFromText($md, $removeMetaData);
+			
+				return $md;
 			}
+
+			$this->read = true;
 		}
-		catch(InvalidArgumentException $e) {}
+		catch(InvalidArgumentException $e) {
+
+		}
 		
 		return false;
 	}
+
+	public function setMetaData($key, $value) {
+		$key = strtolower($key);
+
+		$this->$key = $value;
+	}
+
+	public function getIntroduction() {
+		if(!$this->read) {
+			$this->getMarkdown();
+		}
+		
+		return $this->introduction;
+	}
 	
 	/**
-	 * Parse a file (with a lang and a version).
+	 * Parse a file and return the parsed HTML version.
 	 *
 	 * @param string $baselink 
 	 *
 	 * @return string
 	 */
-	function getHTML($version, $lang = 'en') {
-		return DocumentationParser::parse($this, $this->entity->getRelativeLink($version, $lang));
+	public function getHTML() {
+		$html = DocumentationParser::parse(
+			$this, 
+			$this->entity->Link()
+		);
+
+		return $html;
 	}
 	
 	/**
-	 * get metadata from the first html block in the page, then remove the 
+	 * This should return the link from the entity root to the page. The link
+	 * value has the cleaned version of the folder names. See 
+	 * {@link getRelativePath()} for the actual file path.
+	 *
+	 * @return string
+	 */
+	public function getRelativeLink() {
+		$path = $this->getRelativePath();
+		$url = explode('/', $path);
+		$url = implode('/', array_map(function($a) {
+			return DocumentationHelper::clean_page_url($a);
+		}, $url));
+
+		$url = trim($url, '/') . '/';
+
+		return $url;
+	}
+
+	/**
+	 * This should return the link from the entity root to the page. For the url
+	 * polished version, see {@link getRelativeLink()}.
+	 *
+	 * @return string
+	 */
+	public function getRelativePath() {
+		return str_replace($this->entity->getPath(), '', $this->getPath());
+		
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getPath() {
+		return $this->path;
+	}
+
+	/**
+	 * Returns the URL that will be required for the user to hit to view the 
+	 * given document base name.
+	 *
+	 * @param string $file
+	 * @param string $path
+	 *
+	 * @return string
+	 */
+	public function Link() {
+		return ltrim(Controller::join_links(
+			$this->entity->Link(),
+			$this->getRelativeLink()
+		), '/');
+	}
+	
+	/**
+	 * Return metadata from the first html block in the page, then remove the 
 	 * block on request
 	 * 
 	 * @param DocumentationPage $md
 	 * @param bool $remove
 	 */
-	public function getMetadataFromComments(&$md, $removeMetaData = false) {
-		if($md && DocumentationService::meta_comments_enabled()) {
-			
+	public function populateMetaDataFromText(&$md, $removeMetaData = false) {
+		if($md) {
 			// get the text up to the first whiteline
 			$extPattern = "/^(.+)\n(\r)*\n/Uis";
 			$matches = preg_match($extPattern, $md, $block);
+
 			if($matches && $block[1]) {
 				$metaDataFound = false;
 				
 				// find the key/value pairs
 				$intPattern = '/(?<key>[A-Za-z][A-Za-z0-9_-]+)[\t]*:[\t]*(?<value>[^:\n\r\/]+)/x';
 				$matches = preg_match_all($intPattern, $block[1], $meta);
-				
+	
 				foreach($meta['key'] as $index => $key) {
 					if(isset($meta['value'][$index])) {
-						
 						// check if a property exists for this key
 						if (property_exists(get_class(), $key)) {
-							$this->setMetaData($key, $meta['value'][$index]);
+							$this->$key = $meta['value'][$index];
 							$metaDataFound = true;
 						}  
 					}
 				}
-				// optionally remove the metadata block (only on the page that is displayed)
+
+				// optionally remove the metadata block (only on the page that 
+				// is displayed)
 				if ($metaDataFound && $removeMetaData) {
 					$md = preg_replace($extPattern, '', $md);
 				}
 			}
 		}
-	} 	
+	} 
+
+	public function getVersion() {
+		return $this->entity->getVersion();
+	}
+
+	public function __toString() {
+		return sprintf(get_class($this) .': %s)', $this->getPath());
+	}
 }

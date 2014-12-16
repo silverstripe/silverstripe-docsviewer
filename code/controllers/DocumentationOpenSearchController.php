@@ -20,8 +20,13 @@ class DocumentationOpenSearchController extends Controller {
 	public function description() {
 		$viewer = new DocumentationViewer();
 		
-		if(!$viewer->canView()) return Security::permissionFailure($this);
-		if(!DocumentationSearch::enabled()) return $this->httpError('404');
+		if(!$viewer->canView()) {
+			return Security::permissionFailure($this);
+		}
+
+		if(!Config::inst()->get('DocumentationSearch', 'enabled')) {
+			return $this->httpError('404');
+		}
 		
 		$data = DocumentationSearch::get_meta_data();
 		$link = Director::absoluteBaseUrl() .
@@ -34,6 +39,8 @@ class DocumentationOpenSearchController extends Controller {
 		
 		return $this->customise(
 			new ArrayData($data)
-		)->renderWith(array('OpenSearchDescription'));
+		)->renderWith(array(
+			'OpenSearchDescription'
+		));
 	}
 }

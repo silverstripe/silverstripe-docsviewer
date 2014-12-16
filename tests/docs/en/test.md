@@ -9,7 +9,6 @@ test
 [link: with anchor](/test#anchor)
 [link: http](http://silverstripe.org)
 [link: api](api:DataObject)
-[link: relative](../a-relative-file.md)
 
 [api:DataObject::$has_one]
 
@@ -20,10 +19,13 @@ test
 		and tab indent
 		and escaped < brackets
 		
+
 Normal text after code block
 
 	code block
 	without formatting prefix
+
+How about fences?
 
 ```
 Fenced code block

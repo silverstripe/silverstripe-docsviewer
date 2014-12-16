@@ -1,22 +1,17 @@
 <?php
 
 /**
- * A {@link DocumentationEntity} is created when registering a module path 
- * with {@link DocumentationService::register()}. A {@link DocumentationEntity} 
- * represents a module or folder with documentation rather than a specific 
- * page. Individual pages are handled by {@link DocumentationPage}
+ * A {@link DocumentationEntity} represents a module or folder with stored
+ * documentation files. An entity not an individual page but a `section` of 
+ * documentation arranged by version and language.
  *
- * Each folder must have at least one language subfolder, which is automatically
- * determined through {@link addVersion()} and should not be included in the 
- * $path argument.
+ * Each entity has a version assigned to it (i.e master) and folders can be 
+ * labeled with a specific version. For instance, doc.silverstripe.org has three
+ * DocumentEntities for Framework - versions 2.4, 3.0 and 3.1. In addition an
+ * entity can have a language attached to it. So for an instance with en, de and
+ * fr documentation you may have three {@link DocumentationEntities} registered.
  * 
- * Versions are assumed to be in numeric format (e.g. '2.4'),
- *
- * They're also parsed through version_compare() in {@link getStableVersion()} 
- * which assumes a certain format:
- *
- * @see http://php.net/manual/en/function.version-compare.php
- *
+ * 
  * @package docsviewer
  * @subpackage models
  */
@@ -24,135 +19,236 @@
 class DocumentationEntity extends ViewableData {
 	
 	/**
-	 * @var array
+	 * The key to match entities with that is not localized. For instance, you
+	 * may have three entities (en, de, fr) that you want to display a nice 
+	 * title for, but matching needs to occur on a specific key.
+	 *
+	 * @var string $key
 	 */
-	private static $casting = array(
-		'Name' => 'Text'
-	);
-	
-	/**
-	 * @var string $folder folder name
-	 */
-	private $folder;
-	
-	/**
-	 * @var string $title nice title
-	 */
-	private $title;
+	protected $key;
 
 	/**
-	 * @var array $version version numbers and the paths to each
-	 */
-	private $versions = array();
-	
-	/**
-	 * @var array
-	 */
-	private $stableVersion;
-	
-	/**
-	 * @var Array $langs a list of available langauges
-	 */
-	private $langs = array();
-	
-	/**
-	 * Constructor. You do not need to pass the langs to this as
-	 * it will work out the languages from the filesystem
+	 * The human readable title of this entity. Set when the module is 
+	 * registered.
 	 *
-	 * @param string $folder folder name
-	 * @param string $version version of this module
-	 * @param string $path Absolute path to this module (excluding language folders)
-	 * @param string $title
+	 * @var string $title
 	 */
-	function __construct($folder, $version, $path, $title = false) {
-		$this->addVersion($version, $path);
-		$this->title = (!$title) ? $folder : $title;
-		$this->folder = $folder;
+	protected $title;
+
+	/**
+	 * If the system is setup to only document one entity then you may only 
+	 * want to show a single entity in the URL and the sidebar. Set this when
+	 * you register the entity with the key `DefaultEntity` and the URL will
+	 * not include any version or language information.
+	 *
+	 * @var boolean $default_entity
+	 */
+	protected $defaultEntity;
+
+	/**
+	 * @var mixed
+	 */
+	protected $path;
+
+	/**
+	 * @see {@link http://php.net/manual/en/function.version-compare.php}
+	 * @var float $version
+	 */
+	protected $version;
+
+	/**
+	 * If this entity is a stable release or not. If it is not stable (i.e it 
+	 * could be a past or future release) then a warning message will be shown.
+	 *
+	 * @var boolean $stable
+	 */
+	protected $stable;
+
+	/**
+	 * @var string
+	 */
+	protected $language;
+
+	/**
+	 * 
+	 */
+	public function __construct($key) {
+		$this->key = DocumentationHelper::clean_page_url($key);
 	}
 	
+
 	/**
-	 * Return the languages which are available
+	 * Get the title of this module.
 	 *
-	 * @return array
-	 */
-	public function getLanguages() {
-		return $this->langs;
-	}
-	
-	/**
-	 * Return whether this entity has a given language
-	 *
-	 * @return bool
-	 */
-	public function hasLanguage($lang) {
-		return (in_array($lang, $this->langs));
-	}
-	
-	/**
-	 * Add a langauge or languages to the entity
-	 *
-	 * @param Array|String languages
-	 */
-	public function addLanguage($language) {
-		if(is_array($language)) {
-			$this->langs = array_unique(array_merge($this->langs, $language));
-		}
-		else {
-			$this->langs[] = $language;
-		}
-	}
-	
-	/**
-	 * Get the folder name of this module
-	 *
-	 * @return String
-	 */
-	public function getFolder() {
-		return $this->folder;
-	}
-	
-	/**
-	 * Get the title of this module
-	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getTitle() {
+		if(!$this->title) {
+			$this->title = DocumentationHelper::clean_page_name($this->key);
+		}
+
 		return $this->title;
 	}
-	
+
 	/**
-	 * Return the versions which have been registered for this entity.
+	 * @param string $title
+	 * @return this
+	 */
+	public function setTitle($title) {
+		$this->title = $title;
+
+		return $this;
+	}
+
+	/**
+	 * Returns the web accessible link to this entity.
 	 *
-	 * @return array
+	 * Includes the version information 
+	 *
+	 * @return string
 	 */
-	public function getVersions() {
-		return array_keys($this->versions);
-	}
-	
-	/**
-	 * @return string|boo
-	 */
-	public function getStableVersion() {
-		if(!$this->hasVersions()) return false;
-		
-		if($this->stableVersion) {
-			return $this->stableVersion;
+	public function Link() {
+		if($this->getIsDefaultEntity()) {
+			$base = Controller::join_links(
+				Config::inst()->get('DocumentationViewer', 'link_base'),
+				$this->getLanguage(),
+				'/'
+			);
 		} else {
-			$sortedVersions = $this->getVersions();
-			usort($sortedVersions, create_function('$a,$b', 'return version_compare($a,$b);'));
-			
-			return array_pop($sortedVersions);
+			$base = Controller::join_links(
+				Config::inst()->get('DocumentationViewer', 'link_base'), 
+				$this->getLanguage(),
+				$this->getKey(),
+				'/'
+			);
 		}
+
+		$base = ltrim(str_replace('//', '/', $base), '/');
+
+		if($this->stable) {
+			return $base;
+		}
+
+		return Controller::join_links(
+			$base, 
+			$this->getVersion(),
+			'/'
+		);
 	}
 	
 	/**
-	 * @param String $version
+	 * @return string
 	 */
-	public function setStableVersion($version) {
-		if(!$this->hasVersion($version)) throw new InvalidArgumentException(sprintf('Version "%s" does not exist', $version));
-		$this->stableVersion = $version;
+	public function __toString() {
+		return sprintf('DocumentationEntity: %s)', $this->getPath());
 	}
-	
+
+	/**
+	 * @param DocumentationPage $page
+	 *
+	 * @return boolean
+	 */
+	public function hasRecord($page) {
+		if(!$page) {
+			return false;
+		}
+
+		return strstr($page->getPath(), $this->getPath()) !== false;
+	}
+
+	/**
+	 * @param boolean $bool
+	 */
+	public function setIsDefaultEntity($bool) {
+		$this->defaultEntity = $bool;
+
+		return $this;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getIsDefaultEntity() {
+		return $this->defaultEntity;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getKey() {
+		return $this->key;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getLanguage() {
+		return $this->language;
+	}
+
+	/**
+	 * @param string
+	 *
+	 * @return this
+	 */
+	public function setLanguage($language) {
+		$this->language = $language;
+
+		return $this;
+	}
+
+	/**
+	 * @param string
+	 */
+	public function setVersion($version) {
+		$this->version = $version;
+
+		return $this;
+	}
+
+	/**
+	 * @return float
+	 */
+	public function getVersion() {
+		return $this->version;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getPath() {
+		return $this->path;
+	}
+
+	/**
+	 * @param string $path
+	 *
+	 * @return this
+	 */
+	public function setPath($path) {
+		$this->path = $path;
+
+		return $this;
+	}
+
+	/**
+	 * @param boolean
+	 */
+	public function setIsStable($stable) {
+		$this->stable = $stable;
+
+		return $this;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getIsStable() {
+		return $this->stable;
+	}
+
+
+
 	/**
 	 * Returns an integer value based on if a given version is the latest 
 	 * version. Will return -1 for if the version is older, 0 if versions are 
@@ -161,140 +257,20 @@ class DocumentationEntity extends ViewableData {
 	 * @param string $version
 	 * @return int
 	 */
-	public function compare($version) {
-		$latest = $this->getStableVersion();
-		
-		return version_compare($version, $latest);
+	public function compare(DocumentationEntity $other) {
+		return version_compare($this->getVersion(), $other->getVersion());
 	}
-	
-	/**
-	 * Return whether we have a given version of this entity
-	 *
-	 * @return bool
-	 */
-	public function hasVersion($version) {
-		return (isset($this->versions[$version]));
-	}
-	
-	/**
-	 * Return whether we have any versions at all0
-	 *
-	 * @return bool
-	 */
-	public function hasVersions() {
-		return (sizeof($this->versions) > 0);
-	}
-	
-	/**
-	 * Add another version to this entity
-	 *
-	 * @param Float $version Version number
-	 * @param String $path path to folder
-	 */
-	public function addVersion($version = '', $path) {
 
-		$langs = scandir($path);
-		$available = array();
-		
-		if($langs) {
-			foreach($langs as $key => $lang) {
-				if(!is_dir($path . $lang) || strlen($lang) > 2 || in_array($lang, DocumentationService::get_ignored_files(), true)) 
-					$lang = 'en';
-				
-				if(!in_array($lang, $available))
-					$available[] = $lang;
-			}
-		}
-		
-		$this->addLanguage($available);
-		$this->versions[$version] = $path;
-	}
-	
 	/**
-	 * Remove a version from this entity
-	 *
-	 * @param Float $version
+	 * @return array
 	 */
-	public function removeVersion($version = '') {
-		if(isset($this->versions[$version])) {
-			unset($this->versions[$version]);
-		}
-	}
-	
-	/**
-	 * Return the absolute path to this documentation entity on the
-	 * filesystem
-	 *
-	 * @return string
-	 */
-	public function getPath($version = false, $lang = false) {
-		if(!$version) $version = $this->getStableVersion();
-		if(!$lang) $lang = 'en';
-		
-		if($this->hasVersion($version)) {
-			$path = $this->versions[$version];
-		}	
-		else {
-			$versions = $this->getVersions();
-			$path = $this->versions[$versions[0]]; 
-		}
-		
-		return Controller::join_links($path, $lang);
-	}
-	
-	/**
-	 * Returns the web accessible link to this Entity
-	 *
-	 * @return string
-	 */
-	public function Link($version = false, $lang = false) {
-		return Controller::join_links(
-			Director::absoluteBaseURL(),
-			$this->getRelativeLink($version, $lang)
+	public function toMap() {
+		return array(
+			'Key' => $this->key,
+			'Path' => $this->getPath(),
+			'Version' => $this->getVersion(),
+			'IsStable' => $this->getIsStable(),
+			'Language' => $this->getLanguage()
 		);
-	}
-	
-	function getRelativeLink($version = false, $lang = false) {
-		if(!$lang) $lang = 'en';
-		if($version == $this->getStableVersion()) $version = false;
-		
-		return Controller::join_links(
-			DocumentationViewer::get_link_base(), 
-			$this->getFolder(),
-			$lang,
-			$version
-		);
-	}
-	
-	/**
-	 * Return the summary / index text for this entity. Either pulled
-	 * from an index file or some other summary field
-	 *
-	 * @return DocumentationPage
-	 */
-	function getIndexPage($version, $lang = 'en') {
-		$path = $this->getPath($version, $lang);
-		$absFilepath = Controller::join_links($path, 'index.md');
-		
-		if(file_exists($absFilepath)) {
-			$relativeFilePath = str_replace($path, '', $absFilepath);
-			
-			$page = new DocumentationPage();
-			$page->setRelativePath($relativeFilePath);
-			$page->setEntity($this);
-			$page->setLang($lang);
-			$page->setVersion($version);
-			
-			return $page;
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * @return string
-	 */
-	function __toString() {
-		return sprintf('DocumentationEntity: %s)', $this->getPath());
 	}
 }

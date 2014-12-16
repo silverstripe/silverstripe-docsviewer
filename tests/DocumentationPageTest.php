@@ -4,89 +4,87 @@
  * @package docsviewer
  * @subpackage tests
  */
-
 class DocumentationPageTest extends SapphireTest {
 	
-	function testGetLink() {
-		$entity = new DocumentationEntity('testmodule', null, DOCSVIEWER_PATH .'/tests/docs/');
-		
-		$page = new DocumentationPage();
-		$page->setRelativePath('test.md');
-		$page->setEntity($entity);
+	protected $entity;
+
+	public function setUp() {
+		parent::setUp();
+
+		$this->entity = new DocumentationEntity('doctest');
+		$this->entity->setPath(DOCSVIEWER_PATH . '/tests/docs/en/');
+		$this->entity->setVersion('2.4');
+		$this->entity->setLanguage('en');
+
+		Config::nest();
+
+		// explicitly use dev/docs. Custom paths should be tested separately 
+		Config::inst()->update(
+			'DocumentationViewer', 'link_base', 'dev/docs/'
+		);
+
+		$manifest = new DocumentationManifest(true);
+	}
+
+	public function tearDown() {
+		parent::tearDown();
+
+		Config::unnest();
+	}
+
+	public function testGetLink() {
+		$page = new DocumentationPage(
+			$this->entity,
+			'test.md',
+			DOCSVIEWER_PATH . '/tests/docs/en/test.md'
+		);
 		
 		// single layer
-		$this->assertStringEndsWith('testmodule/en/test', $page->Link, 'The page link should have no extension and have a language');
+		$this->assertEquals('dev/docs/en/doctest/2.4/test/', $page->Link(), 
+			'The page link should have no extension and have a language'
+		);
+
+		$page = new DocumentationFolder(
+			$this->entity,
+			'sort',
+			DOCSVIEWER_PATH . '/tests/docs/en/sort/'
+		);
 		
-		$folder = new DocumentationPage();
-		$folder->setRelativePath('sort');
-		$folder->setEntity($entity);
+		$this->assertEquals('dev/docs/en/doctest/2.4/sort/', $page->Link());
 		
-		// folder, should have a trailing slash
-		$this->assertStringEndsWith('testmodule/en/sort/', $folder->Link);
+		$page = new DocumentationFolder(
+			$this->entity,
+			'1-basic.md',
+			DOCSVIEWER_PATH . '/tests/docs/en/sort/1-basic.md'
+		);
 		
-		// second 
-		$nested = new DocumentationPage();
-		$nested->setRelativePath('subfolder/subpage.md');
-		$nested->setEntity($entity);
-		
-		$this->assertStringEndsWith('testmodule/en/subfolder/subpage', $nested->Link);
-		
-		// test with version.
-		$entity = DocumentationService::register("versionlinks", DOCSVIEWER_PATH ."/tests/docs-v2.4/", '1');
-		$entity->addVersion('2', DOCSVIEWER_PATH ."/tests/docs-v3.0/");
-		$entity->setStableVersion('2');
-		
-		$page = new DocumentationPage();
-		$page->setRelativePath('test.md');
-		$page->setEntity($entity);
-		$page->setVersion('1');
-		$this->assertStringEndsWith('versionlinks/en/1/test', $page->Link);
+		$this->assertEquals('dev/docs/en/doctest/2.4/sort/basic/', $page->Link());
 	}
 	
-	
-	function testGetRelativePath() {
-		$page = new DocumentationPage();
-		$page->setRelativePath('test.md');
-		$page->setEntity(new DocumentationEntity('mymodule', null, DOCSVIEWER_PATH . '/tests/docs/'));
+	public function testGetBreadcrumbTitle() {
+		$page = new DocumentationPage(
+			$this->entity,
+			'test.md',
+			DOCSVIEWER_PATH . '/tests/docs/en/test.md'
+		);
+
+		$this->assertEquals("Test - Doctest", $page->getBreadcrumbTitle());
 		
-		$this->assertEquals('test.md', $page->getRelativePath());
+		$page = new DocumentationFolder(
+			$this->entity,
+			'1-basic.md',
+			DOCSVIEWER_PATH . '/tests/docs/en/sort/1-basic.md'
+		);
 		
-		$page = new DocumentationPage();
-		$page->setRelativePath('subfolder/subpage.md');
-		$page->setEntity(new DocumentationEntity('mymodule', null, DOCSVIEWER_PATH . '/tests/docs/'));
+		$this->assertEquals('Basic - Sort - Doctest', $page->getBreadcrumbTitle());
+
+		$page = new DocumentationFolder(
+			$this->entity,
+			'',
+			DOCSVIEWER_PATH . '/tests/docs/en/sort/'
+		);
+
+		$this->assertEquals('Sort - Doctest', $page->getBreadcrumbTitle());
 		
-		$this->assertEquals('subfolder/subpage.md', $page->getRelativePath());
 	}
-	
-	function testGetPath() {
-		$absPath = DOCSVIEWER_PATH .'/tests/docs/';
-		$page = new DocumentationPage();
-		$page->setRelativePath('test.md');
-		$page->setEntity(new DocumentationEntity('mymodule', null, $absPath));
-		
-		$this->assertEquals($absPath . 'en/test.md', $page->getPath());
-		
-		$page = new DocumentationPage();
-		$page->setRelativePath('subfolder/subpage.md');
-		$page->setEntity(new DocumentationEntity('mymodule', null, $absPath));
-		
-		$this->assertEquals($absPath . 'en/subfolder/subpage.md', $page->getPath());
-	}
-	
-	function testGetBreadcrumbTitle() {
-		$entity = new DocumentationEntity('testmodule', null, DOCSVIEWER_PATH . '/tests/docs/');
-		
-		$page = new DocumentationPage();
-		$page->setRelativePath('test.md');
-		$page->setEntity($entity);
-		
-		$this->assertEquals("Testmodule - Test", $page->getBreadcrumbTitle());
-		
-		$page = new DocumentationPage();
-		$page->setRelativePath('subfolder/subpage.md');
-		$page->setEntity(new DocumentationEntity('mymodule', null, DOCSVIEWER_PATH . '/tests/docs/'));
-		
-		$this->assertEquals('Mymodule - Subfolder - Subpage', $page->getBreadcrumbTitle());
-	}
-	
 }

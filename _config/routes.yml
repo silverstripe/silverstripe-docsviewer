@@ -4,5 +4,5 @@ After: framework/routes#coreroutes
 ---
 Director:
   rules:
-    'dev/docs': 'DocumentationViewer'
+    'dev/docs//$Action/$ID/$OtherID': 'DocumentationViewer'
     'DocumentationOpenSearchController//$Action': 'DocumentationOpenSearchController'

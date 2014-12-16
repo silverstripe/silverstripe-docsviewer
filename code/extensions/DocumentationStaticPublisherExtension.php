@@ -28,30 +28,10 @@
 class DocumentationStaticPublisherExtension extends Extension {
 	
 	public function alterExportUrls(&$urls) {
-		// fetch all the documentation pages for all the registered modules
-		$modules = DocumentationService::get_registered_entities();
-
-		foreach($modules as $module) {
-			foreach($module->getLanguages() as $lang) {
-				foreach($module->getVersions() as $version) {
-
-					$pages = DocumentationService::get_pages_from_folder(
-						$module,
-						false,
-						true,
-						$version,
-						$lang
-					);
-
-					if($pages) {
-						foreach($pages as $page) {
-							$link = $page->getLink(false);
-
-							$urls[$link] = $link;
-						}
-					}
-				}
-			}
+		$manifest = new DocumentationManifest(true);
+		
+		foreach($manifest->getPages() as $url => $page) {
+			$urls[$url] = $url;
 		}
 	}
 }

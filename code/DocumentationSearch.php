@@ -1,5 +1,12 @@
 <?php
 
+set_include_path(
+	dirname(dirname(__FILE__)) . '/thirdparty/'. PATH_SEPARATOR .
+	get_include_path()
+);
+		
+require_once 'Zend/Search/Lucene.php';
+
 /**
  * Documentation Search powered by Lucene. You will need Zend_Lucene installed 
  * on your path.
@@ -46,7 +53,7 @@ class DocumentationSearch {
 	 * Defaults to 1.0, lower to decrease relevancy. Requires reindex.
 	 * Uses {@link DocumentationPage->getRelativePath()} for comparison.
 	 */
-	static $boost_by_path = array();
+	private static $boost_by_path = array();
 	
 	/**
 	 * @var ArrayList - Results
@@ -112,114 +119,31 @@ class DocumentationSearch {
 	}
 	
 	/**
-	 * Folder name for indexes (in the temp folder). You can override it using
-	 * {@link DocumentationSearch::set_index_location($)}
+	 * Folder name for indexes (in the temp folder).
 	 *
+	 * @config
 	 * @var string 
 	 */
 	private static $index_location;
-	
-	/**
-	 * Generate an array of every single documentation page installed on the system. 
-	 *
-	 * @return ArrayList
-	 */
-	public static function get_all_documentation_pages() {
-		DocumentationService::load_automatic_registration();
-		
-		$modules = DocumentationService::get_registered_entities();
-		$output = new ArrayList();
 
-		if($modules) {
-			foreach($modules as $module) {
-				foreach($module->getVersions() as $version) {
-					try {
-						$pages = DocumentationService::get_pages_from_folder($module, false, true, $version);
-						
-						if($pages) {
-							foreach($pages as $page) {
-								$output->push($page);
-							}
-						}
-					}
-					catch(Exception $e) {
-						user_error($e, E_USER_WARNING);
-					}
-				}
-			}
-		}
-
-		return $output;
-	}
-
-	/**
-	 * Enable searching documentation 
-	 */
-	public static function enable($enabled = true) {
-		self::$enabled = $enabled;
-		
-		if($enabled) {
-			// include the zend search functionality
-			set_include_path(
-		 		dirname(dirname(__FILE__)) . '/thirdparty/'. PATH_SEPARATOR .
-				get_include_path()
-			);
-		
-			require_once 'Zend/Search/Lucene.php';
-		}
-	}
-
-	/**
-	 * @return bool
-	 */
-	public static function enabled() {
-		return self::$enabled;
-	}
-
-	/**
-	 * Enable advanced documentation search 
-	 */	
-	public static function enable_advanced_search($enabled = true) {
-		self::$advanced_search_enabled = ($enabled)? true: false;
-	}
-	
-	/**
-	 * @return bool
-	 */
-	public static function advanced_search_enabled() {
-		return self::$advanced_search_enabled;
-	}
-	
-	/**
-	 * @param string
-	 */
-	public static function set_index($index) {
-		self::$index_location = $index;
-	}
-	
 	/**
 	 * @return string
 	 */
 	public static function get_index_location() {
-		if(!self::$index_location) {
-			self::$index_location = DOCSVIEWER_DIR;
+		$location = Config::inst()->get('DocumentationSearch', 'index_location');
+
+		if(!$location) {
+			return Controller::join_links(TEMP_FOLDER, 'RebuildLuceneDocsIndex');
 		}
 		
-		if(file_exists(self::$index_location)) {
-			return self::$index_location;
-		} else {
-			return Controller::join_links(
-				TEMP_FOLDER, 
-				trim(self::$index_location, '/')
-			);	
-		}
-		
+		return $location;
 	}
 	
 	/**
 	 * Perform a search query on the index
 	 */
 	public function performSearch() {	
+
 		try {
 			$index = Zend_Search_Lucene::open(self::get_index_location());
 
@@ -284,25 +208,32 @@ class DocumentationSearch {
 		);
 	
 		$start = ($request->requestVar('start')) ? (int)$request->requestVar('start') : 0;
-		$query = ($request->requestVar('Search')) ? $request->requestVar('Search') : '';
+		$query = ($request->requestVar('q')) ? $request->requestVar('q') : '';
 
 		$currentPage = floor( $start / $pageLength ) + 1;
 		
 		$totalPages = ceil(count($this->results) / $pageLength );
 		
-		if ($totalPages == 0) $totalPages = 1;
-		if ($currentPage > $totalPages) $currentPage = $totalPages;
+		if ($totalPages == 0) {
+			$totalPages = 1;
+		}
+
+		if ($currentPage > $totalPages) {
+			$currentPage = $totalPages;
+		}
 
 		$results = new ArrayList();
 		
 		if($this->results) {
 			foreach($this->results as $k => $hit) {
-				if($k < ($currentPage-1)*$pageLength || $k >= ($currentPage*$pageLength)) continue;
+				if($k < ($currentPage-1)*$pageLength || $k >= ($currentPage*$pageLength)) {
+					continue;
+				}
 			
 				$doc = $hit->getDocument();
 			
 				$content = $hit->content;
-				
+
 				$obj = new ArrayData(array(
 					'Title' => DBField::create_field('Varchar', $doc->getFieldValue('Title')),
 					'BreadcrumbTitle' => DBField::create_field('HTMLText', $doc->getFieldValue('BreadcrumbTitle')),
@@ -446,23 +377,29 @@ class DocumentationSearch {
 	}
 	
 	/**
-	 * Renders the search results into a template. Either
-	 * the search results template or the Atom feed
+	 * Renders the search results into a template. Either the search results 
+	 * template or the Atom feed.
 	 */
 	public function renderResults() {
-		if(!$this->results && $this->query) $this->performSearch();
-		if(!$this->outputController) return user_error('Call renderResults() on a DocumentationViewer instance.', E_USER_ERROR);
+		if(!$this->results && $this->query) {
+			$this->performSearch();
+		}
+
+		if(!$this->outputController) {
+			return user_error('Call renderResults() on a DocumentationViewer instance.', E_USER_ERROR);
+		}
 		
 		$request = $this->outputController->getRequest();
-
 		$data = $this->getSearchResults($request);
-		$templates = array('DocumentationViewer_results', 'DocumentationViewer');
+		$templates = array('DocumentationViewer_search');
 
 		if($request->requestVar('format') && $request->requestVar('format') == "atom") {
 			// alter the fields for the opensearch xml.
 			$title = ($title = $this->getTitle()) ? ' - '. $title : "";
 			
-			$link = Controller::join_links($this->outputController->Link(), 'DocumentationOpenSearchController/description/');
+			$link = Controller::join_links(
+				$this->outputController->Link(), 'DocumentationOpenSearchController/description/'
+			);
 			
 			$data->setField('Title', $data->Title . $title);
 			$data->setField('DescriptionURL', $link);

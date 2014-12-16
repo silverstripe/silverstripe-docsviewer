@@ -4,6 +4,11 @@ This module has been developed to read and display content from markdown and
 plain text files in web browser. It provides an easy way to bundle end user 
 documentation within a SilverStripe installation or module.
 
+
+	:::bash
+	$> composer require
+
+
 ## Setup
 
 The module includes the ability to read documentation from any folder on your
@@ -79,7 +84,7 @@ By default, the documentation is available in `dev/docs`. If you want it to
 live on the webroot instead of a subfolder or on another url address, add the 
 following configuration to your _config.php file:
 
-	DocumentationViewer::set_link_base('');
+	Config::inst()->update('DocumentationViewer', 'link_base', '');
 	
 	Director::addRules(1, array(
 		'$Action' => 'DocumentationViewer',

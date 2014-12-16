@@ -15,7 +15,7 @@ class DocumentationParser {
 	/**
 	 * @var string Rewriting of api links in the format "[api:MyClass]" or "[api:MyClass::$my_property]".
 	 */
-	public static $api_link_base = 'http://api.silverstripe.org/search/lookup/?q=%s&version=%s&module=%s';
+	public static $api_link_base = 'http://api.silverstripe.org/search/lookup/?q=%s&amp;version=%s&amp;module=%s';
 	
 	/**
 	 * @var array
@@ -42,7 +42,9 @@ class DocumentationParser {
 	 * @return String
 	 */
 	public static function parse(DocumentationPage $page, $baselink = null) {
-		if(!$page || (!$page instanceof DocumentationPage)) return false;
+		if(!$page || (!$page instanceof DocumentationPage)) {
+			return false;
+		}
 
 		$md = $page->getMarkdown(true);
 		
@@ -52,10 +54,15 @@ class DocumentationParser {
 
 		$md = self::rewrite_api_links($md, $page);
 		$md = self::rewrite_heading_anchors($md, $page);
+
 		$md = self::rewrite_code_blocks($md);
-		
+
 		$parser = new ParsedownExtra();
-		return $parser->text($md);
+		$parser->setBreaksEnabled(false);
+
+		$text = $parser->text($md);
+
+		return $text;
 	}
 	
 	public static function rewrite_code_blocks($md) {
@@ -63,46 +70,73 @@ class DocumentationParser {
 		$inner = false;
 		$mode = false;
 		$end = false;
+		$debug = false;
 
 		$lines = explode("\n", $md);
 		$output = array();
 
 		foreach($lines as $i => $line) {
+			if($debug) var_dump('Line '. ($i + 1) . ' '. $line);
+
 			// if line just contains whitespace, continue down the page.
 			// Prevents code blocks with leading tabs adding an extra line.
-			if(preg_match('/^\s$/', $line)) {
+			if(preg_match('/^\s$/', $line) && !$started) {
 				continue;
 			}
 
 			if(!$started && preg_match('/^[\t]*:::\s*(.*)/', $line, $matches)) {
 				// first line with custom formatting
+				if($debug) var_dump('Starts a new block with :::');
+
 				$started = true;
 				$mode = self::CODE_BLOCK_COLON;
-				$output[$i] = sprintf('<pre class="brush: %s">', (isset($matches[1])) ? $matches[1] : "");
+
+				$output[$i] = sprintf('```%s', (isset($matches[1])) ? trim($matches[1]) : "");
+
 			} else if(!$started && preg_match('/^\t*```\s*(.*)/', $line, $matches)) {
+				if($debug) var_dump('Starts a new block with ```'); 
+
 				$started = true;
 				$mode = self::CODE_BLOCK_BACKTICK;
-				$output[$i] = sprintf('<pre class="brush: %s">', (isset($matches[1])) ? $matches[1] : "");
+
+				$output[$i] = sprintf('```%s', (isset($matches[1])) ? trim($matches[1]) : "");
 			} else if($started && $mode == self::CODE_BLOCK_BACKTICK) {
 				// inside a backtick fenced box
 				if(preg_match('/^\t*```\s*/', $line, $matches)) {
+					if($debug) var_dump('End a block with ```'); 
+
 					// end of the backtick fenced box. Unset the line that contains the backticks
 					$end = true;
 				}
 				else {
+					if($debug) var_dump('Still in a block with ```'); 
+
 					// still inside the line.
-					$output[$i] = ($started) ? '' : '<pre>' . "\n";
-					$output[$i] .= htmlentities($line, ENT_COMPAT, 'UTF-8');
+					if(!$started) {
+						$output[$i - 1] = '```';
+					}
+
+					$output[$i] = $line;
 					$inner = true;
 				}
 			} else if(preg_match('/^[\ ]{0,3}?[\t](.*)/', $line, $matches)) {
+
 				// inner line of block, or first line of standard markdown code block
 				// regex removes first tab (any following tabs are part of the code).
-				$output[$i] = ($started) ? '' : '<pre>' . "\n";
-				$output[$i] .= htmlentities($matches[1], ENT_COMPAT, 'UTF-8');
+				if(!$started) {
+					if($debug) var_dump('Start code block because of tab. No fence'); 
+
+					$output[$i - 1] = '```';
+				} else {
+					if($debug) var_dump('Content is still tabbed so still inner');
+				}
+
+				$output[$i] = $matches[1];
 				$inner = true;
 				$started = true;
-			} else if($started && $inner && $mode == self::CODE_BLOCK_COLON && trim($line) === "") {
+			} else if($started && $inner && trim($line) === "") {
+				if($debug) var_dump('Inner line of code block'); 
+
 				// still inside a colon based block, if the line is only whitespace 
 				// then continue with  with it. We can continue with it for now as 
 				// it'll be tidied up later in the $end section.
@@ -118,14 +152,19 @@ class DocumentationParser {
 				// and include this line. The edge case where this will fail is
 				// new the following segment contains a code block as well as it
 				// will not open.
+				if($debug) {
+					var_dump('Contains something that isnt code. So end the code.');
+				}
+
 				$end = true;
 				$output[$i] = $line;
-				$i = $i -1;
+				$i = $i - 1;
 			} else {
 				$output[$i] = $line;
 			}
 
 			if($end) {
+				if($debug) var_dump('End of code block');
 				$output = self::finalize_code_output($i, $output);
 
 				// reset state
@@ -134,40 +173,33 @@ class DocumentationParser {
 		}
 
 		if($started) {
-			$output = self::finalize_code_output($i, $output);
+			$output = self::finalize_code_output($i+1, $output);
 		}
 
-		return join("\n", $output);
+		return implode("\n", $output);
 
 	}
 
 	/**
+	 * Adds the closing code backticks. Removes trailing whitespace.
+	 *
 	 * @param int
 	 * @param array
 	 *
 	 * @return array
 	 */
 	private static function finalize_code_output($i, $output) {
-		$j = $i;
-
-		while(isset($output[$j]) && trim($output[$j]) === "") {
-			unset($output[$j]);
-		
-			$j--;
+		if(isset($output[$i]) && trim($output[$i])) {
+			$output[$i] .= "\n```\n";
 		}
-				
-		if(isset($output[$j])) {
-			$output[$j] .= "</pre>\n";
-		}
-
 		else {
-			$output[$j] = "</pre>\n\n";
+			$output[$i] = "```";
 		}
 
 		return $output;				
 	}
 	
-	static function rewrite_image_links($md, $page) {
+	public static function rewrite_image_links($md, $page) {
 		// Links with titles
 		$re = '/
 			!
@@ -179,36 +211,55 @@ class DocumentationParser {
 			\)
 		/x';
 		preg_match_all($re, $md, $images);
-		if($images) foreach($images[0] as $i => $match) {
-			$title = $images[1][$i];
-			$url = $images[2][$i];
-			
-			// Don't process absolute links (based on protocol detection)
-			$urlParts = parse_url($url);
 
-			if($urlParts && isset($urlParts['scheme'])) continue;
-			
-			// Rewrite URL (relative or absolute)
-			$baselink = Director::makeRelative(dirname($page->getPath(false, false)));
-			$relativeUrl = rtrim($baselink, '/') . '/' . ltrim($url, '/');
-			
-			// Resolve relative paths
-			while(strpos($relativeUrl, '/..') !== FALSE) {
-				$relativeUrl = preg_replace('/\w+\/\.\.\//', '', $relativeUrl);
+		if($images) {
+			foreach($images[0] as $i => $match) {
+				$title = $images[1][$i];
+				$url = $images[2][$i];
+				
+				// Don't process absolute links (based on protocol detection)
+				$urlParts = parse_url($url);
+
+				if($urlParts && isset($urlParts['scheme'])) {
+					continue;
+				}
+				
+				// Rewrite URL (relative or absolute)
+				$baselink = Director::makeRelative(
+					dirname($page->getPath())
+				);
+
+				// if the image starts with a slash, it's absolute
+				if(substr($url, 0, 1) == '/') {
+					$relativeUrl = str_replace(BASE_PATH, '', Controller::join_links(
+						$page->getEntity()->getPath(),
+						$url
+					));
+				} else {
+					$relativeUrl = rtrim($baselink, '/') . '/' . ltrim($url, '/');
+				}
+
+				// Resolve relative paths
+				while(strpos($relativeUrl, '/..') !== FALSE) {
+					$relativeUrl = preg_replace('/\w+\/\.\.\//', '', $relativeUrl);
+				}
+				
+				// Make it absolute again
+				$absoluteUrl = Controller::join_links(
+					Director::absoluteBaseURL(), 
+					$relativeUrl
+				);
+				
+				// Replace any double slashes (apart from protocol)
+//				$absoluteUrl = preg_replace('/([^:])\/{2,}/', '$1/', $absoluteUrl);
+				
+				// Replace in original content
+				$md = str_replace(
+					$match, 
+					sprintf('![%s](%s)', $title, $absoluteUrl),
+					$md
+				);
 			}
-			
-			// Replace any double slashes (apart from protocol)
-			$relativeUrl = preg_replace('/([^:])\/{2,}/', '$1/', $relativeUrl);
-			
-			// Make it absolute again
-			$absoluteUrl = Director::absoluteBaseURL() . $relativeUrl;
-			
-			// Replace in original content
-			$md = str_replace(
-				$match, 
-				sprintf('![%s](%s)', $title, $absoluteUrl),
-				$md
-			);
 		}
 		
 		return $md;
@@ -227,7 +278,7 @@ class DocumentationParser {
 	 * @param DocumentationPage $page
 	 * @return String
 	 */
-	static function rewrite_api_links($md, $page) {
+	public static function rewrite_api_links($md, $page) {
 		// Links with titles
 		$re = '/
 			`?
@@ -244,10 +295,17 @@ class DocumentationParser {
 			foreach($linksWithTitles[0] as $i => $match) {
 				$title = $linksWithTitles[1][$i];
 				$subject = $linksWithTitles[2][$i];
-				$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getFolder());
+				
+				$url = sprintf(
+					self::$api_link_base, 
+					urlencode($subject), 
+					urlencode($page->getVersion()), 
+					urlencode($page->getEntity()->getKey())
+				);
+
 				$md = str_replace(
 					$match, 
-					sprintf('<code>[%s](%s)</code>', $title, $url),
+					sprintf('[%s](%s)', $title, $url),
 					$md
 				);
 			}
@@ -265,15 +323,21 @@ class DocumentationParser {
 		if($links) {
 			foreach($links[0] as $i => $match) {
 				$subject = $links[1][$i];
-				$url = sprintf(self::$api_link_base, $subject, $page->getVersion(), $page->getEntity()->getFolder());
+				$url = sprintf(
+					self::$api_link_base, 
+					$subject, 
+					$page->getVersion(), 
+					$page->getEntity()->getKey()
+				);
+
 				$md = str_replace(
 					$match, 
-					sprintf('<code>[%s](%s)</code>', $subject, $url),
+					sprintf('[%s](%s)', $subject, $url),
 					$md
 				);
 			}
 		}
-		
+
 		return $md;
 	}
 	
@@ -287,6 +351,9 @@ class DocumentationParser {
 		return $md; 
 	}
 	
+	/**
+	 *
+	 */
 	public static function _rewrite_heading_anchors_callback($matches) {
 		$heading = $matches[0];
 		$headingText = $matches[1];
@@ -309,7 +376,7 @@ class DocumentationParser {
 	 * 
 	 * @return String
 	 */ 
-	static function generate_html_id($title) {
+	public static function generate_html_id($title) {
 		$t = $title;
 		$t = str_replace('&amp;','-and-',$t);
 		$t = str_replace('&','-and-',$t);
@@ -326,12 +393,12 @@ class DocumentationParser {
 	 * 
 	 * @param String $md Markdown content
 	 * @param DocumentationPage $page
-	 * @param String $baselink
+	 *
 	 * @return String Markdown
 	 */
-	static function rewrite_relative_links($md, $page, $baselink = null) {
-		if(!$baselink) $baselink = $page->getEntity()->getRelativeLink();
-
+	public static function rewrite_relative_links($md, $page) {
+		$baselink = $page->getEntity()->Link();
+		
 		$re = '/
 			([^\!]?) # exclude image format
 			\[
@@ -346,7 +413,20 @@ class DocumentationParser {
 		// relative path (relative to module base folder), without the filename.
 		// For "sapphire/en/current/topics/templates", this would be "templates"
 		$relativePath = dirname($page->getRelativePath());
-		if($relativePath == '.') $relativePath = '';
+
+		if(strpos($page->getRelativePath(), 'index.md')) {
+			$relativeLink = $page->getRelativeLink();
+		} else {
+			$relativeLink = dirname($page->getRelativeLink());
+		}
+
+		if($relativePath == '.') {
+			$relativePath = '';
+		}
+
+		if($relativeLink == ".") {
+			$relativeLink = '';
+		}
 		
 		// file base link
 		$fileBaseLink = Director::makeRelative(dirname($page->getPath()));
@@ -375,10 +455,10 @@ class DocumentationParser {
 					// Rewrite public URL
 					if(preg_match('/^\//', $url)) {
 						// Absolute: Only path to module base
-						$relativeUrl = Controller::join_links($baselink, $url);
+						$relativeUrl = Controller::join_links($baselink, $url, '/');
 					} else {
 						// Relative: Include path to module base and any folders
-						$relativeUrl = Controller::join_links($baselink, $relativePath, $url);
+						$relativeUrl = Controller::join_links($baselink, $relativeLink, $url, '/');
 					}
 				}
 				
@@ -389,7 +469,7 @@ class DocumentationParser {
 			
 				// Replace any double slashes (apart from protocol)
 				$relativeUrl = preg_replace('/([^:])\/{2,}/', '$1/', $relativeUrl);
-			
+
 				// Replace in original content
 				$md = str_replace(
 					$match, 
