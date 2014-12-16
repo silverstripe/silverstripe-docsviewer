@@ -121,11 +121,9 @@ class DocumentationManifest {
 			$path = $this->getRealPath($details['Path']);
 
 			$key = (isset($details['Key'])) ? $details['Key'] : $details['Title'];
-	
-			if($path && !is_dir($path)) {
-				throw new Exception($path . ' is not a valid documentation directory');
-			} else if(!$path) {
-				return;
+
+			if(!$path || !is_dir($path)) {
+				throw new Exception($details['Path'] . ' is not a valid documentation directory');
 			}
 
 			$version = (isset($details['Version'])) ? $details['Version'] : '';

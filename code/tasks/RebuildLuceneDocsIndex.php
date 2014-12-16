@@ -48,7 +48,7 @@ class RebuildLuceneDocsIndex extends BuildTask {
 			$index->removeReference();
 		}
 		catch (Zend_Search_Lucene_Exception $e) {
-			// user_error($e);
+			user_error($e);
 		}
 
 		try {
@@ -61,7 +61,7 @@ class RebuildLuceneDocsIndex extends BuildTask {
 		// includes registration
 		$manifest = new DocumentationManifest(true);
 		$pages = $manifest->getPages();
-		
+
 		if($pages) {
 			$count = 0;
 			
