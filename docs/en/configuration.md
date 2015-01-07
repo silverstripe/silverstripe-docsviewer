@@ -25,6 +25,21 @@ In YAML this looks like:
 	      Path: "framework/docs/"
 	      Title: "Framework Documentation"
 
+###Branch aliases for the edit link (optional)
+When using entities with multiple versions, one of the branches of documentation may be a development version. For example the 'master' branch. You may have an internally assigned version number for this registered in your .yml configuration.
+
+If this version number is not the same as the branch name on the git repository the `getEditLinks` method will return an incorrect link to go and edit the documentation. In this case you can simply set an optional `branch` property on the entity which will be used in the edit link instead.
+
+Example:
+
+	:::yml
+	DocumentationManifest:
+	  register_entities:
+	    - 
+	      Path: "framework/docs/"
+	      Title: "Framework Documentation"
+	      Version: "1.0"
+	      Branch: "master"
 
 ## Permalinks 
 

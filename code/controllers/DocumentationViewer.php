@@ -3,7 +3,7 @@
 /**
  * Documentation Viewer.
  *
- * Reads the bundled markdown files from documentation folders and displays the 
+ * Reads the bundled markdown files from documentation folders and displays the
  * output (either via markdown or plain text).
  *
  * For more documentation on how to use this class see the documentation in the
@@ -31,7 +31,7 @@ class DocumentationViewer extends Controller {
 	 * @var string
 	 */
 	private static $documentation_title = 'SilverStripe Documentation';
-	
+
 	/**
 	 * @var array
 	 */
@@ -65,7 +65,7 @@ class DocumentationViewer extends Controller {
 	 * @var string same as the routing pattern set through Director::addRules().
 	 */
 	private static $link_base = 'dev/docs/';
-	
+
 	/**
 	 * @config
 	 *
@@ -91,9 +91,9 @@ class DocumentationViewer extends Controller {
 		Requirements::javascript('//use.typekit.net/emt4dhq.js');
 		Requirements::customScript('try{Typekit.load();}catch(e){}');
 
-		Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');		
+		Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');
 		Requirements::javascript('https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js');
-		
+
 		Requirements::javascript(DOCSVIEWER_DIR .'/javascript/DocumentationViewer.js');
 		Requirements::combine_files('docs.css', array(
 			DOCSVIEWER_DIR .'/css/normalize.css',
@@ -104,16 +104,16 @@ class DocumentationViewer extends Controller {
 			DOCSVIEWER_DIR .'/css/small.css'
 		));
 	}
-	
+
 	/**
-	 * Can the user view this documentation. Hides all functionality for private 
+	 * Can the user view this documentation. Hides all functionality for private
 	 * wikis.
 	 *
 	 * @return bool
 	 */
 	public function canView() {
-		return (Director::isDev() || Director::is_cli() || 
-			!$this->config()->get('check_permission') || 
+		return (Director::isDev() || Director::is_cli() ||
+			!$this->config()->get('check_permission') ||
 			Permission::check($this->config()->get('check_permission'))
 		);
 	}
@@ -127,8 +127,8 @@ class DocumentationViewer extends Controller {
 	}
 
 	/**
-	 * Overloaded to avoid "action doesn't exist" errors - all URL parts in 
-	 * this controller are virtual and handled through handleRequest(), not 
+	 * Overloaded to avoid "action doesn't exist" errors - all URL parts in
+	 * this controller are virtual and handled through handleRequest(), not
 	 * controller methods.
 	 *
 	 * @param $request
@@ -145,20 +145,20 @@ class DocumentationViewer extends Controller {
 		$url = $request->getURL();
 
 		//
-		// If the current request has an extension attached to it, strip that 
+		// If the current request has an extension attached to it, strip that
 		// off and redirect the user to the page without an extension.
 		//
 		if(DocumentationHelper::get_extension($url)) {
 			$this->response = new SS_HTTPResponse();
 			$this->response->redirect(
-				DocumentationHelper::trim_extension_off($url) .'/', 
+				DocumentationHelper::trim_extension_off($url) .'/',
 				301
 			);
 
 			$request->shift();
 			$request->shift();
 
-			return $this->response; 
+			return $this->response;
 		}
 
 		//
@@ -170,22 +170,22 @@ class DocumentationViewer extends Controller {
 
 		if($base && strpos($url, $base) !== false) {
 			$url = substr(
-				ltrim($url, '/'), 
+				ltrim($url, '/'),
 				strlen($base)
 			);
 		} else {
 
 		}
-		
+
 		//
 		// Handle any permanent redirections that the developer has defined.
-		// 
+		//
 		if($link = DocumentationPermalinks::map($url)) {
 			// the first param is a shortcode for a page so redirect the user to
 			// the short code.
 			$this->response = new SS_HTTPResponse();
 			$this->response->redirect($link, 301);
-			
+
 			$request->shift();
 			$request->shift();
 
@@ -194,7 +194,7 @@ class DocumentationViewer extends Controller {
 
 		//
 		// Validate the language provided. Language is a required URL parameter.
-		// as we use it for generic interfaces and language selection. If 
+		// as we use it for generic interfaces and language selection. If
 		// language is not set, redirects to 'en'
 		//
 		$languages = i18n::get_common_languages();
@@ -245,7 +245,7 @@ class DocumentationViewer extends Controller {
 					"DocumentationViewer_{$type}",
 					"DocumentationViewer"
 				));
-				
+
 				return new SS_HTTPResponse($body, 200);
 			} else if(!$url || $url == $lang) {
 				$body = $this->renderWith(array(
@@ -268,7 +268,7 @@ class DocumentationViewer extends Controller {
 	 */
 	public function httpError($status, $message = null) {
 		$this->init();
-			
+
 		$class = get_class($this);
 		$body = $this->customise(new ArrayData(array(
 			'Message' => $message
@@ -283,7 +283,7 @@ class DocumentationViewer extends Controller {
 	public function getManifest() {
 		if(!$this->manifest) {
 			$flush = SapphireTest::is_running_test() || (isset($_GET['flush']));
-		
+
 	 		$this->manifest = new DocumentationManifest($flush);
 	 	}
 
@@ -304,11 +304,11 @@ class DocumentationViewer extends Controller {
 
 
 	/**
-	 * Generate a list of {@link Documentation } which have been registered and which can 
-	 * be documented. 
+	 * Generate a list of {@link Documentation } which have been registered and which can
+	 * be documented.
 	 *
 	 * @return DataObject
-	 */ 
+	 */
 	public function getMenu() {
 		$entities = $this->getManifest()->getEntities();
 		$output = new ArrayList();
@@ -319,25 +319,25 @@ class DocumentationViewer extends Controller {
 			$checkLang = $entity->getLanguage();
 			$checkVers = $entity->getVersion();
 
-			// only show entities with the same language or any entity that 
+			// only show entities with the same language or any entity that
 			// isn't registered under any particular language (auto detected)
 			if($checkLang && $checkLang !== $this->getLanguage()) {
 				continue;
 			}
-			
+
 			if($current && $checkVers) {
 				if($entity->getVersion() !== $current->getVersion()) {
 					continue;
 				}
 			}
 
-			$mode = 'link';	
+			$mode = 'link';
 			$children = new ArrayList();
 
 			if($entity->hasRecord($record) || $entity->getIsDefaultEntity()) {
 				$mode = 'current';
 
-				// add children				
+				// add children
 				$children = $this->getManifest()->getChildrenFor(
 					$entity->getPath(), ($record) ? $record->getPath() : $entity->getPath()
 				);
@@ -360,7 +360,7 @@ class DocumentationViewer extends Controller {
 
 		return $output;
 	}
-	
+
 	/**
 	 * Return the content for the page. If its an actual documentation page then
 	 * display the content from the page, otherwise display the contents from
@@ -430,7 +430,7 @@ class DocumentationViewer extends Controller {
 
 		return new ArrayList();
 	}
-	
+
 	/**
 	 * Generate a list of breadcrumbs for the user.
 	 *
@@ -474,7 +474,7 @@ class DocumentationViewer extends Controller {
 	public function getTitle() {
 		return ($this->record) ? $this->record->getTitle() : null;
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -502,7 +502,7 @@ class DocumentationViewer extends Controller {
 	}
 
 	/**
-	 * Generate a list of all the pages in the documentation grouped by the 
+	 * Generate a list of all the pages in the documentation grouped by the
 	 * first letter of the page.
 	 *
 	 * @return GroupedList
@@ -525,7 +525,7 @@ class DocumentationViewer extends Controller {
 
 		return GroupedList::create($output->sort('Title', 'ASC'));
 	}
-	
+
 	/**
 	 * Documentation Search Form. Allows filtering of the results by many entities
 	 * and multiple versions.
@@ -536,13 +536,13 @@ class DocumentationViewer extends Controller {
 		if(!Config::inst()->get('DocumentationSearch','enabled')) {
 			return false;
 		}
-		
+
 		return new DocumentationSearchForm($this);
 	}
 
 	/**
 	 * Sets the mapping between a entity name and the link for the end user
-	 * to jump into editing the documentation. 
+	 * to jump into editing the documentation.
 	 *
 	 * Some variables are replaced:
 	 *	- %version%
@@ -554,7 +554,7 @@ class DocumentationViewer extends Controller {
 	 *
 	 * <code>
 	 * DocumentationViewer::set_edit_link(
-	 *	'framework', 
+	 *	'framework',
 	 *	'https://github.com/silverstripe/%entity%/edit/%version%/docs/%lang%/%path%',
 	 * 	$opts
 	 * ));
@@ -592,6 +592,11 @@ class DocumentationViewer extends Controller {
 				$url = self::$edit_links[strtolower($entity->title)];
 				$version = $entity->getVersion();
 
+				if($entity->getBranch()){
+					$version = $entity->getBranch();
+				}
+
+
 				if($version == "trunk" && (isset($url['options']['rewritetrunktomaster']))) {
 					if($url['options']['rewritetrunktomaster']) {
 						$version = "master";
@@ -601,9 +606,9 @@ class DocumentationViewer extends Controller {
 				return str_replace(
 					array('%entity%', '%lang%', '%version%', '%path%'),
 					array(
-						$entity->title, 
-						$this->getLanguage(), 
-						$version, 
+						$entity->title,
+						$this->getLanguage(),
+						$version,
 						ltrim($page->getRelativePath(), '/')
 					),
 
@@ -624,25 +629,25 @@ class DocumentationViewer extends Controller {
 	 * @return DocumentationPage
 	 */
 	public function getNextPage() {
-		return ($this->record) 
+		return ($this->record)
 			? $this->getManifest()->getNextPage(
-				$this->record->getPath(), $this->getEntity()->getPath()) 
+				$this->record->getPath(), $this->getEntity()->getPath())
 			: null;
-	}	
+	}
 
 	/**
-	 * Returns the previous page. Either returns the previous sibling or the 
+	 * Returns the previous page. Either returns the previous sibling or the
 	 * parent of this page
 	 *
 	 * @return DocumentationPage
 	 */
 	public function getPreviousPage() {
-		return ($this->record) 
+		return ($this->record)
 			? $this->getManifest()->getPreviousPage(
-				$this->record->getPath(), $this->getEntity()->getPath()) 
+				$this->record->getPath(), $this->getEntity()->getPath())
 			: null;
 	}
-	
+
 	/**
 	 * @return string
 	 */

@@ -3,7 +3,7 @@
 /**
  * A class which builds a manifest of all documentation present in a project.
  *
- * The manifest is required to map the provided documentation URL rules to a 
+ * The manifest is required to map the provided documentation URL rules to a
  * file path on the server. The stored cache looks similar to the following:
  *
  * <code>
@@ -92,7 +92,7 @@ class DocumentationManifest {
 	/**
 	 * Sets up the top level entities.
 	 *
-	 * Either manually registered through the YAML syntax or automatically 
+	 * Either manually registered through the YAML syntax or automatically
 	 * loaded through investigating the file system for `docs` folder.
 	 */
 	public function setupEntities() {
@@ -128,11 +128,13 @@ class DocumentationManifest {
 
 			$version = (isset($details['Version'])) ? $details['Version'] : '';
 
+			$branch = (isset($details['Branch'])) ? $details['Branch'] : '';
+
 			$langs = scandir($path);
-			
+
 			if($langs) {
 				$possible = i18n::get_common_languages(true);
-	
+
 				foreach($langs as $k => $lang) {
 					if(isset($possible[$lang])) {
 						$entity = Injector::inst()->create(
@@ -143,6 +145,7 @@ class DocumentationManifest {
 						$entity->setTitle($details['Title']);
 						$entity->setLanguage($lang);
 						$entity->setVersion($version);
+						$entity->setBranch($branch);
 
 						if(isset($details['Stable'])) {
 							$entity->setIsStable($details['Stable']);
@@ -192,7 +195,7 @@ class DocumentationManifest {
 			}
 
 			$dir = Controller::join_links(BASE_PATH, $entity);
-		
+
 			if(is_dir($dir)) {
 				// check to see if it has docs
 				$docs = Controller::join_links($dir, 'docs');
@@ -202,6 +205,7 @@ class DocumentationManifest {
 						'Path' => $docs,
 						'Title' => DocumentationHelper::clean_page_name($entity),
 						'Version' => 'master',
+						'Branch' => 'master',
 						'Stable' => true
 					);
 				}
@@ -242,7 +246,7 @@ class DocumentationManifest {
 	}
 
 	/**
-	 * Returns a particular page for the requested URL. 
+	 * Returns a particular page for the requested URL.
 	 *
 	 * @return DocumentationPage
 	 */
@@ -260,7 +264,7 @@ class DocumentationManifest {
 		foreach($this->getEntities() as $entity) {
 			if(strpos($record['filepath'], $entity->getPath()) !== false) {
 				$page =  Injector::inst()->create(
-					$record['type'], 
+					$record['type'],
 					$entity,
 					$record['basename'],
 					$record['filepath']
@@ -285,11 +289,11 @@ class DocumentationManifest {
 
 		foreach($this->getEntities() as $entity) {
 			$this->entity = $entity;
-		
+
 			$this->handleFolder('', $this->entity->getPath(), 0);
 			$finder->find($this->entity->getPath());
 		}
-	
+
 		// groupds
 		$grouped = array();
 
@@ -316,7 +320,7 @@ class DocumentationManifest {
 				if ($a['filepath'] == $b['filepath']) {
 					return 0;
 				}
-		
+
 				return ($a['filepath'] < $b['filepath']) ? -1 : 1;
 			});
 
@@ -339,8 +343,8 @@ class DocumentationManifest {
 		);
 
 		$link = ltrim(str_replace(
-			Config::inst()->get('DocumentationViewer', 'link_base'), 
-			'', 
+			Config::inst()->get('DocumentationViewer', 'link_base'),
+			'',
 			$folder->Link()
 		), '/');
 
@@ -355,9 +359,9 @@ class DocumentationManifest {
 	}
 
 	/**
-	 * Individual files can optionally provide a nice title and a better URL 
-	 * through the use of markdown meta data. This creates a new 
-	 * {@link DocumentationPage} instance for the file. 
+	 * Individual files can optionally provide a nice title and a better URL
+	 * through the use of markdown meta data. This creates a new
+	 * {@link DocumentationPage} instance for the file.
 	 *
 	 * If the markdown does not specify the title in the meta data it falls back
 	 * to using the file name.
@@ -368,7 +372,7 @@ class DocumentationManifest {
 	 */
 	public function handleFile($basename, $path, $depth) {
 		$page = Injector::inst()->create(
-			'DocumentationPage', 
+			'DocumentationPage',
 			$this->entity, $basename, $path
 		);
 
@@ -376,11 +380,11 @@ class DocumentationManifest {
 		$page->getMarkdown();
 
 		$link = ltrim(str_replace(
-			Config::inst()->get('DocumentationViewer', 'link_base'), 
-			'', 
+			Config::inst()->get('DocumentationViewer', 'link_base'),
+			'',
 			$page->Link()
 		), '/');
-		
+
 		$this->pages[$link] = array(
 			'title' => $page->getTitle(),
 			'filepath' => $path,
@@ -403,7 +407,7 @@ class DocumentationManifest {
 		$output = new ArrayList();
 
 		$parts = explode('/', trim($record->getRelativeLink(), '/'));
-		
+
 		// Add the base link.
 		$output->push(new ArrayData(array(
 			'Link' => $base->Link(),
@@ -429,7 +433,7 @@ class DocumentationManifest {
 	/**
 	 * Determine the next page from the given page.
 	 *
-	 * Relies on the fact when the manifest was built, it was generated in 
+	 * Relies on the fact when the manifest was built, it was generated in
 	 * order.
 	 *
 	 * @param string $filepath
@@ -470,7 +474,7 @@ class DocumentationManifest {
 	/**
 	 * Determine the previous page from the given page.
 	 *
-	 * Relies on the fact when the manifest was built, it was generated in 
+	 * Relies on the fact when the manifest was built, it was generated in
 	 * order.
 	 *
 	 * @param string $filepath
@@ -508,7 +512,7 @@ class DocumentationManifest {
 	public function normalizeUrl($url) {
 		$url = trim($url, '/') .'/';
 
-		// if the page is the index page then hide it from the menu 
+		// if the page is the index page then hide it from the menu
 		if(strpos(strtolower($url), '/index.md/')) {
 			$url = substr($url, 0, strpos($url, "index.md/"));
 		}
@@ -529,12 +533,12 @@ class DocumentationManifest {
 		if(!$recordPath) {
 			$recordPath = $entityPath;
 		}
-		
+
 		$output = new ArrayList();
 		$base = Config::inst()->get('DocumentationViewer', 'link_base');
 		$entityPath = $this->normalizeUrl($entityPath);
 		$recordPath = $this->normalizeUrl($recordPath);
-		$recordParts = explode(DIRECTORY_SEPARATOR, trim($recordPath,'/'));		
+		$recordParts = explode(DIRECTORY_SEPARATOR, trim($recordPath,'/'));
 		$currentRecordPath = end($recordParts);
 		$depth = substr_count($entityPath, '/');
 
@@ -548,18 +552,18 @@ class DocumentationManifest {
 
 			// only pull it up if it's one more level depth
 			if(substr_count($pagePath, DIRECTORY_SEPARATOR) == ($depth + 1)) {
-				$pagePathParts = explode(DIRECTORY_SEPARATOR, trim($pagePath,'/'));		
+				$pagePathParts = explode(DIRECTORY_SEPARATOR, trim($pagePath,'/'));
 				$currentPagePath = end($pagePathParts);
-				if($currentPagePath == $currentRecordPath) {					
+				if($currentPagePath == $currentRecordPath) {
 					$mode = 'current';
 				}
-				else if(strpos($recordPath, $pagePath) !== false) {					
+				else if(strpos($recordPath, $pagePath) !== false) {
 					$mode = 'section';
 				}
 				else {
 					$mode = 'link';
 				}
-				
+
 				$children = new ArrayList();
 
 				if($mode == 'section' || $mode == 'current') {
@@ -583,7 +587,7 @@ class DocumentationManifest {
 	 * @param DocumentationEntity
 	 *
 	 * @return ArrayList
-	 */	
+	 */
 	public function getAllVersionsOfEntity(DocumentationEntity $entity) {
 		$all = new ArrayList();
 
@@ -602,7 +606,7 @@ class DocumentationManifest {
 	 * @param DocumentationEntity
 	 *
 	 * @return DocumentationEntity
-	 */	
+	 */
 	public function getStableVersion(DocumentationEntity $entity) {
 		foreach($this->getEntities() as $check) {
 			if($check->getKey() == $entity->getKey()) {
@@ -621,19 +625,19 @@ class DocumentationManifest {
 	 * @param DocumentationEntity
 	 *
 	 * @return ArrayList
-	 */	
+	 */
 	public function getVersions($entity) {
 		if(!$entity) {
 			return null;
 		}
-		
+
 		$output = new ArrayList();
 
 		foreach($this->getEntities() as $check) {
 			if($check->getKey() == $entity->getKey()) {
 				if($check->getLanguage() == $entity->getLanguage()) {
 					$same = ($check->getVersion() == $entity->getVersion());
-					
+
 					$output->push(new ArrayData(array(
 						'Title' => $check->getVersion(),
 						'Link' => $check->Link(),
@@ -652,7 +656,7 @@ class DocumentationManifest {
 	 */
 	public function getAllVersions() {
 		$versions = array();
-		
+
 		foreach($this->getEntities() as $entity) {
 			if($entity->getVersion()) {
 				$versions[$entity->getVersion()] = $entity->getVersion();
@@ -660,9 +664,9 @@ class DocumentationManifest {
 				$versions['0.0'] = _t('DocumentationManifest.MASTER', 'Master');
 			}
 		}
-		
+
 		asort($versions);
-		
+
 		return $versions;
 	}
 }
