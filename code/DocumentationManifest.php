@@ -164,7 +164,7 @@ class DocumentationManifest {
 
 	public function getRealPath($path) {
 		if(substr($path, 0, 1) != '/') {
-			$path = realpath(Controller::join_links(BASE_PATH, $path));
+			$path = Controller::join_links(BASE_PATH, $path);
 		}
 
 		return $path;
