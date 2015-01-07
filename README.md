@@ -9,7 +9,10 @@
 
 ## Requirements
 
+These are pulled in via Composer.
+
 * SilverStripe 3.1
+* [Parsedown](http://parsedown.org/) and Parsedown Extra.
 
 ## Summary
 
