@@ -13,10 +13,11 @@ class DocumentationParser {
 	const CODE_BLOCK_COLON = 2;
 
 	/**
+	 * @config
 	 * @var string Rewriting of api links in the format "[api:MyClass]" or "[api:MyClass::$my_property]".
 	 */
-	public static $api_link_base = 'http://api.silverstripe.org/search/lookup/?q=%s&amp;version=%s&amp;module=%s';
-	
+	private static $api_link_base = 'http://api.silverstripe.org/search/lookup/?q=%s&version=%s&module=%s';
+
 	/**
 	 * @var array
 	 */
@@ -324,9 +325,9 @@ class DocumentationParser {
 			foreach($links[0] as $i => $match) {
 				$subject = $links[1][$i];
 				$url = sprintf(
-					self::$api_link_base, 
-					$subject, 
-					$page->getVersion(), 
+					self::config()->api_link_base,
+					$subject,
+					$page->getVersion(),
 					$page->getEntity()->getKey()
 				);
 
@@ -503,5 +504,9 @@ class DocumentationParser {
 				}
 			}
 		}
+	}
+
+	public static function config() {
+		return Config::inst()->forClass(get_called_class());
 	}
 }
