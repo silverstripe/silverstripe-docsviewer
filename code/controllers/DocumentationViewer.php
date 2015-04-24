@@ -247,6 +247,10 @@ class DocumentationViewer extends Controller {
 				));
 
 				return new SS_HTTPResponse($body, 200);
+			} else if($redirect = $this->getManifest()->getRedirect($url)) {
+				$response = new SS_HTTPResponse();
+				$to = Controller::join_links(Director::baseURL(), $base, $redirect);
+				return $response->redirect($to, 301);
 			} else if(!$url || $url == $lang) {
 				$body = $this->renderWith(array(
 					"DocumentationViewer_DocumentationFolder",

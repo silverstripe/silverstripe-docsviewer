@@ -229,14 +229,13 @@ class DocumentationPage extends ViewableData {
 	 * Returns the URL that will be required for the user to hit to view the 
 	 * given document base name.
 	 *
-	 * @param string $file
-	 * @param string $path
-	 *
+	 * @param boolean $short If true, will attempt to return a short version of the url
+	 * This might omit the version number if this is the default version.
 	 * @return string
 	 */
-	public function Link() {
+	public function Link($short = false) {
 		return ltrim(Controller::join_links(
-			$this->entity->Link(),
+			$this->entity->Link($short),
 			$this->getRelativeLink()
 		), '/');
 	}

@@ -98,13 +98,13 @@ class DocumentationViewerTest extends FunctionalTest {
 	
 
 		// 2.4 is the stable release. Not in the URL
-		$response = $this->get('dev/docs/en/doc_test/');
+		$response = $this->get('dev/docs/en/doc_test/2.4');
 		$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
 		$this->assertContains('english test', $response->getBody(), 'Toplevel content page');
 		
-		// accessing 2.4 is redirects to the version without the version number.
-		$response = $this->get('dev/docs/en/doc_test/2.4/');
-		$this->assertEquals($response->getStatusCode(), 404, 'Existing base folder redirects to without version');
+		// accessing base redirects to the version with the version number.
+		$response = $this->get('dev/docs/en/doc_test/');
+		$this->assertEquals($response->getStatusCode(), 301, 'Existing base folder redirects to with version');
 
 		$response = $this->get('dev/docs/en/doc_test/3.0/');		
 		$this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');		
@@ -156,7 +156,7 @@ class DocumentationViewerTest extends FunctionalTest {
 		$this->assertEquals($expected, $actual);
 
 
-		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/'), DataModel::inst());
+		$response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.4/'), DataModel::inst());
 		$this->assertEquals('current', $v->getMenu()->first()->LinkingMode);
 
 		// 2.4 stable release has 1 child page (not including index)
@@ -164,14 +164,12 @@ class DocumentationViewerTest extends FunctionalTest {
 
 		// menu should contain all the english entities
 		$expected = array(
-			'dev/docs/en/doc_test/' => 'Doc Test',
+			'dev/docs/en/doc_test/2.4/' => 'Doc Test',
 			'dev/docs/en/documentationvieweraltmodule1/' => 'DocumentationViewerAltModule1',
 			'dev/docs/en/documentationvieweraltmodule2/' => 'DocumentationViewerAltModule2'
 		);
 
-		$this->assertEquals($expected, $v->getMenu()->map('Link', 'Title'));
-
-		
+		$this->assertEquals($expected, $v->getMenu()->map('Link', 'Title'));		
 	}
 
 

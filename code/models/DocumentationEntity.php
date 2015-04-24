@@ -112,9 +112,11 @@ class DocumentationEntity extends ViewableData {
 	 *
 	 * Includes the version information
 	 *
+	 * @param boolean $short If true, will attempt to return a short version of the url
+	 * This might omit the version number if this is the default version.
 	 * @return string
 	 */
-	public function Link() {
+	public function Link($short = false) {
 		if($this->getIsDefaultEntity()) {
 			$base = Controller::join_links(
 				Config::inst()->get('DocumentationViewer', 'link_base'),
@@ -132,7 +134,7 @@ class DocumentationEntity extends ViewableData {
 
 		$base = ltrim(str_replace('//', '/', $base), '/');
 
-		if($this->stable) {
+		if($short && $this->stable) {
 			return $base;
 		}
 
