@@ -54,6 +54,8 @@ class DocumentationManifest {
 	 */
 	protected $pages = array();
 
+	protected $redirects = array();
+
 	/**
 	 * @var DocumentationEntity
 	 */
@@ -224,7 +226,8 @@ class DocumentationManifest {
 	 */
 	protected function init() {
 		if (!$this->forceRegen && $data = $this->cache->load($this->cacheKey)) {
-			$this->pages = $data;
+			$this->pages = $data['pages'];
+			$this->redirects = $data['redirects'];
 			$this->inited    = true;
 		} else {
 			$this->regenerate();
@@ -243,6 +246,14 @@ class DocumentationManifest {
 		}
 
 		return $this->pages;
+	}
+
+	public function getRedirects() {
+		if(!$this->inited) {
+			$this->init();
+		}
+
+		return $this->redirects;
 	}
 
 	/**
@@ -276,6 +287,21 @@ class DocumentationManifest {
 	}
 
 	/**
+	 * Get any redirect for the given url
+	 *
+	 * @param type $url
+	 * @return string
+	 */
+	public function getRedirect($url) {
+		$pages = $this->getRedirects();
+		$url = $this->normalizeUrl($url);
+
+		if(isset($pages[$url])) {
+			return $pages[$url];
+		}
+	}
+
+	/**
 	 * Regenerates the manifest by scanning the base path.
 	 *
 	 * @param bool $cache
@@ -287,6 +313,7 @@ class DocumentationManifest {
 			'file_callback'  => array($this, 'handleFile')
 		));
 
+		$this->redirects = array();
 		foreach($this->getEntities() as $entity) {
 			$this->entity = $entity;
 
@@ -328,10 +355,61 @@ class DocumentationManifest {
 		}
 
 		if ($cache) {
-			$this->cache->save($this->pages, $this->cacheKey);
+			$this->cache->save(
+				array(
+					'pages' => $this->pages,
+					'redirects' => $this->redirects
+				),
+				$this->cacheKey
+			);
 		}
 
 		$this->inited = true;
+	}
+
+	/**
+	 * Remove the link_base from the start of a link
+	 *
+	 * @param string $link
+	 * @return string
+	 */
+	protected function stripLinkBase($link) {
+		return ltrim(str_replace(
+			Config::inst()->get('DocumentationViewer', 'link_base'),
+			'',
+			$link
+		), '/');
+	}
+
+	/**
+	 *
+	 * @param DocumentationPage $page
+	 * @param string $basename
+	 * @param string $path
+	 */
+	protected function addPage($page, $basename, $path) {
+		$link = $this->stripLinkBase($page->Link());
+
+		$this->pages[$link] = array(
+			'title' => $page->getTitle(),
+			'basename' => $basename,
+			'filepath' => $path,
+			'type' => get_class($page),
+			'entitypath' => $this->entity->getPath(),
+			'summary' => $page->getSummary()
+		);
+	}
+
+	/**
+	 * Add a redirect
+	 *
+	 * @param string $from
+	 * @param string $to
+	 */
+	protected function addRedirect($from, $to) {
+		$fromLink = $this->stripLinkBase($from);
+		$toLink = $this->stripLinkBase($to);
+		$this->redirects[$fromLink] = $toLink;
 	}
 
 	/**
@@ -342,20 +420,15 @@ class DocumentationManifest {
 			'DocumentationFolder', $this->entity, $basename, $path
 		);
 
-		$link = ltrim(str_replace(
-			Config::inst()->get('DocumentationViewer', 'link_base'),
-			'',
-			$folder->Link()
-		), '/');
+		// Add main folder link
+		$fullLink = $folder->Link();
+		$this->addPage($folder, $basename, $path);
 
-		$this->pages[$link] = array(
-			'title' => $folder->getTitle(),
-			'basename' => $basename,
-			'filepath' => $path,
-			'type' => 'DocumentationFolder',
-			'entitypath' => $this->entity->getPath(),
-			'summary' => ''
-		);
+		// Add alternative link
+		$shortLink = $folder->Link(true);
+		if($shortLink != $fullLink) {
+			$this->addRedirect($shortLink, $fullLink);
+		}
 	}
 
 	/**
@@ -379,20 +452,15 @@ class DocumentationManifest {
 		// populate any meta data
 		$page->getMarkdown();
 
-		$link = ltrim(str_replace(
-			Config::inst()->get('DocumentationViewer', 'link_base'),
-			'',
-			$page->Link()
-		), '/');
+		// Add main link
+		$fullLink = $page->Link();
+		$this->addPage($page, $basename, $path);
 
-		$this->pages[$link] = array(
-			'title' => $page->getTitle(),
-			'filepath' => $path,
-			'entitypath' => $this->entity->getPath(),
-			'basename' => $basename,
-			'type' => 'DocumentationPage',
-			'summary' => $page->getSummary()
-		);
+		// If this is a stable version, add the short link
+		$shortLink = $page->Link(true);
+		if($fullLink != $shortLink) {
+			$this->addRedirect($shortLink, $fullLink);
+		}
 	}
 
 	/**
