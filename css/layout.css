@@ -474,7 +474,8 @@ html {
 	color:#666;
 }
 
-.info {	
+.info,
+.hint {	
 	background: rgb(184, 229, 250);
 }
 
