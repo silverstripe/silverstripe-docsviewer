@@ -82,6 +82,11 @@ html {
 		color:#808c8d;
 	}
 
+	#sidebar .nav a.current:hover {
+		background-color: #03527a;
+		color: #fff;
+	}
+
 	#sidebar .nav .section .top {
 		background: #f6f7f8;
 		border: none;		
@@ -456,12 +461,12 @@ html {
 .notice,
 .note,
 .warningBox {
-	background: #F9F17A;
+	background: #FFFFAD;
 }
 
 .warning,
 .alert {
-	background: #e75242;
+	background: #FF8480;
 	color:#fff;
 }
 .warning a,
@@ -474,14 +479,17 @@ html {
 	color:#666;
 }
 
-.info,
-.hint {	
-	background: rgb(184, 229, 250);
+.hint {
+	background: #f4f4f4;
 }
 
-	.warning p {
-		margin-bottom: 0;
-	}
+.info {	
+	background: #CAF7FF;
+}
+
+.warning p {
+	margin-bottom: 0;
+}
 
 .warningBoxTop {
 	padding: 10px 10px 10px 70px;
