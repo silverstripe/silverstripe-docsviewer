@@ -191,11 +191,9 @@ h6 .heading-anchor-link {
 	h3.hover .heading-anchor-link,
 	h4.hover .heading-anchor-link,
 	h5.hover .heading-anchor-link,
-	h6.hover .heading-anchor-link {
-		display: inline;
-	}
-	
+	h6.hover .heading-anchor-link,
 	.heading-anchor-link:hover {
+		display: inline;
 		color: #aaa;
 	}
 
