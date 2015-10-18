@@ -3,7 +3,7 @@
 		$DocumentationSearchForm
 		
 		<ul class="nav">
-			<li><a href="$DocumentationBaseHref" class="top">Home</a></li>
+			<li><a href="$Menu.First.Link" class="top">Home</a></li>
 
 			<% loop Menu %>
 				<% if DefaultEntity %>
