@@ -709,7 +709,8 @@ class DocumentationManifest {
 					$output->push(new ArrayData(array(
 						'Title' => $check->getVersion(),
 						'Link' => $check->Link(),
-						'LinkingMode' => ($same) ? 'current' : 'link'
+						'LinkingMode' => ($same) ? 'current' : 'link',
+						'IsStable' => $check->getIsStable()
 					)));
 
 				}
