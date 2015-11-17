@@ -3,9 +3,9 @@
 		$DocumentationSearchForm
 		
 		<ul class="nav">
-			<li><a href="$DocumentationBaseHref" class="top">Home</a></li>
 
 			<% loop Menu %>
+				<li><a href="$Link" class="top">Home</a></li>
 				<% if DefaultEntity %>
 					<% loop Children %>
 						<li class="$LinkingMode <% if Last %>last<% end_if %>">
