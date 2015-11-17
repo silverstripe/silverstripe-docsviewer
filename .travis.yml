@@ -8,12 +8,11 @@ sudo: false
 
 env:
  - DB=MYSQL CORE_RELEASE=3.1
- - DB=MYSQL CORE_RELEASE=3
-
+ - DB=MYSQL CORE_RELEASE=3.2
+ 
 matrix:
-  include:
-    - php: 5.4
-      env: DB=MYSQL CORE_RELEASE=3
+  allow_failures:
+    - DB=MYSQL CORE_RELEASE=3
 
 before_script:
  - git clone git://github.com/silverstripe-labs/silverstripe-travis-support.git ~/travis-support
