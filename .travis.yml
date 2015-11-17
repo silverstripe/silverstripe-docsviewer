@@ -9,9 +9,10 @@ sudo: false
 env:
  - DB=MYSQL CORE_RELEASE=3.1
  - DB=MYSQL CORE_RELEASE=3.2
- - DB=MYSQL CORE_RELEASE=3
-
+ 
 matrix:
+  allow_failures:
+    - DB=MYSQL CORE_RELEASE=3
   include:
     - php: 5.4
       env: DB=MYSQL CORE_RELEASE=3
