@@ -1,37 +1,36 @@
 <?php
 
-class DocumentationSearchForm extends Form {
+class DocumentationSearchForm extends Form
+{
+    public function __construct($controller)
+    {
+        $fields = new FieldList(
+            TextField::create('q', _t('DocumentationViewer.SEARCH', 'Search'), '')
+                ->setAttribute('placeholder', _t('DocumentationViewer.SEARCH', 'Search'))
+        );
 
-	public function __construct($controller) {
+        $page = $controller->getPage();
 
+        if ($page) {
+            $versions = HiddenField::create(
+                'Versions',
+                _t('DocumentationViewer.VERSIONS', 'Versions'),
+                $page->getEntity()->getVersion()
+            );
 
-		$fields = new FieldList(
-			TextField::create('q', _t('DocumentationViewer.SEARCH', 'Search'), '')
-				->setAttribute('placeholder', _t('DocumentationViewer.SEARCH', 'Search'))
-		);
+            $fields->push($versions);
+        }
 
-		$page = $controller->getPage();
+        $actions = new FieldList(
+            new FormAction('results', _t('DocumentationViewer.SEARCH', 'Search'))
+        );
 
-		if($page){
-			$versions = HiddenField::create(
-				'Versions',
-				_t('DocumentationViewer.VERSIONS', 'Versions'),
-				$page->getEntity()->getVersion()
-			);
+        parent::__construct($controller, 'DocumentationSearchForm', $fields, $actions);
 
-			$fields->push($versions);
-		}
+        $this->disableSecurityToken();
+        $this->setFormMethod('GET');
+        $this->setFormAction($controller->Link('results'));
 
-		$actions = new FieldList(
-			new FormAction('results', _t('DocumentationViewer.SEARCH', 'Search'))
-		);
-
-		parent::__construct($controller, 'DocumentationSearchForm', $fields, $actions);
-
-		$this->disableSecurityToken();
-		$this->setFormMethod('GET');
-		$this->setFormAction($controller->Link('results'));
-
-		$this->addExtraClass('search');
-	}
+        $this->addExtraClass('search');
+    }
 }
