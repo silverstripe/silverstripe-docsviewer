@@ -25,13 +25,14 @@
  *
  * @package docsviewer
  */
-class DocumentationStaticPublisherExtension extends Extension {
-	
-	public function alterExportUrls(&$urls) {
-		$manifest = new DocumentationManifest(true);
-		
-		foreach($manifest->getPages() as $url => $page) {
-			$urls[$url] = $url;
-		}
-	}
+class DocumentationStaticPublisherExtension extends Extension
+{
+    public function alterExportUrls(&$urls)
+    {
+        $manifest = new DocumentationManifest(true);
+        
+        foreach ($manifest->getPages() as $url => $page) {
+            $urls[$url] = $url;
+        }
+    }
 }

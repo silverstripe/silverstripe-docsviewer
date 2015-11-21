@@ -8,13 +8,13 @@
  * @package docsviewer
  * @subpackage model
  */
-class DocumentationFolder extends DocumentationPage {
-
-	/**
-	 * @return string
-	 */
-	public function getTitle() {
-		return $this->getTitleFromFolder();
-	}
-
+class DocumentationFolder extends DocumentationPage
+{
+    /**
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->getTitleFromFolder();
+    }
 }
