@@ -80,8 +80,8 @@ class DocumentationViewer extends Controller
     private static $edit_links = array();
 
     /**
-     * @var array map of modules to edit links.
-     * @see {@link getEditLink()}
+     * @var boolean whether to clear the docsviewer requirements.
+     * @see {@link init()}
      */
     private static $clear_requirements = false;
 
