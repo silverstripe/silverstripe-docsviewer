@@ -13,9 +13,9 @@ class DocumentationParser
     const CODE_BLOCK_COLON = 2;
 
     /**
-     * @var string Rewriting of api links in the format "[api:MyClass]" or "[api:MyClass::$my_property]".
+     * @var string Format string for api urls. See rewrite_api_links().
      */
-    public static $api_link_base = 'http://api.silverstripe.org/search/lookup/?q=%s&amp;version=%s&amp;module=%s';
+    public static $api_link_base = 'http://api.silverstripe.org/search/lookup/?q=%s&version=%s&module=%s';
     
     /**
      * @var array
@@ -282,82 +282,68 @@ class DocumentationParser
         
         return $md;
     }
-        
+
     /**
-     * Rewrite links with special "api:" prefix, from two possible formats:
-     * 1. [api:DataObject]
-     * 2. (My Title)(api:DataObject)
-     * 
-     * Hack: Replaces any backticks with "<code>" blocks,
-     * as the currently used markdown parser doesn't resolve links in backticks,
-     * but does resolve in "<code>" blocks.
-     * 
-     * @param String $md
-     * @param DocumentationPage $page
-     * @return String
-     */
+    * Rewrite links with special "api:" prefix to html as in the following example:
+    *
+    * (1) [api:DataObject] gets re-written to 
+    *     <a href="https://api.silverstripe.org/search/lookup/?q=DataObject&version=2.4&module=framework">DataObject</a>
+    * (2) [api:DataObject::$defaults] gets re-written to
+    *     <a href="https://api.silverstripe.org/search/lookup/?q=DataObject::$defaults&version=2.4&module=framework">DataObject::$defaults</a>
+    * (3) [api:DataObject::populateDefaults()] gets re-written to
+    *     <a href="https://api.silverstripe.org/search/lookup/?q=DataObject::populateDefaults()&version=2.4&module=framework">DataObject::$defaults</a>
+    * (4) [Title](api:DataObject) gets re-written to 
+    *     <a href="https://api.silverstripe.org/search/lookup/?q=DataObject&version=2.4&module=framework">Title</a>
+    * (5) [Title](api:DataObject::$defaults) gets re-written to
+    *     <a href="https://api.silverstripe.org/search/lookup/?q=DataObject::$defaults&version=2.4&module=framework">Title</a>
+    * (6) [Title](api:DataObject::populateDefaults()) gets re-written to
+    *     <a href="https://api.silverstripe.org/search/lookup/?q=DataObject::populateDefaults()&version=2.4&module=framework">Title</a>
+    *
+    * The markdown parser gets confused by the extra pair of parentheses in links of the form [DataObject](api:DataObject::populateDefaults()) so 
+    * all links are re-written as html markup instead of markdown [Title](url). This also prevents other markdown parsing problems.
+    * 
+    * @param String $md
+    * @param DocumentationPage $page
+    * @return String
+    */
     public static function rewrite_api_links($md, $page)
     {
-        // Links with titles
-        $re = '/
-			`?
-			\[
-				(.*?) # link title (non greedy)
-			\] 
-			\(
-				api:(.*?) # link url (non greedy)
-			\)
-			`?
-		/x';
-        preg_match_all($re, $md, $linksWithTitles);
-        if ($linksWithTitles) {
-            foreach ($linksWithTitles[0] as $i => $match) {
-                $title = $linksWithTitles[1][$i];
-                $subject = $linksWithTitles[2][$i];
-                
-                $url = sprintf(
-                    self::$api_link_base,
-                    urlencode($subject),
-                    urlencode($page->getVersion()),
-                    urlencode($page->getEntity()->getKey())
-                );
 
-                $md = str_replace(
-                    $match,
-                    sprintf('[%s](%s)', $title, $url),
-                    $md
-                );
-            }
-        }
-        
-        // Bare links
-        $re = '/
-			`?
-			\[
-				api:(.*?)
-			\]
-			`?
-		/x';
-        preg_match_all($re, $md, $links);
-        if ($links) {
-            foreach ($links[0] as $i => $match) {
-                $subject = $links[1][$i];
-                $url = sprintf(
-                    self::$api_link_base,
-                    $subject,
-                    $page->getVersion(),
-                    $page->getEntity()->getKey()
-                );
+        $regexs = array(
+            'title_and_method' => '\[(.*?)\]\(api:(.*?\(\))\)',   // title_and_method handles case (6) and must precede title_remaining
+            'title_remaining' => '\[(.*?)\]\(api:(.*?)\)',        // title_and_remaining handles cases (4) and (5)
+            'no_title' => '\[api:(.*?)\]'                         // no_title handles cases (1),(2) and (3)
+        );
 
-                $md = str_replace(
-                    $match,
-                    sprintf('[%s](%s)', $subject, $url),
-                    $md
-                );
-            }
+        foreach($regexs as $regex_type => $regex) {
+            $link_regex = '/ `? '. $regex . ' `? /x';
+            preg_match_all($link_regex, $md, $links);
+            if($links) {
+                foreach($links[0] as $i => $match) {
+                    if( $regex_type === 'no_title' ){
+                        $title = $links[1][$i];
+                        $link = $links[1][$i];
+                    } else {
+                        $title = $links[1][$i];
+                        $link = $links[2][$i];
+                    }
+                    $url = sprintf(
+                        self::$api_link_base, 
+                        $link, 
+                        $page->getVersion(), 
+                        $page->getEntity()->getKey()
+                    );
+                    $md = str_replace(
+                        $match, 
+                        sprintf('<a href="%s">%s</a>', $url, $title),
+                        $md
+                    );
+                }
+            } 
         }
 
         return $md;
+
     }
     
     /**

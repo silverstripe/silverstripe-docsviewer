@@ -317,17 +317,39 @@ HTML;
     
     public function testApiLinks()
     {
+        // test.md
         $result = DocumentationParser::rewrite_api_links(
             $this->page->getMarkdown(),
             $this->page
         );
-
+        // [api:DataObject]
         $this->assertContains(
-            '[link: api](http://api.silverstripe.org/search/lookup/?q=DataObject&amp;version=2.4&amp;module=documentationparsertest)',
+            '<a href="http://api.silverstripe.org/search/lookup/?q=DataObject&version=2.4&module=documentationparsertest">DataObject</a>',
             $result
         );
+        // [api:DataObject::$defaults]
         $this->assertContains(
-            '[DataObject::$has_one](http://api.silverstripe.org/search/lookup/?q=DataObject::$has_one&amp;version=2.4&amp;module=documentationparsertest)',
+            '<a href="http://api.silverstripe.org/search/lookup/?q=DataObject::$defaults&version=2.4&module=documentationparsertest">DataObject::$defaults</a>',
+            $result
+        );
+        // [api:DataObject::populateDefaults()]
+        $this->assertContains(
+            '<a href="http://api.silverstripe.org/search/lookup/?q=DataObject::populateDefaults()&version=2.4&module=documentationparsertest">DataObject::populateDefaults()</a>',
+            $result
+        );
+        // [Title](api:DataObject)
+        $this->assertContains(
+            '<a href="http://api.silverstripe.org/search/lookup/?q=DataObject&version=2.4&module=documentationparsertest">Title</a>',
+            $result
+        );
+        // [Title](api:DataObject::$defaults)
+        $this->assertContains(
+            '<a href="http://api.silverstripe.org/search/lookup/?q=DataObject::$defaults&version=2.4&module=documentationparsertest">Title</a>',
+            $result
+        );
+        // [Title](api:DataObject::populateDefaults())
+        $this->assertContains(
+            '<a href="http://api.silverstripe.org/search/lookup/?q=DataObject::populateDefaults()&version=2.4&module=documentationparsertest">Title</a>',
             $result
         );
     }
