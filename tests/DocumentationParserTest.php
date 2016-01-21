@@ -317,19 +317,31 @@ HTML;
     
     public function testApiLinks()
     {
-        $result = DocumentationParser::rewrite_api_links(
-            $this->page->getMarkdown(),
-            $this->page
+
+        // $this->page is test.md, the documentation page being parsed by rewrite_api_links
+        $parsed_page = DocumentationParser::rewrite_api_links($this->page->getMarkdown(), $this->page);
+
+        // version of documentation page
+        $page_version = $this->page->getVersion();
+
+        // expected url format resulting from rewriting api shortcode links
+        $url_format = '<a href="http://api.silverstripe.org/search/lookup/?q=%s&version='.$page_version.'&module=documentationparsertest">%s</a>';
+
+        // test cases: api shortcode references and the expected urls resulting from rewriting them
+        $test_cases = array(
+            array('[api:DataObject]', sprintf($url_format,'DataObject','DataObject')),
+            array('[api:DataObject::$defaults]',sprintf($url_format,'DataObject::$defaults','DataObject::$defaults')),
+            array('[api:DataObject::populateDefaults()]',sprintf($url_format,'DataObject::populateDefaults()','DataObject::populateDefaults()')),
+            array('[Title](api:DataObject)',sprintf($url_format,'DataObject','Title')),
+            array('[Title](api:DataObject::$defaults)',sprintf($url_format,'DataObject::$defaults','Title')),
+            array('[Title](api:DataObject::populateDefaults())',sprintf($url_format,'DataObject::populateDefaults()','Title'))
         );
 
-        $this->assertContains(
-            '[link: api](http://api.silverstripe.org/search/lookup/?q=DataObject&amp;version=2.4&amp;module=documentationparsertest)',
-            $result
-        );
-        $this->assertContains(
-            '[DataObject::$has_one](http://api.silverstripe.org/search/lookup/?q=DataObject::$has_one&amp;version=2.4&amp;module=documentationparsertest)',
-            $result
-        );
+        foreach($test_cases as $test_case) {
+            $expected_api_url = $test_case[1];
+            $this->assertContains($expected_api_url,$parsed_page);
+        }
+
     }
     
     public function testHeadlineAnchors()

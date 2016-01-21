@@ -10,7 +10,12 @@ test
 [link: http](http://silverstripe.org)
 [link: api](api:DataObject)
 
-[api:DataObject::$has_one]
+[api:DataObject]
+[api:DataObject::$defaults]
+[api:DataObject::populateDefaults()]
+[Title](api:DataObject)
+[Title](api:DataObject::$defaults)
+[Title](api:DataObject::populateDefaults())
 
 	:::php
 	code block
