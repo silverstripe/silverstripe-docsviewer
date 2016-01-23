@@ -13,11 +13,6 @@ class DocumentationParser
     const CODE_BLOCK_COLON = 2;
 
     /**
-     * @var string Format string for api urls. See rewrite_api_links().
-     */
-    public static $api_link_base = 'http://api.silverstripe.org/search/lookup/?q=%s&version=%s&module=%s';
-    
-    /**
      * @var array
      */
     public static $heading_counts = array();
@@ -299,49 +294,73 @@ class DocumentationParser
      * (6) [Title](api:DataObject->populateDefaults()) gets re-written to
      *     <a href="https://api.silverstripe.org/search/lookup/?q=DataObject::populateDefaults()&version=2.4&module=framework">Title</a>
      *
-     *  The markdown parser gets confused by the extra pair of parentheses in links of the form [DataObject](api:DataObject->populateDefaults()) so 
+     * The above api links can be enclosed in backticks.
+     *
+     * The markdown parser gets confused by the extra pair of parentheses in links of the form [DataObject](api:DataObject->populateDefaults()) so 
      * all links are re-written as html markup instead of markdown [Title](url). This also prevents other markdown parsing problems.
      * 
      * @param String $md
      * @param DocumentationPage $page
      * @return String
      */
-    public static function rewrite_api_links($md, $page)
+    public static function rewrite_api_links($markdown, $doc_page)
     {
- 
+
+        $version = $doc_page->getVersion();
+        $module = $doc_page->getEntity()->getKey();
+
+        // define regexs of the api links to be parsed (note: do not include backticks)
         $regexs = array(
-            'title_and_method' => '\[(.*?)\]\(api:(.*?\(\))\)',   // title_and_method handles case (6) and must precede title_remaining
-            'title_remaining' => '\[(.*?)\]\(api:(.*?)\)',        // title_and_remaining handles cases (4) and (5)
-            'no_title' => '\[api:(.*?)\]'                         // no_title handles cases (1),(2) and (3)
+            'title_and_method' => '# \[ ([^\]]*) \] \( api: ([^\)]*\(\)) \) #x',    // title_and_method  = (6) (must be first)
+            'title_remaining'  => '# \[ ([^\]]*) \] \( api: ([^\)]*) \) #x',        // title_and_remaining = (4) and (5)
+            'no_title'         => '# \[ api: ([^\]]*) \] #x'                        // no_title = (1),(2) and (3)
         );
-	
-        foreach($regexs as $regex_type => $regex) {
-            $link_regex = '/ `? '. $regex . ' `? /x';
-            preg_match_all($link_regex, $md, $links);
+
+        // define output format for parsing api links without backticks into html
+        $html_format = '<a href="http://api.silverstripe.org/search/lookup/?q=%s&version=%s&module=%s">%s</a>';
+
+        // parse api links without backticks into html
+        foreach($regexs as $type => $regex) {
+            preg_match_all($regex, $markdown, $links);
             if($links) {
                 foreach($links[0] as $i => $match) {
-                    if( $regex_type === 'no_title' ){
+                    if($type === 'no_title'){
                         $title = $links[1][$i];
                         $link = $links[1][$i];
+                        // change backticked links to avoid being parsed in the same way as non-backticked links
+                        $markdown = str_replace('`'.$match.'`','SS'.$link.'SS',$markdown); 
                     } else {
                         $title = $links[1][$i];
                         $link = $links[2][$i];
+                        // change backticked links to avoid being parsed in the same way as non-backticked links
+                        $markdown = str_replace('`'.$match.'`','XX'.$title.'YY'.$link.'ZZ',$markdown);
                     }
-                    $url = sprintf(
-                        self::$api_link_base, 
-                        $link,
-                        $page->getVersion(), 
-                        $page->getEntity()->getKey()
-                    );
-                    $md = str_replace(
-                        $match, 
-                        sprintf('<a href="%s">%s</a>', $url, $title),
-                        $md
-                    );
+                    $html = sprintf($html_format, $link, $version, $module, $title);
+                    $markdown = str_replace($match,$html,$markdown);
                 }
-            } 
+            }
         }
-        return $md;
+
+        // recover backticked links with no titles 
+        preg_match_all('#SS(.*)?SS#', $markdown, $links);
+        if($links) {
+            foreach($links[0] as $i => $match) {
+                $link = $links[1][$i];
+                $markdown = str_replace($match,'`[api:'.$link.']`',$markdown);
+            }
+        }
+
+        // recover backticked links with titles
+        preg_match_all('#XX(.*)?YY(.*)?ZZ#', $markdown, $links);
+        if($links) {
+            foreach($links[0] as $i => $match) {
+                $title = $links[1][$i];
+                $link = $links[2][$i];
+                $markdown = str_replace($match,'`['.$title.'](api:'.$link.')`',$markdown);
+            }
+        }
+
+        return $markdown;
 
     }
     
