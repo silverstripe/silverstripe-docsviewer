@@ -325,9 +325,9 @@ HTML;
         $page_version = $this->page->getVersion();
 
         // expected url format resulting from rewriting api shortcode links
-        $url_format = '<a href="http://api.silverstripe.org/search/lookup/?q=%s&version='.$page_version.'&module=documentationparsertest">%s</a>';
+        $html_format = '&nbsp;<a href="http://api.silverstripe.org/search/lookup/?q=%s&version='.$page_version.'&module=documentationparsertest">%s</a>';
 
-        // test cases: api shortcode references and the expected urls resulting from rewriting them
+        // test cases: api links and the expected html resulting from rewriting them
         $test_cases = array(
             array('[api:DataObject]', sprintf($url_format,'DataObject','DataObject')),
             array('[api:DataObject::$defaults]',sprintf($url_format,'DataObject::$defaults','DataObject::$defaults')),
@@ -338,8 +338,8 @@ HTML;
         );
 
         foreach($test_cases as $test_case) {
-            $expected_api_url = $test_case[1];
-            $this->assertContains($expected_api_url,$parsed_page);
+            $expected_html = $test_case[1];
+            $this->assertContains($expected_html,$parsed_page);
         }
 
     }

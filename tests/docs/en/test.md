@@ -8,7 +8,6 @@ test
 [link: subfolder page](subfolder/subpage)
 [link: with anchor](/test#anchor)
 [link: http](http://silverstripe.org)
-[link: api](api:DataObject)
 
 [api:DataObject]
 [api:DataObject::$defaults]

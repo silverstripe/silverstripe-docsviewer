@@ -13,11 +13,6 @@ class DocumentationParser
     const CODE_BLOCK_COLON = 2;
 
     /**
-     * @var string Format string for api urls. See rewrite_api_links().
-     */
-    public static $api_link_base = 'http://api.silverstripe.org/search/lookup/?q=%s&version=%s&module=%s';
-    
-    /**
      * @var array
      */
     public static $heading_counts = array();
@@ -308,15 +303,21 @@ class DocumentationParser
      */
     public static function rewrite_api_links($md, $page)
     {
+        $version = $page->getVersion();
+        $module = $page->getEntity()->getKey();
  
+        // define regexs of the api links to be parsed (note: exclude backticks using [^`])
         $regexs = array(
-            'title_and_method' => '\[(.*?)\]\(api:(.*?\(\))\)',   // title_and_method handles case (6) and must precede title_remaining
-            'title_remaining' => '\[(.*?)\]\(api:(.*?)\)',        // title_and_remaining handles cases (4) and (5)
-            'no_title' => '\[api:(.*?)\]'                         // no_title handles cases (1),(2) and (3)
+            'title_and_method' => '#[^`]\[(.*?)\]\(api:(.*?\(\))\)[^`]#',   // title_and_method = (6) (must be first)
+            'title_remaining'  => '#[^`]\[(.*?)\]\(api:(.*?)\)[^`]#',       // title_and_remaining = (4) and (5)
+            'no_title'         => '#[^`]\[api:(.*?)\][^`]#'                 // no_title handles = (1),(2) and (3)
         );
 	
-        foreach($regexs as $regex_type => $regex) {
-            $link_regex = '/ `? '. $regex . ' `? /x';
+	// define output format for parsing api links without backticks into html
+        $html_format = '&nbsp;<a href="http://api.silverstripe.org/search/lookup/?q=%s&version=%s&module=%s">%s</a>';
+
+        // parse api links without backticks into html
+        foreach($link_regexs as $link_type => $link_regex) {
             preg_match_all($link_regex, $md, $links);
             if($links) {
                 foreach($links[0] as $i => $match) {
@@ -327,22 +328,13 @@ class DocumentationParser
                         $title = $links[1][$i];
                         $link = $links[2][$i];
                     }
-                    $url = sprintf(
-                        self::$api_link_base, 
-                        $link,
-                        $page->getVersion(), 
-                        $page->getEntity()->getKey()
-                    );
-                    $md = str_replace(
-                        $match, 
-                        sprintf('<a href="%s">%s</a>', $url, $title),
-                        $md
-                    );
+                    $html = sprintf($html_format, $link, $version, $module, $title);
+                    $match = substr($match,0,strlen($match)-1);
+                    $md = str_replace($match,$html,$md);
                 }
             } 
         }
         return $md;
-
     }
     
     /**
