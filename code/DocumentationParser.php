@@ -296,11 +296,11 @@ class DocumentationParser
      *
      * The above api links can be enclosed in backticks.
      *
-     * The markdown parser gets confused by the extra pair of parentheses in links of the form [DataObject](api:DataObject->populateDefaults()) so 
+     * The markdown parser gets confused by the extra pair of parentheses in links of the form [DataObject](api:DataObject::populateDefaults()) so 
      * all links are re-written as html markup instead of markdown [Title](url). This also prevents other markdown parsing problems.
      * 
-     * @param String $md
-     * @param DocumentationPage $page
+     * @param String $markdown
+     * @param DocumentationPage $doc_page
      * @return String
      */
     public static function rewrite_api_links($markdown, $doc_page)
@@ -328,7 +328,7 @@ class DocumentationParser
                         $title = $links[1][$i];
                         $link = $links[1][$i];
                         // change backticked links to avoid being parsed in the same way as non-backticked links
-                        $markdown = str_replace('`'.$match.'`','SS'.$link.'SS',$markdown); 
+                        $markdown = str_replace('`'.$match.'`','XYZ'.$link.'XYZ',$markdown); 
                     } else {
                         $title = $links[1][$i];
                         $link = $links[2][$i];
@@ -342,7 +342,7 @@ class DocumentationParser
         }
 
         // recover backticked links with no titles 
-        preg_match_all('#SS(.*)?SS#', $markdown, $links);
+        preg_match_all('#XYZ(.*)?XYZ#', $markdown, $links);
         if($links) {
             foreach($links[0] as $i => $match) {
                 $link = $links[1][$i];
