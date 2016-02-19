@@ -92,4 +92,20 @@ class DocumentationHelper
 
         return null;
     }
+
+    /**
+     * Helper function to normalize paths to unix style directory separators
+     * 
+     * @param string
+     * 
+     * @return string
+     */
+    public static function normalizePath($path)
+    {
+        if (DIRECTORY_SEPARATOR != '/') {
+            return str_replace(DIRECTORY_SEPARATOR, '/', $path);
+        }
+        
+        return $path;
+    }
 }

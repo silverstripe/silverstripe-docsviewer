@@ -126,7 +126,7 @@ class DocumentationPage extends ViewableData
         if ($folder == $entity) {
             return $this->getEntity()->getTitle();
         } else {
-            $path = explode(DIRECTORY_SEPARATOR, trim($folder, DIRECTORY_SEPARATOR));
+            $path = explode('/', trim($folder, '/'));
             $folderName = array_pop($path);
         }
 

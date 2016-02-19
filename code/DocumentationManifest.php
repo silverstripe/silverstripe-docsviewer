@@ -145,7 +145,7 @@ class DocumentationManifest
                             'DocumentationEntity', $key
                         );
 
-                        $entity->setPath(Controller::join_links($path, $lang, '/'));
+                        $entity->setPath(DocumentationHelper::normalizePath(Controller::join_links($path, $lang, '/')));
                         $entity->setTitle($details['Title']);
                         $entity->setLanguage($lang);
                         $entity->setVersion($version);
@@ -168,7 +168,7 @@ class DocumentationManifest
 
     public function getRealPath($path)
     {
-        if (substr($path, 0, 1) != '/') {
+        if (!Director::is_absolute($path)) {
             $path = Controller::join_links(BASE_PATH, $path);
         }
 
@@ -201,7 +201,7 @@ class DocumentationManifest
                 continue;
             }
 
-            $dir = Controller::join_links(BASE_PATH, $entity);
+            $dir = DocumentationHelper::normalizePath(Controller::join_links(BASE_PATH, $entity));
 
             if (is_dir($dir)) {
                 // check to see if it has docs
@@ -406,7 +406,7 @@ class DocumentationManifest
         $this->pages[$link] = array(
             'title' => $page->getTitle(),
             'basename' => $basename,
-            'filepath' => $path,
+            'filepath' => DocumentationHelper::normalizePath($path),
             'type' => get_class($page),
             'entitypath' => $this->entity->getPath(),
             'summary' => $page->getSummary()
@@ -627,7 +627,7 @@ class DocumentationManifest
         $base = Config::inst()->get('DocumentationViewer', 'link_base');
         $entityPath = $this->normalizeUrl($entityPath);
         $recordPath = $this->normalizeUrl($recordPath);
-        $recordParts = explode(DIRECTORY_SEPARATOR, trim($recordPath, '/'));
+        $recordParts = explode('/', trim($recordPath, '/'));
         $currentRecordPath = end($recordParts);
         $depth = substr_count($entityPath, '/');
 
@@ -640,8 +640,8 @@ class DocumentationManifest
             }
 
             // only pull it up if it's one more level depth
-            if (substr_count($pagePath, DIRECTORY_SEPARATOR) == ($depth + 1)) {
-                $pagePathParts = explode(DIRECTORY_SEPARATOR, trim($pagePath, '/'));
+            if (substr_count($pagePath, '/') == ($depth + 1)) {
+                $pagePathParts = explode('/', trim($pagePath, '/'));
                 $currentPagePath = end($pagePathParts);
                 if ($currentPagePath == $currentRecordPath) {
                     $mode = 'current';
