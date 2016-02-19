@@ -166,7 +166,7 @@ class DocumentationViewer extends Controller
         if (DocumentationHelper::get_extension($url)) {
             $this->response = new SS_HTTPResponse();
             $this->response->redirect(
-                DocumentationHelper::trim_extension_off($url) .'/',
+                Director::absoluteURL(DocumentationHelper::trim_extension_off($url)) .'/',
                 301
             );
 
