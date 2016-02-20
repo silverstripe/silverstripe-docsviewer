@@ -217,4 +217,17 @@ class DocumentationViewerTest extends FunctionalTest
         $response = $this->get('dev/docs/all/');
         $this->assertEquals(404, $response->getStatusCode());
     }
+
+
+    public function testRedirectStripExtension()
+    {
+        // get url with .md extension
+        $response = $this->get('dev/docs/en/doc_test/3.0/tutorials.md');
+
+        // response should be a 301 redirect
+        $this->assertEquals(301, $response->getStatusCode());
+
+        // redirect should have been to the absolute url minus the .md extension
+        $this->assertEquals(Director::absoluteURL('dev/docs/en/doc_test/3.0/tutorials/'), $response->getHeader('Location'));
+    }
 }
