@@ -440,12 +440,12 @@ class DocumentationParser
         
         // relative path (relative to module base folder), without the filename.
         // For "sapphire/en/current/topics/templates", this would be "templates"
-        $relativePath = dirname($page->getRelativePath());
+        $relativePath = DocumentationHelper::normalizePath(dirname($page->getRelativePath()));
 
         if (strpos($page->getRelativePath(), 'index.md')) {
             $relativeLink = $page->getRelativeLink();
         } else {
-            $relativeLink = dirname($page->getRelativeLink());
+            $relativeLink = DocumentationHelper::normalizePath(dirname($page->getRelativeLink()));
         }
 
         if ($relativePath == '.') {
@@ -457,7 +457,7 @@ class DocumentationParser
         }
         
         // file base link
-        $fileBaseLink = Director::makeRelative(dirname($page->getPath()));
+        $fileBaseLink = DocumentationHelper::normalizePath(Director::makeRelative(dirname($page->getPath())));
         
         if ($matches) {
             foreach ($matches[0] as $i => $match) {
