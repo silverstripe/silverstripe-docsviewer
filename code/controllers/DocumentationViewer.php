@@ -544,13 +544,14 @@ class DocumentationViewer extends Controller
     {
         $pages = $this->getManifest()->getPages();
         $output = new ArrayList();
+        $baseLink = $this->getDocumentationBaseHref();
 
         foreach ($pages as $url => $page) {
             $first = strtoupper(trim(substr($page['title'], 0, 1)));
 
             if ($first) {
                 $output->push(new ArrayData(array(
-                    'Link' => $url,
+                    'Link' => Controller::join_links($baseLink, $url),
                     'Title' => $page['title'],
                     'FirstLetter' => $first
                 )));
