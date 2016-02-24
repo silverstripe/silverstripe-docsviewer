@@ -534,7 +534,7 @@ class DocumentationManifest
         foreach ($this->getPages() as $url => $page) {
             if ($grabNext && strpos($page['filepath'], $entityBase) !== false) {
                 return new ArrayData(array(
-                    'Link' => $url,
+                    'Link' => Controller::join_links(Config::inst()->get('DocumentationViewer', 'link_base'), $url),
                     'Title' => $page['title']
                 ));
             }
@@ -543,7 +543,7 @@ class DocumentationManifest
                 $grabNext = true;
             } elseif (!$fallback && strpos($page['filepath'], $filepath) !== false) {
                 $fallback = new ArrayData(array(
-                    'Link' => $url,
+                    'Link' => Controller::join_links(Config::inst()->get('DocumentationViewer', 'link_base'), $url),
                     'Title' => $page['title'],
                     'Fallback' => true
                 ));
@@ -576,7 +576,7 @@ class DocumentationManifest
             if ($filepath == $page['filepath']) {
                 if ($previousUrl) {
                     return new ArrayData(array(
-                        'Link' => $previousUrl,
+                        'Link' => Controller::join_links(Config::inst()->get('DocumentationViewer', 'link_base'), $previousUrl),
                         'Title' => $previousPage['title']
                     ));
                 }
