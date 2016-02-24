@@ -238,7 +238,7 @@ class DocumentationParser
                 }
                 
                 // Rewrite URL (relative or absolute)
-                $baselink = Director::makeRelative(
+                $baselink = DocumentationHelper::relativePath(
                     dirname($page->getPath())
                 );
 
@@ -457,7 +457,7 @@ class DocumentationParser
         }
         
         // file base link
-        $fileBaseLink = DocumentationHelper::normalizePath(Director::makeRelative(dirname($page->getPath())));
+        $fileBaseLink = DocumentationHelper::relativePath(DocumentationHelper::normalizePath(dirname($page->getPath())));
         
         if ($matches) {
             foreach ($matches[0] as $i => $match) {

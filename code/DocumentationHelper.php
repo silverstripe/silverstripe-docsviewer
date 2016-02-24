@@ -108,4 +108,18 @@ class DocumentationHelper
         
         return $path;
     }
+
+    /**
+     * Helper function to make normalized paths relative
+     * 
+     * @param string
+     * 
+     * @return string
+     */
+    public static function relativePath($path)
+    {
+        $base = self::normalizePath(Director::baseFolder());
+        
+        return substr($path, strlen($base));
+    }
 }
