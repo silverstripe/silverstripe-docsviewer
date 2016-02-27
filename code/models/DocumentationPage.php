@@ -151,7 +151,7 @@ class DocumentationPage extends ViewableData
     public function getMarkdown($removeMetaData = false)
     {
         try {
-            if ($md = file_get_contents($this->getPath())) {
+            if (is_file($this->getPath()) && $md = file_get_contents($this->getPath())) {
                 $this->populateMetaDataFromText($md, $removeMetaData);
             
                 return $md;
