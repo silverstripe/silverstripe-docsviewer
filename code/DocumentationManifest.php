@@ -64,6 +64,11 @@ class DocumentationManifest
     /**
      * @var boolean
      */
+    private $has_default_entity = false;
+
+    /**
+     * @var boolean
+     */
     private $automaticallyPopulated = false;
 
     /**
@@ -157,6 +162,9 @@ class DocumentationManifest
 
                         if (isset($details['DefaultEntity'])) {
                             $entity->setIsDefaultEntity($details['DefaultEntity']);
+                            if ($entity->getIsDefaultEntity()) {
+                                $this->has_default_entity = true;
+                            }
                         }
 
                         $this->registeredEntities->push($entity);
@@ -759,5 +767,14 @@ class DocumentationManifest
         asort($versions);
 
         return $versions;
+    }
+
+    /**
+     * Gets whether there is a default entity or not
+     * @return boolean
+     */
+    public function getHasDefaultEntity()
+    {
+        return $this->has_default_entity;
     }
 }

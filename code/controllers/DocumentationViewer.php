@@ -710,4 +710,14 @@ class DocumentationViewer extends Controller
     {
         return Config::inst()->get('DocumentationViewer', 'link_base');
     }
+
+    /**
+     * Gets whether there is a default entity or not
+     * @return boolean
+     * @see DocumentationManifest::getHasDefaultEntity()
+     */
+    public function getHasDefaultEntity()
+    {
+        return $this->getManifest()->getHasDefaultEntity();
+    }
 }
