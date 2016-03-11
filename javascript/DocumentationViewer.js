@@ -120,7 +120,7 @@
 		 *
 		 * Automatically adds anchor links to headings that have IDs
 		 */
-		var url = window.location.href;
+		var url = window.location.href.replace(/#[a-zA-Z0-9\-\_]*/g, '');
 		
 		$("#content h1[id], #content h2[id], #content h3[id], #content h4[id], #content h5[id], #content h6[id]").each(function() {
 			var link = '<a class="heading-anchor-link" title="Link to this section" href="'+ url + '#' + $(this).attr('id') + '">&para;</a>';
