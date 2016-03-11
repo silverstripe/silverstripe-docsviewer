@@ -238,16 +238,16 @@ class DocumentationParser
                 }
                 
                 // Rewrite URL (relative or absolute)
-                $baselink = DocumentationHelper::relativePath(
+                $baselink = DocumentationHelper::relativePath(DocumentationHelper::normalizePath(
                     dirname($page->getPath())
-                );
+                ));
 
                 // if the image starts with a slash, it's absolute
                 if (substr($url, 0, 1) == '/') {
-                    $relativeUrl = str_replace(BASE_PATH, '', Controller::join_links(
+                    $relativeUrl = DocumentationHelper::normalizePath(str_replace(BASE_PATH, '', Controller::join_links(
                         $page->getEntity()->getPath(),
                         $url
-                    ));
+                    )));
                 } else {
                     $relativeUrl = rtrim($baselink, '/') . '/' . ltrim($url, '/');
                 }
