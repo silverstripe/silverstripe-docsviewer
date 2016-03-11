@@ -482,6 +482,9 @@ class DocumentationParser
                         $fileBaseLink,
                         $url
                     );
+                } else if (preg_match('/^#/', $url)) {
+                    // for relative links begining with a hash use the current page link
+                    $relativeUrl = Controller::join_links($baselink, $page->getRelativeLink(), $url);
                 } else {
                     // Rewrite public URL
                     if (preg_match('/^\//', $url)) {

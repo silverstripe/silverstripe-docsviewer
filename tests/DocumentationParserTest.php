@@ -197,6 +197,16 @@ HTML;
             $result
         );
 
+        $this->assertContains(
+            '[link: with anchor](dev/docs/en/documentationparsertest/2.4/test/#anchor)',
+            $result
+        );
+
+        $this->assertContains(
+            '[link: relative anchor](dev/docs/en/documentationparsertest/2.4/test/#relative-anchor)',
+            $result
+        );
+
         $result = DocumentationParser::rewrite_relative_links(
             $this->subPage->getMarkdown(),
             $this->subPage
