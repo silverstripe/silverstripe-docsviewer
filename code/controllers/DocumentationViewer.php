@@ -12,7 +12,7 @@
  * @package docsviewer
  */
 
-class DocumentationViewer extends Controller
+class DocumentationViewer extends Controller implements PermissionProvider
 {
     /**
      * @var array
@@ -71,7 +71,7 @@ class DocumentationViewer extends Controller
      *
      * @var string|array Optional permission check
      */
-    private static $check_permission = 'ADMIN';
+    private static $check_permission = 'VIEW_DEVDOCS';
 
     /**
      * @var array map of modules to edit links.
@@ -114,6 +114,21 @@ class DocumentationViewer extends Controller
                 DOCSVIEWER_DIR .'/css/small.css'
             ));
         }
+    }
+    
+    /**    
+     * Permission provider to allow more control over who can view docs
+     *
+     * @return array
+     */
+    
+    public function providePermissions() {
+        return array(
+            'VIEW_DEVDOCS' => array(
+                'name' => 'View Site Documentation',
+                'category' => 'Documentation',
+            )
+        );
     }
 
     /**
