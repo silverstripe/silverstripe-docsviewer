@@ -132,7 +132,8 @@ class DocumentationManifest
             $key = (isset($details['Key'])) ? $details['Key'] : $details['Title'];
 
             if (!$path || !is_dir($path)) {
-                throw new Exception($details['Path'] . ' is not a valid documentation directory');
+                trigger_error($details['Path'] . ' is not a valid documentation directory', E_USER_WARNING);
+                continue;
             }
 
             $version = (isset($details['Version'])) ? $details['Version'] : '';
