@@ -69,7 +69,7 @@ class DocumentationParser
         $end = false;
         $debug = false;
 
-        $lines = explode("\n", $md);
+        $lines = preg_split('/\\r\\n|\\r|\\n/', $md);
         $output = array();
 
         foreach ($lines as $i => $line) {
@@ -394,7 +394,7 @@ class DocumentationParser
             $headingText .= "-" . self::$heading_counts[$headingText];
         }
 
-        return sprintf("%s {#%s}", preg_replace('/\n/', '', $heading), self::generate_html_id($headingText));
+        return sprintf("%s {#%s}", preg_replace('/\\r\\n|\\r|\\n/', '', $heading), self::generate_html_id($headingText));
     }
     
     /**
