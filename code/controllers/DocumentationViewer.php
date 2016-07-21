@@ -102,7 +102,7 @@ class DocumentationViewer extends Controller
             Requirements::customScript('try{Typekit.load();}catch(e){}');
 
             Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');
-            Requirements::javascript('https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js');
+            Requirements::javascript('https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js');
 
             Requirements::javascript(DOCSVIEWER_DIR .'/javascript/DocumentationViewer.js');
             Requirements::combine_files('docs.css', array(
