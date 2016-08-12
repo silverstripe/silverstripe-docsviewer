@@ -1,0 +1,19 @@
+hr_HR:
+  DocumentationSearch:
+    SEARCH: Traži
+    SEARCHRESULTS: 'Rezultati pretraživanja'
+  DocumentationViewer:
+    CHANGE: Promjeni
+    KEYWORDS: Ključne riječi
+    LANGUAGE: Jezik
+    MODULES: Moduli
+    OPENSEARCHDESC: 'Pretraži dokumentaciju'
+    OPENSEARCHNAME: 'Pretraga dokumentacije'
+    OPENSEARCHTAGS: dokumentacija
+    SEARCH: Traži
+    VERSIONS: Verzije
+  DocumentationViewer_home.ss:
+    DOCUMENTEDMODULES: 'Dokumentirani moduli'
+    NOMODULEDOCUMENTATION: 'Moduli s instaliranom dokumentacijom nisu pronađeni.'
+  DocumentationViewer_results.ss:
+    ADVANCEDSEARCH: 'Napredno pretraživanje'
