@@ -72,10 +72,15 @@ html {
 		text-transform: uppercase;
 	}
 
+	#sidebar .nav .current .top {
+		color: #1389CE;
+		font-weight: 700;
+	}
+
 	#sidebar .nav a {
 		display:block;
-		padding-top:8px;
-		padding-bottom:8px;
+		padding-top:7px;
+		padding-bottom:7px;
 		padding-right:12px;
 	}
 
@@ -83,10 +88,11 @@ html {
 		text-decoration: none;
 		background:#1389ce;
 		color:#fff;
+		font-weight: 700;
 	}
 
 	#sidebar .nav a.current:hover {
-		background-color: #03527a;
+		background-color: #1389ce;
 		color: #fff;
 	}
 
@@ -100,7 +106,6 @@ html {
 	}
 
 	#sidebar li a.current {
-		background:rgb(3, 91, 136);
 		color:#fff;
 	}
 
@@ -115,16 +120,23 @@ html {
 
 	#sidebar .nav .section ul li a,
 	#sidebar .nav .current ul li a {
-		padding-left:24px;
+		padding-left:30px;
+	}
+
+	#sidebar .nav .section ul li a.section {
+		color: #1389CE;
 	}
 
 	#sidebar .nav .section ul li ul li a,
 	#sidebar .nav .current ul li ul li a {
-		padding-left:42px;
+		padding-left:48px;
 		font-size:14px;
 	}
 
-	#sidebar .nav a.current {}
+	#sidebar .nav a.current {
+		color: #1389CE;
+		font-weight: 700;
+	}
 
 	#sidebar .minor-nav a {
 		color: #181C17;
@@ -688,7 +700,7 @@ html {
 		bottom: 0;
 		top: 0;
 		z-index: 9999;
-		box-shadow: -2px 1px 12px -3px #ccc;
+		box-shadow: -2px 1px 40px -3px #999;
 		overflow-y:auto;
 		overflow-x:hidden;
 	}
@@ -710,9 +722,8 @@ html {
 		font-size:14px;
 	}
 
-	.menu-toggle {
-		display:block;
-		display: inherit;
+	.wrapper .menu-toggle {
+		display: block;
 		position: relative;
 		margin-left: auto;
 		margin-bottom: 20px;
@@ -723,7 +734,7 @@ html {
 		font-weight: 700;
 		color: #fff;
 		background-color: #005B94;
-		border: 1px solid #005B9480;
+		border: 1px solid #005B94;
 		border-radius: 5px;
 	}
 	a.menu-toggle:focus, a.menu-toggle:hover, a.menu-toggle:active{
@@ -733,11 +744,11 @@ html {
 		text-decoration: none;
 	}
 	@media (max-width:350px) {
-		.menu-toggle {
+		.wrapper .menu-toggle {
 			position:fixed;
-			z-index: 9999;
+			z-index: 10000;
 			right: 20px;
-			bottom: 0px;
+			bottom: 0;
 			-webkit-box-shadow: 0 10px 20px #0003, 0 6px 6px #0003;
 			-moz-box-shadow: 0 10px 20px #0003, 0 6px 6px #0003;
 			box-shadow: 0 10px 20px #0003, 0 6px 6px #0003;
