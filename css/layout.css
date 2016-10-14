@@ -84,20 +84,25 @@ html {
 		padding-right:12px;
 	}
 
-	#sidebar .nav a:hover {
-		text-decoration: none;
-		background:#1389ce;
-		color:#fff;
-		font-weight: 700;
-	}
-
-	#sidebar .nav a.current:hover {
+	/* Sidebar hover states */
+	#sidebar .nav a:hover,
+	#sidebar .nav a.top:hover,
+	#sidebar .nav .section ul li .section:hover,
+	#sidebar .nav a.current:hover,
+	/* Sidebar focus states */
+	#sidebar .nav a:focus,
+	#sidebar .nav a.top:focus,
+	#sidebar .nav .section ul li .section:focus,
+	#sidebar .nav a.current:focus {
 		background-color: #1389ce;
 		color: #fff;
+		text-decoration: none;
+		font-weight: 700;
 	}
 
 	#sidebar .nav .section .top {
 		border: none;
+		color: #1389CE;
 	}
 
 	#sidebar li {
@@ -737,7 +742,9 @@ html {
 		border: 1px solid #005B94;
 		border-radius: 5px;
 	}
-	a.menu-toggle:focus, a.menu-toggle:hover, a.menu-toggle:active{
+	a.menu-toggle:focus,
+	a.menu-toggle:hover,
+	a.menu-toggle:active{
 		color: #fff;
 		background-color: #1389ce;
 		border: 1px solid #1389ce;
