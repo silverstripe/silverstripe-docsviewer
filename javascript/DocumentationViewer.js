@@ -1,20 +1,30 @@
 ;(function($) {
 	$(document).ready(function() {
+
+		//toggle the side menu when in mobile
+		$('.menu-toggle').on('click', function (e) {
+			e.preventDefault();
+			var left = $('#sidebar').is('.visible') ? -270 : 0;
+			$('#sidebar').animate({ left: left}, 'fast', function() {
+				$(this).toggleClass('visible');
+			});
+		})
+
 		var switched = false;
-		
+
 		var updateTables = function() {
 			if (($(window).width() < 540) && !switched ){
 				switched = true;
-				
+
 				$("table").each(function(i, element) {
 					splitTable($(element));
 				});
-				
+
 				return true;
 			}
 			else if (switched && ($(window).width() > 540)) {
 				switched = false;
-				
+
 				$("table").each(function(i, element) {
 					unsplitTable($(element));
 				});
@@ -62,7 +72,7 @@
 				tx.each(function () {
 					var height = $(this).outerHeight(true);
 					heights[index] = heights[index] || 0;
-					
+
 					if (height > heights[index]) heights[index] = height;
 				});
 			});
@@ -121,74 +131,21 @@
 		 * Automatically adds anchor links to headings that have IDs
 		 */
 		var url = window.location.href.replace(/#[a-zA-Z0-9\-\_]*/g, '');
-		
+
 		$("#content h1[id], #content h2[id], #content h3[id], #content h4[id], #content h5[id], #content h6[id]").each(function() {
 			var link = '<a class="heading-anchor-link" title="Link to this section" href="'+ url + '#' + $(this).attr('id') + '">&para;</a>';
 			$(this).append(' ' + link);
-		}); 
-		
+		});
+
 		$("h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]").mouseenter(function() {
 			$(this).addClass('hover');
 		});
-		
+
 		$("h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]").mouseleave(function() {
 			$(this).removeClass('hover');
 		});
 
-		/*
-		$(".search input").live("keyup", function(e) {
-			clearTimeout($.data(this, 'timer'));
 
-			var string = $(this).val();
-			var self = $(this);
-
-			if (string == '') {
-				$(".search .autocomplete-results").hide();
-			} else {
-				var container;
-
-				if($(this).siblings('.autocomplete-results').length == 0) {
-					container = $("<div class='autocomplete-results'></div");
-					
-					$(this).after(container);
-				} else {
-					container = $(this).siblings('.autocomplete-results').first();
-				}
-
-				$(this).data('timer', setTimeout(function() {
-					if(string !== '') {
-						$.getJSON(
-							self.parents('form').attr('action'),
-							{ query: string },
-							function(results) {
-								if(results) {
-									var list = $("<ul></ul>");
-
-									$.each(results, function(i, elem) {
-										list.append(
-											$("<li></li>")
-												.append(
-													$("<a></a>").attr('href', elem.link).text(elem.title)
-												).append(
-													elem.path
-												)
-										);
-									});
-
-									container.append(list);
-								} else {
-									container.hide().removeClass('loading');
-								}
-							}
-						);
-					}
-
-					return false;
-				}, 100));
-			};
-
-		});
-		*/
 
 		/** ---------------------------------------------
 		 * LANGAUGE SELECTER
@@ -196,13 +153,13 @@
 		 * Hide the change button and do it onclick
 		 */
 		$("#Form_LanguageForm .Actions").hide();
-		
+
 		$("#Form_LanguageForm select").change(function() {
 			$("#Form_LanguageForm").submit();
 		});
-		
+
 		/** ---------------------------------------------
-		 * SYNTAX HIGHLIGHTER 
+		 * SYNTAX HIGHLIGHTER
 		 *
 		 * As the Markdown parser now uses the GFM structure (```yml) this does
 		 * not work with SyntaxHighlighter. The below translates the GFM output
@@ -218,13 +175,6 @@
 			}
 		});
 
-		$('.menu-toggle').on('click', function (e) {			
-			e.preventDefault();
-			var left = $('#sidebar').is('.visible') ? -270 : 0;
-			$('#sidebar').animate({ left: left}, 'fast', function() {
-				$(this).toggleClass('visible');
-			});
-		})
-		
+
 	});
 })(jQuery);
