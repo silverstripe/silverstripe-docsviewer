@@ -5,7 +5,12 @@
 
 	<div id="masthead" <% if Versions %>class="has_versions"<% end_if %>>
 		<div class="wrapper">
-			<a class="menu-toggle">☰</a>
+			<a class="menu-toggle">
+				<span></span>
+				<span></span>
+				<span></span>
+				<span></span>
+			</a>
 
 			<% if Breadcrumbs.count > 1 %>
 				<% include DocumentationBreadcrumbs %>

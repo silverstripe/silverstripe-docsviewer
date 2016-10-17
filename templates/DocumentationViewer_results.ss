@@ -8,10 +8,15 @@
 
 			<div class="doc-breadcrumbs">
 				<p>
-					<a class="menu-toggle">☰</a>
-						<a class="breadcrumb" href="$BaseHref">Documentation</a>
-						<span>/</span>
-						<a class="breadcrumb current">Search</a>
+					<a class="menu-toggle">
+						<span></span>
+						<span></span>
+						<span></span>
+						<span></span>
+					</a>
+					<a class="breadcrumb" href="$BaseHref">Documentation</a>
+					<span>/</span>
+					<a class="breadcrumb current">Search</a>
 				</p>
 			</div>
 
