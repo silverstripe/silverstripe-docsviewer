@@ -1,51 +1,51 @@
 /*! text selection */
-::-moz-selection {	
+::-moz-selection {
 	text-shadow:none;
 	color: #ffffff;
 	background: #1389CE;
 }
 
-::selection { 	
+::selection {
 	text-shadow: none;
 	color: #ffffff;
 	background: #1389CE;
 }
 
 /*! links */
-a { 
-	color: #1389ce; 
-	text-decoration: none; 
+a {
+	color: #808c8d; 
+	text-decoration: none;
 }
 
 	a:hover,
-	a:focus { 
+	a:focus {
 		text-decoration: underline;
 	}
 
 a[href$=".pdf"],
 a[href$=".PDF"],
-a.pdf { 
+a.pdf {
 	padding: 2px;
-	padding-left: 20px; 
+	padding-left: 20px;
 	background: url(../../docsviewer/images/icons/page_white_acrobat.png) no-repeat left center;
 }
-	
+
 a[href$=".doc"],
 a[href$=".DOC"],
 a.doc {
 	padding: 2px;
-	padding-left: 20px; 
+	padding-left: 20px;
 	background: url(../../docsviewer/images/icons/page_word.png) no-repeat left center;
 }
-	
+
 a[href$=".xls"],
 a[href$=".XLS"],
 a.xls {
 	padding: 2px;
-	padding-left: 20px; 
-	background: url(../../docsviewer/images/icons/page_excel.png) no-repeat left center; 
+	padding-left: 20px;
+	background: url(../../docsviewer/images/icons/page_excel.png) no-repeat left center;
 }
-	
+
 a[href$=".gz"],
 a[href$=".GZ"],
 a[href$=".gzip"],
@@ -54,22 +54,22 @@ a[href$=".zip"],
 a[href$=".ZIP"],
 a.archive {
 	padding: 2px;
-	padding-left: 20px; 
-	background: url(../../docsviewer/images/icons/page_white_zip.png) no-repeat left center; 
+	padding-left: 20px;
+	background: url(../../docsviewer/images/icons/page_white_zip.png) no-repeat left center;
 }
-	
+
 a[href$=".exe"],
 a[href$=".EXE"],
 a.application {
 	padding: 2px;
 	padding-left: 20px;
-	background: url(../../docsviewer/images/icons/application.png) no-repeat left center; 
+	background: url(../../docsviewer/images/icons/application.png) no-repeat left center;
 }
 
 /*! pargraphs */
-p { 
-	font-size: 15px; 
-	line-height: 1.5; 
+p {
+	font-size: 15px;
+	line-height: 1.5;
 	margin: 0 0 25px;
 }
 
@@ -78,36 +78,36 @@ p {
 }
 
 /*! lists */
-ul { 
-	margin: 10px 0 20px 20px; 
+ul {
+	margin: 10px 0 20px 20px;
 	padding: 0;
 }
 
-li, dd, li p { 
-	font-size: 15px; 
+li, dd, li p {
+	font-size: 15px;
 	margin: 0 0 10px 0;
 	line-height: 1.5;
 }
 
-li { 
-	list-style-position: inside; 
+li {
+	list-style-position: inside;
 }
 
 li ul,
-li ol { 
+li ol {
 	margin: 0 0 5px 20px;
 }
 
-dl { 
-	margin: 7px 0 21px 0; 
+dl {
+	margin: 7px 0 21px 0;
 }
 
-dt { 
-	font-weight: bold; 
+dt {
+	font-weight: bold;
 }
 
-dd { 
-	margin: 5px 0 10px 20px; 
+dd {
+	margin: 5px 0 10px 20px;
 }
 
 .semantic {
@@ -132,10 +132,10 @@ ul.third {
 	}
 
 /*! headers */
-h1 { 
+h1 {
 	font-size: 35px;
 	line-height: 40px;
-	margin-bottom: 10px; 
+	margin-bottom: 10px;
 	margin-top: 0;
 	letter-spacing: -1px;
 	color:rgb(3, 91, 136);
@@ -145,44 +145,44 @@ h1 {
 		font-size: 18px;
 		line-height: 20px;
 	}
-	
+
 	h1 + p {
 		margin-top: 30px;
 	}
 
-h2 { 
-	font-size: 28px; 
-	line-height: 30px; 
+h2 {
+	font-size: 28px;
+	line-height: 30px;
 	margin: 40px 0 20px;
 	border-top: 1px solid #eee;
 	padding-top: 29px;
 	letter-spacing: -1px;
-	color: rgb(3, 91, 136); 
+	color: rgb(3, 91, 136);
 }
 
-h3 { 
-	font-size: 20px; 
-	line-height: 20px; 
+h3 {
+	font-size: 20px;
+	line-height: 20px;
 	margin: 30px 0 10px;
-	color: #181c1d; 
+	color: #181c1d;
 }
 
-h4 { 
-	font-size: 16px; 
-	margin-bottom: 14px; 
+h4 {
+	font-size: 16px;
+	margin-bottom: 14px;
 	line-height: 21px;
 }
 
-h5 { 
-	font-size: 14px; 
-	line-height: 14px; 
+h5 {
+	font-size: 14px;
+	line-height: 14px;
 	margin-bottom: 7px;
 }
 
 h6 {
-	font-size: 12px; 
-	line-height: 15px; 
-	margin-bottom: 10px; 
+	font-size: 12px;
+	line-height: 15px;
+	margin-bottom: 10px;
 }
 
 h1 .heading-anchor-link,
@@ -210,16 +210,16 @@ h6 .heading-anchor-link {
 /*! images */
 img {
 	max-width: 100%;
-	border: 1px solid #ccc;	
+	border: 1px solid #ccc;
 	padding: 6px;
 	margin: 10px 0;
 	border-radius: 3px;
 }
 
 /*! code */
-pre { 
-	margin: 20px 0 30px; 
-	font: 13px/20px Monaco, 'Bitstream Vera Sans Mono',  'Courier New', monospace; 
+pre {
+	margin: 20px 0 30px;
+	font: 13px/20px Monaco, 'Bitstream Vera Sans Mono',  'Courier New', monospace;
 	background-color: #f6f7f8;
 	border: 1px solid #e9eaed;
 	padding: 14px;
@@ -228,27 +228,27 @@ pre {
 	color: #4E5661;
 }
 
-	pre code { 
-		background: none; 
+	pre code {
+		background: none;
 		font-weight: normal;
 		padding: 0;
 	}
-	
+
 code {
 	font: 13px/15px Monaco, 'Bitstream Vera Sans Mono', Courier, monospace;
 	background: #ecf0f1;
 	padding: 2px;
 }
 
-	code a { 
-		color: #4E5661; 
+	code a {
+		color: #4E5661;
 	}
 
 /*! quotes */
-blockquote { 
-	margin: 28px 0; 
-	padding: 14px 14px 0 38px; 
-	background: #f8f9fa url(../../docsviewer/images/quote.gif) no-repeat 9px 18px; 
+blockquote {
+	margin: 28px 0;
+	padding: 14px 14px 0 38px;
+	background: #f8f9fa url(../../docsviewer/images/quote.gif) no-repeat 9px 18px;
 	overflow: hidden;
 }
 
@@ -257,42 +257,42 @@ blockquote {
 	blockquote h3,
 	blockquote h4,
 	blockquote h5,
-	blockquote h6 { 
+	blockquote h6 {
 		font-style: italic;
-		color: #627871; 
+		color: #627871;
 	}
-	
-	blockquote h4 { 
-		font-size: 18px; 
+
+	blockquote h4 {
+		font-size: 18px;
 	}
-	
-	blockquote p { 
-		font-style: italic; 
-		font-size: 14px; 
-		color: #667D76; 
+
+	blockquote p {
+		font-style: italic;
+		font-size: 14px;
+		color: #667D76;
 	}
 
 /*! tables */
-table { 
-	border-collapse: collapse; 
-	width: 100%; 
-	background-color: #fafafa; 
+table {
+	border-collapse: collapse;
+	width: 100%;
+	background-color: #fafafa;
 	margin-bottom: 28px;
 	border: 1px solid #c3cdca;
 }
 
-	table tr:nth-child(even) { 
-		background: #eef4f6; 
+	table tr:nth-child(even) {
+		background: #eef4f6;
 	}
 
-	table caption { 
-		text-align: left; 
-		font-weight: bold; 
-		font-size: 18px; 
-		line-height: 21px; 
+	table caption {
+		text-align: left;
+		font-weight: bold;
+		font-size: 18px;
+		line-height: 21px;
 	}
 
-	table thead { 
+	table thead {
 		background: #fafafa;
 	}
 
@@ -303,12 +303,12 @@ table {
 			border-right: 1px solid #c3cdca;
 		}
 
-	table tbody tr { 
-		border-top: 1px solid #c3cdca; 
+	table tbody tr {
+		border-top: 1px solid #c3cdca;
 	}
 
-	table td { 
-		font-size: 15px; 
+	table td {
+		font-size: 15px;
 		line-height: 21px;
 		padding: 7px;
 		border-right: 1px solid #c3cdca;
@@ -342,7 +342,7 @@ table {
 		border-radius: 3px;
 		float: left;
 	}
-	
+
 		#edit-link a:hover,
 		#edit-link a:focus {
 			color: #fff;
