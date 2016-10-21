@@ -732,7 +732,7 @@ html {
 		margin-left: auto;
 		margin-bottom: 20px;
 		width: 30px;
-		height: 30px;
+		height: 39px;
 		-webkit-transform: rotate(0deg);
 		-moz-transform: rotate(0deg);
 		-o-transform: rotate(0deg);
@@ -751,7 +751,6 @@ html {
 		width: 100%;
 		background: #1389ce;
 		border-radius: 9px;
-		opacity: 1;
 		left: 0;
 		-webkit-transform: rotate(0deg);
 		-moz-transform: rotate(0deg);
@@ -762,8 +761,8 @@ html {
 		-o-transition: .25s ease-in-out;
 		transition: .25s ease-in-out;
 	}
-	/* Icon 3 */
 
+	/* Hamburger line positioning */
 	.menu-toggle span:nth-child(1) {
 	  top: 8px;
 	}
@@ -777,6 +776,7 @@ html {
 	  top: 28px;
 	}
 
+	/* X line Animation */
 	.menu-toggle.open span:nth-child(1) {
 	  top: 18px;
 	  width: 0%;
@@ -804,6 +804,7 @@ html {
 	}
 }
 
+/* Hamburger positioning */
 @media (max-width:992px) {
 	#content {
 		float: right;
