@@ -650,12 +650,6 @@ html {
 		float: right;
 	}
 
-@media (min-width: 400px) {
-	.aaaaaaaa {
-		width: 1170px;
-	}
-}
-
 @media (max-width: 767px) {
 	a.breadcrumb, .introduction p {
 		font-size:14px;
@@ -738,7 +732,7 @@ html {
 		margin-left: auto;
 		margin-bottom: 20px;
 		width: 30px;
-		height: 30px;
+		height: 39px;
 		-webkit-transform: rotate(0deg);
 		-moz-transform: rotate(0deg);
 		-o-transform: rotate(0deg);
