@@ -1,5 +1,5 @@
-fieldset { 
-	border: none; 
+fieldset {
+	border: none;
 	margin: 0;
 	padding: 0 0 5px 0;
 }
@@ -23,8 +23,9 @@ fieldset {
 }
 
 #DocumentationAdvancedSearchForm_AdvancedSearchForm #Versions {
-	width: 20%;
-	float: right;
+	width: auto;
+	float: left;
+	margin-top: 12px;
 }
 
 .optionset ul {
@@ -32,4 +33,6 @@ fieldset {
 }
 .optionset li {
 	list-style: none;
+	float: left;
+	padding-right: 12px; 
 }
