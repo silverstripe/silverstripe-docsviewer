@@ -8,7 +8,6 @@
 			$('#sidebar').animate({ left: left}, 'fast', function() {
 				$(this).toggleClass('visible');
 			});
-			$(this).toggleClass('open');
 		})
 
 		var switched = false;

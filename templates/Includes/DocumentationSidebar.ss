@@ -1,4 +1,5 @@
 <div id="sidebar">
+	<a class="collapse"href="#">×</a>
 	<div class="box">
 		$DocumentationSearchForm
 		<ul class="nav">
