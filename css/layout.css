@@ -49,7 +49,7 @@ html {
 /*! sidebar */
 #sidebar {
 	float: left;
-	padding-top:24px;
+	padding-top:20px;
 }
 
 	#sidebar .nav,
@@ -97,6 +97,9 @@ html {
 		background-color: #1389ce;
 		color: #fff;
 		text-decoration: none;
+		-webkit-transition: all 500ms ease;
+    	-moz-transition: all 500ms ease;
+		transition: all 500ms ease;
 	}
 
 	#sidebar .nav .section .top {
@@ -557,7 +560,7 @@ html {
 			color:#696868;
 		}
 
-.menu-toggle {
+.menu-open {
 	display:none;
 }
 
@@ -683,6 +686,10 @@ html {
 	#sidebar {
 		width: 25%;
 	}
+	/* Removes close button on desktop view */
+	#sidebar .menu-close {
+		display: none;
+	}
 
 	.documentation_children li {
 		width:33%;
@@ -694,19 +701,44 @@ html {
 		width: 1170px;
 	}
 }
-
+/* Sidebar mobile styles (default:hidden) */
 @media (max-width: 991px) {
 	#sidebar {
-		width: 265px;
 		position: fixed;
-		background: #fff;
-		left: -300px;
-		bottom: 0;
+		background: transparent;
 		top: 0;
-		z-index: 9999;
-		box-shadow: -2px 1px 40px -3px #999;
-		overflow-y:auto;
-		overflow-x:hidden;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		opacity: 0;
+		z-index: -1; /* [-1] Sidebar: hidden, [0] Page, [1] Sidebar: Show */
+		box-shadow: none;
+		overflow-x: hidden;
+		overflow-y: auto;
+	    -webkit-transition: all 300ms ease;
+	    -moz-transition: all 300ms ease;
+	    transition: all 300ms ease;
+	    -webkit-touch-callout: none;
+	    -webkit-user-select: none;
+	    -khtml-user-select: none;
+	    -moz-user-select: none;
+	    -ms-user-select: none;
+	    -moz-box-shadow: none!important;
+	    -webkit-box-shadow: none!important;
+	    box-shadow: none!important;
+	}
+
+	/* Opened sidebar styles */
+	#sidebar.open {
+		z-index: 1;
+		background: #fff;
+		opacity: 1;
+	}
+	/* Fade out sidebar state styles before class is removed */
+	#sidebar.hide {
+		z-index: 1;
+		background: transparent;
+		color: white;
 	}
 
 	#content {
@@ -726,7 +758,8 @@ html {
 		font-size:14px;
 	}
 
-	.wrapper .menu-toggle {
+	/* Menu button styles */
+	.wrapper .menu-open {
 		display: block;
 		position: relative;
 		margin-left: auto;
@@ -745,10 +778,34 @@ html {
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* IE10+ */
 	}
-	.wrapper .menu-toggle:hover {
+
+	.wrapper .menu-open:hover {
 		background-color: #1389ce;
 		color: #fff;
-		transition: 300ms 0.2s ease;
+		transition: 300ms 0.1s ease;
+	}
+
+	/* Close button styles */
+	.menu-close {
+		display: block;
+		position: relative;
+		margin-left: auto;
+		margin-right: 10px;
+		padding: 0px 12px;
+		font-size: 33px;
+		font-weight: 700;
+		line-height: 33px;
+		text-decoration: none;
+		color: #1389ce;
+		width: 40px;
+		height: 40px;
+		cursor: pointer;
+		-webkit-user-select: none; /* Chrome/Safari */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* IE10+ */
+	}
+	.menu-close:hover {
+		text-decoration: none;
 	}
 }
 

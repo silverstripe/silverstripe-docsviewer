@@ -5,12 +5,12 @@
 
 	<div id="masthead" <% if Versions %>class="has_versions"<% end_if %>>
 		<div class="wrapper">
-			<a class="menu-toggle">
-				<span></span>
-				<span></span>
-				<span></span>
-				<span></span>
-			</a>
+			<div class="menu-bar">
+				<a class="logo" href="https://userhelp.silverstripe.org/"></a>
+				<a class="menu-open">
+					MENU
+				</a>
+			</div>
 
 			<% if Breadcrumbs.count > 1 %>
 				<% include DocumentationBreadcrumbs %>

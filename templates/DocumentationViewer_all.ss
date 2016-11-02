@@ -8,9 +8,9 @@
 
 			<div class="doc-breadcrumbs">
 				<p>
-						<a class="breadcrumb" href="$BaseHref">Documentation</a>
-						<span>/</span>
-						<a class="breadcrumb current">Index</a>
+					<a class="breadcrumb" href="$BaseHref">Documentation</a>
+					<span>/</span>
+					<a class="breadcrumb current">Index</a>
 				</p>
 			</div>
 
