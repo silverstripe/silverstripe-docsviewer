@@ -762,17 +762,19 @@ html {
 	.wrapper .menu-open {
 		display: block;
 		position: relative;
+		width: 70px;
+		height: 40px;
 		margin-left: auto;
 		margin-bottom: 20px;
 		padding: 7px 10px;
 		font-weight: 700;
 		text-decoration: none;
+		text-transform: uppercase;
 		color: #1389ce;
 		background-color: transparent;
 		border: 2px solid #1389ce;
 		border-radius: 5px;
-		width: 70px;
-		height: 40px;
+
 		cursor: pointer;
 		-webkit-user-select: none; /* Chrome/Safari */
 		-moz-user-select: none; /* Firefox */
