@@ -1,4 +1,5 @@
 <div id="sidebar">
+	<a class="menu-close" href="#">×</a>
 	<div class="box">
 		$DocumentationSearchForm
 		<ul class="nav">

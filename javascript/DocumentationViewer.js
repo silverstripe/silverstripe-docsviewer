@@ -1,15 +1,26 @@
 ;(function($) {
 	$(document).ready(function() {
 
-		//toggle the side menu when in mobile
-		$('.menu-toggle').on('click', function (e) {
-			e.preventDefault();
-			var left = $('#sidebar').is('.visible') ? -270 : 0;
-			$('#sidebar').animate({ left: left}, 'fast', function() {
-				$(this).toggleClass('visible');
-			});
-			$(this).toggleClass('open');
-		})
+		// Open sidebar on mobile
+		$('.menu-open').click(function(){
+		    $('#sidebar').removeClass('hide').addClass('open');
+			return false;
+		});
+		// Close sidebar on mobile
+		$('.menu-close').click(function(){
+			$('#sidebar').removeClass('open').addClass('hide');
+
+			setTimeout(function() {
+				$('#sidebar').removeClass('hide');
+			}, 500);
+			return false;
+		});
+		// Close sidebar by hitting of ESC
+		$(document).keyup(function(e) {
+		    if (e.keyCode == 27) {
+		        $('#sidebar').removeClass('open');
+		    }
+		});
 
 		var switched = false;
 
