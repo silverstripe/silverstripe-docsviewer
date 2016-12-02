@@ -138,6 +138,12 @@ class DocumentationManifest
 
             $version = (isset($details['Version'])) ? $details['Version'] : '';
 
+            $versionTitle = isset($details['VersionTitle'])
+                ? $details['VersionTitle']
+                : $version;
+
+            $archived = !empty($details['Archived']);
+
             $branch = (isset($details['Branch'])) ? $details['Branch'] : '';
 
             $langs = scandir($path);
@@ -147,6 +153,7 @@ class DocumentationManifest
 
                 foreach ($langs as $k => $lang) {
                     if (isset($possible[$lang])) {
+                        /** @var DocumentationEntity $entity */
                         $entity = Injector::inst()->create(
                             'DocumentationEntity', $key
                         );
@@ -155,7 +162,9 @@ class DocumentationManifest
                         $entity->setTitle($details['Title']);
                         $entity->setLanguage($lang);
                         $entity->setVersion($version);
+                        $entity->setVersionTitle($versionTitle);
                         $entity->setBranch($branch);
+                        $entity->setIsArchived($archived);
 
                         if (isset($details['Stable'])) {
                             $entity->setIsStable($details['Stable']);
@@ -720,8 +729,7 @@ class DocumentationManifest
     }
 
     /**
-     * @param DocumentationEntity
-     *
+     * @param DocumentationEntity $entity
      * @return ArrayList
      */
     public function getVersions($entity)
@@ -732,13 +740,16 @@ class DocumentationManifest
 
         $output = new ArrayList();
 
+        /** @var DocumentationEntity $check */
         foreach ($this->getEntities() as $check) {
             if ($check->getKey() == $entity->getKey()) {
                 if ($check->getLanguage() == $entity->getLanguage()) {
                     $same = ($check->getVersion() == $entity->getVersion());
 
                     $output->push(new ArrayData(array(
-                        'Title' => $check->getVersion(),
+                        'Title' => $check->getVersionTitle(),
+                        'Version' => $check->getVersion(),
+                        'Archived' => $check->getIsArchived(),
                         'Link' => $check->Link(),
                         'LinkingMode' => ($same) ? 'current' : 'link',
                         'IsStable' => $check->getIsStable()
