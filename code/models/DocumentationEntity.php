@@ -11,8 +11,7 @@
  * entity can have a language attached to it. So for an instance with en, de and
  * fr documentation you may have three {@link DocumentationEntities} registered.
  *
- *
- * @package docsviewer
+ * @package    docsviewer
  * @subpackage models
  */
 
@@ -130,7 +129,7 @@ class DocumentationEntity extends ViewableData
      *
      * Includes the version information
      *
-     * @param boolean $short If true, will attempt to return a short version of the url
+     * @param  boolean $short If true, will attempt to return a short version of the url
      * This might omit the version number if this is the default version.
      * @return string
      */
@@ -256,17 +255,19 @@ class DocumentationEntity extends ViewableData
      *
      * @return string
      */
-    public function getVersionTitle() {
+    public function getVersionTitle() 
+    {
         return $this->versionTitle;
     }
 
     /**
      * Sets the title for this version
      *
-     * @param string $title
+     * @param  string $title
      * @return $this
      */
-    public function setVersionTitle($title) {
+    public function setVersionTitle($title) 
+    {
         $this->versionTitle = $title;
         return $this;
     }
@@ -274,10 +275,11 @@ class DocumentationEntity extends ViewableData
     /**
      * Set if this is archived
      *
-     * @param bool $archived
+     * @param  bool $archived
      * @return $this
      */
-    public function setIsArchived($archived) {
+    public function setIsArchived($archived) 
+    {
         $this->archived = $archived;
         return $this;
     }
@@ -285,7 +287,8 @@ class DocumentationEntity extends ViewableData
     /**
      * @return bool
      */
-    public function getIsArchived() {
+    public function getIsArchived() 
+    {
         return $this->archived;
     }
 
@@ -354,7 +357,7 @@ class DocumentationEntity extends ViewableData
      * version. Will return -1 for if the version is older, 0 if versions are
      * the same and 1 if the version is greater than.
      *
-     * @param DocumentationEntity $other
+     * @param  DocumentationEntity $other
      * @return int
      */
     public function compare(DocumentationEntity $other)

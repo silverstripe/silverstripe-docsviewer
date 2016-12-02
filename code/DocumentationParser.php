@@ -30,9 +30,9 @@ class DocumentationParser
      * Pathparts: folder/subfolder/page
      * 
      * @param DocumentationPage $page
-     * @param String $baselink Link relative to webroot, up until the "root" 
-     *							of the module. Necessary to rewrite relative 
-     *							links
+     * @param String            $baselink Link relative to webroot, up until the "root"  of the module. Necessary to rewrite relative  links
+     *                            of the module. Necessary to rewrite relative 
+     *                            links
      *
      * @return String
      */
@@ -238,16 +238,22 @@ class DocumentationParser
                 }
                 
                 // Rewrite URL (relative or absolute)
-                $baselink = DocumentationHelper::relativePath(DocumentationHelper::normalizePath(
-                    dirname($page->getPath())
-                ));
+                $baselink = DocumentationHelper::relativePath(
+                    DocumentationHelper::normalizePath(
+                        dirname($page->getPath())
+                    )
+                );
 
                 // if the image starts with a slash, it's absolute
                 if (substr($url, 0, 1) == '/') {
-                    $relativeUrl = DocumentationHelper::normalizePath(str_replace(BASE_PATH, '', Controller::join_links(
-                        $page->getEntity()->getPath(),
-                        $url
-                    )));
+                    $relativeUrl = DocumentationHelper::normalizePath(
+                        str_replace(
+                            BASE_PATH, '', Controller::join_links(
+                                $page->getEntity()->getPath(),
+                                $url
+                            )
+                        )
+                    );
                 } else {
                     $relativeUrl = rtrim($baselink, '/') . '/' . ltrim($url, '/');
                 }
@@ -264,7 +270,7 @@ class DocumentationParser
                 );
                 
                 // Replace any double slashes (apart from protocol)
-//				$absoluteUrl = preg_replace('/([^:])\/{2,}/', '$1/', $absoluteUrl);
+                //				$absoluteUrl = preg_replace('/([^:])\/{2,}/', '$1/', $absoluteUrl);
 
                 // Replace in original content
                 $md = str_replace(
@@ -299,8 +305,8 @@ class DocumentationParser
      * The markdown parser gets confused by the extra pair of parentheses in links of the form [DataObject](api:DataObject::populateDefaults()) so 
      * all links are re-written as html markup instead of markdown [Title](url). This also prevents other markdown parsing problems.
      * 
-     * @param String $markdown
-     * @param DocumentationPage $doc_page
+     * @param  String            $markdown
+     * @param  DocumentationPage $doc_page
      * @return String
      */
     public static function rewrite_api_links($markdown, $doc_page)
@@ -324,19 +330,19 @@ class DocumentationParser
             preg_match_all($regex, $markdown, $links);
             if($links) {
                 foreach($links[0] as $i => $match) {
-                    if($type === 'no_title'){
+                    if($type === 'no_title') {
                         $title = $links[1][$i];
                         $link = $links[1][$i];
                         // change backticked links to avoid being parsed in the same way as non-backticked links
-                        $markdown = str_replace('`'.$match.'`','XYZ'.$link.'XYZ',$markdown); 
+                        $markdown = str_replace('`'.$match.'`', 'XYZ'.$link.'XYZ', $markdown); 
                     } else {
                         $title = $links[1][$i];
                         $link = $links[2][$i];
                         // change backticked links to avoid being parsed in the same way as non-backticked links
-                        $markdown = str_replace('`'.$match.'`','XX'.$title.'YY'.$link.'ZZ',$markdown);
+                        $markdown = str_replace('`'.$match.'`', 'XX'.$title.'YY'.$link.'ZZ', $markdown);
                     }
                     $html = sprintf($html_format, $link, $version, $module, $title);
-                    $markdown = str_replace($match,$html,$markdown);
+                    $markdown = str_replace($match, $html, $markdown);
                 }
             }
         }
@@ -346,7 +352,7 @@ class DocumentationParser
         if($links) {
             foreach($links[0] as $i => $match) {
                 $link = $links[1][$i];
-                $markdown = str_replace($match,'`[api:'.$link.']`',$markdown);
+                $markdown = str_replace($match, '`[api:'.$link.']`', $markdown);
             }
         }
 
@@ -356,7 +362,7 @@ class DocumentationParser
             foreach($links[0] as $i => $match) {
                 $title = $links[1][$i];
                 $link = $links[2][$i];
-                $markdown = str_replace($match,'`['.$title.'](api:'.$link.')`',$markdown);
+                $markdown = str_replace($match, '`['.$title.'](api:'.$link.')`', $markdown);
             }
         }
 
@@ -418,7 +424,7 @@ class DocumentationParser
     /**
      * Resolves all relative links within markdown.
      * 
-     * @param String $md Markdown content
+     * @param String            $md   Markdown content
      * @param DocumentationPage $page
      *
      * @return String Markdown
@@ -524,11 +530,13 @@ class DocumentationParser
     public static function retrieve_meta_data(DocumentationPage &$page)
     {
         if ($md = $page->getMarkdown()) {
-            $matches = preg_match_all('/
+            $matches = preg_match_all(
+                '/
 				(?<key>[A-Za-z0-9_-]+): 
 				\s*
 				(?<value>.*)
-			/x', $md, $meta);
+			/x', $md, $meta
+            );
         
             if ($matches) {
                 foreach ($meta['key'] as $index => $key) {

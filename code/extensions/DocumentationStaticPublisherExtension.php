@@ -10,7 +10,7 @@
  * <code>
  * StaticExporter:
  *   extensions:
- *	   - DocumentationStaticPublisherExtension
+ *       - DocumentationStaticPublisherExtension
  * </code>
  *
  * If you don't plan on using static publisher for anything else and you have 

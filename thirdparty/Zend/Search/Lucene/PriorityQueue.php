@@ -12,11 +12,11 @@
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
  *
- * @category   Zend
- * @package    Zend_Search_Lucene
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: PriorityQueue.php 20096 2010-01-06 02:05:09Z bkarwin $
+ * @category  Zend
+ * @package   Zend_Search_Lucene
+ * @copyright Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd     New BSD License
+ * @version   $Id: PriorityQueue.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 
@@ -30,10 +30,10 @@
  *
  * It provides O(log(N)) time of put/pop operations, where N is a size of queue
  *
- * @category   Zend
- * @package    Zend_Search_Lucene
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @category  Zend
+ * @package   Zend_Search_Lucene
+ * @copyright Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Search_Lucene_PriorityQueue
 {
@@ -133,9 +133,9 @@ abstract class Zend_Search_Lucene_PriorityQueue
             $childId = ($nodeId << 1) + 1;     // First child
 
             // Choose smaller child
-            if (($childId+1) < $lastId  &&
-                $this->_less($this->_heap[$childId+1], $this->_heap[$childId])
-               ) {
+            if (($childId+1) < $lastId  
+                && $this->_less($this->_heap[$childId+1], $this->_heap[$childId])
+            ) {
                 $childId++;
             }
         }
@@ -162,8 +162,8 @@ abstract class Zend_Search_Lucene_PriorityQueue
      *
      * Returns true, if $el1 is less than $el2; else otherwise
      *
-     * @param mixed $el1
-     * @param mixed $el2
+     * @param  mixed $el1
+     * @param  mixed $el2
      * @return boolean
      */
     abstract protected function _less($el1, $el2);

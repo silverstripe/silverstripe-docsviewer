@@ -21,7 +21,9 @@
  */
 
 
-/** Zend_Search_Lucene_Analysis_Analyzer_Common */
+/**
+ * Zend_Search_Lucene_Analysis_Analyzer_Common 
+*/
 require_once 'Zend/Search/Lucene/Analysis/Analyzer/Common.php';
 
 
@@ -58,7 +60,7 @@ class Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8 extends Zend_Search_Lucen
     {
         if (@preg_match('/\pL/u', 'a') != 1) {
             // PCRE unicode support is turned off
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('Utf8 analyzer needs PCRE unicode support to be enabled.');
         }
     }
@@ -72,8 +74,9 @@ class Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8 extends Zend_Search_Lucen
         $this->_bytePosition = 0;
 
         // convert input into UTF-8
-        if (strcasecmp($this->_encoding, 'utf8' ) != 0  &&
-            strcasecmp($this->_encoding, 'utf-8') != 0 ) {
+        if (strcasecmp($this->_encoding, 'utf8') != 0  
+            && strcasecmp($this->_encoding, 'utf-8') != 0 
+        ) {
                 $this->_input = iconv($this->_encoding, 'UTF-8', $this->_input);
                 $this->_encoding = 'UTF-8';
         }
@@ -107,10 +110,14 @@ class Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8 extends Zend_Search_Lucen
 
             // character position of the matched word in the input stream
             $startPos = $this->_position +
-                        iconv_strlen(substr($this->_input,
-                                            $this->_bytePosition,
-                                            $binStartPos - $this->_bytePosition),
-                                     'UTF-8');
+                        iconv_strlen(
+                            substr(
+                                $this->_input,
+                                $this->_bytePosition,
+                                $binStartPos - $this->_bytePosition
+                            ),
+                            'UTF-8'
+                        );
             // character postion of the end of matched word in the input stream
             $endPos = $startPos + iconv_strlen($matchedWord, 'UTF-8');
 

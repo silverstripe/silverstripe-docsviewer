@@ -21,18 +21,28 @@
  */
 
 
-/** Define constant used to provide correct file processing order    */
-/** @todo Section should be removed with ZF 2.0 release as obsolete  */
+/**
+ * Define constant used to provide correct file processing order    
+*/
+/**
+ * @todo Section should be removed with ZF 2.0 release as obsolete  
+*/
 define('ZEND_SEARCH_LUCENE_COMMON_ANALYZER_PROCESSED', true);
 
 
-/** Zend_Search_Lucene_Analysis_Analyzer */
+/**
+ * Zend_Search_Lucene_Analysis_Analyzer 
+*/
 require_once 'Zend/Search/Lucene/Analysis/Analyzer.php';
 
-/** Zend_Search_Lucene_Analysis_Token */
+/**
+ * Zend_Search_Lucene_Analysis_Token 
+*/
 require_once 'Zend/Search/Lucene/Analysis/Token.php';
 
-/** Zend_Search_Lucene_Analysis_TokenFilter */
+/**
+ * Zend_Search_Lucene_Analysis_TokenFilter 
+*/
 require_once 'Zend/Search/Lucene/Analysis/TokenFilter.php';
 
 
@@ -72,7 +82,7 @@ abstract class Zend_Search_Lucene_Analysis_Analyzer_Common extends Zend_Search_L
     /**
      * Apply filters to the token. Can return null when the token was removed.
      *
-     * @param Zend_Search_Lucene_Analysis_Token $token
+     * @param  Zend_Search_Lucene_Analysis_Token $token
      * @return Zend_Search_Lucene_Analysis_Token
      */
     public function normalize(Zend_Search_Lucene_Analysis_Token $token)

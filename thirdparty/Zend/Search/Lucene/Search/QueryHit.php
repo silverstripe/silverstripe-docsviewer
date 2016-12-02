@@ -32,24 +32,28 @@ class Zend_Search_Lucene_Search_QueryHit
 {
     /**
      * Object handle of the index
+     *
      * @var Zend_Search_Lucene_Interface
      */
     protected $_index = null;
 
     /**
      * Object handle of the document associated with this hit
+     *
      * @var Zend_Search_Lucene_Document
      */
     protected $_document = null;
 
     /**
      * Number of the document in the index
+     *
      * @var integer
      */
     public $id;
 
     /**
      * Score of the hit
+     *
      * @var float
      */
     public $score;
@@ -64,7 +68,7 @@ class Zend_Search_Lucene_Search_QueryHit
 
     public function __construct(Zend_Search_Lucene_Interface $index)
     {
-        require_once 'Zend/Search/Lucene/Proxy.php';
+        include_once 'Zend/Search/Lucene/Proxy.php';
         $this->_index = new Zend_Search_Lucene_Proxy($index);
     }
 
@@ -73,7 +77,7 @@ class Zend_Search_Lucene_Search_QueryHit
      * Convenience function for getting fields from the document
      * associated with this hit.
      *
-     * @param string $offset
+     * @param  string $offset
      * @return string
      */
     public function __get($offset)

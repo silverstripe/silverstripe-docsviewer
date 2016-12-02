@@ -5,7 +5,7 @@
  *
  * For the hourly cron rebuild use RebuildLuceneDocusIndex_Hourly 
  *
- * @package docsviewer
+ * @package    docsviewer
  * @subpackage tasks
  */
 
@@ -23,7 +23,7 @@ class RebuildLuceneDocsIndex extends BuildTask
     
     public function rebuildIndexes($quiet = false)
     {
-        require_once 'Zend/Search/Lucene.php';
+        include_once 'Zend/Search/Lucene.php';
 
         ini_set("memory_limit", -1);
         ini_set('max_execution_time', 0);
@@ -85,21 +85,29 @@ class RebuildLuceneDocsIndex extends BuildTask
                 $doc->addField($titleField = Zend_Search_Lucene_Field::Text('Title', $page->getTitle()));
                 $doc->addField($breadcrumbField = Zend_Search_Lucene_Field::Text('BreadcrumbTitle', $page->getBreadcrumbTitle()));
 
-                $doc->addField(Zend_Search_Lucene_Field::Keyword(
-                    'Version', $page->getEntity()->getVersion()
-                ));
+                $doc->addField(
+                    Zend_Search_Lucene_Field::Keyword(
+                        'Version', $page->getEntity()->getVersion()
+                    )
+                );
 
-                $doc->addField(Zend_Search_Lucene_Field::Keyword(
-                    'Language', $page->getEntity()->getLanguage()
-                ));
+                $doc->addField(
+                    Zend_Search_Lucene_Field::Keyword(
+                        'Language', $page->getEntity()->getLanguage()
+                    )
+                );
 
-                $doc->addField(Zend_Search_Lucene_Field::Keyword(
-                    'Entity', $page->getEntity()
-                ));
+                $doc->addField(
+                    Zend_Search_Lucene_Field::Keyword(
+                        'Entity', $page->getEntity()
+                    )
+                );
 
-                $doc->addField(Zend_Search_Lucene_Field::Keyword(
-                    'Link', $page->Link()
-                ));
+                $doc->addField(
+                    Zend_Search_Lucene_Field::Keyword(
+                        'Link', $page->Link()
+                    )
+                );
     
                 // custom boosts
                 $titleField->boost = 3;

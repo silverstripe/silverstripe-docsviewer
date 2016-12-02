@@ -7,7 +7,7 @@
  * not always be the file name. If the file contains meta data with a nicer URL 
  * sthen it will use that. 
  * 
- * @package docsviewer
+ * @package    docsviewer
  * @subpackage model
  */
 class DocumentationPage extends ViewableData
@@ -38,8 +38,8 @@ class DocumentationPage extends ViewableData
 
     /**
      * @param DocumentationEntity $entity
-     * @param string $filename
-     * @param string $path
+     * @param string              $filename
+     * @param string              $path
      */
     public function __construct(DocumentationEntity $entity, $filename, $path)
     {
@@ -71,15 +71,19 @@ class DocumentationPage extends ViewableData
         // add the module to the breadcrumb trail.
         $pathParts[] = $this->entity->getTitle();
         
-        $titleParts = array_map(array(
+        $titleParts = array_map(
+            array(
             'DocumentationHelper', 'clean_page_name'
-        ), $pathParts);
+            ), $pathParts
+        );
 
-        $titleParts = array_filter($titleParts, function ($val) {
-            if ($val) {
-                return $val;
+        $titleParts = array_filter(
+            $titleParts, function ($val) {
+                if ($val) {
+                    return $val;
+                }
             }
-        });
+        );
 
         if ($this->getTitle()) {
             array_unshift($titleParts, $this->getTitle());
@@ -208,9 +212,13 @@ class DocumentationPage extends ViewableData
     {
         $path = $this->getRelativePath();
         $url = explode('/', $path);
-        $url = implode('/', array_map(function ($a) {
-            return DocumentationHelper::clean_page_url($a);
-        }, $url));
+        $url = implode(
+            '/', array_map(
+                function ($a) {
+                    return DocumentationHelper::clean_page_url($a);
+                }, $url
+            )
+        );
 
         $url = trim($url, '/') . '/';
 
@@ -240,16 +248,18 @@ class DocumentationPage extends ViewableData
      * Returns the URL that will be required for the user to hit to view the 
      * given document base name.
      *
-     * @param boolean $short If true, will attempt to return a short version of the url
+     * @param  boolean $short If true, will attempt to return a short version of the url
      * This might omit the version number if this is the default version.
      * @return string
      */
     public function Link($short = false)
     {
-        return ltrim(Controller::join_links(
-            $this->entity->Link($short),
-            $this->getRelativeLink()
-        ), '/');
+        return ltrim(
+            Controller::join_links(
+                $this->entity->Link($short),
+                $this->getRelativeLink()
+            ), '/'
+        );
     }
     
     /**
@@ -257,7 +267,7 @@ class DocumentationPage extends ViewableData
      * block on request
      * 
      * @param DocumentationPage $md
-     * @param bool $remove
+     * @param bool              $remove
      */
     public function populateMetaDataFromText(&$md, $removeMetaData = false)
     {

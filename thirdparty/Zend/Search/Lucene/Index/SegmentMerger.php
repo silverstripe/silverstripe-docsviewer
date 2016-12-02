@@ -20,7 +20,9 @@
  * @version    $Id: SegmentMerger.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
-/** Zend_Search_Lucene_Index_SegmentInfo */
+/**
+ * Zend_Search_Lucene_Index_SegmentInfo 
+*/
 require_once 'Zend/Search/Lucene/Index/SegmentInfo.php';
 
 
@@ -78,12 +80,14 @@ class Zend_Search_Lucene_Index_SegmentMerger
      * and $name as a name of new segment
      *
      * @param Zend_Search_Lucene_Storage_Directory $directory
-     * @param string $name
+     * @param string                               $name
      */
     public function __construct($directory, $name)
     {
-        /** Zend_Search_Lucene_Index_SegmentWriter_StreamWriter */
-        require_once 'Zend/Search/Lucene/Index/SegmentWriter/StreamWriter.php';
+        /**
+ * Zend_Search_Lucene_Index_SegmentWriter_StreamWriter 
+*/
+        include_once 'Zend/Search/Lucene/Index/SegmentWriter/StreamWriter.php';
         $this->_writer = new Zend_Search_Lucene_Index_SegmentWriter_StreamWriter($directory, $name);
     }
 
@@ -110,15 +114,17 @@ class Zend_Search_Lucene_Index_SegmentMerger
     public function merge()
     {
         if ($this->_mergeDone) {
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('Merge is already done.');
         }
 
         if (count($this->_segmentInfos) < 1) {
-            require_once 'Zend/Search/Lucene/Exception.php';
-            throw new Zend_Search_Lucene_Exception('Wrong number of segments to be merged ('
+            include_once 'Zend/Search/Lucene/Exception.php';
+            throw new Zend_Search_Lucene_Exception(
+                'Wrong number of segments to be merged ('
                                                  . count($this->_segmentInfos)
-                                                 . ').');
+                . ').'
+            );
         }
 
         $this->_mergeFields();
@@ -191,21 +197,25 @@ class Zend_Search_Lucene_Index_SegmentMerger
 
                     if (!($bits & 2)) { // Text data
                         $storedFields[] =
-                                 new Zend_Search_Lucene_Field($fieldInfo->name,
-                                                              $fdtFile->readString(),
-                                                              'UTF-8',
-                                                              true,
-                                                              $fieldInfo->isIndexed,
-                                                              $bits & 1 );
+                                 new Zend_Search_Lucene_Field(
+                                     $fieldInfo->name,
+                                     $fdtFile->readString(),
+                                     'UTF-8',
+                                     true,
+                                     $fieldInfo->isIndexed,
+                                     $bits & 1 
+                                 );
                     } else {            // Binary data
                         $storedFields[] =
-                                 new Zend_Search_Lucene_Field($fieldInfo->name,
-                                                              $fdtFile->readBinary(),
-                                                              '',
-                                                              true,
-                                                              $fieldInfo->isIndexed,
-                                                              $bits & 1,
-                                                              true);
+                                 new Zend_Search_Lucene_Field(
+                                     $fieldInfo->name,
+                                     $fdtFile->readBinary(),
+                                     '',
+                                     true,
+                                     $fieldInfo->isIndexed,
+                                     $bits & 1,
+                                     true
+                                 );
                     }
                 }
 
@@ -223,8 +233,10 @@ class Zend_Search_Lucene_Index_SegmentMerger
      */
     private function _mergeTerms()
     {
-        /** Zend_Search_Lucene_Index_TermsPriorityQueue */
-        require_once 'Zend/Search/Lucene/Index/TermsPriorityQueue.php';
+        /**
+ * Zend_Search_Lucene_Index_TermsPriorityQueue 
+*/
+        include_once 'Zend/Search/Lucene/Index/TermsPriorityQueue.php';
 
         $segmentInfoQueue = new Zend_Search_Lucene_Index_TermsPriorityQueue();
 
@@ -245,9 +257,9 @@ class Zend_Search_Lucene_Index_SegmentMerger
             // Merge positions array
             $termDocs += $segmentInfo->currentTermPositions();
 
-            if ($segmentInfoQueue->top() === null ||
-                $segmentInfoQueue->top()->currentTerm()->key() !=
-                            $segmentInfo->currentTerm()->key()) {
+            if ($segmentInfoQueue->top() === null 
+                || $segmentInfoQueue->top()->currentTerm()->key() !=                $segmentInfo->currentTerm()->key()
+            ) {
                 // We got new term
                 ksort($termDocs, SORT_NUMERIC);
 

@@ -10,10 +10,10 @@
  * array(
  *     'en/someniceurl/' => array(
  *       'filepath' => '/path/to/docs/en/SomeniceFile.md',
- *		 'title' => 'Some nice URL',
- *		 'summary' => 'Summary Text',
- *		 'basename' => 'SomeniceFile.md',
- *		 'type' => 'DocumentationPage'
+ *         'title' => 'Some nice URL',
+ *         'summary' => 'Summary Text',
+ *         'basename' => 'SomeniceFile.md',
+ *         'type' => 'DocumentationPage'
  *     )
  *   )
  * </code>
@@ -21,10 +21,10 @@
  * URL format is in the following structures:
  *
  *  {lang}/{path}
- *	{lang}/{module}/{path}
+ *    {lang}/{module}/{path}
  *  {lang}/{module}/{version}/{/path}
  *
- * @package framework
+ * @package    framework
  * @subpackage manifest
  */
 class DocumentationManifest
@@ -81,7 +81,7 @@ class DocumentationManifest
      * or loaded from cache until needed.
      *
      * @param bool $includeTests Include tests in the manifest.
-     * @param bool $forceRegen Force the manifest to be regenerated.
+     * @param bool $forceRegen   Force the manifest to be regenerated.
      */
     public function __construct($forceRegen = false)
     {
@@ -89,10 +89,12 @@ class DocumentationManifest
         $this->forceRegen = $forceRegen;
         $this->registeredEntities = new ArrayList();
 
-        $this->cache = SS_Cache::factory('DocumentationManifest', 'Core', array(
+        $this->cache = SS_Cache::factory(
+            'DocumentationManifest', 'Core', array(
             'automatic_serialization' => true,
             'lifetime' => null
-        ));
+            )
+        );
 
         $this->setupEntities();
     }
@@ -153,7 +155,9 @@ class DocumentationManifest
 
                 foreach ($langs as $k => $lang) {
                     if (isset($possible[$lang])) {
-                        /** @var DocumentationEntity $entity */
+                        /**
+ * @var DocumentationEntity $entity 
+*/
                         $entity = Injector::inst()->create(
                             'DocumentationEntity', $key
                         );
@@ -316,7 +320,7 @@ class DocumentationManifest
     /**
      * Get any redirect for the given url
      *
-     * @param type $url
+     * @param  type $url
      * @return string
      */
     public function getRedirect($url)
@@ -337,10 +341,12 @@ class DocumentationManifest
     public function regenerate($cache = true)
     {
         $finder = new DocumentationManifestFileFinder();
-        $finder->setOptions(array(
+        $finder->setOptions(
+            array(
             'dir_callback' => array($this, 'handleFolder'),
             'file_callback'  => array($this, 'handleFile')
-        ));
+            )
+        );
 
         $this->redirects = array();
         foreach ($this->getEntities() as $entity) {
@@ -364,21 +370,23 @@ class DocumentationManifest
         $this->pages = array();
 
         foreach ($grouped as $entity) {
-            uasort($entity, function ($a, $b) {
-                // ensure parent directories are first
-                $a['filepath'] = str_replace('index.md', '', $a['filepath']);
-                $b['filepath'] = str_replace('index.md', '', $b['filepath']);
+            uasort(
+                $entity, function ($a, $b) {
+                    // ensure parent directories are first
+                    $a['filepath'] = str_replace('index.md', '', $a['filepath']);
+                    $b['filepath'] = str_replace('index.md', '', $b['filepath']);
 
-                if (strpos($b['filepath'], $a['filepath']) === 0) {
-                    return -1;
+                    if (strpos($b['filepath'], $a['filepath']) === 0) {
+                        return -1;
+                    }
+
+                    if ($a['filepath'] == $b['filepath']) {
+                        return 0;
+                    }
+
+                    return ($a['filepath'] < $b['filepath']) ? -1 : 1;
                 }
-
-                if ($a['filepath'] == $b['filepath']) {
-                    return 0;
-                }
-
-                return ($a['filepath'] < $b['filepath']) ? -1 : 1;
-            });
+            );
 
             $this->pages = array_merge($this->pages, $entity);
         }
@@ -399,23 +407,25 @@ class DocumentationManifest
     /**
      * Remove the link_base from the start of a link
      *
-     * @param string $link
+     * @param  string $link
      * @return string
      */
     protected function stripLinkBase($link)
     {
-        return ltrim(str_replace(
-            Config::inst()->get('DocumentationViewer', 'link_base'),
-            '',
-            $link
-        ), '/');
+        return ltrim(
+            str_replace(
+                Config::inst()->get('DocumentationViewer', 'link_base'),
+                '',
+                $link
+            ), '/'
+        );
     }
 
     /**
      *
      * @param DocumentationPage $page
-     * @param string $basename
-     * @param string $path
+     * @param string            $basename
+     * @param string            $path
      */
     protected function addPage($page, $basename, $path)
     {
@@ -474,7 +484,7 @@ class DocumentationManifest
      *
      * @param string $basename
      * @param string $path
-     * @param int $depth
+     * @param int    $depth
      */
     public function handleFile($basename, $path, $depth)
     {
@@ -512,10 +522,14 @@ class DocumentationManifest
         $parts = explode('/', trim($record->getRelativeLink(), '/'));
 
         // Add the base link.
-        $output->push(new ArrayData(array(
-            'Link' => $base->Link(),
-            'Title' => $base->Title
-        )));
+        $output->push(
+            new ArrayData(
+                array(
+                'Link' => $base->Link(),
+                'Title' => $base->Title
+                )
+            )
+        );
 
         $progress = $base->Link();
 
@@ -523,10 +537,14 @@ class DocumentationManifest
             if ($part) {
                 $progress = Controller::join_links($progress, $part, '/');
 
-                $output->push(new ArrayData(array(
-                    'Link' => $progress,
-                    'Title' => DocumentationHelper::clean_page_name($part)
-                )));
+                $output->push(
+                    new ArrayData(
+                        array(
+                        'Link' => $progress,
+                        'Title' => DocumentationHelper::clean_page_name($part)
+                        )
+                    )
+                );
             }
         }
 
@@ -551,20 +569,24 @@ class DocumentationManifest
 
         foreach ($this->getPages() as $url => $page) {
             if ($grabNext && strpos($page['filepath'], $entityBase) !== false) {
-                return new ArrayData(array(
+                return new ArrayData(
+                    array(
                     'Link' => Controller::join_links(Config::inst()->get('DocumentationViewer', 'link_base'), $url),
                     'Title' => $page['title']
-                ));
+                    )
+                );
             }
 
             if ($filepath == $page['filepath']) {
                 $grabNext = true;
             } elseif (!$fallback && strpos($page['filepath'], $filepath) !== false) {
-                $fallback = new ArrayData(array(
+                $fallback = new ArrayData(
+                    array(
                     'Link' => Controller::join_links(Config::inst()->get('DocumentationViewer', 'link_base'), $url),
                     'Title' => $page['title'],
                     'Fallback' => true
-                ));
+                    )
+                );
             }
         }
 
@@ -593,10 +615,12 @@ class DocumentationManifest
         foreach ($this->getPages() as $url => $page) {
             if ($filepath == $page['filepath']) {
                 if ($previousUrl) {
-                    return new ArrayData(array(
+                    return new ArrayData(
+                        array(
                         'Link' => Controller::join_links(Config::inst()->get('DocumentationViewer', 'link_base'), $previousUrl),
                         'Title' => $previousPage['title']
-                    ));
+                        )
+                    );
                 }
             }
 
@@ -675,13 +699,17 @@ class DocumentationManifest
                     $children = $this->getChildrenFor($pagePath, $recordPath);
                 }
 
-                $output->push(new ArrayData(array(
-                    'Link' => Controller::join_links($base, $url, '/'),
-                    'Title' => $page['title'],
-                    'LinkingMode' => $mode,
-                    'Summary' => $page['summary'],
-                    'Children' => $children
-                )));
+                $output->push(
+                    new ArrayData(
+                        array(
+                        'Link' => Controller::join_links($base, $url, '/'),
+                        'Title' => $page['title'],
+                        'LinkingMode' => $mode,
+                        'Summary' => $page['summary'],
+                        'Children' => $children
+                        )
+                    )
+                );
             }
         }
 
@@ -740,20 +768,26 @@ class DocumentationManifest
 
         $output = new ArrayList();
 
-        /** @var DocumentationEntity $check */
+        /**
+ * @var DocumentationEntity $check 
+*/
         foreach ($this->getEntities() as $check) {
             if ($check->getKey() == $entity->getKey()) {
                 if ($check->getLanguage() == $entity->getLanguage()) {
                     $same = ($check->getVersion() == $entity->getVersion());
 
-                    $output->push(new ArrayData(array(
-                        'Title' => $check->getVersionTitle(),
-                        'Version' => $check->getVersion(),
-                        'Archived' => $check->getIsArchived(),
-                        'Link' => $check->Link(),
-                        'LinkingMode' => ($same) ? 'current' : 'link',
-                        'IsStable' => $check->getIsStable()
-                    )));
+                    $output->push(
+                        new ArrayData(
+                            array(
+                            'Title' => $check->getVersionTitle(),
+                            'Version' => $check->getVersion(),
+                            'Archived' => $check->getIsArchived(),
+                            'Link' => $check->Link(),
+                            'LinkingMode' => ($same) ? 'current' : 'link',
+                            'IsStable' => $check->getIsStable()
+                            )
+                        )
+                    );
                 }
             }
         }
@@ -783,6 +817,7 @@ class DocumentationManifest
 
     /**
      * Gets whether there is a default entity or not
+     *
      * @return boolean
      */
     public function getHasDefaultEntity()

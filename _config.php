@@ -7,11 +7,11 @@
  */
 
 if(!defined('DOCSVIEWER_PATH')) {
-	define('DOCSVIEWER_PATH', dirname(__FILE__));
+    define('DOCSVIEWER_PATH', dirname(__FILE__));
 }
 
 if(!defined('DOCSVIEWER_DIR')) {
-	$dir = explode(DIRECTORY_SEPARATOR, DOCSVIEWER_PATH);
+    $dir = explode(DIRECTORY_SEPARATOR, DOCSVIEWER_PATH);
 
-	define('DOCSVIEWER_DIR', array_pop($dir));
+    define('DOCSVIEWER_DIR', array_pop($dir));
 }

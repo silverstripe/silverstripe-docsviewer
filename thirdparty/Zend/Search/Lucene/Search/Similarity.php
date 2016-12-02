@@ -322,7 +322,7 @@ abstract class Zend_Search_Lucene_Search_Similarity
     public static function getDefault()
     {
         if (!self::$_defaultImpl instanceof Zend_Search_Lucene_Search_Similarity) {
-            require_once 'Zend/Search/Lucene/Search/Similarity/Default.php';
+            include_once 'Zend/Search/Lucene/Search/Similarity/Default.php';
             self::$_defaultImpl = new Zend_Search_Lucene_Search_Similarity_Default();
         }
 
@@ -350,8 +350,8 @@ abstract class Zend_Search_Lucene_Search_Similarity
      *             'fieldName' of 'doc'.
      * Returns a normalization factor for hits on this field of this document
      *
-     * @param string $fieldName
-     * @param integer $numTokens
+     * @param  string  $fieldName
+     * @param  integer $numTokens
      * @return float
      */
     abstract public function lengthNorm($fieldName, $numTokens);
@@ -367,7 +367,7 @@ abstract class Zend_Search_Lucene_Search_Similarity
      * sumOfSquaredWeights - the sum of the squares of query term weights
      * Returns a normalization factor for query weights
      *
-     * @param float $sumOfSquaredWeights
+     * @param  float $sumOfSquaredWeights
      * @return float
      */
     abstract public function queryNorm($sumOfSquaredWeights);
@@ -376,7 +376,7 @@ abstract class Zend_Search_Lucene_Search_Similarity
     /**
      *  Decodes a normalization factor stored in an index.
      *
-     * @param integer $byte
+     * @param  integer $byte
      * @return float
      */
     public static function decodeNorm($byte)
@@ -396,18 +396,18 @@ abstract class Zend_Search_Lucene_Search_Similarity
      * small to represent are rounded up to the smallest positive representable
      * value.
      *
-     * @param float $f
+     * @param  float $f
      * @return integer
      */
     static function encodeNorm($f)
     {
-      return self::_floatToByte($f);
+        return self::_floatToByte($f);
     }
 
     /**
      * Float to byte conversion
      *
-     * @param integer $b
+     * @param  integer $b
      * @return float
      */
     private static function _floatToByte($f)
@@ -435,8 +435,9 @@ abstract class Zend_Search_Lucene_Search_Similarity
         }
 
         // round to closest value
-        if ($highIndex != 255 &&
-            $f - self::$_normTable[$highIndex] > self::$_normTable[$highIndex+1] - $f ) {
+        if ($highIndex != 255 
+            && $f - self::$_normTable[$highIndex] > self::$_normTable[$highIndex+1] - $f 
+        ) {
             return $highIndex + 1;
         } else {
             return $highIndex;
@@ -458,7 +459,7 @@ abstract class Zend_Search_Lucene_Search_Similarity
      * freq - the frequency of a term within a document
      * Returns a score factor based on a term's within-document frequency
      *
-     * @param float $freq
+     * @param  float $freq
      * @return float
      */
     abstract public function tf($freq);
@@ -476,7 +477,7 @@ abstract class Zend_Search_Lucene_Search_Similarity
      * distance - the edit distance of this sloppy phrase match
      * Returns the frequency increment for this match
      *
-     * @param integer $distance
+     * @param  integer $distance
      * @return float
      */
     abstract public function sloppyFreq($distance);
@@ -492,8 +493,8 @@ abstract class Zend_Search_Lucene_Search_Similarity
      * reader - reader the document collection being searched
      * Returns a score factor for the term
      *
-     * @param mixed $input
-     * @param Zend_Search_Lucene_Interface $reader
+     * @param  mixed                        $input
+     * @param  Zend_Search_Lucene_Interface $reader
      * @return a score factor for the term
      */
     public function idf($input, Zend_Search_Lucene_Interface $reader)
@@ -523,8 +524,8 @@ abstract class Zend_Search_Lucene_Search_Similarity
      * numDocs - the total number of documents in the collection
      * Returns a score factor based on the term's document frequency
      *
-     * @param integer $docFreq
-     * @param integer $numDocs
+     * @param  integer $docFreq
+     * @param  integer $numDocs
      * @return float
      */
     abstract public function idfFreq($docFreq, $numDocs);
@@ -542,8 +543,8 @@ abstract class Zend_Search_Lucene_Search_Similarity
      * maxOverlap - the total number of terms in the query
      * Returns a score factor based on term overlap with the query
      *
-     * @param integer $overlap
-     * @param integer $maxOverlap
+     * @param  integer $overlap
+     * @param  integer $maxOverlap
      * @return float
      */
     abstract public function coord($overlap, $maxOverlap);

@@ -21,7 +21,7 @@ class DocumentationPermalinks
      *
      * <code>
      * DocumentationPermalinks::add(array(
-     * 	'debugging' => 'current/en/sapphire/topics/debugging'
+     *     'debugging' => 'current/en/sapphire/topics/debugging'
      * ));
      * </code>
      *

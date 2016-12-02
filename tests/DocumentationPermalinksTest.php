@@ -9,30 +9,35 @@ class DocumentationPermalinksTest extends FunctionalTest
     public function testSavingAndAccessingMapping()
     {
         // basic test
-        DocumentationPermalinks::add(array(
+        DocumentationPermalinks::add(
+            array(
             'foo' => 'en/framework/subfolder/foo',
             'bar' => 'en/cms/bar'
-        ));
+            )
+        );
         
-        $this->assertEquals('en/framework/subfolder/foo',
+        $this->assertEquals(
+            'en/framework/subfolder/foo',
             DocumentationPermalinks::map('foo')
         );
 
-        $this->assertEquals('en/cms/bar',
+        $this->assertEquals(
+            'en/cms/bar',
             DocumentationPermalinks::map('bar')
         );
     }
     
     /**
      * Tests to make sure short codes get translated to full paths.
-     *
      */
     public function testRedirectingMapping()
     {
-        DocumentationPermalinks::add(array(
+        DocumentationPermalinks::add(
+            array(
             'foo' => 'en/framework/subfolder/foo',
             'bar' => 'en/cms/bar'
-        ));
+            )
+        );
         
         $this->autoFollowRedirection = false;
         

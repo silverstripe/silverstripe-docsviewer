@@ -1,36 +1,36 @@
 @media screen and (max-width: 540px) {
-	#content-column {
-		width: 100%;
-		padding: 0;
-	}
+    #content-column {
+        width: 100%;
+        padding: 0;
+    }
 
-	#container {
-		padding: 15px;
-	}
+    #container {
+        padding: 15px;
+    }
 
-	#sidebar-column {
-		width: 100%;
-	}
+    #sidebar-column {
+        width: 100%;
+    }
 
-	#sidebar-column .sidebar-box {
-		padding: 10px;
-	}
+    #sidebar-column .sidebar-box {
+        padding: 10px;
+    }
 
-	#footer {
-		padding: 20px;
-	}
+    #footer {
+        padding: 20px;
+    }
 
-	.pinned { position: absolute; left: 0; top: 0; background: #fff; width: 35%; overflow: hidden; overflow-x: scroll; border-right: 1px solid #ccc; border-left: 1px solid #ccc; }
-	.pinned table { border-right: none; border-left: none; width: 100%; }
-	.pinned table th, .pinned table td { white-space: nowrap; }
-	.pinned td:last-child { border-bottom: 0; }
-	
-	div.table-wrapper { position: relative; margin-bottom: 20px; overflow: hidden; border-right: 1px solid #ccc; }
-	div.table-wrapper div.scrollable table { margin-left: 35%; }
-	div.table-wrapper div.scrollable { overflow: scroll; overflow-y: hidden; }	
-	
-	table td, table th { position: relative; white-space: nowrap; overflow: hidden; }
-	table th:first-child, table td:first-child, table td:first-child, .pinned table td { display: none; }
-	.pinned table td:first-child,
-	.pinned table th:first-child { display: block; }
+    .pinned { position: absolute; left: 0; top: 0; background: #fff; width: 35%; overflow: hidden; overflow-x: scroll; border-right: 1px solid #ccc; border-left: 1px solid #ccc; }
+    .pinned table { border-right: none; border-left: none; width: 100%; }
+    .pinned table th, .pinned table td { white-space: nowrap; }
+    .pinned td:last-child { border-bottom: 0; }
+    
+    div.table-wrapper { position: relative; margin-bottom: 20px; overflow: hidden; border-right: 1px solid #ccc; }
+    div.table-wrapper div.scrollable table { margin-left: 35%; }
+    div.table-wrapper div.scrollable { overflow: scroll; overflow-y: hidden; }    
+    
+    table td, table th { position: relative; white-space: nowrap; overflow: hidden; }
+    table th:first-child, table td:first-child, table td:first-child, .pinned table td { display: none; }
+    .pinned table td:first-child,
+    .pinned table th:first-child { display: block; }
 }

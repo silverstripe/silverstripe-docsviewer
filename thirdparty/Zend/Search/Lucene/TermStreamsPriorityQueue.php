@@ -20,7 +20,9 @@
  * @version    $Id: TermStreamsPriorityQueue.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
-/** Zend_Search_Lucene_Index_TermsStream_Interface */
+/**
+ * Zend_Search_Lucene_Index_TermsStream_Interface 
+*/
 require_once 'Zend/Search/Lucene/Index/TermsStream/Interface.php';
 
 
@@ -58,7 +60,7 @@ class Zend_Search_Lucene_TermStreamsPriorityQueue implements Zend_Search_Lucene_
     /**
      * Object constructor
      *
-     * @param array $termStreams  array of term streams (Zend_Search_Lucene_Index_TermsStream_Interface objects)
+     * @param array $termStreams array of term streams (Zend_Search_Lucene_Index_TermsStream_Interface objects)
      */
     public function __construct(array $termStreams)
     {
@@ -72,8 +74,10 @@ class Zend_Search_Lucene_TermStreamsPriorityQueue implements Zend_Search_Lucene_
      */
     public function resetTermsStream()
     {
-        /** Zend_Search_Lucene_Index_TermsPriorityQueue */
-        require_once 'Zend/Search/Lucene/Index/TermsPriorityQueue.php';
+        /**
+ * Zend_Search_Lucene_Index_TermsPriorityQueue 
+*/
+        include_once 'Zend/Search/Lucene/Index/TermsPriorityQueue.php';
 
         $this->_termsStreamQueue = new Zend_Search_Lucene_Index_TermsPriorityQueue();
 
@@ -123,9 +127,9 @@ class Zend_Search_Lucene_TermStreamsPriorityQueue implements Zend_Search_Lucene_
     public function nextTerm()
     {
         while (($termStream = $this->_termsStreamQueue->pop()) !== null) {
-            if ($this->_termsStreamQueue->top() === null ||
-                $this->_termsStreamQueue->top()->currentTerm()->key() !=
-                            $termStream->currentTerm()->key()) {
+            if ($this->_termsStreamQueue->top() === null 
+                || $this->_termsStreamQueue->top()->currentTerm()->key() !=                $termStream->currentTerm()->key()
+            ) {
                 // We got new term
                 $this->_lastTerm = $termStream->currentTerm();
 

@@ -20,7 +20,9 @@
  * @version    $Id: StreamWriter.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
-/** Zend_Search_Lucene_Index_SegmentWriter */
+/**
+ * Zend_Search_Lucene_Index_SegmentWriter 
+*/
 require_once 'Zend/Search/Lucene/Index/SegmentWriter.php';
 
 /**
@@ -36,7 +38,7 @@ class Zend_Search_Lucene_Index_SegmentWriter_StreamWriter extends Zend_Search_Lu
      * Object constructor.
      *
      * @param Zend_Search_Lucene_Storage_Directory $directory
-     * @param string $name
+     * @param string                               $name
      */
     public function __construct(Zend_Search_Lucene_Storage_Directory $directory, $name)
     {
@@ -79,16 +81,20 @@ class Zend_Search_Lucene_Index_SegmentWriter_StreamWriter extends Zend_Search_Lu
         $this->_dumpFNM();
         $this->_generateCFS();
 
-        /** Zend_Search_Lucene_Index_SegmentInfo */
-        require_once 'Zend/Search/Lucene/Index/SegmentInfo.php';
+        /**
+ * Zend_Search_Lucene_Index_SegmentInfo 
+*/
+        include_once 'Zend/Search/Lucene/Index/SegmentInfo.php';
 
-        return new Zend_Search_Lucene_Index_SegmentInfo($this->_directory,
-                                                        $this->_name,
-                                                        $this->_docCount,
-                                                        -1,
-                                                        null,
-                                                        true,
-                                                        true);
+        return new Zend_Search_Lucene_Index_SegmentInfo(
+            $this->_directory,
+            $this->_name,
+            $this->_docCount,
+            -1,
+            null,
+            true,
+            true
+        );
     }
 }
 

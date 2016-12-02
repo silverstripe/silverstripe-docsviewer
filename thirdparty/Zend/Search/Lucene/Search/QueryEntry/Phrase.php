@@ -20,7 +20,9 @@
  * @version    $Id: Phrase.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
-/** Zend_Search_Lucene_Search_QueryEntry */
+/**
+ * Zend_Search_Lucene_Search_QueryEntry 
+*/
 require_once 'Zend/Search/Lucene/Search/QueryEntry.php';
 
 /**
@@ -91,19 +93,23 @@ class Zend_Search_Lucene_Search_QueryEntry_Phrase extends Zend_Search_Lucene_Sea
     /**
      * Transform entry to a subquery
      *
-     * @param string $encoding
+     * @param  string $encoding
      * @return Zend_Search_Lucene_Search_Query
      * @throws Zend_Search_Lucene_Search_QueryParserException
      */
     public function getQuery($encoding)
     {
-        /** Zend_Search_Lucene_Search_Query_Preprocessing_Phrase */
-        require_once 'Zend/Search/Lucene/Search/Query/Preprocessing/Phrase.php';
-        $query = new Zend_Search_Lucene_Search_Query_Preprocessing_Phrase($this->_phrase,
-                                                                          $encoding,
-                                                                          ($this->_field !== null)?
+        /**
+ * Zend_Search_Lucene_Search_Query_Preprocessing_Phrase 
+*/
+        include_once 'Zend/Search/Lucene/Search/Query/Preprocessing/Phrase.php';
+        $query = new Zend_Search_Lucene_Search_Query_Preprocessing_Phrase(
+            $this->_phrase,
+            $encoding,
+            ($this->_field !== null)?
                                                                               iconv($encoding, 'UTF-8', $this->_field) :
-                                                                              null);
+            null
+        );
 
         if ($this->_proximityQuery) {
             $query->setSlop($this->_wordsDistance);

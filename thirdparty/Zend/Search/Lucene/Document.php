@@ -21,7 +21,9 @@
  */
 
 
-/** Zend_Search_Lucene_Field */
+/**
+ * Zend_Search_Lucene_Field 
+*/
 require_once 'Zend/Search/Lucene/Field.php';
 
 
@@ -69,7 +71,7 @@ class Zend_Search_Lucene_Document
     /**
      * Add a field object to this document.
      *
-     * @param Zend_Search_Lucene_Field $field
+     * @param  Zend_Search_Lucene_Field $field
      * @return Zend_Search_Lucene_Document
      */
     public function addField(Zend_Search_Lucene_Field $field)
@@ -94,13 +96,13 @@ class Zend_Search_Lucene_Document
     /**
      * Returns Zend_Search_Lucene_Field object for a named field in this document.
      *
-     * @param string $fieldName
+     * @param  string $fieldName
      * @return Zend_Search_Lucene_Field
      */
     public function getField($fieldName)
     {
         if (!array_key_exists($fieldName, $this->_fields)) {
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception("Field name \"$fieldName\" not found in document.");
         }
         return $this->_fields[$fieldName];
@@ -110,7 +112,7 @@ class Zend_Search_Lucene_Document
     /**
      * Returns the string value of a named field in this document.
      *
-     * @see __get()
+     * @see    __get()
      * @return string
      */
     public function getFieldValue($fieldName)
@@ -121,7 +123,7 @@ class Zend_Search_Lucene_Document
     /**
      * Returns the string value of a named field in UTF-8 encoding.
      *
-     * @see __get()
+     * @see    __get()
      * @return string
      */
     public function getFieldUtf8Value($fieldName)

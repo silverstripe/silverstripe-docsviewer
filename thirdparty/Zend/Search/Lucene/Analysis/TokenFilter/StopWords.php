@@ -20,7 +20,9 @@
  * @version    $Id: StopWords.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
-/** Zend_Search_Lucene_Analysis_TokenFilter */
+/**
+ * Zend_Search_Lucene_Analysis_TokenFilter 
+*/
 require_once 'Zend/Search/Lucene/Analysis/TokenFilter.php';
 
 /**
@@ -40,6 +42,7 @@ class Zend_Search_Lucene_Analysis_TokenFilter_StopWords extends Zend_Search_Luce
 {
     /**
      * Stop Words
+     *
      * @var array
      */
     private $_stopSet;
@@ -49,17 +52,19 @@ class Zend_Search_Lucene_Analysis_TokenFilter_StopWords extends Zend_Search_Luce
      *
      * @param array $stopwords array (set) of words that will be filtered out
      */
-    public function __construct($stopwords = array()) {
+    public function __construct($stopwords = array()) 
+    {
         $this->_stopSet = array_flip($stopwords);
     }
 
     /**
      * Normalize Token or remove it (if null is returned)
      *
-     * @param Zend_Search_Lucene_Analysis_Token $srcToken
+     * @param  Zend_Search_Lucene_Analysis_Token $srcToken
      * @return Zend_Search_Lucene_Analysis_Token
      */
-    public function normalize(Zend_Search_Lucene_Analysis_Token $srcToken) {
+    public function normalize(Zend_Search_Lucene_Analysis_Token $srcToken) 
+    {
         if (array_key_exists($srcToken->getTermText(), $this->_stopSet)) {
             return null;
         } else {
@@ -73,27 +78,28 @@ class Zend_Search_Lucene_Analysis_TokenFilter_StopWords extends Zend_Search_Luce
      *
      * You can call this method one or more times. New stopwords are always added to current set.
      *
-     * @param string $filepath full path for text file with stopwords
+     * @param  string $filepath full path for text file with stopwords
      * @throws Zend_Search_Exception When the file doesn`t exists or is not readable.
      */
-    public function loadFromFile($filepath = null) {
+    public function loadFromFile($filepath = null) 
+    {
         if (! $filepath || ! file_exists($filepath)) {
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('You have to provide valid file path');
         }
         $fd = fopen($filepath, "r");
         if (! $fd) {
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('Cannot open file ' . $filepath);
         }
-        while (!feof ($fd)) {
+        while (!feof($fd)) {
             $buffer = trim(fgets($fd));
             if (strlen($buffer) > 0 && $buffer[0] != '#') {
                 $this->_stopSet[$buffer] = 1;
             }
         }
         if (!fclose($fd)) {
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('Cannot close file ' . $filepath);
         }
     }

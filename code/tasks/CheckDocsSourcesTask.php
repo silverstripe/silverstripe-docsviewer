@@ -3,19 +3,22 @@
 /**
  * Check status of sources dirs
  */
-class CheckDocsSourcesTask extends BuildTask {
+class CheckDocsSourcesTask extends BuildTask
+{
 
     protected $errors = 0;
 
     protected $description = "Check validity of all docs source files registered";
 
-    public function start() {
+    public function start() 
+    {
         if(!Director::is_cli()) {
             echo "<ul>";
         }
     }
 
-    public function end() {
+    public function end() 
+    {
         if(Director::is_cli()) {
             echo "\nTotal errors: {$this->errors}\n";
         } else {
@@ -24,7 +27,8 @@ class CheckDocsSourcesTask extends BuildTask {
         }
     }
 
-    public function showError($error) {
+    public function showError($error) 
+    {
         $this->errors++;
         if(Director::is_cli()) {
             echo "\n$error";
@@ -36,7 +40,7 @@ class CheckDocsSourcesTask extends BuildTask {
     /**
      * Validate all source files
      *
-     * @param SS_HTTPRequest $request
+     * @param  SS_HTTPRequest $request
      * @throws Exception
      */
     public function run($request)
