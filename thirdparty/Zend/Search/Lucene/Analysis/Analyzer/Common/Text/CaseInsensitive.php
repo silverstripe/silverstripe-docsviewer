@@ -21,10 +21,14 @@
  */
 
 
-/** Zend_Search_Lucene_Analysis_Analyzer_Common_Text */
+/**
+ * Zend_Search_Lucene_Analysis_Analyzer_Common_Text 
+*/
 require_once 'Zend/Search/Lucene/Analysis/Analyzer/Common/Text.php';
 
-/** Zend_Search_Lucene_Analysis_TokenFilter_LowerCase */
+/**
+ * Zend_Search_Lucene_Analysis_TokenFilter_LowerCase 
+*/
 require_once 'Zend/Search/Lucene/Analysis/TokenFilter/LowerCase.php';
 
 

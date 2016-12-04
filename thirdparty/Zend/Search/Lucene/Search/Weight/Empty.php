@@ -21,7 +21,9 @@
  */
 
 
-/** Zend_Search_Lucene_Search_Weight */
+/**
+ * Zend_Search_Lucene_Search_Weight 
+*/
 require_once 'Zend/Search/Lucene/Search/Weight.php';
 
 

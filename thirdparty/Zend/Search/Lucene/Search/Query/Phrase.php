@@ -21,7 +21,9 @@
  */
 
 
-/** Zend_Search_Lucene_Search_Query */
+/**
+ * Zend_Search_Lucene_Search_Query 
+*/
 require_once 'Zend/Search/Lucene/Search/Query.php';
 
 
@@ -91,9 +93,9 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
     /**
      * Class constructor.  Create a new prase query.
      *
-     * @param string $field    Field to search.
-     * @param array  $terms    Terms to search Array of strings.
-     * @param array  $offsets  Relative term positions. Array of integers.
+     * @param  string $field   Field to search.
+     * @param  array  $terms   Terms to search Array of strings.
+     * @param  array  $offsets Relative term positions. Array of integers.
      * @throws Zend_Search_Lucene_Exception
      */
     public function __construct($terms = null, $offsets = null, $field = null)
@@ -102,7 +104,7 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
 
         if (is_array($terms)) {
             $this->_terms = array();
-            require_once 'Zend/Search/Lucene/Index/Term.php';
+            include_once 'Zend/Search/Lucene/Index/Term.php';
             foreach ($terms as $termId => $termText) {
                 $this->_terms[$termId] = ($field !== null)? new Zend_Search_Lucene_Index_Term($termText, $field):
                                                             new Zend_Search_Lucene_Index_Term($termText);
@@ -110,13 +112,13 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
         } else if ($terms === null) {
             $this->_terms = array();
         } else {
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('terms argument must be array of strings or null');
         }
 
         if (is_array($offsets)) {
             if (count($this->_terms) != count($offsets)) {
-                require_once 'Zend/Search/Lucene/Exception.php';
+                include_once 'Zend/Search/Lucene/Exception.php';
                 throw new Zend_Search_Lucene_Exception('terms and offsets arguments must have the same size.');
             }
             $this->_offsets = $offsets;
@@ -127,7 +129,7 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
                 $this->_offsets[$termId] = $position;
             }
         } else {
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('offsets argument must be array of strings or null');
         }
     }
@@ -160,13 +162,16 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
      * after the last term added.
      *
      * @param Zend_Search_Lucene_Index_Term $term
-     * @param integer $position
+     * @param integer                       $position
      */
-    public function addTerm(Zend_Search_Lucene_Index_Term $term, $position = null) {
+    public function addTerm(Zend_Search_Lucene_Index_Term $term, $position = null) 
+    {
         if ((count($this->_terms) != 0)&&(end($this->_terms)->field != $term->field)) {
-            require_once 'Zend/Search/Lucene/Exception.php';
-            throw new Zend_Search_Lucene_Exception('All phrase terms must be in the same field: ' .
-                                                   $term->field . ':' . $term->text);
+            include_once 'Zend/Search/Lucene/Exception.php';
+            throw new Zend_Search_Lucene_Exception(
+                'All phrase terms must be in the same field: ' .
+                $term->field . ':' . $term->text
+            );
         }
 
         $this->_terms[] = $term;
@@ -183,18 +188,18 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
     /**
      * Re-write query into primitive queries in the context of specified index
      *
-     * @param Zend_Search_Lucene_Interface $index
+     * @param  Zend_Search_Lucene_Interface $index
      * @return Zend_Search_Lucene_Search_Query
      */
     public function rewrite(Zend_Search_Lucene_Interface $index)
     {
         if (count($this->_terms) == 0) {
-            require_once 'Zend/Search/Lucene/Search/Query/Empty.php';
+            include_once 'Zend/Search/Lucene/Search/Query/Empty.php';
             return new Zend_Search_Lucene_Search_Query_Empty();
         } else if ($this->_terms[0]->field !== null) {
             return $this;
         } else {
-            require_once 'Zend/Search/Lucene/Search/Query/Boolean.php';
+            include_once 'Zend/Search/Lucene/Search/Query/Boolean.php';
             $query = new Zend_Search_Lucene_Search_Query_Boolean();
             $query->setBoost($this->getBoost());
 
@@ -202,7 +207,7 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
                 $subquery = new Zend_Search_Lucene_Search_Query_Phrase();
                 $subquery->setSlop($this->getSlop());
 
-                require_once 'Zend/Search/Lucene/Index/Term.php';
+                include_once 'Zend/Search/Lucene/Index/Term.php';
                 foreach ($this->_terms as $termId => $term) {
                     $qualifiedTerm = new Zend_Search_Lucene_Index_Term($term->text, $fieldName);
 
@@ -219,7 +224,7 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
     /**
      * Optimize query in the context of specified index
      *
-     * @param Zend_Search_Lucene_Interface $index
+     * @param  Zend_Search_Lucene_Interface $index
      * @return Zend_Search_Lucene_Search_Query
      */
     public function optimize(Zend_Search_Lucene_Interface $index)
@@ -227,14 +232,14 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
         // Check, that index contains all phrase terms
         foreach ($this->_terms as $term) {
             if (!$index->hasTerm($term)) {
-                require_once 'Zend/Search/Lucene/Search/Query/Empty.php';
+                include_once 'Zend/Search/Lucene/Search/Query/Empty.php';
                 return new Zend_Search_Lucene_Search_Query_Empty();
             }
         }
 
         if (count($this->_terms) == 1) {
             // It's one term query
-            require_once 'Zend/Search/Lucene/Search/Query/Term.php';
+            include_once 'Zend/Search/Lucene/Search/Query/Term.php';
             $optimizedQuery = new Zend_Search_Lucene_Search_Query_Term(reset($this->_terms));
             $optimizedQuery->setBoost($this->getBoost());
 
@@ -242,7 +247,7 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
         }
 
         if (count($this->_terms) == 0) {
-            require_once 'Zend/Search/Lucene/Search/Query/Empty.php';
+            include_once 'Zend/Search/Lucene/Search/Query/Empty.php';
             return new Zend_Search_Lucene_Search_Query_Empty();
         }
 
@@ -264,7 +269,7 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
     /**
      * Set weight for specified term
      *
-     * @param integer $num
+     * @param integer                               $num
      * @param Zend_Search_Lucene_Search_Weight_Term $weight
      */
     public function setWeight($num, $weight)
@@ -276,12 +281,12 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
     /**
      * Constructs an appropriate Weight implementation for this query.
      *
-     * @param Zend_Search_Lucene_Interface $reader
+     * @param  Zend_Search_Lucene_Interface $reader
      * @return Zend_Search_Lucene_Search_Weight
      */
     public function createWeight(Zend_Search_Lucene_Interface $reader)
     {
-        require_once 'Zend/Search/Lucene/Search/Weight/Phrase.php';
+        include_once 'Zend/Search/Lucene/Search/Weight/Phrase.php';
         $this->_weight = new Zend_Search_Lucene_Search_Weight_Phrase($this, $reader);
         return $this->_weight;
     }
@@ -290,7 +295,7 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
     /**
      * Score calculator for exact phrase queries (terms sequence is fixed)
      *
-     * @param integer $docId
+     * @param  integer $docId
      * @return float
      */
     public function _exactPhraseFreq($docId)
@@ -302,11 +307,11 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
 
         // Calculate $lowCardTermId
         foreach ($this->_terms as $termId => $term) {
-            if ($lowCardTermId === null ||
-                count($this->_termsPositions[$termId][$docId]) <
-                count($this->_termsPositions[$lowCardTermId][$docId]) ) {
+            if ($lowCardTermId === null 
+                || count($this->_termsPositions[$termId][$docId]) <count($this->_termsPositions[$lowCardTermId][$docId]) 
+            ) {
                     $lowCardTermId = $termId;
-                }
+            }
         }
 
         // Walk through positions of the term with lowest cardinality
@@ -335,8 +340,8 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
     /**
      * Score calculator for sloppy phrase queries (terms sequence is fixed)
      *
-     * @param integer $docId
-     * @param Zend_Search_Lucene_Interface $reader
+     * @param  integer                      $docId
+     * @param  Zend_Search_Lucene_Interface $reader
      * @return float
      */
     public function _sloppyPhraseFreq($docId, Zend_Search_Lucene_Interface $reader)
@@ -361,9 +366,11 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
                     }
                 } else {
                     for ($count = 0; $count < $queueSize; $count++) {
-                        if ($lastTerm !== null &&
-                            abs( $termPosition - $phraseQueue[$count][$lastTerm] -
-                                 ($this->_offsets[$termId] - $this->_offsets[$lastTerm])) > $this->_slop) {
+                        if ($lastTerm !== null 
+                            && abs(
+                                $termPosition - $phraseQueue[$count][$lastTerm] -
+                                ($this->_offsets[$termId] - $this->_offsets[$lastTerm])
+                            ) > $this->_slop) {
                             continue;
                         }
 
@@ -412,7 +419,7 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
      * Execute query in context of index reader
      * It also initializes necessary internal structures
      *
-     * @param Zend_Search_Lucene_Interface $reader
+     * @param Zend_Search_Lucene_Interface             $reader
      * @param Zend_Search_Lucene_Index_DocsFilter|null $docsFilter
      */
     public function execute(Zend_Search_Lucene_Interface $reader, $docsFilter = null)
@@ -434,9 +441,11 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
             $this->_termsPositions[$termId] = $reader->termPositions($term);
         }
         // sort resvectors in order of subquery cardinality increasing
-        array_multisort($resVectorsSizes, SORT_ASC, SORT_NUMERIC,
-                        $resVectorsIds,   SORT_ASC, SORT_NUMERIC,
-                        $resVectors);
+        array_multisort(
+            $resVectorsSizes, SORT_ASC, SORT_NUMERIC,
+            $resVectorsIds,   SORT_ASC, SORT_NUMERIC,
+            $resVectors
+        );
 
         foreach ($resVectors as $nextResVector) {
             if($this->_resVector === null) {
@@ -484,8 +493,8 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
     /**
      * Score specified document
      *
-     * @param integer $docId
-     * @param Zend_Search_Lucene_Interface $reader
+     * @param  integer                      $docId
+     * @param  Zend_Search_Lucene_Interface $reader
      * @return float
      */
     public function score($docId, Zend_Search_Lucene_Interface $reader)
@@ -525,7 +534,7 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
     /**
      * Query specific matches highlighting
      *
-     * @param Zend_Search_Lucene_Search_Highlighter_Interface $highlighter  Highlighter object (also contains doc for highlighting)
+     * @param Zend_Search_Lucene_Search_Highlighter_Interface $highlighter Highlighter object (also contains doc for highlighting)
      */
     protected function _highlightMatches(Zend_Search_Lucene_Search_Highlighter_Interface $highlighter)
     {

@@ -14,7 +14,7 @@ class DocumentationManifestTests extends SapphireTest
 
         Config::nest();
 
-        // explicitly use dev/docs. Custom paths should be tested separately 
+        // explicitly use dev/docs. Custom paths should be tested separately
         Config::inst()->update(
             'DocumentationViewer', 'link_base', 'dev/docs'
         );
@@ -57,11 +57,11 @@ class DocumentationManifestTests extends SapphireTest
 
         $this->manifest = new DocumentationManifest(true);
     }
-    
+
     public function tearDown()
     {
         parent::tearDown();
-        
+
         Config::unnest();
     }
 
@@ -107,51 +107,69 @@ class DocumentationManifestTests extends SapphireTest
     {
         // get next page at the end of one subfolder goes back up to the top
         // most directory
-        $this->assertStringEndsWith('2.3/test/', $this->manifest->getNextPage(
-            DOCSVIEWER_PATH . '/tests/docs/en/subfolder/subsubfolder/subsubpage.md',
-            DOCSVIEWER_PATH . '/tests/docs/en/'
-        )->Link);
+        $this->assertStringEndsWith(
+            '2.3/test/',
+            $this->manifest->getNextPage(
+                DOCSVIEWER_PATH . '/tests/docs/en/subfolder/subsubfolder/subsubpage.md',
+                DOCSVIEWER_PATH . '/tests/docs/en/'
+            )->Link
+        );
 
         // after sorting, 2 is shown.
-        $this->assertContains('/intermediate/', $this->manifest->getNextPage(
-            DOCSVIEWER_PATH . '/tests/docs/en/sort/01-basic.md',
-            DOCSVIEWER_PATH . '/tests/docs/en/'
-        )->Link);
+        $this->assertContains(
+            '/intermediate/',
+            $this->manifest->getNextPage(
+                DOCSVIEWER_PATH . '/tests/docs/en/sort/01-basic.md',
+                DOCSVIEWER_PATH . '/tests/docs/en/'
+            )->Link
+        );
 
 
         // next gets the following URL
-        $this->assertContains('/test/', $this->manifest->getNextPage(
-            DOCSVIEWER_PATH . '/tests/docs-v2.4/en/index.md',
-            DOCSVIEWER_PATH . '/tests/docs-v2.4/en/'
-        )->Link);
+        $this->assertContains(
+            '/test/',
+            $this->manifest->getNextPage(
+                DOCSVIEWER_PATH . '/tests/docs-v2.4/en/index.md',
+                DOCSVIEWER_PATH . '/tests/docs-v2.4/en/'
+            )->Link
+        );
 
 
         // last folder in a entity does not leak
-        $this->assertNull($this->manifest->getNextPage(
-            DOCSVIEWER_PATH . '/tests/docs/en/test.md',
-            DOCSVIEWER_PATH . '/tests/docs/en/'
-        ));
+        $this->assertNull(
+            $this->manifest->getNextPage(
+                DOCSVIEWER_PATH . '/tests/docs/en/test.md',
+                DOCSVIEWER_PATH . '/tests/docs/en/'
+            )
+        );
     }
 
     public function testGetPreviousPage()
     {
         // goes right into subfolders
-        $this->assertContains('subfolder/subsubfolder/subsubpage', $this->manifest->getPreviousPage(
-            DOCSVIEWER_PATH . '/tests/docs/en/test.md',
-            DOCSVIEWER_PATH . '/tests/docs/en/'
-        )->Link);
+        $this->assertContains(
+            'subfolder/subsubfolder/subsubpage',
+            $this->manifest->getPreviousPage(
+                DOCSVIEWER_PATH . '/tests/docs/en/test.md',
+                DOCSVIEWER_PATH . '/tests/docs/en/'
+            )->Link
+        );
 
         // does not leak between entities
-        $this->assertNull($this->manifest->getPreviousPage(
-            DOCSVIEWER_PATH . '/tests/docs/en/index.md',
-            DOCSVIEWER_PATH . '/tests/docs/en/'
-        ));
+        $this->assertNull(
+            $this->manifest->getPreviousPage(
+                DOCSVIEWER_PATH . '/tests/docs/en/index.md',
+                DOCSVIEWER_PATH . '/tests/docs/en/'
+            )
+        );
 
         // does not leak between entities
-        $this->assertNull($this->manifest->getPreviousPage(
-            DOCSVIEWER_PATH . '	/tests/docs/en/index.md',
-            DOCSVIEWER_PATH . '/tests/docs/en/'
-        ));
+        $this->assertNull(
+            $this->manifest->getPreviousPage(
+                DOCSVIEWER_PATH . '	/tests/docs/en/index.md',
+                DOCSVIEWER_PATH . '/tests/docs/en/'
+            )
+        );
     }
 
     public function testGetPage()
@@ -170,9 +188,11 @@ class DocumentationManifestTests extends SapphireTest
             array('Title' => 'Test', 'LinkingMode' => 'link')
         );
 
-        $this->assertDOSContains($expected, $this->manifest->getChildrenFor(
-            DOCSVIEWER_PATH . "/tests/docs/en/"
-        ));
+        $this->assertDOSContains(
+            $expected, $this->manifest->getChildrenFor(
+                DOCSVIEWER_PATH . '/tests/docs/en/'
+            )
+        );
 
         $expected = array(
             array('Title' => 'ChangeLog', 'LinkingMode' => 'current'),
@@ -180,10 +200,13 @@ class DocumentationManifestTests extends SapphireTest
             array('Title' => 'Empty')
         );
 
-        $this->assertDOSContains($expected, $this->manifest->getChildrenFor(
-            DOCSVIEWER_PATH . '/tests/docs-v3.0/en/',
-            DOCSVIEWER_PATH . '/tests/docs-v3.0/en/ChangeLog.md'
-        ));
+        $this->assertDOSContains(
+            $expected,
+            $this->manifest->getChildrenFor(
+                DOCSVIEWER_PATH . '/tests/docs-v3.0/en/',
+                DOCSVIEWER_PATH . '/tests/docs-v3.0/en/ChangeLog.md'
+            )
+        );
     }
 
     public function testGetAllVersions()
@@ -211,7 +234,7 @@ class DocumentationManifestTests extends SapphireTest
         $this->assertEquals(3, $this->manifest->getAllVersionsOfEntity($entity)->count());
 
         $entity = $this->manifest->getEntities()->find('Language', 'de');
-        
+
         $this->assertEquals(1, $this->manifest->getAllVersionsOfEntity($entity)->count());
     }
 

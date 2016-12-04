@@ -10,14 +10,14 @@
  * <code>
  * StaticExporter:
  *   extensions:
- *	   - DocumentationStaticPublisherExtension
+ *     - DocumentationStaticPublisherExtension
  * </code>
  *
- * If you don't plan on using static publisher for anything else and you have 
- * the cms module installed, make sure you disable that from being published. 
- * 
+ * If you don't plan on using static publisher for anything else and you have
+ * the cms module installed, make sure you disable that from being published.
+ *
  * Again, in your applications config.yml file
- * 
+ *
  * <code>
  * StaticExporter:
  *   disable_sitetree_export: true
@@ -30,7 +30,7 @@ class DocumentationStaticPublisherExtension extends Extension
     public function alterExportUrls(&$urls)
     {
         $manifest = new DocumentationManifest(true);
-        
+
         foreach ($manifest->getPages() as $url => $page) {
             $urls[$url] = $url;
         }

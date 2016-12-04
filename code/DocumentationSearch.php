@@ -127,7 +127,7 @@ class DocumentationSearch
      * Folder name for indexes (in the temp folder).
      *
      * @config
-     * @var string 
+     * @var    string 
      */
     private static $index_location;
 
@@ -240,7 +240,8 @@ class DocumentationSearch
             
                 $content = $hit->content;
 
-                $obj = new ArrayData(array(
+                $obj = new ArrayData(
+                    array(
                     'Title' => DBField::create_field('Varchar', $doc->getFieldValue('Title')),
                     'BreadcrumbTitle' => DBField::create_field('HTMLText', $doc->getFieldValue('BreadcrumbTitle')),
                     'Link' => DBField::create_field('Varchar', $doc->getFieldValue('Link')),
@@ -251,7 +252,8 @@ class DocumentationSearch
                     'Score' => $hit->score,
                     'Number' => $k + 1,
                     'ID' => md5($doc->getFieldValue('Link'))
-                ));
+                    )
+                );
 
                 $results->push($obj);
             }
@@ -267,13 +269,15 @@ class DocumentationSearch
 
         // Pagination links
         if ($currentPage > 1) {
-            $data['PrevUrl'] = DBField::create_field('Text',
+            $data['PrevUrl'] = DBField::create_field(
+                'Text',
                 $this->buildQueryUrl(array('start' => ($currentPage - 2) * $pageLength))
             );
         }
 
         if ($currentPage < $totalPages) {
-            $data['NextUrl'] = DBField::create_field('Text',
+            $data['NextUrl'] = DBField::create_field(
+                'Text',
                 $this->buildQueryUrl(array('start' => $currentPage * $pageLength))
             );
         }
@@ -284,9 +288,11 @@ class DocumentationSearch
                 $obj = new DataObject();
                 $obj->IsEllipsis = false;
                 $obj->PageNumber = $i;
-                $obj->Link = $this->buildQueryUrl(array(
+                $obj->Link = $this->buildQueryUrl(
+                    array(
                     'start' => ($i - 1) * $pageLength
-                ));
+                    )
+                );
                 
                 $obj->Current = false;
                 if ($i == $currentPage) {

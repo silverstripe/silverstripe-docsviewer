@@ -11,8 +11,7 @@
  * entity can have a language attached to it. So for an instance with en, de and
  * fr documentation you may have three {@link DocumentationEntities} registered.
  *
- *
- * @package docsviewer
+ * @package    docsviewer
  * @subpackage models
  */
 
@@ -36,6 +35,13 @@ class DocumentationEntity extends ViewableData
     protected $title;
 
     /**
+     * Label for this version
+     *
+     * @var string
+     */
+    protected $versionTitle;
+
+    /**
      * If the system is setup to only document one entity then you may only
      * want to show a single entity in the URL and the sidebar. Set this when
      * you register the entity with the key `DefaultEntity` and the URL will
@@ -44,6 +50,13 @@ class DocumentationEntity extends ViewableData
      * @var boolean $default_entity
      */
     protected $defaultEntity;
+
+    /**
+     * Set if this version is archived
+     *
+     * @var bool
+     */
+    protected $archived = false;
 
     /**
      * @var mixed
@@ -77,10 +90,11 @@ class DocumentationEntity extends ViewableData
     protected $language;
 
     /**
-     *
+     * @param string $key Key of module
      */
     public function __construct($key)
     {
+        parent::__construct();
         $this->key = DocumentationHelper::clean_page_url($key);
     }
 
@@ -101,7 +115,7 @@ class DocumentationEntity extends ViewableData
 
     /**
      * @param string $title
-     * @return this
+     * @return $this
      */
     public function setTitle($title)
     {
@@ -115,7 +129,7 @@ class DocumentationEntity extends ViewableData
      *
      * Includes the version information
      *
-     * @param boolean $short If true, will attempt to return a short version of the url
+     * @param  boolean $short If true, will attempt to return a short version of the url
      * This might omit the version number if this is the default version.
      * @return string
      */
@@ -172,12 +186,12 @@ class DocumentationEntity extends ViewableData
     }
 
     /**
-     * @param boolean $bool
+     * @param bool $bool
+     * @return $this
      */
     public function setIsDefaultEntity($bool)
     {
         $this->defaultEntity = $bool;
-
         return $this;
     }
 
@@ -208,7 +222,7 @@ class DocumentationEntity extends ViewableData
     /**
      * @param string
      *
-     * @return this
+     * @return $this
      */
     public function setLanguage($language)
     {
@@ -219,6 +233,7 @@ class DocumentationEntity extends ViewableData
 
     /**
      * @param string
+     * @return $this
      */
     public function setVersion($version)
     {
@@ -236,7 +251,50 @@ class DocumentationEntity extends ViewableData
     }
 
     /**
+     * Get the version for this title
+     *
+     * @return string
+     */
+    public function getVersionTitle()
+    {
+        return $this->versionTitle;
+    }
+
+    /**
+     * Sets the title for this version
+     *
+     * @param  string $title
+     * @return $this
+     */
+    public function setVersionTitle($title)
+    {
+        $this->versionTitle = $title;
+        return $this;
+    }
+
+    /**
+     * Set if this is archived
+     *
+     * @param  bool $archived
+     * @return $this
+     */
+    public function setIsArchived($archived)
+    {
+        $this->archived = $archived;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsArchived()
+    {
+        return $this->archived;
+    }
+
+    /**
      * @param string
+     * @return $this
      */
     public function setBranch($branch)
     {
@@ -262,9 +320,8 @@ class DocumentationEntity extends ViewableData
     }
 
     /**
-     * @param string $path
-     *
-     * @return this
+     * @param  string $path
+     * @return $this
      */
     public function setPath($path)
     {
@@ -274,7 +331,8 @@ class DocumentationEntity extends ViewableData
     }
 
     /**
-     * @param boolean
+     * @param bool
+     * @return $this
      */
     public function setIsStable($stable)
     {
@@ -291,19 +349,30 @@ class DocumentationEntity extends ViewableData
         return $this->stable;
     }
 
-
-
     /**
      * Returns an integer value based on if a given version is the latest
      * version. Will return -1 for if the version is older, 0 if versions are
      * the same and 1 if the version is greater than.
      *
-     * @param string $version
+     * @param  DocumentationEntity $other
      * @return int
      */
     public function compare(DocumentationEntity $other)
     {
-        return version_compare($this->getVersion(), $other->getVersion());
+        $v1 = $this->getVersion();
+        $v2 = $other->getVersion();
+
+        // Normalise versions prior to comparison
+        $dots = substr_count($v1, '.') - substr_count($v2, '.');
+        while ($dots > 0) {
+            $dots--;
+            $v2 .= '.99999';
+        }
+        while ($dots < 0) {
+            $dots++;
+            $v1 .= '.99999';
+        }
+        return version_compare($v1, $v2);
     }
 
     /**
@@ -312,10 +381,10 @@ class DocumentationEntity extends ViewableData
     public function toMap()
     {
         return array(
-            'Key' => $this->key,
-            'Path' => $this->getPath(),
-            'Version' => $this->getVersion(),
-            'Branch' => $this->getBranch(),
+            'Key'      => $this->key,
+            'Path'     => $this->getPath(),
+            'Version'  => $this->getVersion(),
+            'Branch'   => $this->getBranch(),
             'IsStable' => $this->getIsStable(),
             'Language' => $this->getLanguage()
         );

@@ -1,13 +1,13 @@
 <?php
 
 /**
- * A specific documentation page within a {@link DocumentationEntity}. 
+ * A specific documentation page within a {@link DocumentationEntity}.
  *
- * Maps to a file on the file system. Note that the URL to access this page may 
- * not always be the file name. If the file contains meta data with a nicer URL 
- * sthen it will use that. 
- * 
- * @package docsviewer
+ * Maps to a file on the file system. Note that the URL to access this page may
+ * not always be the file name. If the file contains meta data with a nicer URL
+ * sthen it will use that.
+ *
+ * @package    docsviewer
  * @subpackage model
  */
 class DocumentationPage extends ViewableData
@@ -38,8 +38,8 @@ class DocumentationPage extends ViewableData
 
     /**
      * @param DocumentationEntity $entity
-     * @param string $filename
-     * @param string $path
+     * @param string              $filename
+     * @param string              $path
      */
     public function __construct(DocumentationEntity $entity, $filename, $path)
     {
@@ -55,7 +55,7 @@ class DocumentationPage extends ViewableData
     {
         return DocumentationHelper::get_extension($this->filename);
     }
-    
+
     /**
      * @param string - has to be plain text for open search compatibility.
      *
@@ -64,22 +64,28 @@ class DocumentationPage extends ViewableData
     public function getBreadcrumbTitle($divider = ' - ')
     {
         $pathParts = explode('/', trim($this->getRelativePath(), '/'));
-        
+
         // from the page from this
         array_pop($pathParts);
 
         // add the module to the breadcrumb trail.
         $pathParts[] = $this->entity->getTitle();
-        
-        $titleParts = array_map(array(
-            'DocumentationHelper', 'clean_page_name'
-        ), $pathParts);
 
-        $titleParts = array_filter($titleParts, function ($val) {
-            if ($val) {
-                return $val;
+        $titleParts = array_map(
+            array(
+                'DocumentationHelper',
+                'clean_page_name'
+            ),
+            $pathParts
+        );
+
+        $titleParts = array_filter(
+            $titleParts, function ($val) {
+                if ($val) {
+                    return $val;
+                }
             }
-        });
+        );
 
         if ($this->getTitle()) {
             array_unshift($titleParts, $this->getTitle());
@@ -87,7 +93,7 @@ class DocumentationPage extends ViewableData
 
         return implode($divider, $titleParts);
     }
-    
+
     /**
      * @return DocumentationEntity
      */
@@ -107,7 +113,7 @@ class DocumentationPage extends ViewableData
 
         $page = DocumentationHelper::clean_page_name($this->filename);
 
-        if ($page == "Index") {
+        if ($page == 'Index') {
             return $this->getTitleFromFolder();
         }
 
@@ -120,7 +126,7 @@ class DocumentationPage extends ViewableData
         $entity = $this->getEntity()->getPath();
 
         $folder = str_replace('index.md', '', $folder);
-        
+
         // if it's the root of the entity then we want to use the entity name
         // otherwise we'll get 'En' for the entity folder
         if ($folder == $entity) {
@@ -132,7 +138,7 @@ class DocumentationPage extends ViewableData
 
         return DocumentationHelper::clean_page_name($folderName);
     }
-    
+
     /**
      * @return string
      */
@@ -142,25 +148,25 @@ class DocumentationPage extends ViewableData
     }
 
     /**
-     * Return the raw markdown for a given documentation page. 
+     * Return the raw markdown for a given documentation page.
      *
      * @param boolean $removeMetaData
      *
-     * @return string
+     * @return string|false
      */
     public function getMarkdown($removeMetaData = false)
     {
         try {
             if (is_file($this->getPath()) && $md = file_get_contents($this->getPath())) {
                 $this->populateMetaDataFromText($md, $removeMetaData);
-            
+
                 return $md;
             }
 
             $this->read = true;
         } catch (InvalidArgumentException $e) {
         }
-        
+
         return false;
     }
 
@@ -171,19 +177,22 @@ class DocumentationPage extends ViewableData
         $this->$key = $value;
     }
 
+    /**
+     * @return string
+     */
     public function getIntroduction()
     {
         if (!$this->read) {
             $this->getMarkdown();
         }
-        
+
         return $this->introduction;
     }
-    
+
     /**
      * Parse a file and return the parsed HTML version.
      *
-     * @param string $baselink 
+     * @param string $baselink
      *
      * @return string
      */
@@ -196,10 +205,10 @@ class DocumentationPage extends ViewableData
 
         return $html;
     }
-    
+
     /**
      * This should return the link from the entity root to the page. The link
-     * value has the cleaned version of the folder names. See 
+     * value has the cleaned version of the folder names. See
      * {@link getRelativePath()} for the actual file path.
      *
      * @return string
@@ -208,9 +217,15 @@ class DocumentationPage extends ViewableData
     {
         $path = $this->getRelativePath();
         $url = explode('/', $path);
-        $url = implode('/', array_map(function ($a) {
-            return DocumentationHelper::clean_page_url($a);
-        }, $url));
+        $url = implode(
+            '/',
+            array_map(
+                function ($a) {
+                    return DocumentationHelper::clean_page_url($a);
+                },
+                $url
+            )
+        );
 
         $url = trim($url, '/') . '/';
 
@@ -237,27 +252,29 @@ class DocumentationPage extends ViewableData
     }
 
     /**
-     * Returns the URL that will be required for the user to hit to view the 
+     * Returns the URL that will be required for the user to hit to view the
      * given document base name.
      *
-     * @param boolean $short If true, will attempt to return a short version of the url
+     * @param  boolean $short If true, will attempt to return a short version of the url
      * This might omit the version number if this is the default version.
      * @return string
      */
     public function Link($short = false)
     {
-        return ltrim(Controller::join_links(
-            $this->entity->Link($short),
-            $this->getRelativeLink()
-        ), '/');
+        return ltrim(
+            Controller::join_links(
+                $this->entity->Link($short),
+                $this->getRelativeLink()
+            ), '/'
+        );
     }
-    
+
     /**
-     * Return metadata from the first html block in the page, then remove the 
+     * Return metadata from the first html block in the page, then remove the
      * block on request
-     * 
+     *
      * @param DocumentationPage $md
-     * @param bool $remove
+     * @param bool              $remove
      */
     public function populateMetaDataFromText(&$md, $removeMetaData = false)
     {
@@ -268,11 +285,11 @@ class DocumentationPage extends ViewableData
 
             if ($matches && $block[1]) {
                 $metaDataFound = false;
-                
+
                 // find the key/value pairs
                 $intPattern = '/(?<key>[A-Za-z][A-Za-z0-9_-]+)[\t]*:[\t]*(?<value>[^:\n\r\/]+)/x';
                 $matches = preg_match_all($intPattern, $block[1], $meta);
-    
+
                 foreach ($meta['key'] as $index => $key) {
                     if (isset($meta['value'][$index])) {
                         // check if a property exists for this key
@@ -283,7 +300,7 @@ class DocumentationPage extends ViewableData
                     }
                 }
 
-                // optionally remove the metadata block (only on the page that 
+                // optionally remove the metadata block (only on the page that
                 // is displayed)
                 if ($metaDataFound && $removeMetaData) {
                     $md = preg_replace($extPattern, '', $md);
@@ -297,6 +314,9 @@ class DocumentationPage extends ViewableData
         return $this->entity->getVersion();
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return sprintf(get_class($this) .': %s)', $this->getPath());

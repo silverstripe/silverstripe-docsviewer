@@ -4,7 +4,7 @@
  * Some of these tests are simply checking that pages load. They should not assume
  * somethings working.
  *
- * @package docsviewer
+ * @package    docsviewer
  * @subpackage tests
  */
 

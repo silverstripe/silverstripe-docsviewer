@@ -47,12 +47,12 @@ class DocumentationSearchTest extends FunctionalTest
     {
         $c = new DocumentationOpenSearchController();
         $response = $c->handleRequest(new SS_HTTPRequest('GET', ''), DataModel::inst());
-//        $this->assertEquals(404, $response->getStatusCode());
+        //        $this->assertEquals(404, $response->getStatusCode());
         
         Config::inst()->update('DocumentationSearch', 'enabled', false);
 
         $response = $c->handleRequest(new SS_HTTPRequest('GET', 'description/'), DataModel::inst());
-//        $this->assertEquals(404, $response->getStatusCode());
+        //        $this->assertEquals(404, $response->getStatusCode());
         
         // test we get a response to the description. The meta data test will 
         // check that the individual fields are valid but we should check urls 
@@ -61,9 +61,9 @@ class DocumentationSearchTest extends FunctionalTest
         Config::inst()->update('DocumentationSearch', 'enabled', true);
 
         $response = $c->handleRequest(new SS_HTTPRequest('GET', 'description'), DataModel::inst());
-//        $this->assertEquals(200, $response->getStatusCode());
+        //        $this->assertEquals(200, $response->getStatusCode());
         
         $desc = new SimpleXMLElement($response->getBody());
-//        $this->assertEquals(2, count($desc->Url));
+        //        $this->assertEquals(2, count($desc->Url));
     }
 }

@@ -33,7 +33,7 @@ abstract class Zend_Search_Lucene_Storage_File
      * Reads $length number of bytes at the current position in the
      * file and advances the file pointer.
      *
-     * @param integer $length
+     * @param  integer $length
      * @return string
      */
     abstract protected function _fread($length=1);
@@ -51,8 +51,8 @@ abstract class Zend_Search_Lucene_Storage_File
      * in offset.)
      * Upon success, returns 0; otherwise, returns -1
      *
-     * @param integer $offset
-     * @param integer $whence
+     * @param  integer $offset
+     * @param  integer $whence
      * @return integer
      */
     abstract public function seek($offset, $whence=SEEK_SET);
@@ -77,7 +77,7 @@ abstract class Zend_Search_Lucene_Storage_File
      * Writes $length number of bytes (all, if $length===null) to the end
      * of the file.
      *
-     * @param string $data
+     * @param string  $data
      * @param integer $length
      */
     abstract protected function _fwrite($data, $length=null);
@@ -87,7 +87,7 @@ abstract class Zend_Search_Lucene_Storage_File
      *
      * Lock type may be a LOCK_SH (shared lock) or a LOCK_EX (exclusive lock)
      *
-     * @param integer $lockType
+     * @param  integer $lockType
      * @return boolean
      */
     abstract public function lock($lockType, $nonBlockinLock = false);
@@ -122,7 +122,7 @@ abstract class Zend_Search_Lucene_Storage_File
      * Read num bytes from the current position in the file
      * and advances the file pointer.
      *
-     * @param integer $num
+     * @param  integer $num
      * @return string
      */
     public function readBytes($num)
@@ -134,7 +134,7 @@ abstract class Zend_Search_Lucene_Storage_File
      * Writes num bytes of data (all, if $num===null) to the end
      * of the string.
      *
-     * @param string $data
+     * @param string  $data
      * @param integer $num
      */
     public function writeBytes($data, $num=null)
@@ -168,10 +168,12 @@ abstract class Zend_Search_Lucene_Storage_File
     public function writeInt($value)
     {
         settype($value, 'integer');
-        $this->_fwrite( chr($value>>24 & 0xFF) .
+        $this->_fwrite(
+            chr($value>>24 & 0xFF) .
                         chr($value>>16 & 0xFF) .
                         chr($value>>8  & 0xFF) .
-                        chr($value     & 0xFF),   4  );
+            chr($value     & 0xFF),   4  
+        );
     }
 
 
@@ -207,7 +209,7 @@ abstract class Zend_Search_Lucene_Storage_File
     /**
      * Writes long integer to the end of file
      *
-     * @param integer $value
+     * @param  integer $value
      * @throws Zend_Search_Lucene_Exception
      */
     public function writeLong($value)
@@ -218,14 +220,16 @@ abstract class Zend_Search_Lucene_Storage_File
          */
         if (PHP_INT_SIZE > 4) {
             settype($value, 'integer');
-            $this->_fwrite( chr($value>>56 & 0xFF) .
+            $this->_fwrite(
+                chr($value>>56 & 0xFF) .
                             chr($value>>48 & 0xFF) .
                             chr($value>>40 & 0xFF) .
                             chr($value>>32 & 0xFF) .
                             chr($value>>24 & 0xFF) .
                             chr($value>>16 & 0xFF) .
                             chr($value>>8  & 0xFF) .
-                            chr($value     & 0xFF),   8  );
+                chr($value     & 0xFF),   8  
+            );
         } else {
             $this->writeLong32Bit($value);
         }
@@ -249,7 +253,7 @@ abstract class Zend_Search_Lucene_Storage_File
             if ($wordHigh == (int)0xFFFFFFFF  &&  ($wordLow & (int)0x80000000)) {
                 return $wordLow;
             } else {
-                require_once 'Zend/Search/Lucene/Exception.php';
+                include_once 'Zend/Search/Lucene/Exception.php';
                 throw new Zend_Search_Lucene_Exception('Long integers lower than -2147483648 (0x80000000) are not supported on 32-bit platforms.');
             }
 
@@ -273,13 +277,13 @@ abstract class Zend_Search_Lucene_Storage_File
     /**
      * Writes long integer to the end of file (32-bit platforms implementation)
      *
-     * @param integer|float $value
+     * @param  integer|float $value
      * @throws Zend_Search_Lucene_Exception
      */
     public function writeLong32Bit($value)
     {
         if ($value < (int)0x80000000) {
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('Long integers lower than -2147483648 (0x80000000) are not supported on 32-bit platforms.');
         }
 
@@ -329,7 +333,7 @@ abstract class Zend_Search_Lucene_Storage_File
     {
         settype($value, 'integer');
         while ($value > 0x7F) {
-            $this->_fwrite(chr( ($value & 0x7F)|0x80 ));
+            $this->_fwrite(chr(($value & 0x7F)|0x80));
             $value >>= 7;
         }
         $this->_fwrite(chr($value));
@@ -379,11 +383,12 @@ abstract class Zend_Search_Lucene_Storage_File
 
                     // Check for null character. Java2 encodes null character
                     // in two bytes.
-                    if (ord($str_val[$count])   == 0xC0 &&
-                        ord($str_val[$count+1]) == 0x80   ) {
+                    if (ord($str_val[$count])   == 0xC0 
+                        && ord($str_val[$count+1]) == 0x80   
+                    ) {
                         $str_val[$count] = 0;
-                        $str_val = substr($str_val,0,$count+1)
-                                 . substr($str_val,$count+2);
+                        $str_val = substr($str_val, 0, $count+1)
+                                 . substr($str_val, $count+2);
                     }
                     $count += $addBytes;
                 }
@@ -396,7 +401,7 @@ abstract class Zend_Search_Lucene_Storage_File
     /**
      * Writes a string to the end of file.
      *
-     * @param string $str
+     * @param  string $str
      * @throws Zend_Search_Lucene_Exception
      */
     public function writeString($str)
@@ -447,7 +452,7 @@ abstract class Zend_Search_Lucene_Storage_File
         }
 
         if ($chars < 0) {
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('Invalid UTF-8 string');
         }
 

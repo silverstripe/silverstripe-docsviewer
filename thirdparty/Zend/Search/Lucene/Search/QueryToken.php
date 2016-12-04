@@ -128,98 +128,98 @@ class Zend_Search_Lucene_Search_QueryToken
         $this->position = $position + 1; // Start from 1
 
         switch ($tokenCategory) {
-            case self::TC_WORD:
-                if (  strtolower($tokenText) == 'and') {
-                    $this->type = self::TT_AND_LEXEME;
-                } else if (strtolower($tokenText) == 'or') {
-                    $this->type = self::TT_OR_LEXEME;
-                } else if (strtolower($tokenText) == 'not') {
-                    $this->type = self::TT_NOT_LEXEME;
-                } else if (strtolower($tokenText) == 'to') {
-                    $this->type = self::TT_TO_LEXEME;
-                } else {
-                    $this->type = self::TT_WORD;
-                }
+        case self::TC_WORD:
+            if (strtolower($tokenText) == 'and') {
+                $this->type = self::TT_AND_LEXEME;
+            } else if (strtolower($tokenText) == 'or') {
+                $this->type = self::TT_OR_LEXEME;
+            } else if (strtolower($tokenText) == 'not') {
+                $this->type = self::TT_NOT_LEXEME;
+            } else if (strtolower($tokenText) == 'to') {
+                $this->type = self::TT_TO_LEXEME;
+            } else {
+                $this->type = self::TT_WORD;
+            }
+            break;
+
+        case self::TC_PHRASE:
+            $this->type = self::TT_PHRASE;
+            break;
+
+        case self::TC_NUMBER:
+            $this->type = self::TT_NUMBER;
+            break;
+
+        case self::TC_SYNTAX_ELEMENT:
+            switch ($tokenText) {
+            case ':':
+                $this->type = self::TT_FIELD_INDICATOR;
                 break;
 
-            case self::TC_PHRASE:
-                $this->type = self::TT_PHRASE;
+            case '+':
+                $this->type = self::TT_REQUIRED;
                 break;
 
-            case self::TC_NUMBER:
-                $this->type = self::TT_NUMBER;
+            case '-':
+                $this->type = self::TT_PROHIBITED;
                 break;
 
-            case self::TC_SYNTAX_ELEMENT:
-                switch ($tokenText) {
-                    case ':':
-                        $this->type = self::TT_FIELD_INDICATOR;
-                        break;
-
-                    case '+':
-                        $this->type = self::TT_REQUIRED;
-                        break;
-
-                    case '-':
-                        $this->type = self::TT_PROHIBITED;
-                        break;
-
-                    case '~':
-                        $this->type = self::TT_FUZZY_PROX_MARK;
-                        break;
-
-                    case '^':
-                        $this->type = self::TT_BOOSTING_MARK;
-                        break;
-
-                    case '[':
-                        $this->type = self::TT_RANGE_INCL_START;
-                        break;
-
-                    case ']':
-                        $this->type = self::TT_RANGE_INCL_END;
-                        break;
-
-                    case '{':
-                        $this->type = self::TT_RANGE_EXCL_START;
-                        break;
-
-                    case '}':
-                        $this->type = self::TT_RANGE_EXCL_END;
-                        break;
-
-                    case '(':
-                        $this->type = self::TT_SUBQUERY_START;
-                        break;
-
-                    case ')':
-                        $this->type = self::TT_SUBQUERY_END;
-                        break;
-
-                    case '!':
-                        $this->type = self::TT_NOT_LEXEME;
-                        break;
-
-                    case '&&':
-                        $this->type = self::TT_AND_LEXEME;
-                        break;
-
-                    case '||':
-                        $this->type = self::TT_OR_LEXEME;
-                        break;
-
-                    default:
-                        require_once 'Zend/Search/Lucene/Exception.php';
-                        throw new Zend_Search_Lucene_Exception('Unrecognized query syntax lexeme: \'' . $tokenText . '\'');
-                }
+            case '~':
+                $this->type = self::TT_FUZZY_PROX_MARK;
                 break;
 
-            case self::TC_NUMBER:
-                $this->type = self::TT_NUMBER;
+            case '^':
+                $this->type = self::TT_BOOSTING_MARK;
+                break;
+
+            case '[':
+                $this->type = self::TT_RANGE_INCL_START;
+                break;
+
+            case ']':
+                $this->type = self::TT_RANGE_INCL_END;
+                break;
+
+            case '{':
+                $this->type = self::TT_RANGE_EXCL_START;
+                break;
+
+            case '}':
+                $this->type = self::TT_RANGE_EXCL_END;
+                break;
+
+            case '(':
+                $this->type = self::TT_SUBQUERY_START;
+                break;
+
+            case ')':
+                $this->type = self::TT_SUBQUERY_END;
+                break;
+
+            case '!':
+                $this->type = self::TT_NOT_LEXEME;
+                break;
+
+            case '&&':
+                $this->type = self::TT_AND_LEXEME;
+                break;
+
+            case '||':
+                $this->type = self::TT_OR_LEXEME;
+                break;
 
             default:
-                require_once 'Zend/Search/Lucene/Exception.php';
-                throw new Zend_Search_Lucene_Exception('Unrecognized lexeme type: \'' . $tokenCategory . '\'');
+                include_once 'Zend/Search/Lucene/Exception.php';
+                throw new Zend_Search_Lucene_Exception('Unrecognized query syntax lexeme: \'' . $tokenText . '\'');
+            }
+            break;
+
+        case self::TC_NUMBER:
+            $this->type = self::TT_NUMBER;
+
+        default:
+            include_once 'Zend/Search/Lucene/Exception.php';
+            throw new Zend_Search_Lucene_Exception('Unrecognized lexeme type: \'' . $tokenCategory . '\'');
         }
     }
 }

@@ -5,7 +5,7 @@
  *
  * Maps to a folder on the file system. 
  *
- * @package docsviewer
+ * @package    docsviewer
  * @subpackage model
  */
 class DocumentationFolder extends DocumentationPage

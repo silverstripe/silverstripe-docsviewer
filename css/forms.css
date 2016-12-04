@@ -1,38 +1,38 @@
 fieldset {
-	border: none;
-	margin: 0;
-	padding: 0 0 5px 0;
+    border: none;
+    margin: 0;
+    padding: 0 0 5px 0;
 }
 
 #DocumentationAdvancedSearchForm_AdvancedSearchForm_q {
-	width: 100%;
-	font-size: 15px;
-	padding: 10px 10px;
+    width: 100%;
+    font-size: 15px;
+    padding: 10px 10px;
 }
 
 #DocumentationAdvancedSearchForm_AdvancedSearchForm #q {
-	width: 55%;
-	padding-right: 2%;
-	float: left;
+    width: 55%;
+    padding-right: 2%;
+    float: left;
 }
 
 #DocumentationAdvancedSearchForm_AdvancedSearchForm #Entities {
-	width: 25%;
-	padding-right: 2%;
-	float: left;
+    width: 25%;
+    padding-right: 2%;
+    float: left;
 }
 
 #DocumentationAdvancedSearchForm_AdvancedSearchForm #Versions {
-	width: auto;
-	float: left;
-	margin-top: 12px;
+    width: auto;
+    float: left;
+    margin-top: 12px;
 }
 
 .optionset ul {
-	margin: 0;
+    margin: 0;
 }
 .optionset li {
-	list-style: none;
-	float: left;
-	padding-right: 12px; 
+    list-style: none;
+    float: left;
+    padding-right: 12px; 
 }

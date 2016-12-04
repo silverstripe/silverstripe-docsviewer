@@ -64,8 +64,9 @@ class Zend_Search_Lucene_Search_Weight_Phrase extends Zend_Search_Lucene_Search_
      * @param Zend_Search_Lucene_Interface           $reader
      */
     public function __construct(Zend_Search_Lucene_Search_Query_Phrase $query,
-                                Zend_Search_Lucene_Interface           $reader)
-    {
+        Zend_Search_Lucene_Interface           $reader
+    ) {
+    
         $this->_query  = $query;
         $this->_reader = $reader;
     }

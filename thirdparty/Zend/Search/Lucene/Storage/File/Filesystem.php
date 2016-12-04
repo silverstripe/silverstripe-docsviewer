@@ -20,7 +20,9 @@
  * @version    $Id: Filesystem.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
-/** Zend_Search_Lucene_Storage_File */
+/**
+ * Zend_Search_Lucene_Storage_File 
+*/
 require_once 'Zend/Search/Lucene/Storage/File.php';
 
 /**
@@ -52,7 +54,7 @@ class Zend_Search_Lucene_Storage_File_Filesystem extends Zend_Search_Lucene_Stor
 
         if (strpos($mode, 'w') === false  &&  !is_readable($filename)) {
             // opening for reading non-readable file
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('File \'' . $filename . '\' is not readable.');
         }
 
@@ -63,7 +65,7 @@ class Zend_Search_Lucene_Storage_File_Filesystem extends Zend_Search_Lucene_Stor
 
         if ($this->_fileHandle === false) {
             ini_set('track_errors', $trackErrors);
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception($php_errormsg);
         }
 
@@ -84,8 +86,8 @@ class Zend_Search_Lucene_Storage_File_Filesystem extends Zend_Search_Lucene_Stor
      *
      * Upon success, returns 0; otherwise, returns -1
      *
-     * @param integer $offset
-     * @param integer $whence
+     * @param  integer $offset
+     * @param  integer $whence
      * @return integer
      */
     public function seek($offset, $whence=SEEK_SET)
@@ -137,7 +139,7 @@ class Zend_Search_Lucene_Storage_File_Filesystem extends Zend_Search_Lucene_Stor
         $position = ftell($this->_fileHandle);
         fseek($this->_fileHandle, 0, SEEK_END);
         $size = ftell($this->_fileHandle);
-        fseek($this->_fileHandle,$position);
+        fseek($this->_fileHandle, $position);
 
         return $size;
     }
@@ -145,7 +147,7 @@ class Zend_Search_Lucene_Storage_File_Filesystem extends Zend_Search_Lucene_Stor
     /**
      * Read a $length bytes from the file and advance the file pointer.
      *
-     * @param integer $length
+     * @param  integer $length
      * @return string
      */
     protected function _fread($length=1)
@@ -171,7 +173,7 @@ class Zend_Search_Lucene_Storage_File_Filesystem extends Zend_Search_Lucene_Stor
      * Writes $length number of bytes (all, if $length===null) to the end
      * of the file.
      *
-     * @param string $data
+     * @param string  $data
      * @param integer $length
      */
     protected function _fwrite($data, $length=null)
@@ -188,8 +190,8 @@ class Zend_Search_Lucene_Storage_File_Filesystem extends Zend_Search_Lucene_Stor
      *
      * Lock type may be a LOCK_SH (shared lock) or a LOCK_EX (exclusive lock)
      *
-     * @param integer $lockType
-     * @param boolean $nonBlockingLock
+     * @param  integer $lockType
+     * @param  boolean $nonBlockingLock
      * @return boolean
      */
     public function lock($lockType, $nonBlockingLock = false)

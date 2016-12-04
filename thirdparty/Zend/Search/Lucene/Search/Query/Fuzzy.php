@@ -21,7 +21,9 @@
  */
 
 
-/** Zend_Search_Lucene_Search_Query */
+/**
+ * Zend_Search_Lucene_Search_Query 
+*/
 require_once 'Zend/Search/Lucene/Search/Query.php';
 
 
@@ -34,7 +36,9 @@ require_once 'Zend/Search/Lucene/Search/Query.php';
  */
 class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Query
 {
-    /** Default minimum similarity */
+    /**
+ * Default minimum similarity 
+*/
     const DEFAULT_MIN_SIMILARITY = 0.5;
 
     /**
@@ -114,23 +118,23 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
     /**
      * Zend_Search_Lucene_Search_Query_Wildcard constructor.
      *
-     * @param Zend_Search_Lucene_Index_Term $term
-     * @param float   $minimumSimilarity
-     * @param integer $prefixLength
+     * @param  Zend_Search_Lucene_Index_Term $term
+     * @param  float                         $minimumSimilarity
+     * @param  integer                       $prefixLength
      * @throws Zend_Search_Lucene_Exception
      */
     public function __construct(Zend_Search_Lucene_Index_Term $term, $minimumSimilarity = self::DEFAULT_MIN_SIMILARITY, $prefixLength = null)
     {
         if ($minimumSimilarity < 0) {
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('minimumSimilarity cannot be less than 0');
         }
         if ($minimumSimilarity >= 1) {
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('minimumSimilarity cannot be greater than or equal to 1');
         }
         if ($prefixLength < 0) {
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('prefixLength cannot be less than 0');
         }
 
@@ -162,9 +166,9 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
     /**
      * Calculate maximum distance for specified word length
      *
-     * @param integer $prefixLength
-     * @param integer $termLength
-     * @param integer $length
+     * @param  integer $prefixLength
+     * @param  integer $termLength
+     * @param  integer $length
      * @return integer
      */
     private function _calculateMaxDistance($prefixLength, $termLength, $length)
@@ -176,7 +180,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
     /**
      * Re-write query into primitive queries in the context of specified index
      *
-     * @param Zend_Search_Lucene_Interface $index
+     * @param  Zend_Search_Lucene_Interface $index
      * @return Zend_Search_Lucene_Search_Query
      * @throws Zend_Search_Lucene_Exception
      */
@@ -193,7 +197,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
             $fields = array($this->_term->field);
         }
 
-        require_once 'Zend/Search/Lucene/Index/Term.php';
+        include_once 'Zend/Search/Lucene/Index/Term.php';
         $prefix           = Zend_Search_Lucene_Index_Term::getPrefix($this->_term->text, $this->_prefixLength);
         $prefixByteLength = strlen($prefix);
         $prefixUtf8Length = Zend_Search_Lucene_Index_Term::getLength($prefix);
@@ -206,12 +210,12 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
 
         $scaleFactor = 1/(1 - $this->_minimumSimilarity);
 
-        require_once 'Zend/Search/Lucene.php';
+        include_once 'Zend/Search/Lucene.php';
         $maxTerms = Zend_Search_Lucene::getTermsPerQueryLimit();
         foreach ($fields as $field) {
             $index->resetTermsStream();
 
-            require_once 'Zend/Search/Lucene/Index/Term.php';
+            include_once 'Zend/Search/Lucene/Index/Term.php';
             if ($prefix != '') {
                 $index->skipTo(new Zend_Search_Lucene_Index_Term($prefix, $field));
 
@@ -231,7 +235,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
                         $similarity = (($prefixUtf8Length == 0)? 0 : 1 - strlen($target)/$prefixUtf8Length);
                     } else if (strlen($target) == 0) {
                         $similarity = (($prefixUtf8Length == 0)? 0 : 1 - $termRestLength/$prefixUtf8Length);
-                    } else if ($maxDistance < abs($termRestLength - strlen($target))){
+                    } else if ($maxDistance < abs($termRestLength - strlen($target))) {
                         //just adding the characters of term to target or vice-versa results in too many edits
                         //for example "pre" length is 3 and "prefixes" length is 8.  We can see that
                         //given this optimal circumstance, the edit distance cannot be less than 5.
@@ -249,7 +253,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
                         $this->_scores[]   = ($similarity - $this->_minimumSimilarity)*$scaleFactor;
 
                         if ($maxTerms != 0  &&  count($this->_matches) > $maxTerms) {
-                            require_once 'Zend/Search/Lucene/Exception.php';
+                            include_once 'Zend/Search/Lucene/Exception.php';
                             throw new Zend_Search_Lucene_Exception('Terms per query limit is reached.');
                         }
                     }
@@ -267,7 +271,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
                                        $this->_maxDistances[strlen($target)] :
                                        $this->_calculateMaxDistance(0, $termRestLength, strlen($target));
 
-                    if ($maxDistance < abs($termRestLength - strlen($target))){
+                    if ($maxDistance < abs($termRestLength - strlen($target))) {
                         //just adding the characters of term to target or vice-versa results in too many edits
                         //for example "pre" length is 3 and "prefixes" length is 8.  We can see that
                         //given this optimal circumstance, the edit distance cannot be less than 5.
@@ -285,7 +289,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
                         $this->_scores[]   = ($similarity - $this->_minimumSimilarity)*$scaleFactor;
 
                         if ($maxTerms != 0  &&  count($this->_matches) > $maxTerms) {
-                            require_once 'Zend/Search/Lucene/Exception.php';
+                            include_once 'Zend/Search/Lucene/Exception.php';
                             throw new Zend_Search_Lucene_Exception('Terms per query limit is reached.');
                         }
                     }
@@ -298,21 +302,23 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
         }
 
         if (count($this->_matches) == 0) {
-            require_once 'Zend/Search/Lucene/Search/Query/Empty.php';
+            include_once 'Zend/Search/Lucene/Search/Query/Empty.php';
             return new Zend_Search_Lucene_Search_Query_Empty();
         } else if (count($this->_matches) == 1) {
-            require_once 'Zend/Search/Lucene/Search/Query/Term.php';
+            include_once 'Zend/Search/Lucene/Search/Query/Term.php';
             return new Zend_Search_Lucene_Search_Query_Term(reset($this->_matches));
         } else {
-            require_once 'Zend/Search/Lucene/Search/Query/Boolean.php';
+            include_once 'Zend/Search/Lucene/Search/Query/Boolean.php';
             $rewrittenQuery = new Zend_Search_Lucene_Search_Query_Boolean();
 
-            array_multisort($this->_scores,   SORT_DESC, SORT_NUMERIC,
-                            $this->_termKeys, SORT_ASC,  SORT_STRING,
-                            $this->_matches);
+            array_multisort(
+                $this->_scores,   SORT_DESC, SORT_NUMERIC,
+                $this->_termKeys, SORT_ASC,  SORT_STRING,
+                $this->_matches
+            );
 
             $termCount = 0;
-            require_once 'Zend/Search/Lucene/Search/Query/Term.php';
+            include_once 'Zend/Search/Lucene/Search/Query/Term.php';
             foreach ($this->_matches as $id => $matchedTerm) {
                 $subquery = new Zend_Search_Lucene_Search_Query_Term($matchedTerm);
                 $subquery->setBoost($this->_scores[$id]);
@@ -332,12 +338,12 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
     /**
      * Optimize query in the context of specified index
      *
-     * @param Zend_Search_Lucene_Interface $index
+     * @param  Zend_Search_Lucene_Interface $index
      * @return Zend_Search_Lucene_Search_Query
      */
     public function optimize(Zend_Search_Lucene_Interface $index)
     {
-        require_once 'Zend/Search/Lucene/Exception.php';
+        include_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Fuzzy query should not be directly used for search. Use $query->rewrite($index)');
     }
 
@@ -350,7 +356,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
     public function getQueryTerms()
     {
         if ($this->_matches === null) {
-            require_once 'Zend/Search/Lucene/Exception.php';
+            include_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('Search or rewrite operations have to be performed before.');
         }
 
@@ -360,13 +366,13 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
     /**
      * Constructs an appropriate Weight implementation for this query.
      *
-     * @param Zend_Search_Lucene_Interface $reader
+     * @param  Zend_Search_Lucene_Interface $reader
      * @return Zend_Search_Lucene_Search_Weight
      * @throws Zend_Search_Lucene_Exception
      */
     public function createWeight(Zend_Search_Lucene_Interface $reader)
     {
-        require_once 'Zend/Search/Lucene/Exception.php';
+        include_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Fuzzy query should not be directly used for search. Use $query->rewrite($index)');
     }
 
@@ -375,13 +381,13 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
      * Execute query in context of index reader
      * It also initializes necessary internal structures
      *
-     * @param Zend_Search_Lucene_Interface $reader
-     * @param Zend_Search_Lucene_Index_DocsFilter|null $docsFilter
+     * @param  Zend_Search_Lucene_Interface             $reader
+     * @param  Zend_Search_Lucene_Index_DocsFilter|null $docsFilter
      * @throws Zend_Search_Lucene_Exception
      */
     public function execute(Zend_Search_Lucene_Interface $reader, $docsFilter = null)
     {
-        require_once 'Zend/Search/Lucene/Exception.php';
+        include_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Fuzzy query should not be directly used for search. Use $query->rewrite($index)');
     }
 
@@ -395,34 +401,34 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
      */
     public function matchedDocs()
     {
-        require_once 'Zend/Search/Lucene/Exception.php';
+        include_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Fuzzy query should not be directly used for search. Use $query->rewrite($index)');
     }
 
     /**
      * Score specified document
      *
-     * @param integer $docId
-     * @param Zend_Search_Lucene_Interface $reader
+     * @param  integer                      $docId
+     * @param  Zend_Search_Lucene_Interface $reader
      * @return float
      * @throws Zend_Search_Lucene_Exception
      */
     public function score($docId, Zend_Search_Lucene_Interface $reader)
     {
-        require_once 'Zend/Search/Lucene/Exception.php';
+        include_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Fuzzy query should not be directly used for search. Use $query->rewrite($index)');
     }
 
     /**
      * Query specific matches highlighting
      *
-     * @param Zend_Search_Lucene_Search_Highlighter_Interface $highlighter  Highlighter object (also contains doc for highlighting)
+     * @param Zend_Search_Lucene_Search_Highlighter_Interface $highlighter Highlighter object (also contains doc for highlighting)
      */
     protected function _highlightMatches(Zend_Search_Lucene_Search_Highlighter_Interface $highlighter)
     {
         $words = array();
 
-        require_once 'Zend/Search/Lucene/Index/Term.php';
+        include_once 'Zend/Search/Lucene/Index/Term.php';
         $prefix           = Zend_Search_Lucene_Index_Term::getPrefix($this->_term->text, $this->_prefixLength);
         $prefixByteLength = strlen($prefix);
         $prefixUtf8Length = Zend_Search_Lucene_Index_Term::getLength($prefix);
@@ -436,7 +442,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
         $scaleFactor = 1/(1 - $this->_minimumSimilarity);
 
         $docBody = $highlighter->getDocument()->getFieldUtf8Value('body');
-        require_once 'Zend/Search/Lucene/Analysis/Analyzer.php';
+        include_once 'Zend/Search/Lucene/Analysis/Analyzer.php';
         $tokens = Zend_Search_Lucene_Analysis_Analyzer::getDefault()->tokenize($docBody, 'UTF-8');
         foreach ($tokens as $token) {
             $termText = $token->getTermText();
@@ -455,7 +461,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
                     $similarity = (($prefixUtf8Length == 0)? 0 : 1 - strlen($target)/$prefixUtf8Length);
                 } else if (strlen($target) == 0) {
                     $similarity = (($prefixUtf8Length == 0)? 0 : 1 - $termRestLength/$prefixUtf8Length);
-                } else if ($maxDistance < abs($termRestLength - strlen($target))){
+                } else if ($maxDistance < abs($termRestLength - strlen($target))) {
                     //just adding the characters of term to target or vice-versa results in too many edits
                     //for example "pre" length is 3 and "prefixes" length is 8.  We can see that
                     //given this optimal circumstance, the edit distance cannot be less than 5.

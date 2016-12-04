@@ -212,7 +212,7 @@ HTML;
             $this->subPage
         );
 
-        # @todo this should redirect to /subpage/
+        // @todo this should redirect to /subpage/
         $this->assertContains(
             '[link: relative](dev/docs/en/documentationparsertest/2.4/subfolder/subpage.md/)',
             $result
@@ -223,7 +223,7 @@ HTML;
             $result
         );
 
-        # @todo this should redirect to /
+        // @todo this should redirect to /
         $this->assertContains(
             '[link: absolute index with name](dev/docs/en/documentationparsertest/2.4/index/)',
             $result
@@ -304,9 +304,11 @@ HTML;
         );
 
         $this->assertContains(
-            sprintf('[parent image link](%s)', Controller::join_links(
-                Director::absoluteBaseURL(), DOCSVIEWER_DIR, '/tests/docs/en/_images/image.png'
-            )),
+            sprintf(
+                '[parent image link](%s)', Controller::join_links(
+                    Director::absoluteBaseURL(), DOCSVIEWER_DIR, '/tests/docs/en/_images/image.png'
+                )
+            ),
             $result
         );
         
@@ -341,17 +343,17 @@ HTML;
             array('`[Title](api:DataObject)`','`[Title](api:DataObject)`'),
             array('`[Title](api:DataObject::$defaults)`','`[Title](api:DataObject::$defaults)`'),
             array('`[Title](api:DataObject::populateDefaults())`','`[Title](api:DataObject::populateDefaults())`'),
-            array('[api:DataObject]', sprintf($html_format,'DataObject','DataObject')),
-            array('[api:DataObject::$defaults]',sprintf($html_format,'DataObject::$defaults','DataObject::$defaults')),
-            array('[api:DataObject::populateDefaults()]',sprintf($html_format,'DataObject::populateDefaults()','DataObject::populateDefaults()')),
-            array('[Title](api:DataObject)',sprintf($html_format,'DataObject','Title')),
-            array('[Title](api:DataObject::$defaults)',sprintf($html_format,'DataObject::$defaults','Title')),
-            array('[Title](api:DataObject::populateDefaults())',sprintf($html_format,'DataObject::populateDefaults()','Title'))
+            array('[api:DataObject]', sprintf($html_format, 'DataObject', 'DataObject')),
+            array('[api:DataObject::$defaults]',sprintf($html_format, 'DataObject::$defaults', 'DataObject::$defaults')),
+            array('[api:DataObject::populateDefaults()]',sprintf($html_format, 'DataObject::populateDefaults()', 'DataObject::populateDefaults()')),
+            array('[Title](api:DataObject)',sprintf($html_format, 'DataObject', 'Title')),
+            array('[Title](api:DataObject::$defaults)',sprintf($html_format, 'DataObject::$defaults', 'Title')),
+            array('[Title](api:DataObject::populateDefaults())',sprintf($html_format, 'DataObject::populateDefaults()', 'Title'))
         );
 
         foreach($test_cases as $test_case) {
             $expected_html = $test_case[1];
-            $this->assertContains($expected_html,$parsed_page);
+            $this->assertContains($expected_html, $parsed_page);
         }
 
     }

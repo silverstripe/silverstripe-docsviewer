@@ -2,7 +2,7 @@
 
 /**
  * Parser wrapping the Markdown Extra parser.
- * 
+ *
  * @see http://michelf.com/projects/php-markdown/extra/
  *
  * @package docsviewer
@@ -16,25 +16,25 @@ class DocumentationParser
      * @var array
      */
     public static $heading_counts = array();
-    
+
     /**
-     * Parse a given path to the documentation for a file. Performs a case 
-     * insensitive lookup on the file system. Automatically appends the file 
+     * Parse a given path to the documentation for a file. Performs a case
+     * insensitive lookup on the file system. Automatically appends the file
      * extension to one of the markdown extensions as well so /install/ in a
      * web browser will match /install.md or /INSTALL.md.
-     * 
+     *
      * Filepath: /var/www/myproject/src/cms/en/folder/subfolder/page.md
      * URL: http://myhost/mywebroot/dev/docs/2.4/cms/en/folder/subfolder/page
      * Webroot: http://myhost/mywebroot/
      * Baselink: dev/docs/2.4/cms/en/
      * Pathparts: folder/subfolder/page
-     * 
-     * @param DocumentationPage $page
-     * @param String $baselink Link relative to webroot, up until the "root" 
-     *							of the module. Necessary to rewrite relative 
-     *							links
      *
-     * @return String
+     * @param DocumentationPage $page
+     * @param string            $baselink Link relative to webroot, up until the "root"  of the module.
+     *                                    Necessary to rewrite relative links of the module. Necessary
+     *                                    to rewrite relative links
+     *
+     * @return string
      */
     public static function parse(DocumentationPage $page, $baselink = null)
     {
@@ -43,7 +43,7 @@ class DocumentationParser
         }
 
         $md = $page->getMarkdown(true);
-        
+
         // Pre-processing
         $md = self::rewrite_image_links($md, $page);
         $md = self::rewrite_relative_links($md, $page, $baselink);
@@ -60,7 +60,7 @@ class DocumentationParser
 
         return $text;
     }
-    
+
     public static function rewrite_code_blocks($md)
     {
         $started = false;
@@ -148,8 +148,8 @@ class DocumentationParser
                     var_dump('Inner line of code block');
                 }
 
-                // still inside a colon based block, if the line is only whitespace 
-                // then continue with  with it. We can continue with it for now as 
+                // still inside a colon based block, if the line is only whitespace
+                // then continue with  with it. We can continue with it for now as
                 // it'll be tidied up later in the $end section.
                 $inner = true;
                 $output[$i] = $line;
@@ -210,7 +210,7 @@ class DocumentationParser
 
         return $output;
     }
-    
+
     public static function rewrite_image_links($md, $page)
     {
         // Links with titles
@@ -229,25 +229,31 @@ class DocumentationParser
             foreach ($images[0] as $i => $match) {
                 $title = $images[1][$i];
                 $url = $images[2][$i];
-                
+
                 // Don't process absolute links (based on protocol detection)
                 $urlParts = parse_url($url);
 
                 if ($urlParts && isset($urlParts['scheme'])) {
                     continue;
                 }
-                
+
                 // Rewrite URL (relative or absolute)
-                $baselink = DocumentationHelper::relativePath(DocumentationHelper::normalizePath(
-                    dirname($page->getPath())
-                ));
+                $baselink = DocumentationHelper::relativePath(
+                    DocumentationHelper::normalizePath(
+                        dirname($page->getPath())
+                    )
+                );
 
                 // if the image starts with a slash, it's absolute
                 if (substr($url, 0, 1) == '/') {
-                    $relativeUrl = DocumentationHelper::normalizePath(str_replace(BASE_PATH, '', Controller::join_links(
-                        $page->getEntity()->getPath(),
-                        $url
-                    )));
+                    $relativeUrl = DocumentationHelper::normalizePath(
+                        str_replace(
+                            BASE_PATH, '', Controller::join_links(
+                                $page->getEntity()->getPath(),
+                                $url
+                            )
+                        )
+                    );
                 } else {
                     $relativeUrl = rtrim($baselink, '/') . '/' . ltrim($url, '/');
                 }
@@ -256,15 +262,15 @@ class DocumentationParser
                 while (strpos($relativeUrl, '/..') !== false) {
                     $relativeUrl = preg_replace('/\w+\/\.\.\//', '', $relativeUrl);
                 }
-                
+
                 // Make it absolute again
                 $absoluteUrl = Controller::join_links(
                     Director::absoluteBaseURL(),
                     $relativeUrl
                 );
-                
+
                 // Replace any double slashes (apart from protocol)
-//				$absoluteUrl = preg_replace('/([^:])\/{2,}/', '$1/', $absoluteUrl);
+                //				$absoluteUrl = preg_replace('/([^:])\/{2,}/', '$1/', $absoluteUrl);
 
                 // Replace in original content
                 $md = str_replace(
@@ -274,20 +280,20 @@ class DocumentationParser
                 );
             }
         }
-        
+
         return $md;
     }
-        
+
      /**
      * Rewrite links with special "api:" prefix to html as in the following example:
      *
-     * (1) [api:DataObject] gets re-written to 
+     * (1) [api:DataObject] gets re-written to
      *     <a href="https://api.silverstripe.org/search/lookup/?q=DataObject&version=2.4&module=framework">DataObject</a>
      * (2) [api:DataObject::$defaults] gets re-written to
      *     <a href="https://api.silverstripe.org/search/lookup/?q=DataObject::$defaults&version=2.4&module=framework">DataObject::$defaults</a>
      * (3) [api:DataObject::populateDefaults()] gets re-written to
      *     <a href="https://api.silverstripe.org/search/lookup/?q=DataObject::populateDefaults()&version=2.4&module=framework">DataObject::$defaults</a>
-     * (4) [Title](api:DataObject) gets re-written to 
+     * (4) [Title](api:DataObject) gets re-written to
      *     <a href="https://api.silverstripe.org/search/lookup/?q=DataObject&version=2.4&module=framework">Title</a>
      * (5) [Title](api:DataObject::$defaults) gets re-written to
      *     <a href="https://api.silverstripe.org/search/lookup/?q=DataObject::$defaults&version=2.4&module=framework">Title</a>
@@ -296,11 +302,11 @@ class DocumentationParser
      *
      * The above api links can be enclosed in backticks.
      *
-     * The markdown parser gets confused by the extra pair of parentheses in links of the form [DataObject](api:DataObject::populateDefaults()) so 
+     * The markdown parser gets confused by the extra pair of parentheses in links of the form [DataObject](api:DataObject::populateDefaults()) so
      * all links are re-written as html markup instead of markdown [Title](url). This also prevents other markdown parsing problems.
-     * 
-     * @param String $markdown
-     * @param DocumentationPage $doc_page
+     *
+     * @param  String            $markdown
+     * @param  DocumentationPage $doc_page
      * @return String
      */
     public static function rewrite_api_links($markdown, $doc_page)
@@ -324,29 +330,29 @@ class DocumentationParser
             preg_match_all($regex, $markdown, $links);
             if($links) {
                 foreach($links[0] as $i => $match) {
-                    if($type === 'no_title'){
+                    if($type === 'no_title') {
                         $title = $links[1][$i];
                         $link = $links[1][$i];
                         // change backticked links to avoid being parsed in the same way as non-backticked links
-                        $markdown = str_replace('`'.$match.'`','XYZ'.$link.'XYZ',$markdown); 
+                        $markdown = str_replace('`'.$match.'`', 'XYZ'.$link.'XYZ', $markdown);
                     } else {
                         $title = $links[1][$i];
                         $link = $links[2][$i];
                         // change backticked links to avoid being parsed in the same way as non-backticked links
-                        $markdown = str_replace('`'.$match.'`','XX'.$title.'YY'.$link.'ZZ',$markdown);
+                        $markdown = str_replace('`'.$match.'`', 'XX'.$title.'YY'.$link.'ZZ', $markdown);
                     }
                     $html = sprintf($html_format, $link, $version, $module, $title);
-                    $markdown = str_replace($match,$html,$markdown);
+                    $markdown = str_replace($match, $html, $markdown);
                 }
             }
         }
 
-        // recover backticked links with no titles 
+        // recover backticked links with no titles
         preg_match_all('#XYZ(.*)?XYZ#', $markdown, $links);
         if($links) {
             foreach($links[0] as $i => $match) {
                 $link = $links[1][$i];
-                $markdown = str_replace($match,'`[api:'.$link.']`',$markdown);
+                $markdown = str_replace($match, '`[api:'.$link.']`', $markdown);
             }
         }
 
@@ -356,14 +362,14 @@ class DocumentationParser
             foreach($links[0] as $i => $match) {
                 $title = $links[1][$i];
                 $link = $links[2][$i];
-                $markdown = str_replace($match,'`['.$title.'](api:'.$link.')`',$markdown);
+                $markdown = str_replace($match, '`['.$title.'](api:'.$link.')`', $markdown);
             }
         }
 
         return $markdown;
 
     }
-    
+
     /**
      *
      */
@@ -371,10 +377,10 @@ class DocumentationParser
     {
         $re = '/^\#+(.*)/m';
         $md = preg_replace_callback($re, array('DocumentationParser', '_rewrite_heading_anchors_callback'), $md);
-        
+
         return $md;
     }
-    
+
     /**
      *
      */
@@ -396,10 +402,10 @@ class DocumentationParser
 
         return sprintf("%s {#%s}", preg_replace('/\\r\\n|\\r|\\n/', '', $heading), self::generate_html_id($headingText));
     }
-    
+
     /**
      * Generate an html element id from a string
-     * 
+     *
      * @return String
      */
     public static function generate_html_id($title)
@@ -411,14 +417,14 @@ class DocumentationParser
         $t = preg_replace('/-+/', '-', $t);
         $t = trim($t, '-');
         $t = strtolower($t);
-                
+
         return $t;
     }
-    
+
     /**
      * Resolves all relative links within markdown.
-     * 
-     * @param String $md Markdown content
+     *
+     * @param String            $md   Markdown content
      * @param DocumentationPage $page
      *
      * @return String Markdown
@@ -455,20 +461,20 @@ class DocumentationParser
         if ($relativeLink == ".") {
             $relativeLink = '';
         }
-        
+
         // file base link
         $fileBaseLink = DocumentationHelper::relativePath(DocumentationHelper::normalizePath(dirname($page->getPath())));
-        
+
         if ($matches) {
             foreach ($matches[0] as $i => $match) {
                 $title = $matches[2][$i];
                 $url = $matches[3][$i];
-            
+
                 // Don't process API links
                 if (preg_match('/^api:/', $url)) {
                     continue;
                 }
-            
+
                 // Don't process absolute links (based on protocol detection)
                 $urlParts = parse_url($url);
                 if ($urlParts && isset($urlParts['scheme'])) {
@@ -495,12 +501,12 @@ class DocumentationParser
                         $relativeUrl = Controller::join_links($baselink, $relativeLink, $url, '/');
                     }
                 }
-                
+
                 // Resolve relative paths
                 while (strpos($relativeUrl, '..') !== false) {
                     $relativeUrl = preg_replace('/[-\w]+\/\.\.\//', '', $relativeUrl);
                 }
-            
+
                 // Replace any double slashes (apart from protocol)
                 $relativeUrl = preg_replace('/([^:])\/{2,}/', '$1/', $relativeUrl);
 
@@ -512,10 +518,10 @@ class DocumentationParser
                 );
             }
         }
-        
+
         return $md;
     }
-    
+
     /**
      * Strips out the metadata for a page
      *
@@ -524,11 +530,13 @@ class DocumentationParser
     public static function retrieve_meta_data(DocumentationPage &$page)
     {
         if ($md = $page->getMarkdown()) {
-            $matches = preg_match_all('/
+            $matches = preg_match_all(
+                '/
 				(?<key>[A-Za-z0-9_-]+): 
 				\s*
 				(?<value>.*)
-			/x', $md, $meta);
+			/x', $md, $meta
+            );
         
             if ($matches) {
                 foreach ($meta['key'] as $index => $key) {
