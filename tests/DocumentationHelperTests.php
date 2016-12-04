@@ -9,7 +9,8 @@ class DocumentationHelperTests extends SapphireTest
     public function testCleanName()
     {
         $this->assertEquals(
-            "File path", DocumentationHelper::clean_page_name(
+            'File path',
+            DocumentationHelper::clean_page_name(
                 '00_file-path.md'
             )
         );
@@ -18,13 +19,15 @@ class DocumentationHelperTests extends SapphireTest
     public function testCleanUrl()
     {
         $this->assertEquals(
-            "some_path", DocumentationHelper::clean_page_url(
+            'some_path',
+            DocumentationHelper::clean_page_url(
                 'Some Path'
             )
         );
 
         $this->assertEquals(
-            "somefilepath", DocumentationHelper::clean_page_url(
+            'somefilepath',
+            DocumentationHelper::clean_page_url(
                 '00_SomeFilePath.md'
             )
         );
@@ -33,19 +36,22 @@ class DocumentationHelperTests extends SapphireTest
     public function testTrimSortNumber()
     {
         $this->assertEquals(
-            'file', DocumentationHelper::trim_sort_number(
+            'file',
+            DocumentationHelper::trim_sort_number(
                 '0_file'
             )
         );
 
         $this->assertEquals(
-            '2.1', DocumentationHelper::trim_sort_number(
+            '2.1',
+            DocumentationHelper::trim_sort_number(
                 '2.1'
             )
         );
 
         $this->assertEquals(
-            'dev/tasks/2.1', DocumentationHelper::trim_sort_number(
+            'dev/tasks/2.1',
+            DocumentationHelper::trim_sort_number(
                 'dev/tasks/2.1'
             )
         );
@@ -54,13 +60,15 @@ class DocumentationHelperTests extends SapphireTest
     public function testTrimExtension()
     {
         $this->assertEquals(
-            'file', DocumentationHelper::trim_extension_off(
+            'file',
+            DocumentationHelper::trim_extension_off(
                 'file.md'
             )
         );
 
         $this->assertEquals(
-            'dev/path/file', DocumentationHelper::trim_extension_off(
+            'dev/path/file',
+            DocumentationHelper::trim_extension_off(
                 'dev/path/file.md'
             )
         );
@@ -69,19 +77,22 @@ class DocumentationHelperTests extends SapphireTest
     public function testGetExtension()
     {
         $this->assertEquals(
-            'md', DocumentationHelper::get_extension(
+            'md',
+            DocumentationHelper::get_extension(
                 'file.md'
             )
         );
 
         $this->assertEquals(
-            'md', DocumentationHelper::get_extension(
+            'md',
+            DocumentationHelper::get_extension(
                 'dev/tasks/file.md'
             )
         );
 
         $this->assertEquals(
-            'txt', DocumentationHelper::get_extension(
+            'txt',
+            DocumentationHelper::get_extension(
                 'dev/tasks/file.txt'
             )
         );

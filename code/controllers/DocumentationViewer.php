@@ -117,14 +117,14 @@ class DocumentationViewer extends Controller implements PermissionProvider
             );
         }
     }
-    
-    /**    
+
+    /**
      * Permission provider to allow more control over who can view docs
      *
      * @return array
      */
-    
-    public function providePermissions() 
+
+    public function providePermissions()
     {
         return array(
             'CMS_VIEW_DEVDOCS' => array(
@@ -400,11 +400,11 @@ class DocumentationViewer extends Controller implements PermissionProvider
             $output->push(
                 new ArrayData(
                     array(
-                    'Title'      => $entity->getTitle(),
+                    'Title'         => $entity->getTitle(),
                     'Link'          => $link,
-                    'LinkingMode' => $mode,
+                    'LinkingMode'   => $mode,
                     'DefaultEntity' => $entity->getIsDefaultEntity(),
-                    'Children' => $children
+                    'Children'      => $children
                     )
                 )
             );
@@ -467,7 +467,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
         return $this->customise(
             new ArrayData(
                 array(
-                'Children' => $children
+                    'Children' => $children
                 )
             )
         )->renderWith('Includes/DocumentationPages');
@@ -587,9 +587,9 @@ class DocumentationViewer extends Controller implements PermissionProvider
                 $output->push(
                     new ArrayData(
                         array(
-                        'Link' => Controller::join_links($baseLink, $url),
-                        'Title' => $page['title'],
-                        'FirstLetter' => $first
+                            'Link'        => Controller::join_links($baseLink, $url),
+                            'Title'       => $page['title'],
+                            'FirstLetter' => $first
                         )
                     )
                 );
@@ -622,14 +622,14 @@ class DocumentationViewer extends Controller implements PermissionProvider
      *    - %version%
      *    - %entity%
      *    - %path%
-     *     - %lang%
+     *    - %lang%
      *
      * For example to provide an edit link to the framework module in github:
      *
      * <code>
      * DocumentationViewer::set_edit_link(
-     *    'framework',
-     *    'https://github.com/silverstripe/%entity%/edit/%version%/docs/%lang%/%path%',
+     *     'framework',
+     *     'https://github.com/silverstripe/%entity%/edit/%version%/docs/%lang%/%path%',
      *     $opts
      * ));
      * </code>
@@ -658,8 +658,6 @@ class DocumentationViewer extends Controller implements PermissionProvider
         if ($page) {
             $entity = $page->getEntity();
 
-
-
             if ($entity && isset(self::$edit_links[strtolower($entity->title)])) {
 
                 // build the edit link, using the version defined
@@ -671,7 +669,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
                 }
 
 
-                if ($version == "trunk" && (isset($url['options']['rewritetrunktomaster']))) {
+                if ($version == 'trunk' && (isset($url['options']['rewritetrunktomaster']))) {
                     if ($url['options']['rewritetrunktomaster']) {
                         $version = "master";
                     }
@@ -699,7 +697,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
      * Returns the next page. Either retrieves the sibling of the current page
      * or return the next sibling of the parent page.
      *
-     * @return DocumentationPage
+     * @return DocumentationPage|null
      */
     public function getNextPage()
     {
@@ -714,7 +712,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
      * Returns the previous page. Either returns the previous sibling or the
      * parent of this page
      *
-     * @return DocumentationPage
+     * @return DocumentationPage|null
      */
     public function getPreviousPage()
     {
@@ -726,7 +724,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
     }
 
     /**
-     * @return string
+     * @return string|void
      */
     public function getGoogleAnalyticsCode()
     {
@@ -745,6 +743,9 @@ class DocumentationViewer extends Controller implements PermissionProvider
         return $this->config()->get('documentation_title');
     }
 
+    /**
+     * @return string
+     */
     public function getDocumentationBaseHref()
     {
         return Config::inst()->get('DocumentationViewer', 'link_base');

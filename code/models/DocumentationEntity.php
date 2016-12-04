@@ -255,7 +255,7 @@ class DocumentationEntity extends ViewableData
      *
      * @return string
      */
-    public function getVersionTitle() 
+    public function getVersionTitle()
     {
         return $this->versionTitle;
     }
@@ -266,7 +266,7 @@ class DocumentationEntity extends ViewableData
      * @param  string $title
      * @return $this
      */
-    public function setVersionTitle($title) 
+    public function setVersionTitle($title)
     {
         $this->versionTitle = $title;
         return $this;
@@ -278,7 +278,7 @@ class DocumentationEntity extends ViewableData
      * @param  bool $archived
      * @return $this
      */
-    public function setIsArchived($archived) 
+    public function setIsArchived($archived)
     {
         $this->archived = $archived;
         return $this;
@@ -287,7 +287,7 @@ class DocumentationEntity extends ViewableData
     /**
      * @return bool
      */
-    public function getIsArchived() 
+    public function getIsArchived()
     {
         return $this->archived;
     }
@@ -320,8 +320,7 @@ class DocumentationEntity extends ViewableData
     }
 
     /**
-     * @param string $path
-     *
+     * @param  string $path
      * @return $this
      */
     public function setPath($path)
@@ -350,8 +349,6 @@ class DocumentationEntity extends ViewableData
         return $this->stable;
     }
 
-
-
     /**
      * Returns an integer value based on if a given version is the latest
      * version. Will return -1 for if the version is older, 0 if versions are
@@ -367,7 +364,7 @@ class DocumentationEntity extends ViewableData
 
         // Normalise versions prior to comparison
         $dots = substr_count($v1, '.') - substr_count($v2, '.');
-        while($dots > 0) {
+        while ($dots > 0) {
             $dots--;
             $v2 .= '.99999';
         }
@@ -384,10 +381,10 @@ class DocumentationEntity extends ViewableData
     public function toMap()
     {
         return array(
-            'Key' => $this->key,
-            'Path' => $this->getPath(),
-            'Version' => $this->getVersion(),
-            'Branch' => $this->getBranch(),
+            'Key'      => $this->key,
+            'Path'     => $this->getPath(),
+            'Version'  => $this->getVersion(),
+            'Branch'   => $this->getBranch(),
             'IsStable' => $this->getIsStable(),
             'Language' => $this->getLanguage()
         );

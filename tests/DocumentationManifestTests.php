@@ -14,7 +14,7 @@ class DocumentationManifestTests extends SapphireTest
 
         Config::nest();
 
-        // explicitly use dev/docs. Custom paths should be tested separately 
+        // explicitly use dev/docs. Custom paths should be tested separately
         Config::inst()->update(
             'DocumentationViewer', 'link_base', 'dev/docs'
         );
@@ -57,11 +57,11 @@ class DocumentationManifestTests extends SapphireTest
 
         $this->manifest = new DocumentationManifest(true);
     }
-    
+
     public function tearDown()
     {
         parent::tearDown();
-        
+
         Config::unnest();
     }
 
@@ -108,7 +108,8 @@ class DocumentationManifestTests extends SapphireTest
         // get next page at the end of one subfolder goes back up to the top
         // most directory
         $this->assertStringEndsWith(
-            '2.3/test/', $this->manifest->getNextPage(
+            '2.3/test/',
+            $this->manifest->getNextPage(
                 DOCSVIEWER_PATH . '/tests/docs/en/subfolder/subsubfolder/subsubpage.md',
                 DOCSVIEWER_PATH . '/tests/docs/en/'
             )->Link
@@ -116,7 +117,8 @@ class DocumentationManifestTests extends SapphireTest
 
         // after sorting, 2 is shown.
         $this->assertContains(
-            '/intermediate/', $this->manifest->getNextPage(
+            '/intermediate/',
+            $this->manifest->getNextPage(
                 DOCSVIEWER_PATH . '/tests/docs/en/sort/01-basic.md',
                 DOCSVIEWER_PATH . '/tests/docs/en/'
             )->Link
@@ -125,7 +127,8 @@ class DocumentationManifestTests extends SapphireTest
 
         // next gets the following URL
         $this->assertContains(
-            '/test/', $this->manifest->getNextPage(
+            '/test/',
+            $this->manifest->getNextPage(
                 DOCSVIEWER_PATH . '/tests/docs-v2.4/en/index.md',
                 DOCSVIEWER_PATH . '/tests/docs-v2.4/en/'
             )->Link
@@ -145,7 +148,8 @@ class DocumentationManifestTests extends SapphireTest
     {
         // goes right into subfolders
         $this->assertContains(
-            'subfolder/subsubfolder/subsubpage', $this->manifest->getPreviousPage(
+            'subfolder/subsubfolder/subsubpage',
+            $this->manifest->getPreviousPage(
                 DOCSVIEWER_PATH . '/tests/docs/en/test.md',
                 DOCSVIEWER_PATH . '/tests/docs/en/'
             )->Link
@@ -186,7 +190,7 @@ class DocumentationManifestTests extends SapphireTest
 
         $this->assertDOSContains(
             $expected, $this->manifest->getChildrenFor(
-                DOCSVIEWER_PATH . "/tests/docs/en/"
+                DOCSVIEWER_PATH . '/tests/docs/en/'
             )
         );
 
@@ -197,7 +201,8 @@ class DocumentationManifestTests extends SapphireTest
         );
 
         $this->assertDOSContains(
-            $expected, $this->manifest->getChildrenFor(
+            $expected,
+            $this->manifest->getChildrenFor(
                 DOCSVIEWER_PATH . '/tests/docs-v3.0/en/',
                 DOCSVIEWER_PATH . '/tests/docs-v3.0/en/ChangeLog.md'
             )
@@ -229,7 +234,7 @@ class DocumentationManifestTests extends SapphireTest
         $this->assertEquals(3, $this->manifest->getAllVersionsOfEntity($entity)->count());
 
         $entity = $this->manifest->getEntities()->find('Language', 'de');
-        
+
         $this->assertEquals(1, $this->manifest->getAllVersionsOfEntity($entity)->count());
     }
 

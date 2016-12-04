@@ -156,8 +156,8 @@ class DocumentationManifest
                 foreach ($langs as $k => $lang) {
                     if (isset($possible[$lang])) {
                         /**
- * @var DocumentationEntity $entity 
-*/
+                         * @var DocumentationEntity $entity
+                         */
                         $entity = Injector::inst()->create(
                             'DocumentationEntity', $key
                         );
@@ -769,8 +769,8 @@ class DocumentationManifest
         $output = new ArrayList();
 
         /**
- * @var DocumentationEntity $check 
-*/
+         * @var DocumentationEntity $check
+         */
         foreach ($this->getEntities() as $check) {
             if ($check->getKey() == $entity->getKey()) {
                 if ($check->getLanguage() == $entity->getLanguage()) {

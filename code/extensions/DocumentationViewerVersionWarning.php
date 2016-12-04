@@ -1,14 +1,15 @@
 <?php
-
 /**
- * Check to see if the currently accessed version is out of date or perhaps a 
- * future version rather than the stable edition.
- *
- * @return false|ArrayData
+ * @package docsviewer
  */
-
 class DocumentationViewerVersionWarning extends Extension
 {
+    /**
+     * Check to see if the currently accessed version is out of date or perhaps a
+     * future version rather than the stable edition.
+     *
+     * @return false|ArrayData
+     */
     public function VersionWarning()
     {
         $page = $this->owner->getPage();
@@ -16,7 +17,7 @@ class DocumentationViewerVersionWarning extends Extension
         if (!$page) {
             return false;
         }
-        
+
         $entity = $page->getEntity();
 
         if (!$entity) {
@@ -32,12 +33,12 @@ class DocumentationViewerVersionWarning extends Extension
         $stable = $this->owner->getManifest()->getStableVersion($entity);
         $compare = $entity->compare($stable);
 
-        if ($entity->getVersion() == "master" || $compare > 0) {
+        if ($entity->getVersion() == 'master' || $compare > 0) {
             return $this->owner->customise(
                 new ArrayData(
                     array(
-                    'FutureRelease' => true,
-                    'StableVersion' => DBField::create_field('HTMLText', $stable->getVersion())
+                        'FutureRelease' => true,
+                        'StableVersion' => DBField::create_field('HTMLText', $stable->getVersion())
                     )
                 )
             );
@@ -45,13 +46,13 @@ class DocumentationViewerVersionWarning extends Extension
             return $this->owner->customise(
                 new ArrayData(
                     array(
-                    'OutdatedRelease' => true,
-                    'StableVersion' => DBField::create_field('HTMLText', $stable->getVersion())
+                        'OutdatedRelease' => true,
+                        'StableVersion'   => DBField::create_field('HTMLText', $stable->getVersion())
                     )
                 )
             );
         }
-    
+
         return false;
     }
 }
