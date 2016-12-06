@@ -15,7 +15,9 @@ class DocumentationPage extends ViewableData
     /**
      * @var string
      */
-    protected $title, $summary, $introduction;
+    protected $title;
+    protected $summary;
+    protected $introduction;
 
     /**
      * @var DocumentationEntity
