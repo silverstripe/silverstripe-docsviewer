@@ -251,7 +251,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
         if (in_array($action, $allowed)) {
             //
             // if it's one of the allowed actions such as search or all then the
-            // URL must be prefixed with one of the allowed languages.
+            // URL must be prefixed with one of the allowed languages and versions
             //
             return parent::handleAction($request, $action);
         } else {
@@ -275,8 +275,8 @@ class DocumentationViewer extends Controller implements PermissionProvider
                 $type = get_class($this->record);
                 $body = $this->renderWith(
                     array(
-                    "DocumentationViewer_{$type}",
-                    "DocumentationViewer"
+                        "DocumentationViewer_{$type}",
+                        'DocumentationViewer'
                     )
                 );
 
@@ -288,8 +288,8 @@ class DocumentationViewer extends Controller implements PermissionProvider
             } elseif (!$url || $url == $lang) {
                 $body = $this->renderWith(
                     array(
-                    "DocumentationViewer_DocumentationFolder",
-                    "DocumentationViewer"
+                        'DocumentationViewer_DocumentationFolder',
+                        'DocumentationViewer'
                     )
                 );
 
@@ -572,15 +572,21 @@ class DocumentationViewer extends Controller implements PermissionProvider
      * Generate a list of all the pages in the documentation grouped by the
      * first letter of the page.
      *
+     * @param  string|int|null $version
      * @return GroupedList
      */
-    public function AllPages()
+    public function AllPages($version = null)
     {
         $pages = $this->getManifest()->getPages();
         $output = new ArrayList();
         $baseLink = $this->getDocumentationBaseHref();
 
         foreach ($pages as $url => $page) {
+            // Option to skip Pages that do not belong to the current version
+            if (!is_null($version) && (string) $page['version'] !== (string) $version) {
+                continue;
+            }
+
             $first = strtoupper(trim(substr($page['title'], 0, 1)));
 
             if ($first) {
@@ -597,6 +603,16 @@ class DocumentationViewer extends Controller implements PermissionProvider
         }
 
         return GroupedList::create($output->sort('Title', 'ASC'));
+    }
+
+    /**
+     * Return all Pages that apply to the current version (from the route)
+     *
+     * @return GroupedList
+     */
+    public function getAllVersionPages()
+    {
+        return $this->AllPages($this->getRequestedVersion());
     }
 
     /**
@@ -760,5 +776,25 @@ class DocumentationViewer extends Controller implements PermissionProvider
     public function getHasDefaultEntity()
     {
         return $this->getManifest()->getHasDefaultEntity();
+    }
+
+    /**
+     * Gets the requested version from the URL
+     *
+     * @return string
+     */
+    public function getRequestedVersion()
+    {
+        return (string) $this->request->param('Version');
+    }
+
+    /**
+     * Gets the link to the "documentation index" containing the currently requested version
+     *
+     * @return string
+     */
+    public function getDocumentationIndexLink()
+    {
+        return $this->Link($this->getRequestedVersion() . '/all');
     }
 }

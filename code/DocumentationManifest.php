@@ -432,12 +432,13 @@ class DocumentationManifest
         $link = $this->stripLinkBase($page->Link());
 
         $this->pages[$link] = array(
-            'title' => $page->getTitle(),
-            'basename' => $basename,
-            'filepath' => DocumentationHelper::normalizePath($path),
-            'type' => get_class($page),
+            'title'      => $page->getTitle(),
+            'version'    => $page->getVersion(),
+            'basename'   => $basename,
+            'filepath'   => DocumentationHelper::normalizePath($path),
+            'type'       => get_class($page),
             'entitypath' => $this->entity->getPath(),
-            'summary' => $page->getSummary()
+            'summary'    => $page->getSummary()
         );
     }
 

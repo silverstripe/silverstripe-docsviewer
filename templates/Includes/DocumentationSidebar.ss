@@ -63,7 +63,7 @@
 
 	<div class="no-box">
 		<ul class="minor-nav">
-			<li><a href="{$Link(all)}">Documentation Index</a></li>
+			<li><a href="$DocumentationIndexLink">Documentation Index</a></li>
 		</ul>
 	</div>
 </div>
