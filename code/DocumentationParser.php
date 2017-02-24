@@ -527,22 +527,29 @@ class DocumentationParser
      *
      * @param DocumentationPage
      */
-    public static function retrieve_meta_data(DocumentationPage &$page)
+    public static function retrieve_meta_data(DocumentationPage $page)
     {
-        if ($md = $page->getMarkdown()) {
-            $matches = preg_match_all(
-                '/
-				(?<key>[A-Za-z0-9_-]+): 
-				\s*
-				(?<value>.*)
-			/x', $md, $meta
-            );
-        
-            if ($matches) {
-                foreach ($meta['key'] as $index => $key) {
-                    if (isset($meta['value'][$index])) {
-                        $page->setMetaData($key, $meta['value'][$index]);
+        $md = $page->getMarkdown();
+        if ($md) {
+            // get the text up to the first empty line
+            $extPattern = "/^(.+)\n\r*\n/Uis";
+            $matches = preg_match($extPattern, $md, $block);
+
+            if ($matches && $block[1]) {
+
+                // find the key/value pairs
+                $lines = preg_split('/\v+/', $block[1]);
+                $key = '';
+                $value = '';
+                foreach ($lines as $line) {
+                    if (strpos($line, ':') !== false) {
+                        list($key, $value) = explode(':', $line, 2);
+                        $key = trim($key);
+                        $value = trim($value);
+                    } else {
+                        $value .= ' ' . trim($line);
                     }
+                    $page->setMetaData($key, $value);
                 }
             }
         }

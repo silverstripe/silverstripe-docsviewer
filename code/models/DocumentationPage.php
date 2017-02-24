@@ -281,24 +281,28 @@ class DocumentationPage extends ViewableData
     public function populateMetaDataFromText(&$md, $removeMetaData = false)
     {
         if ($md) {
-            // get the text up to the first whiteline
-            $extPattern = "/^(.+)\n(\r)*\n/Uis";
+            // get the text up to the first empty line
+            $extPattern = "/^(.+)\n\r*\n/Uis";
             $matches = preg_match($extPattern, $md, $block);
 
             if ($matches && $block[1]) {
                 $metaDataFound = false;
 
                 // find the key/value pairs
-                $intPattern = '/(?<key>[A-Za-z][A-Za-z0-9_-]+)[\t]*:[\t]*(?<value>[^:\n\r\/]+)/x';
-                $matches = preg_match_all($intPattern, $block[1], $meta);
-
-                foreach ($meta['key'] as $index => $key) {
-                    if (isset($meta['value'][$index])) {
-                        // check if a property exists for this key
-                        if (property_exists(get_class(), $key)) {
-                            $this->$key = $meta['value'][$index];
-                            $metaDataFound = true;
-                        }
+                $lines = preg_split('/\v+/', $block[1]);
+                $key = '';
+                $value = '';
+                foreach ($lines as $line) {
+                    if (strpos($line, ':') !== false) {
+                        list($key, $value) = explode(':', $line, 2);
+                        $key = trim($key);
+                        $value = trim($value);
+                    } else {
+                        $value .= ' ' . trim($line);
+                    }
+                    if (property_exists(get_class(), $key)) {
+                        $this->$key = $value;
+                        $metaDataFound = true;
                     }
                 }
 

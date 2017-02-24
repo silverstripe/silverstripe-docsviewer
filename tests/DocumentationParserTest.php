@@ -399,6 +399,8 @@ HTML;
         
         $this->assertEquals('Dr. Foo Bar.', $this->metaDataPage->author);
         $this->assertEquals("Foo Bar's Test page.", $this->metaDataPage->getTitle());
+        $this->assertEquals("Foo Bar's Test page.", $this->metaDataPage->getTitle());
+        $this->assertEquals("A long intro that splits over many lines", $this->metaDataPage->getIntroduction());
     }
     
     public function testRewritingRelativeLinksToFiles()
