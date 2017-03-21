@@ -172,13 +172,6 @@ class DocumentationPage extends ViewableData
         return false;
     }
 
-    public function setMetaData($key, $value)
-    {
-        $key = strtolower($key);
-
-        $this->$key = $value;
-    }
-
     /**
      * @return string
      */
@@ -280,37 +273,66 @@ class DocumentationPage extends ViewableData
      */
     public function populateMetaDataFromText(&$md, $removeMetaData = false)
     {
-        if ($md) {
-            // get the text up to the first empty line
-            $extPattern = "/^(.+)\n\r*\n/Uis";
-            $matches = preg_match($extPattern, $md, $block);
+        if (!$md) {
+            return;
+        }
 
-            if ($matches && $block[1]) {
-                $metaDataFound = false;
-
-                // find the key/value pairs
-                $lines = preg_split('/\v+/', $block[1]);
-                $key = '';
-                $value = '';
-                foreach ($lines as $line) {
-                    if (strpos($line, ':') !== false) {
-                        list($key, $value) = explode(':', $line, 2);
-                        $key = trim($key);
-                        $value = trim($value);
-                    } else {
-                        $value .= ' ' . trim($line);
-                    }
-                    if (property_exists(get_class(), $key)) {
-                        $this->$key = $value;
-                        $metaDataFound = true;
-                    }
+        // See if there is YAML metadata block at the top of the document. e.g.
+        // ---
+        // property: value
+        // another: value
+        // ---
+        //
+        // If we found one, then we'll use a YAML parser to extract the
+        // data out and then remove the whole block from the markdown string.
+        $parser = new \Mni\FrontYAML\Parser();
+        $document = $parser->parse($md, false);
+        $yaml = $document->getYAML();
+        if ($yaml) {
+            foreach ($yaml as $key => $value) {
+                if (!property_exists(get_class($this), $key)) {
+                    continue;
                 }
+                $this->$key = $value;
+            }
+            if ($removeMetaData) {
+                $md = $document->getContent();
+            }
+            return;
+        }
 
-                // optionally remove the metadata block (only on the page that
-                // is displayed)
-                if ($metaDataFound && $removeMetaData) {
-                    $md = preg_replace($extPattern, '', $md);
+        // this is the alternative way of parsing the properties out that don't contain
+        // a YAML block declared with ---
+        //
+        // get the text up to the first empty line
+        $extPattern = "/^(.+)\n\r*\n/Uis";
+        $matches = preg_match($extPattern, $md, $block);
+
+        if ($matches && $block[1]) {
+            $metaDataFound = false;
+
+            // find the key/value pairs
+            $lines = preg_split('/\v+/', $block[1]);
+            $key = '';
+            $value = '';
+            foreach ($lines as $line) {
+                if (strpos($line, ':') !== false) {
+                    list($key, $value) = explode(':', $line, 2);
+                    $key = trim($key);
+                    $value = trim($value);
+                } else {
+                    $value .= ' ' . trim($line);
                 }
+                if (property_exists(get_class(), $key)) {
+                    $this->$key = $value;
+                    $metaDataFound = true;
+                }
+            }
+
+            // optionally remove the metadata block (only on the page that
+            // is displayed)
+            if ($metaDataFound && $removeMetaData) {
+                $md = preg_replace($extPattern, '', $md);
             }
         }
     }
@@ -328,3 +350,4 @@ class DocumentationPage extends ViewableData
         return sprintf(get_class($this) .': %s)', $this->getPath());
     }
 }
+

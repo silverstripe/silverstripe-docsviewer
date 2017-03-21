@@ -11,7 +11,7 @@ class DocumentationParserTest extends SapphireTest
     public function tearDown()
     {
         parent::tearDown();
-        
+
         Config::unnest();
     }
 
@@ -21,7 +21,7 @@ class DocumentationParserTest extends SapphireTest
 
         Config::nest();
 
-        // explicitly use dev/docs. Custom paths should be tested separately 
+        // explicitly use dev/docs. Custom paths should be tested separately
         Config::inst()->update(
             'DocumentationViewer', 'link_base', 'dev/docs/'
         );
@@ -48,7 +48,7 @@ class DocumentationParserTest extends SapphireTest
             'subpage.md',
             DOCSVIEWER_PATH. '/tests/docs/en/subfolder/subpage.md'
         );
-            
+
         $this->subSubPage = new DocumentationPage(
             $this->entity,
             'subsubpage.md',
@@ -128,13 +128,12 @@ with multiple
 lines
 	and tab indent
 	and escaped < brackets
-	
 ```
 Normal text after code block
 HTML;
 
         $this->assertContains($expected, $result, 'Custom code blocks with ::: prefix');
-        
+
         $expected = <<<HTML
 ```
 code block
@@ -149,7 +148,7 @@ Fenced code block
 ```
 HTML;
         $this->assertContains($expected, $result, 'Backtick code blocks');
-        
+
         $expected = <<<HTML
 ```php
 Fenced box with
@@ -171,7 +170,7 @@ HTML;
             $this->indexPage->getMarkdown(),
             $this->indexPage
         );
-        
+
         $this->assertContains(
             '[link: subfolder index](dev/docs/en/documentationparsertest/2.4/subfolder/)',
             $result
@@ -183,7 +182,7 @@ HTML;
             $this->page->getMarkdown(),
             $this->page
         );
-        
+
         $this->assertContains(
             '[link: subfolder index](dev/docs/en/documentationparsertest/2.4/subfolder/)',
             $result
@@ -217,7 +216,7 @@ HTML;
             '[link: relative](dev/docs/en/documentationparsertest/2.4/subfolder/subpage.md/)',
             $result
         );
-        
+
         $this->assertContains(
             '[link: absolute index](dev/docs/en/documentationparsertest/2.4/)',
             $result
@@ -233,22 +232,22 @@ HTML;
             '[link: relative index](dev/docs/en/documentationparsertest/2.4/)',
             $result
         );
-        
+
         $this->assertContains(
             '[link: relative parent page](dev/docs/en/documentationparsertest/2.4/test/)',
             $result
         );
-        
+
         $this->assertContains(
             '[link: absolute parent page](dev/docs/en/documentationparsertest/2.4/test/)',
             $result
         );
-        
+
         $result = DocumentationParser::rewrite_relative_links(
             $this->subSubPage->getMarkdown(),
             $this->subSubPage
         );
-        
+
         $this->assertContains(
             '[link: absolute index](dev/docs/en/documentationparsertest/2.4/)',
             $result
@@ -286,7 +285,7 @@ HTML;
     }
 
 
-    
+
     public function testImageRewrites()
     {
         $result = DocumentationParser::rewrite_image_links(
@@ -311,7 +310,7 @@ HTML;
             ),
             $result
         );
-        
+
         $expected = Controller::join_links(
             Director::absoluteBaseURL(), DOCSVIEWER_DIR, '/tests/docs/en/_images/image.png'
         );
@@ -321,7 +320,7 @@ HTML;
             $result
         );
     }
-    
+
     public function testApiLinks()
     {
 
@@ -357,14 +356,14 @@ HTML;
         }
 
     }
-    
+
     public function testHeadlineAnchors()
     {
         $result = DocumentationParser::rewrite_heading_anchors(
             $this->page->getMarkdown(),
             $this->page
         );
-        
+
         /*
         # Heading one {#Heading-one}
 
@@ -379,7 +378,7 @@ HTML;
         ## Heading duplicate {#Heading-duplicate-2}
 
         ## Heading duplicate {#Heading-duplicate-3}
-        
+
         */
 
         $this->assertContains('# Heading one {#heading-one}', $result);
@@ -395,14 +394,41 @@ HTML;
 
     public function testRetrieveMetaData()
     {
-        DocumentationParser::retrieve_meta_data($this->metaDataPage);
-        
-        $this->assertEquals('Dr. Foo Bar.', $this->metaDataPage->author);
-        $this->assertEquals("Foo Bar's Test page.", $this->metaDataPage->getTitle());
-        $this->assertEquals("Foo Bar's Test page.", $this->metaDataPage->getTitle());
-        $this->assertEquals("A long intro that splits over many lines", $this->metaDataPage->getIntroduction());
+        $this->metaDataPage->getMarkdown(true);
+        $this->assertEquals('Foo Bar\'s Test page.', $this->metaDataPage->getTitle());
+        $this->assertEquals('A long intro that splits over many lines', $this->metaDataPage->getIntroduction());
+        $this->assertEquals('Foo Bar Test page description', $this->metaDataPage->getSummary());
+
+        $parsed = DocumentationParser::parse($this->metaDataPage);
+        $expected = <<<HTML
+<h1 id="content">Content</h1>
+HTML;
+        $this->assertEquals($parsed, $expected, 'Metadata block removed, parsed correctly');
     }
-    
+
+    public function testRetrieveMetaDataYamlBlock()
+    {
+        $page = new DocumentationPage(
+            $this->entityAlt,
+            'MetaDataYamlBlockTest.md',
+            DOCSVIEWER_PATH . '/tests/docs-parser/en/MetaDataYamlBlockTest.md'
+        );
+        $page->getMarkdown(true);
+
+        $this->assertEquals('Foo Bar\'s Test page.', $page->getTitle());
+        $this->assertEquals('This is the page\'s description', $page->getSummary());
+
+        $parsed = DocumentationParser::parse($page);
+        $expected = <<<HTML
+<h2 id="content-2">Content</h2>
+<p>Content goes here.</p>
+<hr />
+<h2>randomblock: ignored</h2>
+HTML;
+
+        $this->assertEquals($parsed, $expected, 'YAML metadata block removed, parsed correctly');
+    }
+
     public function testRewritingRelativeLinksToFiles()
     {
         $parsed = DocumentationParser::parse($this->filePage);
@@ -411,7 +437,7 @@ HTML;
             DOCSVIEWER_DIR .'/tests/docs-parser/en/_images/external_link.png',
             $parsed
         );
-        
+
         $this->assertContains(
             DOCSVIEWER_DIR .'/tests/docs-parser/en/_images/test.tar.gz',
             $parsed

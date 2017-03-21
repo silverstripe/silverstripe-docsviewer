@@ -1,24 +1,25 @@
 {
-	"name": "silverstripe/docsviewer",
-	"description": "Documentation viewer module for SilverStripe",
-	"type": "silverstripe-module",
-	"keywords": ["silverstripe", "documentation"],
-	"license": "BSD-3-Clause",
-	"authors": [{
-		"name": "Will Rossiter",
-		"homepage": "http://wilr.github.io",
-		"email": "will@fullscreen.io"
-	}],
-	"support": {
-		"email": "will@fullscreen.io",
-		"irc": "irc://irc.freenode.org/silverstripe"
-	},
+    "name": "silverstripe/docsviewer",
+    "description": "Documentation viewer module for SilverStripe",
+    "type": "silverstripe-module",
+    "keywords": ["silverstripe", "documentation"],
+    "license": "BSD-3-Clause",
+    "authors": [{
+        "name": "Will Rossiter",
+        "homepage": "http://wilr.github.io",
+        "email": "will@fullscreen.io"
+    }],
+    "support": {
+        "email": "will@fullscreen.io",
+        "irc": "irc://irc.freenode.org/silverstripe"
+    },
 	"require": {
-		"silverstripe/framework": "~3.1",
-		"erusev/parsedown-extra": "0.2.2",
-		"erusev/parsedown": "~1.1.0"
-	},
-	"suggest": {
-		"silverstripe/staticpublisher": "Allows publishing documentation as HTML"
-	}
+        "silverstripe/framework": "~3.1",
+        "erusev/parsedown-extra": "0.2.2",
+        "erusev/parsedown": "~1.1.0",
+        "mnapoli/front-yaml": "^1.5"
+    },
+    "suggest": {
+        "silverstripe/staticpublisher": "Allows publishing documentation as HTML"
+    }
 }

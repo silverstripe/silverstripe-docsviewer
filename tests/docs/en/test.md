@@ -29,7 +29,6 @@ test
 	lines
 		and tab indent
 		and escaped < brackets
-		
 
 Normal text after code block
 
