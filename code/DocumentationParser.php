@@ -218,7 +218,7 @@ class DocumentationParser
 			!
 			\[
 				(.*?) # image title (non greedy)
-			\] 
+			\]
 			\(
 				(.*?) # image url (non greedy)
 			\)
@@ -432,18 +432,18 @@ class DocumentationParser
     public static function rewrite_relative_links($md, $page)
     {
         $baselink = $page->getEntity()->Link();
-        
+
         $re = '/
 			([^\!]?) # exclude image format
 			\[
 				(.*?) # link title (non greedy)
-			\] 
+			\]
 			\(
 				(.*?) # link url (non greedy)
 			\)
 		/x';
         preg_match_all($re, $md, $matches);
-        
+
         // relative path (relative to module base folder), without the filename.
         // For "sapphire/en/current/topics/templates", this would be "templates"
         $relativePath = DocumentationHelper::normalizePath(dirname($page->getRelativePath()));
@@ -522,36 +522,4 @@ class DocumentationParser
         return $md;
     }
 
-    /**
-     * Strips out the metadata for a page
-     *
-     * @param DocumentationPage
-     */
-    public static function retrieve_meta_data(DocumentationPage $page)
-    {
-        $md = $page->getMarkdown();
-        if ($md) {
-            // get the text up to the first empty line
-            $extPattern = "/^(.+)\n\r*\n/Uis";
-            $matches = preg_match($extPattern, $md, $block);
-
-            if ($matches && $block[1]) {
-
-                // find the key/value pairs
-                $lines = preg_split('/\v+/', $block[1]);
-                $key = '';
-                $value = '';
-                foreach ($lines as $line) {
-                    if (strpos($line, ':') !== false) {
-                        list($key, $value) = explode(':', $line, 2);
-                        $key = trim($key);
-                        $value = trim($value);
-                    } else {
-                        $value .= ' ' . trim($line);
-                    }
-                    $page->setMetaData($key, $value);
-                }
-            }
-        }
-    }
 }

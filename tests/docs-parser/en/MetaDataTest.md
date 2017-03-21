@@ -1,7 +1,6 @@
-Title: Foo Bar's Test page.
-Author: Dr. Foo Bar.
-Another: Test.
-Introduction: A long intro that
+title: Foo Bar's Test page.
+summary: Foo Bar Test page description
+introduction: A long intro that
 splits over
 many lines
 
