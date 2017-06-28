@@ -1,7 +1,6 @@
 ;(function($) {
     $(document).ready(
         function() {
-
             // Open sidebar on mobile
             $('.menu-open').click(
                 function(){
@@ -207,26 +206,13 @@
                 }
             );
 
-            /**
-        * ---------------------------------------------
-         * SYNTAX HIGHLIGHTER
-         *
-         * As the Markdown parser now uses the GFM structure (```yml) this does
-         * not work with SyntaxHighlighter. The below translates the GFM output
-         * to one SyntaxHighter can use
-         */
-            $("pre").each(
-                function(i, elem) {
-                    var code = $(elem).find('code[class^=language]');
-
-                    if(code.length > 0) {
-                        var brush = code.attr('class').replace('language-', '');
-                        $(elem).attr('class', 'prettyprint lang-' + brush);
-                        //				$(elem).html(code.html());
-                    }
-                }
-            );
-
+        // Syntax highlighting with highlightjs.org
+        hljs.registerLanguage('ss', function() {
+            // Alias language with the closest match until we can write a better one
+            // See http://highlightjs.readthedocs.io/en/latest/language-guide.html
+            return hljs.getLanguage('xml');
+        });
+        hljs.initHighlighting();
 
         }
     );
