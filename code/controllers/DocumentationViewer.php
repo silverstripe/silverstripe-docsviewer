@@ -101,18 +101,24 @@ class DocumentationViewer extends Controller implements PermissionProvider
             Requirements::javascript('//use.typekit.net/emt4dhq.js');
             Requirements::customScript('try{Typekit.load();}catch(e){}');
 
-            Requirements::javascript(THIRDPARTY_DIR .'/jquery/jquery.js');
-            Requirements::javascript('https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js');
-
-            Requirements::javascript(DOCSVIEWER_DIR .'/javascript/DocumentationViewer.js');
             Requirements::combine_files(
-                'docs.css', array(
-                DOCSVIEWER_DIR .'/css/normalize.css',
-                DOCSVIEWER_DIR .'/css/utilities.css',
-                DOCSVIEWER_DIR .'/css/typography.css',
-                DOCSVIEWER_DIR .'/css/forms.css',
-                DOCSVIEWER_DIR .'/css/layout.css',
-                DOCSVIEWER_DIR .'/css/small.css'
+                'docs.js',
+                array(
+                    THIRDPARTY_DIR .'/jquery/jquery.js',
+                    DOCSVIEWER_DIR .'/thirdparty/highlight/highlight.pack.js',
+                    DOCSVIEWER_DIR .'/javascript/DocumentationViewer.js',
+                )
+            );
+            Requirements::combine_files(
+                'docs.css', 
+                array(
+                    DOCSVIEWER_DIR .'/css/highlight.css',
+                    DOCSVIEWER_DIR .'/css/normalize.css',
+                    DOCSVIEWER_DIR .'/css/utilities.css',
+                    DOCSVIEWER_DIR .'/css/typography.css',
+                    DOCSVIEWER_DIR .'/css/forms.css',
+                    DOCSVIEWER_DIR .'/css/layout.css',
+                    DOCSVIEWER_DIR .'/css/small.css'
                 )
             );
         }

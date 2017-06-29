@@ -218,30 +218,26 @@ img {
 
 /*! code */
 pre {
-    margin: 20px 0 30px;
-    font: 13px/20px Monaco, 'Bitstream Vera Sans Mono',  'Courier New', monospace;
-    background-color: #f6f7f8;
-    border: 1px solid #e9eaed;
-    padding: 14px;
-    border-radius: 3px;
-    overflow-x: scroll;
-    color: #4E5661;
+    font-size: 12px;
 }
 
     pre code {
-        background: none;
-        font-weight: normal;
-        padding: 0;
+        /* reset block styles */
+        font-size: 1em; 
+        line-height: 1.5em;
     }
 
-code {
-    font: 13px/15px Monaco, 'Bitstream Vera Sans Mono', Courier, monospace;
-    background: #ecf0f1;
-    padding: 2px;
-}
-
-    code a {
-        color: #4E5661;
+code {      
+    /* inline styles, fit with non-code text */
+    font-size: 13px;
+    line-height: 15px;
+    font-family: Monaco, 'Bitstream Vera Sans Mono', Courier, monospace;       
+    background: #f3f6f6;      
+    padding: 2px;     
+}     
+      
+    code a {      
+        color: #4E5661;       
     }
 
 /*! quotes */
