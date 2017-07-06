@@ -171,7 +171,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
     public function handleAction($request, $action)
     {
         // if we submitted a form, let that pass
-        if (!$request->isGET()) {
+        if (!$request->isGET() && !$request->isHEAD()) {
             return parent::handleAction($request, $action);
         }
 
