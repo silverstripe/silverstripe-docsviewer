@@ -11,7 +11,7 @@
 class DocumentationViewerTest extends FunctionalTest
 {
     protected $autoFollowRedirection = false;
-        
+
     protected $manifest;
 
     public function setUp()
@@ -20,7 +20,7 @@ class DocumentationViewerTest extends FunctionalTest
 
         Config::nest();
 
-        // explicitly use dev/docs. Custom paths should be tested separately 
+        // explicitly use dev/docs. Custom paths should be tested separately
         Config::inst()->update(
             'DocumentationViewer', 'link_base', 'dev/docs/'
         );
@@ -65,11 +65,11 @@ class DocumentationViewerTest extends FunctionalTest
 
         $this->manifest = new DocumentationManifest(true);
     }
-    
+
     public function tearDown()
     {
         parent::tearDown();
-        
+
         Config::unnest();
     }
 
@@ -98,47 +98,47 @@ class DocumentationViewerTest extends FunctionalTest
 
         $response = $this->get('dev/docs/en/doc_test/3.0/empty.md');
         $this->assertEquals(301, $response->getStatusCode(), 'Direct markdown links also work. They should redirect to /empty/');
-    
+
 
         // 2.4 is the stable release. Not in the URL
         $response = $this->get('dev/docs/en/doc_test/2.4');
         $this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
         $this->assertContains('english test', $response->getBody(), 'Toplevel content page');
-        
+
         // accessing base redirects to the version with the version number.
         $response = $this->get('dev/docs/en/doc_test/');
         $this->assertEquals($response->getStatusCode(), 301, 'Existing base folder redirects to with version');
 
         $response = $this->get('dev/docs/en/doc_test/3.0/');
         $this->assertEquals($response->getStatusCode(), 200, 'Existing base folder');
-        
+
         $response = $this->get('dev/docs/en/doc_test/2.3/nonexistant-subfolder');
         $this->assertEquals($response->getStatusCode(), 404, 'Nonexistant subfolder');
-        
+
         $response = $this->get('dev/docs/en/doc_test/2.3/nonexistant-file.txt');
         $this->assertEquals($response->getStatusCode(), 301, 'Nonexistant file');
 
         $response = $this->get('dev/docs/en/doc_test/2.3/nonexistant-file/');
         $this->assertEquals($response->getStatusCode(), 404, 'Nonexistant file');
-        
+
         $response = $this->get('dev/docs/en/doc_test/2.3/test');
         $this->assertEquals($response->getStatusCode(), 200, 'Existing file');
-        
+
         $response = $this->get('dev/docs/en/doc_test/3.0/empty?foo');
         $this->assertEquals(200, $response->getStatusCode(), 'Existing page');
-        
+
         $response = $this->get('dev/docs/en/doc_test/3.0/empty/');
         $this->assertEquals($response->getStatusCode(), 200, 'Existing page');
-        
+
         $response = $this->get('dev/docs/en/doc_test/3.0/test');
         $this->assertEquals($response->getStatusCode(), 404, 'Missing page');
-        
+
         $response = $this->get('dev/docs/en/doc_test/3.0/test.md');
         $this->assertEquals($response->getStatusCode(), 301, 'Missing page');
-        
+
         $response = $this->get('dev/docs/en/doc_test/3.0/test/');
         $this->assertEquals($response->getStatusCode(), 404, 'Missing page');
-        
+
         $response = $this->get('dev/docs/dk/');
         $this->assertEquals($response->getStatusCode(), 404, 'Access a language that doesn\'t exist');
     }
@@ -188,7 +188,7 @@ class DocumentationViewerTest extends FunctionalTest
         $response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.3/subfolder/subsubfolder/subsubpage/'), DataModel::inst());
         $this->assertEquals('en', $v->getLanguage());
     }
-    
+
 
     public function testAccessingAll()
     {
@@ -229,5 +229,21 @@ class DocumentationViewerTest extends FunctionalTest
 
         // redirect should have been to the absolute url minus the .md extension
         $this->assertEquals(Director::absoluteURL('dev/docs/en/doc_test/3.0/tutorials/'), $response->getHeader('Location'));
+    }
+
+    public function testCanonicalUrlIsIncludedInLayout()
+    {
+        $response = $this->get('dev/docs/en/doc_test/2.3/subfolder/subsubfolder/subsubpage');
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $expectedUrl = Director::absoluteURL('dev/docs/en/subfolder/subsubfolder/subsubpage/');
+        $this->assertContains('<link rel="canonical" href="' . $expectedUrl . '" />', (string) $response->getBody());
+    }
+
+    public function testCanonicalUrlIsEmptyWhenNoPageExists()
+    {
+        $viewer = new DocumentationViewer;
+        $this->assertSame('', $viewer->getCanonicalUrl());
     }
 }
