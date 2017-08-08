@@ -23,7 +23,9 @@ class DocumentationParserTest extends SapphireTest
 
         // explicitly use dev/docs. Custom paths should be tested separately
         Config::inst()->update(
-            'DocumentationViewer', 'link_base', 'dev/docs/'
+            'DocumentationViewer',
+            'link_base',
+            'dev/docs/'
         );
 
         $this->entity = new DocumentationEntity('DocumentationParserTest');
@@ -294,7 +296,9 @@ HTML;
         );
 
         $expected = Controller::join_links(
-            Director::absoluteBaseURL(), DOCSVIEWER_DIR, '/tests/docs/en/subfolder/_images/image.png'
+            Director::absoluteBaseURL(),
+            DOCSVIEWER_DIR,
+            '/tests/docs/en/subfolder/_images/image.png'
         );
 
         $this->assertContains(
@@ -304,15 +308,20 @@ HTML;
 
         $this->assertContains(
             sprintf(
-                '[parent image link](%s)', Controller::join_links(
-                    Director::absoluteBaseURL(), DOCSVIEWER_DIR, '/tests/docs/en/_images/image.png'
+                '[parent image link](%s)',
+                Controller::join_links(
+                    Director::absoluteBaseURL(),
+                    DOCSVIEWER_DIR,
+                    '/tests/docs/en/_images/image.png'
                 )
             ),
             $result
         );
 
         $expected = Controller::join_links(
-            Director::absoluteBaseURL(), DOCSVIEWER_DIR, '/tests/docs/en/_images/image.png'
+            Director::absoluteBaseURL(),
+            DOCSVIEWER_DIR,
+            '/tests/docs/en/_images/image.png'
         );
 
         $this->assertContains(
@@ -350,11 +359,10 @@ HTML;
             array('[Title](api:DataObject::populateDefaults())',sprintf($html_format, 'DataObject::populateDefaults()', 'Title'))
         );
 
-        foreach($test_cases as $test_case) {
+        foreach ($test_cases as $test_case) {
             $expected_html = $test_case[1];
             $this->assertContains($expected_html, $parsed_page);
         }
-
     }
 
     public function testHeadlineAnchors()

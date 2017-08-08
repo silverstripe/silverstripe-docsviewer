@@ -21,7 +21,7 @@ class DocumentationManifestFileFinder extends SS_FileFinder
     );
 
     /**
-     * 
+     *
      */
     public function acceptDir($basename, $pathname, $depth)
     {

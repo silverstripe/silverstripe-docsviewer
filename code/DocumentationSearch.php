@@ -8,20 +8,20 @@ set_include_path(
 require_once 'Zend/Search/Lucene.php';
 
 /**
- * Documentation Search powered by Lucene. You will need Zend_Lucene installed 
+ * Documentation Search powered by Lucene. You will need Zend_Lucene installed
  * on your path.
  *
- * To rebuild the indexes run the {@link RebuildLuceneDocsIndex} task. You may 
+ * To rebuild the indexes run the {@link RebuildLuceneDocsIndex} task. You may
  * wish to setup a cron job to remake the indexes on a regular basis.
  *
- * This class has the ability to generate an OpenSearch RSS formatted feeds 
+ * This class has the ability to generate an OpenSearch RSS formatted feeds
  * simply by using the URL:
  *
  * <code>
  * yoursite.com/search/?q=Foo&format=rss. // Format can either be specified as rss or left off.
  * </code>
  *
- * To get a specific amount of results you can also use the modifiers start and 
+ * To get a specific amount of results you can also use the modifiers start and
  * limit:
  *
  * <code>
@@ -127,7 +127,7 @@ class DocumentationSearch
      * Folder name for indexes (in the temp folder).
      *
      * @config
-     * @var    string 
+     * @var    string
      */
     private static $index_location;
 
@@ -363,7 +363,7 @@ class DocumentationSearch
     }
     
     /**
-     * OpenSearch MetaData fields. For a list of fields consult 
+     * OpenSearch MetaData fields. For a list of fields consult
      * {@link self::get_meta_data()}
      *
      * @param array
@@ -406,7 +406,7 @@ class DocumentationSearch
     }
     
     /**
-     * Renders the search results into a template. Either the search results 
+     * Renders the search results into a template. Either the search results
      * template or the Atom feed.
      */
     public function renderResults()
@@ -428,7 +428,8 @@ class DocumentationSearch
             $title = ($title = $this->getTitle()) ? ' - '. $title : "";
             
             $link = Controller::join_links(
-                $this->outputController->Link(), 'DocumentationOpenSearchController/description/'
+                $this->outputController->Link(),
+                'DocumentationOpenSearchController/description/'
             );
             
             $data->setField('Title', $data->Title . $title);

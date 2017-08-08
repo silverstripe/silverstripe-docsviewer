@@ -90,7 +90,9 @@ class DocumentationManifest
         $this->registeredEntities = new ArrayList();
 
         $this->cache = SS_Cache::factory(
-            'DocumentationManifest', 'Core', array(
+            'DocumentationManifest',
+            'Core',
+            array(
             'automatic_serialization' => true,
             'lifetime' => null
             )
@@ -159,7 +161,8 @@ class DocumentationManifest
                          * @var DocumentationEntity $entity
                          */
                         $entity = Injector::inst()->create(
-                            'DocumentationEntity', $key
+                            'DocumentationEntity',
+                            $key
                         );
 
                         $entity->setPath(DocumentationHelper::normalizePath(Controller::join_links($path, $lang, '/')));
@@ -242,7 +245,9 @@ class DocumentationManifest
         }
 
         Config::inst()->update(
-            'DocumentationManifest', 'register_entities', $entities
+            'DocumentationManifest',
+            'register_entities',
+            $entities
         );
 
         $this->automaticallyPopulated = true;
@@ -371,7 +376,8 @@ class DocumentationManifest
 
         foreach ($grouped as $entity) {
             uasort(
-                $entity, function ($a, $b) {
+                $entity,
+                function ($a, $b) {
                     // ensure parent directories are first
                     $a['filepath'] = str_replace('index.md', '', $a['filepath']);
                     $b['filepath'] = str_replace('index.md', '', $b['filepath']);
@@ -417,7 +423,8 @@ class DocumentationManifest
                 Config::inst()->get('DocumentationViewer', 'link_base'),
                 '',
                 $link
-            ), '/'
+            ),
+            '/'
         );
     }
 
@@ -461,7 +468,10 @@ class DocumentationManifest
     public function handleFolder($basename, $path, $depth)
     {
         $folder = Injector::inst()->create(
-            'DocumentationFolder', $this->entity, $basename, $path
+            'DocumentationFolder',
+            $this->entity,
+            $basename,
+            $path
         );
 
         // Add main folder link
@@ -491,7 +501,9 @@ class DocumentationManifest
     {
         $page = Injector::inst()->create(
             'DocumentationPage',
-            $this->entity, $basename, $path
+            $this->entity,
+            $basename,
+            $path
         );
 
         // populate any meta data

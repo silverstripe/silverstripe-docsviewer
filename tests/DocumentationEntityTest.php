@@ -2,7 +2,7 @@
 
 class DocumentationEntityTest extends SapphireTest
 {
-    public function dataCompare() 
+    public function dataCompare()
     {
         return array(
             array('3', '3.0', 1),
@@ -20,7 +20,7 @@ class DocumentationEntityTest extends SapphireTest
      * @param string $right
      * @param int    $result
      */
-    public function testCompare($left, $right, $result) 
+    public function testCompare($left, $right, $result)
     {
         $leftVersion = new DocumentationEntity('Framework');
         $leftVersion->setVersion($left);

@@ -125,7 +125,6 @@ class DocumentationParser
                     $inner = true;
                 }
             } elseif (preg_match('/^[\ ]{0,3}?[\t](.*)/', $line, $matches)) {
-
                 // inner line of block, or first line of standard markdown code block
                 // regex removes first tab (any following tabs are part of the code).
                 if (!$started) {
@@ -248,7 +247,9 @@ class DocumentationParser
                 if (substr($url, 0, 1) == '/') {
                     $relativeUrl = DocumentationHelper::normalizePath(
                         str_replace(
-                            BASE_PATH, '', Controller::join_links(
+                            BASE_PATH,
+                            '',
+                            Controller::join_links(
                                 $page->getEntity()->getPath(),
                                 $url
                             )
@@ -326,11 +327,11 @@ class DocumentationParser
         $html_format = '<a href="http://api.silverstripe.org/search/lookup/?q=%s&version=%s&module=%s">%s</a>';
 
         // parse api links without backticks into html
-        foreach($regexs as $type => $regex) {
+        foreach ($regexs as $type => $regex) {
             preg_match_all($regex, $markdown, $links);
-            if($links) {
-                foreach($links[0] as $i => $match) {
-                    if($type === 'no_title') {
+            if ($links) {
+                foreach ($links[0] as $i => $match) {
+                    if ($type === 'no_title') {
                         $title = $links[1][$i];
                         $link = $links[1][$i];
                         // change backticked links to avoid being parsed in the same way as non-backticked links
@@ -349,8 +350,8 @@ class DocumentationParser
 
         // recover backticked links with no titles
         preg_match_all('#XYZ(.*)?XYZ#', $markdown, $links);
-        if($links) {
-            foreach($links[0] as $i => $match) {
+        if ($links) {
+            foreach ($links[0] as $i => $match) {
                 $link = $links[1][$i];
                 $markdown = str_replace($match, '`[api:'.$link.']`', $markdown);
             }
@@ -358,8 +359,8 @@ class DocumentationParser
 
         // recover backticked links with titles
         preg_match_all('#XX(.*)?YY(.*)?ZZ#', $markdown, $links);
-        if($links) {
-            foreach($links[0] as $i => $match) {
+        if ($links) {
+            foreach ($links[0] as $i => $match) {
                 $title = $links[1][$i];
                 $link = $links[2][$i];
                 $markdown = str_replace($match, '`['.$title.'](api:'.$link.')`', $markdown);
@@ -367,7 +368,6 @@ class DocumentationParser
         }
 
         return $markdown;
-
     }
 
     /**
@@ -488,7 +488,7 @@ class DocumentationParser
                         $fileBaseLink,
                         $url
                     );
-                } else if (preg_match('/^#/', $url)) {
+                } elseif (preg_match('/^#/', $url)) {
                     // for relative links begining with a hash use the current page link
                     $relativeUrl = Controller::join_links($baselink, $page->getRelativeLink(), $url);
                 } else {
@@ -521,5 +521,4 @@ class DocumentationParser
 
         return $md;
     }
-
 }

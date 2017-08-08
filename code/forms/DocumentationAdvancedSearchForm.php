@@ -34,7 +34,8 @@ class DocumentationAdvancedSearchForm extends Form
             CheckboxSetField::create(
                 'Versions',
                 _t('DocumentationViewer.VERSIONS', 'Versions'),
-                $versions, $searchedVersions
+                $versions,
+                $searchedVersions
             )
         );
 
