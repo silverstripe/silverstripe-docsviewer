@@ -575,6 +575,19 @@ class DocumentationViewer extends Controller implements PermissionProvider
     }
 
     /**
+     * Return the canonical URL from the page
+     *
+     * @return string
+     */
+    public function getCanonicalUrl()
+    {
+        if (!$this->getPage()) {
+            return '';
+        }
+        return $this->getPage()->getCanonicalUrl();
+    }
+
+    /**
      * Generate a list of all the pages in the documentation grouped by the
      * first letter of the page.
      *

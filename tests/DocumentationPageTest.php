@@ -19,10 +19,8 @@ class DocumentationPageTest extends SapphireTest
 
         Config::nest();
 
-        // explicitly use dev/docs. Custom paths should be tested separately 
-        Config::inst()->update(
-            'DocumentationViewer', 'link_base', 'dev/docs/'
-        );
+        // explicitly use dev/docs. Custom paths should be tested separately
+        Config::inst()->update('DocumentationViewer', 'link_base', 'dev/docs/');
 
         $manifest = new DocumentationManifest(true);
     }
@@ -41,7 +39,7 @@ class DocumentationPageTest extends SapphireTest
             'test.md',
             DOCSVIEWER_PATH . '/tests/docs/en/test.md'
         );
-        
+
         // single layer
         $this->assertEquals(
             'dev/docs/en/doctest/2.4/test/', $page->Link(),
@@ -53,18 +51,18 @@ class DocumentationPageTest extends SapphireTest
             'sort',
             DOCSVIEWER_PATH . '/tests/docs/en/sort/'
         );
-        
+
         $this->assertEquals('dev/docs/en/doctest/2.4/sort/', $page->Link());
-        
+
         $page = new DocumentationFolder(
             $this->entity,
             '1-basic.md',
             DOCSVIEWER_PATH . '/tests/docs/en/sort/1-basic.md'
         );
-        
+
         $this->assertEquals('dev/docs/en/doctest/2.4/sort/basic/', $page->Link());
     }
-    
+
     public function testGetBreadcrumbTitle()
     {
         $page = new DocumentationPage(
@@ -74,13 +72,13 @@ class DocumentationPageTest extends SapphireTest
         );
 
         $this->assertEquals("Test - Doctest", $page->getBreadcrumbTitle());
-        
+
         $page = new DocumentationFolder(
             $this->entity,
             '1-basic.md',
             DOCSVIEWER_PATH . '/tests/docs/en/sort/1-basic.md'
         );
-        
+
         $this->assertEquals('Basic - Sort - Doctest', $page->getBreadcrumbTitle());
 
         $page = new DocumentationFolder(
@@ -90,5 +88,23 @@ class DocumentationPageTest extends SapphireTest
         );
 
         $this->assertEquals('Sort - Doctest', $page->getBreadcrumbTitle());
+    }
+
+    public function testGetCanonicalUrl()
+    {
+        $page = new DocumentationPage(
+            $this->entity,
+            'file.md',
+            DOCSVIEWER_PATH . '/tests/docs/en/test/file.md'
+        );
+
+        $this->assertContains(
+            'dev/docs/en/test/file/',
+            $page->getCanonicalUrl(),
+            'Canonical URL is determined, set and returned'
+        );
+
+        $page->setCanonicalUrl('some-other-url');
+        $this->assertSame('some-other-url', $page->getCanonicalUrl(), 'Canonical URL can be adjusted via public API');
     }
 }

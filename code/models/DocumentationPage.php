@@ -38,6 +38,11 @@ class DocumentationPage extends ViewableData
 
     protected $read = false;
 
+     /**
+     * @var string
+     */
+    protected $canonicalUrl;
+
     /**
      * @param DocumentationEntity $entity
      * @param string              $filename
@@ -260,8 +265,23 @@ class DocumentationPage extends ViewableData
             Controller::join_links(
                 $this->entity->Link($short),
                 $this->getRelativeLink()
-            ), '/'
+            ),
+            '/'
         );
+    }
+
+    /**
+     * Determine and set the canonical URL for the given record, for example: dev/docs/en/Path/To/Document
+     */
+    public function populateCanonicalUrl()
+    {
+        $url = Director::absoluteURL(Controller::join_links(
+            Config::inst()->get('DocumentationViewer', 'link_base'),
+            $this->getEntity()->getLanguage(),
+            $this->getRelativeLink()
+        ));
+
+        $this->setCanonicalUrl($url);
     }
 
     /**
@@ -349,5 +369,30 @@ class DocumentationPage extends ViewableData
     {
         return sprintf(get_class($this) .': %s)', $this->getPath());
     }
-}
 
+    /**
+     * Set the canonical URL to use for this page
+     *
+     * @param string $canonicalUrl
+     * @return $this
+     */
+    public function setCanonicalUrl($canonicalUrl)
+    {
+        $this->canonicalUrl = $canonicalUrl;
+        return $this;
+    }
+
+    /**
+     * Get the canonical URL to use for this page. Will trigger discovery
+     * via {@link DocumentationPage::populateCanonicalUrl()} if none is already set.
+     *
+     * @return string
+     */
+    public function getCanonicalUrl()
+    {
+        if (!$this->canonicalUrl) {
+            $this->populateCanonicalUrl();
+        }
+        return $this->canonicalUrl;
+    }
+}
