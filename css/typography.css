@@ -13,7 +13,7 @@
 
 /*! links */
 a {
-    color: #808c8d; 
+    color: #0071c4;
     text-decoration: none;
 }
 
@@ -223,21 +223,23 @@ pre {
 
     pre code {
         /* reset block styles */
-        font-size: 1em; 
+        font-size: 1em;
         line-height: 1.5em;
     }
 
-code {      
+code {
     /* inline styles, fit with non-code text */
     font-size: 13px;
     line-height: 15px;
-    font-family: Monaco, 'Bitstream Vera Sans Mono', Courier, monospace;       
-    background: #f3f6f6;      
-    padding: 2px;     
-}     
-      
-    code a {      
-        color: #4E5661;       
+    font-family: Monaco, 'Bitstream Vera Sans Mono', Courier, monospace;
+    background: #f0f4f4;
+    color: #ed135a;
+    padding: 2px;
+}
+
+    code a {
+      color: #ed135a;
+      text-decoration: underline;
     }
 
 /*! quotes */
