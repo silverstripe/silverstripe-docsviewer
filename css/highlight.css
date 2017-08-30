@@ -8,23 +8,23 @@ Customised for doc.silverstripe.org, see CUSTOM markers.
 .hljs {
   display: block;
   overflow-x: auto;
-  padding: 0.5em;
-  color: #333;
+  padding: 1.5em 1em;
+  color: #444;
   background: #f3f6f6; /* CUSTOM */
   border-radius: 3px; /* CUSTOM */
-  box-shadow: 0 1px 1px rgba(0,0,0,.125); /* CUSTOM */
+  box-shadow: 0 1px 3px rgba(0,0,0,.15); /* CUSTOM */
 }
 
 .hljs-comment,
 .hljs-quote {
-  color: #998;
+  color: #717171;
   font-style: italic;
 }
 
 .hljs-keyword,
 .hljs-selector-tag,
 .hljs-subst {
-  color: #333;
+  color: #444;
   font-weight: bold;
 }
 
@@ -33,12 +33,12 @@ Customised for doc.silverstripe.org, see CUSTOM markers.
 .hljs-variable,
 .hljs-template-variable,
 .hljs-tag .hljs-attr {
-  color: #008080;
+  color: #007e7e;
 }
 
 .hljs-string,
 .hljs-doctag {
-  color: #d14;
+  color: #ed135a;
 }
 
 .hljs-title,
@@ -67,7 +67,7 @@ Customised for doc.silverstripe.org, see CUSTOM markers.
 
 .hljs-regexp,
 .hljs-link {
-  color: #009926;
+  color: #008500;
 }
 
 .hljs-symbol,

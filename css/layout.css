@@ -476,35 +476,26 @@ html {
     text-align: center;
 }
 
+.info,
 .notice,
 .note,
 .warningBox {
-    background: #FFFFAD;
+    background: #e6f5fc;
 }
 
 .warning,
 .alert {
-    background: #FF8480;
-    color:#fff;
-}
-
-.warning a,
-.alert a {
-    color:#fff;
-    text-decoration:underline;
+    background: #ffdcdb;
+    color: #586667;
 }
 
 .warning code,
 .alert code {
-    color:#666;
+    color: #666;
 }
 
 .hint {
-    background: #f4f4f4;
-}
-
-.info {
-    background: #CAF7FF;
+    background: #f0f4f4;
 }
 
 .warning p {
