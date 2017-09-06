@@ -298,14 +298,6 @@ html {
     padding: 0 30px;
 }
 
-    #footer p {
-        color: #798D85;
-    }
-
-        #footer p a {
-            color: #798D85;
-        }
-
 /*! Pagination */
 #page-numbers span,
 #page-numbers a {
@@ -479,19 +471,16 @@ html {
 .info,
 .notice,
 .note,
-.warningBox {
+.warningBox,
+form .message.good {
     background: #e6f5fc;
 }
 
 .warning,
-.alert {
+.alert,
+form .message.error {
     background: #ffdcdb;
     color: #586667;
-}
-
-.warning code,
-.alert code {
-    color: #666;
 }
 
 .hint {
@@ -629,7 +618,7 @@ html {
 }
 
     .next-prev a {
-        color: #798D85;
+        color: #586667;
     }
 
     .next-prev p {
