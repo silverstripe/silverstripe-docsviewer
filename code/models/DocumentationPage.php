@@ -87,7 +87,8 @@ class DocumentationPage extends ViewableData
         );
 
         $titleParts = array_filter(
-            $titleParts, function ($val) {
+            $titleParts,
+            function ($val) {
                 if ($val) {
                     return $val;
                 }

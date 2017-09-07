@@ -1,7 +1,7 @@
 <?php
 
 /**
- * A mapping store of given permalinks to the full documentation path or useful 
+ * A mapping store of given permalinks to the full documentation path or useful
  * for customizing the shortcut URLs used in the viewer.
  *
  * Redirects the user from example.com/foo to example.com/en/module/foo
@@ -25,7 +25,7 @@ class DocumentationPermalinks
      * ));
      * </code>
      *
-     * Do not need to include the language or the version current as it 
+     * Do not need to include the language or the version current as it
      * will add it based off the language or version in the session
      *
      * @param array

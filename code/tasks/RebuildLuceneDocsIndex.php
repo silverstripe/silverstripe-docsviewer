@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Rebuilds the search indexes for the documentation pages. 
+ * Rebuilds the search indexes for the documentation pages.
  *
- * For the hourly cron rebuild use RebuildLuceneDocusIndex_Hourly 
+ * For the hourly cron rebuild use RebuildLuceneDocusIndex_Hourly
  *
  * @package    docsviewer
  * @subpackage tasks
@@ -87,25 +87,29 @@ class RebuildLuceneDocsIndex extends BuildTask
 
                 $doc->addField(
                     Zend_Search_Lucene_Field::Keyword(
-                        'Version', $page->getEntity()->getVersion()
+                        'Version',
+                        $page->getEntity()->getVersion()
                     )
                 );
 
                 $doc->addField(
                     Zend_Search_Lucene_Field::Keyword(
-                        'Language', $page->getEntity()->getLanguage()
+                        'Language',
+                        $page->getEntity()->getLanguage()
                     )
                 );
 
                 $doc->addField(
                     Zend_Search_Lucene_Field::Keyword(
-                        'Entity', $page->getEntity()
+                        'Entity',
+                        $page->getEntity()
                     )
                 );
 
                 $doc->addField(
                     Zend_Search_Lucene_Field::Keyword(
-                        'Link', $page->Link()
+                        'Link',
+                        $page->Link()
                     )
                 );
     

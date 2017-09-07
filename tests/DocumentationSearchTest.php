@@ -13,20 +13,26 @@ class DocumentationSearchTest extends FunctionalTest
 
         Config::nest();
 
-        // explicitly use dev/docs. Custom paths should be tested separately 
+        // explicitly use dev/docs. Custom paths should be tested separately
         Config::inst()->update(
-            'DocumentationViewer', 'link_base', 'dev/docs'
+            'DocumentationViewer',
+            'link_base',
+            'dev/docs'
         );
 
         // disable automatic module registration so modules don't interfere.
         Config::inst()->update(
-            'DocumentationManifest', 'automatic_registration', false
+            'DocumentationManifest',
+            'automatic_registration',
+            false
         );
 
         Config::inst()->remove('DocumentationManifest', 'register_entities');
         Config::inst()->update('DocumentationSearch', 'enabled', true);
         Config::inst()->update(
-            'DocumentationManifest', 'register_entities', array(
+            'DocumentationManifest',
+            'register_entities',
+            array(
                 array(
                     'Path' => DOCSVIEWER_PATH . "/tests/docs-search/",
                     'Title' => 'Docs Search Test',            )
@@ -54,8 +60,8 @@ class DocumentationSearchTest extends FunctionalTest
         $response = $c->handleRequest(new SS_HTTPRequest('GET', 'description/'), DataModel::inst());
         //        $this->assertEquals(404, $response->getStatusCode());
         
-        // test we get a response to the description. The meta data test will 
-        // check that the individual fields are valid but we should check urls 
+        // test we get a response to the description. The meta data test will
+        // check that the individual fields are valid but we should check urls
         // are there
 
         Config::inst()->update('DocumentationSearch', 'enabled', true);

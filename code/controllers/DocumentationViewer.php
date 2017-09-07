@@ -110,7 +110,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
                 )
             );
             Requirements::combine_files(
-                'docs.css', 
+                'docs.css',
                 array(
                     DOCSVIEWER_DIR .'/css/highlight.css',
                     DOCSVIEWER_DIR .'/css/normalize.css',
@@ -204,7 +204,8 @@ class DocumentationViewer extends Controller implements PermissionProvider
         // Strip off the base url
         //
         $base = ltrim(
-            Config::inst()->get('DocumentationViewer', 'link_base'), '/'
+            Config::inst()->get('DocumentationViewer', 'link_base'),
+            '/'
         );
 
         if ($base && strpos($url, $base) !== false) {
@@ -393,7 +394,8 @@ class DocumentationViewer extends Controller implements PermissionProvider
 
                 // add children
                 $children = $this->getManifest()->getChildrenFor(
-                    $entity->getPath(), ($record) ? $record->getPath() : $entity->getPath()
+                    $entity->getPath(),
+                    ($record) ? $record->getPath() : $entity->getPath()
                 );
             } else {
                 if ($current && $current->getKey() == $entity->getKey()) {
@@ -438,7 +440,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
     public function replaceChildrenCalls($html)
     {
         $codes = new ShortcodeParser();
-        $codes->register('CHILDREN',  array($this, 'includeChildren'));
+        $codes->register('CHILDREN', array($this, 'includeChildren'));
 
         return $codes->parse($html);
     }
@@ -694,7 +696,6 @@ class DocumentationViewer extends Controller implements PermissionProvider
             $entity = $page->getEntity();
 
             if ($entity && isset(self::$edit_links[strtolower($entity->title)])) {
-
                 // build the edit link, using the version defined
                 $url = self::$edit_links[strtolower($entity->title)];
                 $version = $entity->getVersion();
@@ -738,7 +739,8 @@ class DocumentationViewer extends Controller implements PermissionProvider
     {
         return ($this->record)
             ? $this->getManifest()->getNextPage(
-                $this->record->getPath(), $this->getEntity()->getPath()
+                $this->record->getPath(),
+                $this->getEntity()->getPath()
             )
             : null;
     }
@@ -753,7 +755,8 @@ class DocumentationViewer extends Controller implements PermissionProvider
     {
         return ($this->record)
             ? $this->getManifest()->getPreviousPage(
-                $this->record->getPath(), $this->getEntity()->getPath()
+                $this->record->getPath(),
+                $this->getEntity()->getPath()
             )
             : null;
     }

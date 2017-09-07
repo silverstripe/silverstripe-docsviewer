@@ -42,7 +42,8 @@ class DocumentationPageTest extends SapphireTest
 
         // single layer
         $this->assertEquals(
-            'dev/docs/en/doctest/2.4/test/', $page->Link(),
+            'dev/docs/en/doctest/2.4/test/',
+            $page->Link(),
             'The page link should have no extension and have a language'
         );
 

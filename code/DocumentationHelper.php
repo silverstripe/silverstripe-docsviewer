@@ -8,7 +8,7 @@
 class DocumentationHelper
 {
     /**
-     * String helper for cleaning a file name to a readable version. 
+     * String helper for cleaning a file name to a readable version.
      *
      * @param string $name to convert
      *
@@ -95,9 +95,9 @@ class DocumentationHelper
 
     /**
      * Helper function to normalize paths to unix style directory separators
-     * 
+     *
      * @param string
-     * 
+     *
      * @return string
      */
     public static function normalizePath($path)
@@ -111,9 +111,9 @@ class DocumentationHelper
 
     /**
      * Helper function to make normalized paths relative
-     * 
+     *
      * @param string
-     * 
+     *
      * @return string
      */
     public static function relativePath($path)

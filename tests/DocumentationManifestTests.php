@@ -16,18 +16,24 @@ class DocumentationManifestTests extends SapphireTest
 
         // explicitly use dev/docs. Custom paths should be tested separately
         Config::inst()->update(
-            'DocumentationViewer', 'link_base', 'dev/docs'
+            'DocumentationViewer',
+            'link_base',
+            'dev/docs'
         );
 
         // disable automatic module registration so modules don't interfere.
         Config::inst()->update(
-            'DocumentationManifest', 'automatic_registration', false
+            'DocumentationManifest',
+            'automatic_registration',
+            false
         );
 
         Config::inst()->remove('DocumentationManifest', 'register_entities');
 
         Config::inst()->update(
-            'DocumentationManifest', 'register_entities', array(
+            'DocumentationManifest',
+            'register_entities',
+            array(
                 array(
                     'Path' => DOCSVIEWER_PATH . "/tests/docs/",
                     'Title' => 'Doc Test',
@@ -189,7 +195,8 @@ class DocumentationManifestTests extends SapphireTest
         );
 
         $this->assertDOSContains(
-            $expected, $this->manifest->getChildrenFor(
+            $expected,
+            $this->manifest->getChildrenFor(
                 DOCSVIEWER_PATH . '/tests/docs/en/'
             )
         );
