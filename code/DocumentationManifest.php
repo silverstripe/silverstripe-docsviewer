@@ -459,7 +459,12 @@ class DocumentationManifest
     {
         $fromLink = $this->stripLinkBase($from);
         $toLink = $this->stripLinkBase($to);
-        $this->redirects[$fromLink] = $toLink;
+
+        // If the redirect "from" is already registered with a "to", don't override it. This ensures
+        // that the first version processed is treated as the canonical version.
+        if (!isset($this->redirects[$fromLink])) {
+            $this->redirects[$fromLink] = $toLink;
+        }
     }
 
     /**
