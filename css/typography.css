@@ -210,8 +210,10 @@ h6 .heading-anchor-link {
 /*! images */
 img {
     max-width: 100%;
-    padding: 10px;
-    float: right;
+    border: 1px solid #ccc;
+    padding: 6px;
+    margin: 10px 0;
+    border-radius: 3px;
 }
 
 /*! code */
