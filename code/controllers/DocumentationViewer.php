@@ -62,7 +62,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
     /**
      * @config
      *
-     * @var string same as the routing pattern set through Director::addRules().
+     * @var string Site-relative root URL of documentation. Same as the routing pattern set through Director::addRules().
      */
     private static $link_base = 'dev/docs/';
 
@@ -567,6 +567,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
     public function Link($action = '')
     {
         $link = Controller::join_links(
+            Director::baseURL(),
             Config::inst()->get('DocumentationViewer', 'link_base'),
             $this->getLanguage(),
             $action,
@@ -786,7 +787,10 @@ class DocumentationViewer extends Controller implements PermissionProvider
      */
     public function getDocumentationBaseHref()
     {
-        return Config::inst()->get('DocumentationViewer', 'link_base');
+        return Controller::join_links(
+            Director::baseURL(),
+            Config::inst()->get('DocumentationViewer', 'link_base')
+        );
     }
 
     /**

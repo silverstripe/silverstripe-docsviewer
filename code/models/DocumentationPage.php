@@ -262,12 +262,9 @@ class DocumentationPage extends ViewableData
      */
     public function Link($short = false)
     {
-        return ltrim(
-            Controller::join_links(
-                $this->entity->Link($short),
-                $this->getRelativeLink()
-            ),
-            '/'
+        return Controller::join_links(
+            $this->entity->Link($short),
+            $this->getRelativeLink()
         );
     }
 

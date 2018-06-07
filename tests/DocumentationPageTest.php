@@ -42,7 +42,7 @@ class DocumentationPageTest extends SapphireTest
 
         // single layer
         $this->assertEquals(
-            'dev/docs/en/doctest/2.4/test/',
+            Director::baseURL() . 'dev/docs/en/doctest/2.4/test/',
             $page->Link(),
             'The page link should have no extension and have a language'
         );
@@ -53,7 +53,7 @@ class DocumentationPageTest extends SapphireTest
             DOCSVIEWER_PATH . '/tests/docs/en/sort/'
         );
 
-        $this->assertEquals('dev/docs/en/doctest/2.4/sort/', $page->Link());
+        $this->assertEquals(Director::baseURL() . 'dev/docs/en/doctest/2.4/sort/', $page->Link());
 
         $page = new DocumentationFolder(
             $this->entity,
@@ -61,7 +61,7 @@ class DocumentationPageTest extends SapphireTest
             DOCSVIEWER_PATH . '/tests/docs/en/sort/1-basic.md'
         );
 
-        $this->assertEquals('dev/docs/en/doctest/2.4/sort/basic/', $page->Link());
+        $this->assertEquals(Director::baseURL() . 'dev/docs/en/doctest/2.4/sort/basic/', $page->Link());
     }
 
     public function testGetBreadcrumbTitle()

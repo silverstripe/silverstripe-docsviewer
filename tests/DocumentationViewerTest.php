@@ -157,9 +157,9 @@ class DocumentationViewerTest extends FunctionalTest
         $response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.3/'), DataModel::inst());
 
         $expected = array(
-            'dev/docs/en/doc_test/2.3/sort/' => 'Sort',
-            'dev/docs/en/doc_test/2.3/subfolder/' => 'Subfolder',
-            'dev/docs/en/doc_test/2.3/test/' => 'Test'
+            Director::baseURL() . 'dev/docs/en/doc_test/2.3/sort/' => 'Sort',
+            Director::baseURL() . 'dev/docs/en/doc_test/2.3/subfolder/' => 'Subfolder',
+            Director::baseURL() . 'dev/docs/en/doc_test/2.3/test/' => 'Test'
         );
 
         $actual = $v->getMenu()->first()->Children->map('Link', 'Title');
@@ -174,9 +174,9 @@ class DocumentationViewerTest extends FunctionalTest
 
         // menu should contain all the english entities
         $expected = array(
-            'dev/docs/en/doc_test/2.4/' => 'Doc Test',
-            'dev/docs/en/documentationvieweraltmodule1/' => 'DocumentationViewerAltModule1',
-            'dev/docs/en/documentationvieweraltmodule2/' => 'DocumentationViewerAltModule2'
+            Director::baseURL() . 'dev/docs/en/doc_test/2.4/' => 'Doc Test',
+            Director::baseURL() . 'dev/docs/en/documentationvieweraltmodule1/' => 'DocumentationViewerAltModule1',
+            Director::baseURL() . 'dev/docs/en/documentationvieweraltmodule2/' => 'DocumentationViewerAltModule2'
         );
 
         $this->assertEquals($expected, $v->getMenu()->map('Link', 'Title'));

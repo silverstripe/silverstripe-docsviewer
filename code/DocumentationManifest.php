@@ -418,14 +418,15 @@ class DocumentationManifest
      */
     protected function stripLinkBase($link)
     {
-        return ltrim(
-            str_replace(
-                Config::inst()->get('DocumentationViewer', 'link_base'),
-                '',
-                $link
-            ),
-            '/'
-        );
+        // Trim baseURL
+        $link = preg_replace('/^' . preg_quote(Director::baseURL(), '/') .'/', '', $link);
+
+        // Trim link_base
+        if ($linkBase = Config::inst()->get('DocumentationViewer', 'link_base')) {
+            $link = preg_replace('/^' . preg_quote($linkBase, '/') .'\/?/', '', $link);
+        }
+
+        return $link;
     }
 
     /**
@@ -570,6 +571,19 @@ class DocumentationManifest
     }
 
     /**
+     * Create a clean domain-relative URL form a docuetn URL
+     */
+    protected function buildUrl($url)
+    {
+        return Controller::join_links(
+            Director::baseURL(),
+            Config::inst()->get('DocumentationViewer', 'link_base'),
+            $url,
+            '/'
+        );
+    }
+
+    /**
      * Determine the next page from the given page.
      *
      * Relies on the fact when the manifest was built, it was generated in
@@ -589,7 +603,7 @@ class DocumentationManifest
             if ($grabNext && strpos($page['filepath'], $entityBase) !== false) {
                 return new ArrayData(
                     array(
-                    'Link' => Controller::join_links(Config::inst()->get('DocumentationViewer', 'link_base'), $url),
+                    'Link' => $this->buildUrl($url),
                     'Title' => $page['title']
                     )
                 );
@@ -600,7 +614,7 @@ class DocumentationManifest
             } elseif (!$fallback && strpos($page['filepath'], $filepath) !== false) {
                 $fallback = new ArrayData(
                     array(
-                    'Link' => Controller::join_links(Config::inst()->get('DocumentationViewer', 'link_base'), $url),
+                    'Link' => $this->buildUrl($url),
                     'Title' => $page['title'],
                     'Fallback' => true
                     )
@@ -635,7 +649,7 @@ class DocumentationManifest
                 if ($previousUrl) {
                     return new ArrayData(
                         array(
-                        'Link' => Controller::join_links(Config::inst()->get('DocumentationViewer', 'link_base'), $previousUrl),
+                        'Link' => $this->buildUrl($previousUrl),
                         'Title' => $previousPage['title']
                         )
                     );
@@ -684,7 +698,6 @@ class DocumentationManifest
         }
 
         $output = new ArrayList();
-        $base = Config::inst()->get('DocumentationViewer', 'link_base');
         $entityPath = $this->normalizeUrl($entityPath);
         $recordPath = $this->normalizeUrl($recordPath);
         $recordParts = explode('/', trim($recordPath, '/'));
@@ -720,7 +733,7 @@ class DocumentationManifest
                 $output->push(
                     new ArrayData(
                         array(
-                        'Link' => Controller::join_links($base, $url, '/'),
+                        'Link' => $this->buildUrl($url),
                         'Title' => $page['title'],
                         'LinkingMode' => $mode,
                         'Summary' => $page['summary'],

@@ -137,20 +137,20 @@ class DocumentationEntity extends ViewableData
     {
         if ($this->getIsDefaultEntity()) {
             $base = Controller::join_links(
+                Director::baseURL(),
                 Config::inst()->get('DocumentationViewer', 'link_base'),
                 $this->getLanguage(),
                 '/'
             );
         } else {
             $base = Controller::join_links(
+                Director::baseURL(),
                 Config::inst()->get('DocumentationViewer', 'link_base'),
                 $this->getLanguage(),
                 $this->getKey(),
                 '/'
             );
         }
-
-        $base = ltrim(str_replace('//', '/', $base), '/');
 
         if ($short && $this->stable) {
             return $base;
