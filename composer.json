@@ -21,5 +21,10 @@
     },
     "suggest": {
         "silverstripe/staticpublisher": "Allows publishing documentation as HTML"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.x-dev"
+        }
     }
 }
