@@ -174,7 +174,7 @@ HTML;
         );
 
         $this->assertContains(
-            '[link: subfolder index](dev/docs/en/documentationparsertest/2.4/subfolder/)',
+            '[link: subfolder index](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/subfolder/)',
             $result
         );
 
@@ -186,11 +186,11 @@ HTML;
         );
 
         $this->assertContains(
-            '[link: subfolder index](dev/docs/en/documentationparsertest/2.4/subfolder/)',
+            '[link: subfolder index](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/subfolder/)',
             $result
         );
         $this->assertContains(
-            '[link: subfolder page](dev/docs/en/documentationparsertest/2.4/subfolder/subpage/)',
+            '[link: subfolder page](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/subfolder/subpage/)',
             $result
         );
         $this->assertContains(
@@ -199,12 +199,12 @@ HTML;
         );
 
         $this->assertContains(
-            '[link: with anchor](dev/docs/en/documentationparsertest/2.4/test/#anchor)',
+            '[link: with anchor](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/test/#anchor)',
             $result
         );
 
         $this->assertContains(
-            '[link: relative anchor](dev/docs/en/documentationparsertest/2.4/test/#relative-anchor)',
+            '[link: relative anchor](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/test/#relative-anchor)',
             $result
         );
 
@@ -215,33 +215,33 @@ HTML;
 
         // @todo this should redirect to /subpage/
         $this->assertContains(
-            '[link: relative](dev/docs/en/documentationparsertest/2.4/subfolder/subpage.md/)',
+            '[link: relative](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/subfolder/subpage.md/)',
             $result
         );
 
         $this->assertContains(
-            '[link: absolute index](dev/docs/en/documentationparsertest/2.4/)',
+            '[link: absolute index](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/)',
             $result
         );
 
         // @todo this should redirect to /
         $this->assertContains(
-            '[link: absolute index with name](dev/docs/en/documentationparsertest/2.4/index/)',
+            '[link: absolute index with name](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/index/)',
             $result
         );
 
         $this->assertContains(
-            '[link: relative index](dev/docs/en/documentationparsertest/2.4/)',
+            '[link: relative index](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/)',
             $result
         );
 
         $this->assertContains(
-            '[link: relative parent page](dev/docs/en/documentationparsertest/2.4/test/)',
+            '[link: relative parent page](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/test/)',
             $result
         );
 
         $this->assertContains(
-            '[link: absolute parent page](dev/docs/en/documentationparsertest/2.4/test/)',
+            '[link: absolute parent page](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/test/)',
             $result
         );
 
@@ -251,27 +251,27 @@ HTML;
         );
 
         $this->assertContains(
-            '[link: absolute index](dev/docs/en/documentationparsertest/2.4/)',
+            '[link: absolute index](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/)',
             $result
         );
 
         $this->assertContains(
-            '[link: relative index](dev/docs/en/documentationparsertest/2.4/subfolder/)',
+            '[link: relative index](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/subfolder/)',
             $result
         );
 
         $this->assertContains(
-            '[link: relative parent page](dev/docs/en/documentationparsertest/2.4/subfolder/subpage/)',
+            '[link: relative parent page](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/subfolder/subpage/)',
             $result
         );
 
         $this->assertContains(
-            '[link: relative grandparent page](dev/docs/en/documentationparsertest/2.4/test/)',
+            '[link: relative grandparent page](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/test/)',
             $result
         );
 
         $this->assertContains(
-            '[link: absolute page](dev/docs/en/documentationparsertest/2.4/test/)',
+            '[link: absolute page](' . Director::baseURL() . 'dev/docs/en/documentationparsertest/2.4/test/)',
             $result
         );
     }
