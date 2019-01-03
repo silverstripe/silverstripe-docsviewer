@@ -1,4 +1,15 @@
 <?php
+namespace SilverStripe\DocsViewer\Models;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\DocsViewer\DocumentationHelper;
+use SilverStripe\DocsViewer\DocumentationParser;
+use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
+use SilverStripe\View\ViewableData;
+use InvalidArgumentException;
+
 
 /**
  * A specific documentation page within a {@link DocumentationEntity}.
@@ -80,7 +91,7 @@ class DocumentationPage extends ViewableData
 
         $titleParts = array_map(
             array(
-                'DocumentationHelper',
+                DocumentationHelper::class,
                 'clean_page_name'
             ),
             $pathParts
@@ -274,7 +285,7 @@ class DocumentationPage extends ViewableData
     public function populateCanonicalUrl()
     {
         $url = Director::absoluteURL(Controller::join_links(
-            Config::inst()->get('DocumentationViewer', 'link_base'),
+            Config::inst()->get(DocumentationViewer::class, 'link_base'),
             $this->getEntity()->getLanguage(),
             $this->getRelativeLink()
         ));

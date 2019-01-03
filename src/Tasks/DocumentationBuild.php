@@ -1,4 +1,9 @@
 <?php
+namespace SilverStripe\DocsViewer\Tasks;
+
+use SilverStripe\Dev\BuildTask;
+use SilverStripe\DocsViewer\DocumentationManifest;
+
 
 class DocumentationBuild extends BuildTask
 {

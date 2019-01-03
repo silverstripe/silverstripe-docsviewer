@@ -1,5 +1,14 @@
 <?php
 
+namespace SilverStripe\DocsViewer\Tests;
+
+
+use SilverStripe\Dev\SapphireTest;
+use SilverStripe\DocsViewer\DocumentationHelper;
+
+
+
+
 /**
  * @package docsviewer
  * @subpackage tests

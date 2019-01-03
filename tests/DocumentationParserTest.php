@@ -1,5 +1,24 @@
 <?php
 
+namespace SilverStripe\DocsViewer\Tests;
+
+
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\Controller;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Dev\SapphireTest;
+use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
+use SilverStripe\DocsViewer\Models\DocumentationEntity;
+use SilverStripe\DocsViewer\Models\DocumentationPage;
+use SilverStripe\DocsViewer\DocumentationManifest;
+use SilverStripe\DocsViewer\DocumentationParser;
+use SilverStripe\DocsViewer\Tests\DocumentationParserTest;
+
+
+
+
+
 /**
  * @package docsviewer
  * @subpackage tests
@@ -23,12 +42,12 @@ class DocumentationParserTest extends SapphireTest
 
         // explicitly use dev/docs. Custom paths should be tested separately
         Config::inst()->update(
-            'DocumentationViewer',
+            DocumentationViewer::class,
             'link_base',
             'dev/docs/'
         );
 
-        $this->entity = new DocumentationEntity('DocumentationParserTest');
+        $this->entity = new DocumentationEntity(DocumentationParserTest::class);
         $this->entity->setPath(DOCSVIEWER_PATH . '/tests/docs/en/');
         $this->entity->setVersion('2.4');
         $this->entity->setLanguage('en');
@@ -351,10 +370,10 @@ HTML;
             array('`[Title](api:DataObject)`','`[Title](api:DataObject)`'),
             array('`[Title](api:DataObject::$defaults)`','`[Title](api:DataObject::$defaults)`'),
             array('`[Title](api:DataObject::populateDefaults())`','`[Title](api:DataObject::populateDefaults())`'),
-            array('[api:DataObject]', sprintf($html_format, 'DataObject', 'DataObject')),
+            array('[api:DataObject]', sprintf($html_format, DataObject::class, DataObject::class)),
             array('[api:DataObject::$defaults]',sprintf($html_format, 'DataObject::$defaults', 'DataObject::$defaults')),
             array('[api:DataObject::populateDefaults()]',sprintf($html_format, 'DataObject::populateDefaults()', 'DataObject::populateDefaults()')),
-            array('[Title](api:DataObject)',sprintf($html_format, 'DataObject', 'Title')),
+            array('[Title](api:DataObject)',sprintf($html_format, DataObject::class, 'Title')),
             array('[Title](api:DataObject::$defaults)',sprintf($html_format, 'DataObject::$defaults', 'Title')),
             array('[Title](api:DataObject::populateDefaults())',sprintf($html_format, 'DataObject::populateDefaults()', 'Title'))
         );

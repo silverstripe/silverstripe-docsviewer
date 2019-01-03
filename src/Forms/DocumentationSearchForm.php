@@ -1,4 +1,12 @@
 <?php
+namespace SilverStripe\DocsViewer\Forms;
+
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\Form;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\HiddenField;
+use SilverStripe\Forms\TextField;
+
 
 class DocumentationSearchForm extends Form
 {
@@ -25,7 +33,7 @@ class DocumentationSearchForm extends Form
             new FormAction('results', _t('DocumentationViewer.SEARCH', 'Search'))
         );
 
-        parent::__construct($controller, 'DocumentationSearchForm', $fields, $actions);
+        parent::__construct($controller, DocumentationSearchForm::class, $fields, $actions);
 
         $this->disableSecurityToken();
         $this->setFormMethod('GET');

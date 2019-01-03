@@ -1,6 +1,11 @@
 <?php
+namespace SilverStripe\DocsViewer;
 
-class DocumentationManifestFileFinder extends SS_FileFinder
+use SilverStripe\Assets\FileFinder;
+use SilverStripe\Core\Config\Config;
+
+
+class DocumentationManifestFileFinder extends FileFinder
 {
     /**
      * @var array
@@ -25,7 +30,7 @@ class DocumentationManifestFileFinder extends SS_FileFinder
      */
     public function acceptDir($basename, $pathname, $depth)
     {
-        $ignored =  Config::inst()->get('DocumentationManifestFileFinder', 'ignored_files');
+        $ignored =  Config::inst()->get(DocumentationManifestFileFinder::class, 'ignored_files');
 
         if ($ignored) {
             if (in_array(strtolower($basename), $ignored)) {

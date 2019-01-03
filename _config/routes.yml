@@ -2,7 +2,7 @@
 Name: docs
 After: framework/routes#coreroutes
 ---
-Director:
+SilverStripe\Control\Director:
   rules:
-    'dev/docs//$Action/$ID/$OtherID': 'DocumentationViewer'
-    'DocumentationOpenSearchController//$Action': 'DocumentationOpenSearchController'
+    dev/docs//$Action/$ID/$OtherID: SilverStripe\DocsViewer\Controllers\DocumentationViewer
+    DocumentationOpenSearchController//$Action: SilverStripe\DocsViewer\Controllers\DocumentationOpenSearchController

@@ -1,5 +1,17 @@
 <?php
 
+namespace SilverStripe\DocsViewer\Tests;
+
+
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Dev\SapphireTest;
+use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
+use SilverStripe\DocsViewer\DocumentationManifest;
+use DataModel;
+
+
+
 /**
  * @package docsviewer
  * @subpackage tests
@@ -18,22 +30,22 @@ class DocumentationViewerVersionWarningTest extends SapphireTest
 
         // explicitly use dev/docs. Custom paths should be tested separately
         Config::inst()->update(
-            'DocumentationViewer',
+            DocumentationViewer::class,
             'link_base',
             'dev/docs'
         );
 
         // disable automatic module registration so modules don't interfere.
         Config::inst()->update(
-            'DocumentationManifest',
+            DocumentationManifest::class,
             'automatic_registration',
             false
         );
 
-        Config::inst()->remove('DocumentationManifest', 'register_entities');
+        Config::inst()->remove(DocumentationManifest::class, 'register_entities');
 
         Config::inst()->update(
-            'DocumentationManifest',
+            DocumentationManifest::class,
             'register_entities',
             array(
                 array(
@@ -73,19 +85,19 @@ class DocumentationViewerVersionWarningTest extends SapphireTest
         $v = new DocumentationViewer();
         
         // the current version is set to 2.4, no notice should be shown on that page
-        $response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/testdocs/'), DataModel::inst());
+        $response = $v->handleRequest(new HTTPRequest('GET', 'en/testdocs/'), DataModel::inst());
         //        $this->assertFalse($v->VersionWarning());
 
         
         // 2.3 is an older release, hitting that should return us an outdated flag
-        $response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/testdocs/2.3/'), DataModel::inst());
+        $response = $v->handleRequest(new HTTPRequest('GET', 'en/testdocs/2.3/'), DataModel::inst());
         $warn = $v->VersionWarning();
         
         //       $this->assertTrue($warn->OutdatedRelease);
         //       $this->assertNull($warn->FutureRelease);
         
         // 3.0 is a future release
-        $response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/testdocs/3.0/'), DataModel::inst());
+        $response = $v->handleRequest(new HTTPRequest('GET', 'en/testdocs/3.0/'), DataModel::inst());
         $warn = $v->VersionWarning();
         
         //        $this->assertNull($warn->OutdatedRelease);

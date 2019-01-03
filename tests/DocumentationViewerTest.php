@@ -1,5 +1,19 @@
 <?php
 
+namespace SilverStripe\DocsViewer\Tests;
+
+
+use SilverStripe\Core\Config\Config;
+use SilverStripe\View\SSViewer;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\Director;
+use SilverStripe\Dev\FunctionalTest;
+use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
+use SilverStripe\DocsViewer\DocumentationManifest;
+use DataModel;
+
+
+
 /**
  * Some of these tests are simply checking that pages load. They should not assume
  * somethings working.
@@ -22,22 +36,22 @@ class DocumentationViewerTest extends FunctionalTest
 
         // explicitly use dev/docs. Custom paths should be tested separately
         Config::inst()->update(
-            'DocumentationViewer',
+            DocumentationViewer::class,
             'link_base',
             'dev/docs/'
         );
 
         // disable automatic module registration so modules don't interfere.
         Config::inst()->update(
-            'DocumentationManifest',
+            DocumentationManifest::class,
             'automatic_registration',
             false
         );
 
-        Config::inst()->remove('DocumentationManifest', 'register_entities');
+        Config::inst()->remove(DocumentationManifest::class, 'register_entities');
 
         Config::inst()->update(
-            'DocumentationManifest',
+            DocumentationManifest::class,
             'register_entities',
             array(
                 array(
@@ -67,7 +81,7 @@ class DocumentationViewerTest extends FunctionalTest
             )
         );
 
-        Config::inst()->update('SSViewer', 'theme_enabled', false);
+        Config::inst()->update(SSViewer::class, 'theme_enabled', false);
 
         $this->manifest = new DocumentationManifest(true);
     }
@@ -154,7 +168,7 @@ class DocumentationViewerTest extends FunctionalTest
     {
         $v = new DocumentationViewer();
         // check with children
-        $response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.3/'), DataModel::inst());
+        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.3/'), DataModel::inst());
 
         $expected = array(
             Director::baseURL() . 'dev/docs/en/doc_test/2.3/sort/' => 'Sort',
@@ -166,7 +180,7 @@ class DocumentationViewerTest extends FunctionalTest
         $this->assertEquals($expected, $actual);
 
 
-        $response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.4/'), DataModel::inst());
+        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.4/'), DataModel::inst());
         $this->assertEquals('current', $v->getMenu()->first()->LinkingMode);
 
         // 2.4 stable release has 1 child page (not including index)
@@ -187,11 +201,11 @@ class DocumentationViewerTest extends FunctionalTest
     public function testGetLanguage()
     {
         $v = new DocumentationViewer();
-        $response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.3/'), DataModel::inst());
+        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.3/'), DataModel::inst());
 
         $this->assertEquals('en', $v->getLanguage());
 
-        $response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.3/subfolder/subsubfolder/subsubpage/'), DataModel::inst());
+        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.3/subfolder/subsubfolder/subsubpage/'), DataModel::inst());
         $this->assertEquals('en', $v->getLanguage());
     }
 

@@ -1,4 +1,13 @@
 <?php
+namespace SilverStripe\DocsViewer\Forms;
+
+use SilverStripe\Forms\CheckboxSetField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\Form;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\RequiredFields;
+use SilverStripe\Forms\TextField;
+
 
 /**
  * @package docsviewer

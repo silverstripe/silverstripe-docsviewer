@@ -1,4 +1,20 @@
 <?php
+namespace SilverStripe\DocsViewer;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
+use SilverStripe\DocsViewer\Models\DocumentationEntity;
+use SilverStripe\DocsViewer\Models\DocumentationFolder;
+use SilverStripe\DocsViewer\Models\DocumentationPage;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\View\ArrayData;
+use SilverStripe\i18n\i18n;
+use Exception;
+use SS_Cache;
+
 
 /**
  * A class which builds a manifest of all documentation present in a project.
@@ -90,7 +106,7 @@ class DocumentationManifest
         $this->registeredEntities = new ArrayList();
 
         $this->cache = SS_Cache::factory(
-            'DocumentationManifest',
+            DocumentationManifest::class,
             'Core',
             array(
             'automatic_serialization' => true,
@@ -113,11 +129,11 @@ class DocumentationManifest
             return;
         }
 
-        if (Config::inst()->get('DocumentationManifest', 'automatic_registration')) {
+        if (Config::inst()->get(DocumentationManifest::class, 'automatic_registration')) {
             $this->populateEntitiesFromInstall();
         }
 
-        $registered = Config::inst()->get('DocumentationManifest', 'register_entities');
+        $registered = Config::inst()->get(DocumentationManifest::class, 'register_entities');
 
         foreach ($registered as $details) {
             // validate the details provided through the YAML configuration
@@ -161,7 +177,7 @@ class DocumentationManifest
                          * @var DocumentationEntity $entity
                          */
                         $entity = Injector::inst()->create(
-                            'DocumentationEntity',
+                            DocumentationEntity::class,
                             $key
                         );
 
@@ -245,7 +261,7 @@ class DocumentationManifest
         }
 
         Config::inst()->update(
-            'DocumentationManifest',
+            DocumentationManifest::class,
             'register_entities',
             $entities
         );
@@ -422,7 +438,7 @@ class DocumentationManifest
         $link = preg_replace('/^' . preg_quote(Director::baseURL(), '/') .'/', '', $link);
 
         // Trim link_base
-        if ($linkBase = Config::inst()->get('DocumentationViewer', 'link_base')) {
+        if ($linkBase = Config::inst()->get(DocumentationViewer::class, 'link_base')) {
             $link = preg_replace('/^' . preg_quote($linkBase, '/') .'\/?/', '', $link);
         }
 
@@ -474,7 +490,7 @@ class DocumentationManifest
     public function handleFolder($basename, $path, $depth)
     {
         $folder = Injector::inst()->create(
-            'DocumentationFolder',
+            DocumentationFolder::class,
             $this->entity,
             $basename,
             $path
@@ -506,7 +522,7 @@ class DocumentationManifest
     public function handleFile($basename, $path, $depth)
     {
         $page = Injector::inst()->create(
-            'DocumentationPage',
+            DocumentationPage::class,
             $this->entity,
             $basename,
             $path
@@ -577,7 +593,7 @@ class DocumentationManifest
     {
         return Controller::join_links(
             Director::baseURL(),
-            Config::inst()->get('DocumentationViewer', 'link_base'),
+            Config::inst()->get(DocumentationViewer::class, 'link_base'),
             $url,
             '/'
         );

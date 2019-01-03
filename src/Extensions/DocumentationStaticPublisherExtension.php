@@ -1,4 +1,9 @@
 <?php
+namespace SilverStripe\DocsViewer\Extensions;
+
+use SilverStripe\Core\Extension;
+use SilverStripe\DocsViewer\DocumentationManifest;
+
 
 /**
  * An extension to StaticPublisher to enable exporting the documentation pages

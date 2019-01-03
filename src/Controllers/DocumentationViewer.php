@@ -1,4 +1,31 @@
 <?php
+namespace SilverStripe\DocsViewer\Controllers;
+
+use SilverStripe\Assets\Folder;
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\HTTPResponse;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Dev\SapphireTest;
+use SilverStripe\DocsViewer\DocumentationHelper;
+use SilverStripe\DocsViewer\DocumentationManifest;
+use SilverStripe\DocsViewer\DocumentationPermalinks;
+use SilverStripe\DocsViewer\DocumentationSearch;
+use SilverStripe\DocsViewer\Extensions\DocumentationSearchExtension;
+use SilverStripe\DocsViewer\Extensions\DocumentationViewerVersionWarning;
+use SilverStripe\DocsViewer\Forms\DocumentationSearchForm;
+use SilverStripe\DocsViewer\Models\DocumentationFolder;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\GroupedList;
+use SilverStripe\Security\Permission;
+use SilverStripe\Security\PermissionProvider;
+use SilverStripe\Security\Security;
+use SilverStripe\View\ArrayData;
+use SilverStripe\View\Requirements;
+use SilverStripe\View\Parsers\ShortcodeParser;
+use SilverStripe\i18n\i18n;
+
+
 
 /**
  * Documentation Viewer.
@@ -18,8 +45,8 @@ class DocumentationViewer extends Controller implements PermissionProvider
      * @var array
      */
     private static $extensions = array(
-        'DocumentationViewerVersionWarning',
-        'DocumentationSearchExtension'
+        DocumentationViewerVersionWarning::class,
+        DocumentationSearchExtension::class
     );
 
     /**
@@ -188,7 +215,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
         // off and redirect the user to the page without an extension.
         //
         if (DocumentationHelper::get_extension($url)) {
-            $this->response = new SS_HTTPResponse();
+            $this->response = new HTTPResponse();
             $this->response->redirect(
                 Director::absoluteURL(DocumentationHelper::trim_extension_off($url)) .'/',
                 301
@@ -204,7 +231,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
         // Strip off the base url
         //
         $base = ltrim(
-            Config::inst()->get('DocumentationViewer', 'link_base'),
+            Config::inst()->get(DocumentationViewer::class, 'link_base'),
             '/'
         );
 
@@ -221,7 +248,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
         if ($link = DocumentationPermalinks::map($url)) {
             // the first param is a shortcode for a page so redirect the user to
             // the short code.
-            $this->response = new SS_HTTPResponse();
+            $this->response = new HTTPResponse();
             $this->response->redirect($link, 301);
 
             $request->shift();
@@ -287,24 +314,24 @@ class DocumentationViewer extends Controller implements PermissionProvider
                 $body = $this->renderWith(
                     array(
                         "DocumentationViewer_{$type}",
-                        'DocumentationViewer'
+                        DocumentationViewer::class
                     )
                 );
 
-                return new SS_HTTPResponse($body, 200);
+                return new HTTPResponse($body, 200);
             } elseif ($redirect = $this->getManifest()->getRedirect($url)) {
-                $response = new SS_HTTPResponse();
+                $response = new HTTPResponse();
                 $to = Controller::join_links(Director::baseURL(), $base, $redirect);
                 return $response->redirect($to, 301);
             } elseif (!$url || $url == $lang) {
                 $body = $this->renderWith(
                     array(
                         'DocumentationViewer_DocumentationFolder',
-                        'DocumentationViewer'
+                        DocumentationViewer::class
                     )
                 );
 
-                return new SS_HTTPResponse($body, 200);
+                return new HTTPResponse($body, 200);
             }
         }
 
@@ -330,7 +357,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
             )
         )->renderWith(array("{$class}_error", $class));
 
-        return new SS_HTTPResponse($body, $status);
+        return new HTTPResponse($body, $status);
     }
 
     /**
@@ -454,9 +481,9 @@ class DocumentationViewer extends Controller implements PermissionProvider
      */
     public function includeChildren($args)
     {
-        if (isset($args['Folder'])) {
+        if (isset($args[Folder::class])) {
             $children = $this->getManifest()->getChildrenFor(
-                Controller::join_links(dirname($this->record->getPath()), $args['Folder'])
+                Controller::join_links(dirname($this->record->getPath()), $args[Folder::class])
             );
         } else {
             $children = $this->getManifest()->getChildrenFor(
@@ -572,7 +599,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
     {
         $link = Controller::join_links(
             Director::baseURL(),
-            Config::inst()->get('DocumentationViewer', 'link_base'),
+            Config::inst()->get(DocumentationViewer::class, 'link_base'),
             $this->getLanguage(),
             $action,
             '/'
@@ -649,7 +676,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
      */
     public function DocumentationSearchForm()
     {
-        if (!Config::inst()->get('DocumentationSearch', 'enabled')) {
+        if (!Config::inst()->get(DocumentationSearch::class, 'enabled')) {
             return false;
         }
 
@@ -798,7 +825,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
     {
         return Controller::join_links(
             Director::baseURL(),
-            Config::inst()->get('DocumentationViewer', 'link_base')
+            Config::inst()->get(DocumentationViewer::class, 'link_base')
         );
     }
 

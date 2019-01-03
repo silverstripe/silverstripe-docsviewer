@@ -1,4 +1,17 @@
 <?php
+namespace SilverStripe\DocsViewer\Tasks;
+
+use SilverStripe\Assets\Filesystem;
+use SilverStripe\Control\Director;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Dev\BuildTask;
+use SilverStripe\DocsViewer\DocumentationManifest;
+use SilverStripe\DocsViewer\DocumentationSearch;
+use Zend_Search_Lucene;
+use Zend_Search_Lucene_Document;
+use Zend_Search_Lucene_Exception;
+use Zend_Search_Lucene_Field;
+
 
 /**
  * Rebuilds the search indexes for the documentation pages.
@@ -117,7 +130,7 @@ class RebuildLuceneDocsIndex extends BuildTask
                 $titleField->boost = 3;
                 $breadcrumbField->boost = 1.5;
 
-                $boost = Config::inst()->get('DocumentationSearch', 'boost_by_path');
+                $boost = Config::inst()->get(DocumentationSearch::class, 'boost_by_path');
 
                 foreach ($boost as $pathExpr => $boost) {
                     if (preg_match($pathExpr, $page->getRelativePath())) {

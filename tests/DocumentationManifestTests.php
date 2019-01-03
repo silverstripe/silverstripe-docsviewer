@@ -1,5 +1,16 @@
 <?php
 
+namespace SilverStripe\DocsViewer\Tests;
+
+
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Dev\SapphireTest;
+use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
+use SilverStripe\DocsViewer\DocumentationManifest;
+
+
+
+
 /**
  * @package docsviewer
  * @subpackage tests
@@ -16,22 +27,22 @@ class DocumentationManifestTests extends SapphireTest
 
         // explicitly use dev/docs. Custom paths should be tested separately
         Config::inst()->update(
-            'DocumentationViewer',
+            DocumentationViewer::class,
             'link_base',
             'dev/docs'
         );
 
         // disable automatic module registration so modules don't interfere.
         Config::inst()->update(
-            'DocumentationManifest',
+            DocumentationManifest::class,
             'automatic_registration',
             false
         );
 
-        Config::inst()->remove('DocumentationManifest', 'register_entities');
+        Config::inst()->remove(DocumentationManifest::class, 'register_entities');
 
         Config::inst()->update(
-            'DocumentationManifest',
+            DocumentationManifest::class,
             'register_entities',
             array(
                 array(

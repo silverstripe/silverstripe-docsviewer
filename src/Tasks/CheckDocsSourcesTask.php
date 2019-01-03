@@ -1,4 +1,13 @@
 <?php
+namespace SilverStripe\DocsViewer\Tasks;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
+use SilverStripe\Core\Convert;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Dev\BuildTask;
+use SilverStripe\DocsViewer\DocumentationManifest;
+
 
 /**
  * Check status of sources dirs
@@ -46,7 +55,7 @@ class CheckDocsSourcesTask extends BuildTask
     public function run($request)
     {
         $this->start();
-        $registered = Config::inst()->get('DocumentationManifest', 'register_entities');
+        $registered = Config::inst()->get(DocumentationManifest::class, 'register_entities');
         foreach ($registered as $details) {
             // validate the details provided through the YAML configuration
             $required = array('Path', 'Title');

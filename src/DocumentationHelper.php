@@ -1,4 +1,8 @@
 <?php
+namespace SilverStripe\DocsViewer;
+
+use SilverStripe\Control\Director;
+
 
 /**
  * Collection of static helper methods for managing the documentation

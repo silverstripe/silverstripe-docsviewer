@@ -1,4 +1,13 @@
 <?php
+namespace SilverStripe\DocsViewer\Models;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\DocsViewer\DocumentationHelper;
+use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
+use SilverStripe\View\ViewableData;
+
 
 /**
  * A {@link DocumentationEntity} represents a module or folder with stored
@@ -138,14 +147,14 @@ class DocumentationEntity extends ViewableData
         if ($this->getIsDefaultEntity()) {
             $base = Controller::join_links(
                 Director::baseURL(),
-                Config::inst()->get('DocumentationViewer', 'link_base'),
+                Config::inst()->get(DocumentationViewer::class, 'link_base'),
                 $this->getLanguage(),
                 '/'
             );
         } else {
             $base = Controller::join_links(
                 Director::baseURL(),
-                Config::inst()->get('DocumentationViewer', 'link_base'),
+                Config::inst()->get(DocumentationViewer::class, 'link_base'),
                 $this->getLanguage(),
                 $this->getKey(),
                 '/'

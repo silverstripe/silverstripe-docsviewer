@@ -1,4 +1,6 @@
 <?php
+namespace SilverStripe\DocsViewer\Models;
+
 
 /**
  * A specific documentation folder within a {@link DocumentationEntity}.

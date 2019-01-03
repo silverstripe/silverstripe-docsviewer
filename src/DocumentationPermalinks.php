@@ -1,4 +1,8 @@
 <?php
+namespace SilverStripe\DocsViewer;
+
+use SilverStripe\ORM\ArrayLib;
+
 
 /**
  * A mapping store of given permalinks to the full documentation path or useful

@@ -1,4 +1,11 @@
 <?php
+namespace SilverStripe\DocsViewer\Extensions;
+
+use SilverStripe\Core\Extension;
+use SilverStripe\ORM\FieldType\DBField;
+use SilverStripe\View\ArrayData;
+
+
 /**
  * @package docsviewer
  */

@@ -1,4 +1,11 @@
 <?php
+namespace SilverStripe\DocsViewer;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
+use SilverStripe\DocsViewer\Models\DocumentationPage;
+use ParsedownExtra;
+
 
 /**
  * Parser wrapping the Markdown Extra parser.
@@ -376,7 +383,7 @@ class DocumentationParser
     public static function rewrite_heading_anchors($md, $page)
     {
         $re = '/^\#+(.*)/m';
-        $md = preg_replace_callback($re, array('DocumentationParser', '_rewrite_heading_anchors_callback'), $md);
+        $md = preg_replace_callback($re, array(DocumentationParser::class, '_rewrite_heading_anchors_callback'), $md);
 
         return $md;
     }

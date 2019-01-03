@@ -1,4 +1,13 @@
 <?php
+namespace SilverStripe\DocsViewer\Extensions;
+
+use SilverStripe\Core\Convert;
+use SilverStripe\Core\Extension;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\DocsViewer\DocumentationSearch;
+use SilverStripe\DocsViewer\Forms\DocumentationAdvancedSearchForm;
+use SilverStripe\ORM\FieldType\DBField;
+
 
 class DocumentationSearchExtension extends Extension
 {
@@ -91,6 +100,6 @@ class DocumentationSearchExtension extends Extension
      */
     public function getAdvancedSearchEnabled()
     {
-        return Config::inst()->get("DocumentationSearch", 'advanced_search_enabled');
+        return Config::inst()->get(DocumentationSearch::class, 'advanced_search_enabled');
     }
 }

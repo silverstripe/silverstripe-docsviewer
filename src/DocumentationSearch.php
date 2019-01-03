@@ -1,4 +1,21 @@
 <?php
+namespace SilverStripe\DocsViewer;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Email\Email;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\DocsViewer\Tasks\RebuildLuceneDocsIndex;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\FieldType\DBField;
+use SilverStripe\View\ArrayData;
+use Zend_Search_Lucene;
+use Zend_Search_Lucene_Exception;
+use Zend_Search_Lucene_Index_Term;
+use Zend_Search_Lucene_Search_QueryParser;
+use Zend_Search_Lucene_Search_Query_Boolean;
+use Zend_Search_Lucene_Search_Query_MultiTerm;
+
 
 set_include_path(
     dirname(dirname(__FILE__)) . '/thirdparty/'. PATH_SEPARATOR .
@@ -136,10 +153,10 @@ class DocumentationSearch
      */
     public static function get_index_location()
     {
-        $location = Config::inst()->get('DocumentationSearch', 'index_location');
+        $location = Config::inst()->get(DocumentationSearch::class, 'index_location');
 
         if (!$location) {
-            return Controller::join_links(TEMP_FOLDER, 'RebuildLuceneDocsIndex');
+            return Controller::join_links(TEMP_FOLDER, RebuildLuceneDocsIndex::class);
         }
         
         return $location;
@@ -391,7 +408,7 @@ class DocumentationSearch
         $defaults = array(
             'Description' => _t('DocumentationViewer.OPENSEARCHDESC', 'Search the documentation'),
             'Tags' => _t('DocumentationViewer.OPENSEARCHTAGS', 'documentation'),
-            'Contact' => Config::inst()->get('Email', 'admin_email'),
+            'Contact' => Config::inst()->get(Email::class, 'admin_email'),
             'ShortName' => _t('DocumentationViewer.OPENSEARCHNAME', 'Documentation Search'),
             'Author' => 'SilverStripe'
         );

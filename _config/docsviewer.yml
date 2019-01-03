@@ -1,8 +1,7 @@
 ---
 name: docsviewer
 ---
-DocumentationViewer:
+SilverStripe\DocsViewer\Controllers\DocumentationViewer:
   google_analytics_code: ''
-DocumentationManifest:
+SilverStripe\DocsViewer\DocumentationManifest:
   automatic_registration: true
-

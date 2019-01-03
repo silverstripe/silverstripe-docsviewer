@@ -1,5 +1,16 @@
 <?php
 
+namespace SilverStripe\DocsViewer\Tests;
+
+
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Dev\FunctionalTest;
+use SilverStripe\DocsViewer\DocumentationPermalinks;
+use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
+use DataModel;
+
+
+
 /**
  * @package docsviewer
  * @subpackage tests
@@ -42,7 +53,7 @@ class DocumentationPermalinksTest extends FunctionalTest
         $this->autoFollowRedirection = false;
         
         $v = new DocumentationViewer();
-        $response = $v->handleRequest(new SS_HTTPRequest('GET', 'foo'), DataModel::inst());
+        $response = $v->handleRequest(new HTTPRequest('GET', 'foo'), DataModel::inst());
         
         $this->assertEquals('301', $response->getStatusCode());
         $this->assertContains('en/framework/subfolder/foo', $response->getHeader('Location'));

@@ -1,5 +1,20 @@
 <?php
 
+namespace SilverStripe\DocsViewer\Tests;
+
+
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Control\Director;
+use SilverStripe\Dev\SapphireTest;
+use SilverStripe\DocsViewer\Models\DocumentationEntity;
+use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
+use SilverStripe\DocsViewer\DocumentationManifest;
+use SilverStripe\DocsViewer\Models\DocumentationPage;
+use SilverStripe\DocsViewer\Models\DocumentationFolder;
+
+
+
+
 /**
  * @package docsviewer
  * @subpackage tests
@@ -20,7 +35,7 @@ class DocumentationPageTest extends SapphireTest
         Config::nest();
 
         // explicitly use dev/docs. Custom paths should be tested separately
-        Config::inst()->update('DocumentationViewer', 'link_base', 'dev/docs/');
+        Config::inst()->update(DocumentationViewer::class, 'link_base', 'dev/docs/');
 
         $manifest = new DocumentationManifest(true);
     }

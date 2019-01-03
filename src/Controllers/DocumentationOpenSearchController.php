@@ -1,4 +1,13 @@
 <?php
+namespace SilverStripe\DocsViewer\Controllers;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\DocsViewer\DocumentationSearch;
+use SilverStripe\Security\Security;
+use SilverStripe\View\ArrayData;
+
 
 /**
  * Public facing controller for handling an opensearch interface based on
@@ -26,7 +35,7 @@ class DocumentationOpenSearchController extends Controller
             return Security::permissionFailure($this);
         }
 
-        if (!Config::inst()->get('DocumentationSearch', 'enabled')) {
+        if (!Config::inst()->get(DocumentationSearch::class, 'enabled')) {
             return $this->httpError('404');
         }
         
