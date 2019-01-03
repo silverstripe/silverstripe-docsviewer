@@ -14,9 +14,9 @@
         "irc": "irc://irc.freenode.org/silverstripe"
     },
 	"require": {
-        "silverstripe/framework": "~3.1",
-        "erusev/parsedown-extra": "~0.2",
-        "erusev/parsedown": "~1.1",
+        "silverstripe/framework": "~4.3",
+        "erusev/parsedown-extra": "~0.7",
+        "erusev/parsedown": "~1.7",
         "mnapoli/front-yaml": "^1.5"
     },
     "suggest": {
