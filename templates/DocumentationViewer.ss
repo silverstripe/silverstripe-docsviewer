@@ -8,7 +8,7 @@
 			<div class="menu-bar">
 				<a class="logo" href="https://userhelp.silverstripe.org/"></a>
 				<a class="menu-open">
-					<%t DocumentationViewer.MENU "Menu" %>
+					<%t SilverStripe\\DocsViewer\\Controllers\\DocumentationViewer.MENU "Menu" %>
 				</a>
 			</div>
 

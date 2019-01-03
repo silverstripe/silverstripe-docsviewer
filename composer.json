@@ -1,7 +1,7 @@
 {
     "name": "silverstripe/docsviewer",
     "description": "Documentation viewer module for SilverStripe",
-    "type": "silverstripe-module",
+    "type": "silverstripe-vendormodule",
     "keywords": ["silverstripe", "documentation"],
     "license": "BSD-3-Clause",
     "authors": [{
@@ -17,7 +17,7 @@
         "silverstripe/framework": "~4.3",
         "erusev/parsedown-extra": "~0.7",
         "erusev/parsedown": "~1.7",
-        "mnapoli/front-yaml": "^1.5"
+        "mnapoli/front-yaml": "^1.6"
     },
     "suggest": {
         "silverstripe/staticpublisher": "Allows publishing documentation as HTML"

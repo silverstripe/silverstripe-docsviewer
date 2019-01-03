@@ -131,21 +131,21 @@ class DocumentationViewer extends Controller implements PermissionProvider
             Requirements::combine_files(
                 'docs.js',
                 array(
-                    THIRDPARTY_DIR .'/jquery/jquery.js',
-                    DOCSVIEWER_DIR .'/thirdparty/highlight/highlight.pack.js',
-                    DOCSVIEWER_DIR .'/javascript/DocumentationViewer.js',
+                    'silverstripe/admin: thirdparty/jquery/jquery.js',
+                    'silverstripe/docsviewer: thirdparty/highlight/highlight.pack.js',
+                    'silverstripe/docsviewer: javascript/DocumentationViewer.js',
                 )
             );
             Requirements::combine_files(
                 'docs.css',
                 array(
-                    DOCSVIEWER_DIR .'/css/highlight.css',
-                    DOCSVIEWER_DIR .'/css/normalize.css',
-                    DOCSVIEWER_DIR .'/css/utilities.css',
-                    DOCSVIEWER_DIR .'/css/typography.css',
-                    DOCSVIEWER_DIR .'/css/forms.css',
-                    DOCSVIEWER_DIR .'/css/layout.css',
-                    DOCSVIEWER_DIR .'/css/small.css'
+                    'silverstripe/docsviewer: css/highlight.css',
+                    'silverstripe/docsviewer: css/normalize.css',
+                    'silverstripe/docsviewer: css/utilities.css',
+                    'silverstripe/docsviewer: css/typography.css',
+                    'silverstripe/docsviewer: css/forms.css',
+                    'silverstripe/docsviewer: css/layout.css',
+                    'silverstripe/docsviewer: css/small.css'
                 )
             );
         }

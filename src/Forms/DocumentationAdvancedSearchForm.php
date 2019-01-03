@@ -38,18 +38,18 @@ class DocumentationAdvancedSearchForm extends Form
         }
 
         $fields = FieldList::create(
-            TextField::create('q', _t('DocumentationViewer.KEYWORDS', 'Keywords'), $q),
+            TextField::create('q', _t('SilverStripe\\DocsViewer\\Controllers\\DocumentationViewer.KEYWORDS', 'Keywords'), $q),
             //CheckboxSetField::create('Entities', _t('DocumentationViewer.MODULES', 'Modules'), $entities, $searchedEntities),
             CheckboxSetField::create(
                 'Versions',
-                _t('DocumentationViewer.VERSIONS', 'Versions'),
+                _t('SilverStripe\\DocsViewer\\Controllers\\DocumentationViewer.VERSIONS', 'Versions'),
                 $versions,
                 $searchedVersions
             )
         );
 
         $actions = FieldList::create(
-            FormAction::create('results', _t('DocumentationViewer.SEARCH', 'Search'))
+            FormAction::create('results', _t('SilverStripe\\DocsViewer\\Controllers\\DocumentationViewer.SEARCH', 'Search'))
         );
         
         $required = RequiredFields::create(array('Search'));

@@ -1,6 +1,7 @@
 <?php
 namespace SilverStripe\DocsViewer;
 
+use Psr\SimpleCache\CacheInterface;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Config;
@@ -13,7 +14,6 @@ use SilverStripe\ORM\ArrayList;
 use SilverStripe\View\ArrayData;
 use SilverStripe\i18n\i18n;
 use Exception;
-use SS_Cache;
 
 
 /**
@@ -105,14 +105,7 @@ class DocumentationManifest
         $this->forceRegen = $forceRegen;
         $this->registeredEntities = new ArrayList();
 
-        $this->cache = SS_Cache::factory(
-            DocumentationManifest::class,
-            'Core',
-            array(
-            'automatic_serialization' => true,
-            'lifetime' => null
-            )
-        );
+        $this->cache = Injector::inst()->get(CacheInterface::class.'.DocsViewerManifest');
 
         $this->setupEntities();
     }
@@ -169,10 +162,10 @@ class DocumentationManifest
             $langs = scandir($path);
 
             if ($langs) {
-                $possible = i18n::get_common_languages(true);
+                $possible = i18n::getData()->getLanguages();
 
-                foreach ($langs as $k => $lang) {
-                    if (isset($possible[$lang])) {
+                foreach ($langs as $lang) {
+                    if (array_key_exists($lang, $possible)) {
                         /**
                          * @var DocumentationEntity $entity
                          */
@@ -237,6 +230,8 @@ class DocumentationManifest
             return;
         }
 
+        $entities = [];
+
         foreach (scandir(BASE_PATH) as $key => $entity) {
             if ($key == "themes") {
                 continue;
@@ -274,7 +269,8 @@ class DocumentationManifest
      */
     protected function init()
     {
-        if (!$this->forceRegen && $data = $this->cache->load($this->cacheKey)) {
+        if (!$this->forceRegen && $this->cache->has($this->cacheKey)) {
+            $data = $this->cache->get($this->cacheKey);
             $this->pages = $data['pages'];
             $this->redirects = $data['redirects'];
             $this->inited    = true;
@@ -414,12 +410,12 @@ class DocumentationManifest
         }
 
         if ($cache) {
-            $this->cache->save(
+            $this->cache->set(
+                $this->cacheKey,
                 array(
                     'pages' => $this->pages,
                     'redirects' => $this->redirects
-                ),
-                $this->cacheKey
+                )
             );
         }
 
@@ -853,7 +849,7 @@ class DocumentationManifest
             if ($entity->getVersion()) {
                 $versions[$entity->getVersion()] = $entity->getVersion();
             } else {
-                $versions['0.0'] = _t('DocumentationManifest.MASTER', 'Master');
+                $versions['0.0'] = _t('SilverStripe\\DocsViewer\\DocumentationManifest.MASTER', 'Master');
             }
         }
 

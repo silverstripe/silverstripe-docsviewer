@@ -1,8 +1,8 @@
 hr:
-  DocumentationSearch:
+  SilverStripe\DocsViewer\Search\DocumentationSearch:
     SEARCH: Traži
     SEARCHRESULTS: 'Rezultati pretraživanja'
-  DocumentationViewer:
+  SilverStripe\DocsViewer\Controllers\DocumentationViewer:
     CHANGE: Promjeni
     KEYWORDS: Ključne riječi
     LANGUAGE: Jezik

@@ -13,8 +13,8 @@ class DocumentationSearchForm extends Form
     public function __construct($controller)
     {
         $fields = new FieldList(
-            TextField::create('q', _t('DocumentationViewer.SEARCH', 'Search'), '')
-                ->setAttribute('placeholder', _t('DocumentationViewer.SEARCH', 'Search'))
+            TextField::create('q', _t('SilverStripe\\DocsViewer\\Controllers\\DocumentationViewer.SEARCH', 'Search'), '')
+                ->setAttribute('placeholder', _t('SilverStripe\\DocsViewer\\Controllers\\DocumentationViewer.SEARCH', 'Search'))
         );
 
         $page = $controller->getPage();
@@ -22,7 +22,7 @@ class DocumentationSearchForm extends Form
         if ($page) {
             $versions = HiddenField::create(
                 'Versions',
-                _t('DocumentationViewer.VERSIONS', 'Versions'),
+                _t('SilverStripe\\DocsViewer\\Controllers\\DocumentationViewer.VERSIONS', 'Versions'),
                 $page->getEntity()->getVersion()
             );
 
@@ -30,7 +30,7 @@ class DocumentationSearchForm extends Form
         }
 
         $actions = new FieldList(
-            new FormAction('results', _t('DocumentationViewer.SEARCH', 'Search'))
+            new FormAction('results', _t('SilverStripe\\DocsViewer\\Controllers\\DocumentationViewer.SEARCH', 'Search'))
         );
 
         parent::__construct($controller, DocumentationSearchForm::class, $fields, $actions);

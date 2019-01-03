@@ -404,4 +404,15 @@ class DocumentationPage extends ViewableData
         }
         return $this->canonicalUrl;
     }
+
+    /**
+     * Get the type of this documentation page
+     *
+     * @return string
+     */
+    public function getType()
+    {
+        $classPath=explode('\\', get_class($this));
+        return array_pop($classPath);
+    }
 }

@@ -218,7 +218,7 @@ class DocumentationSearch
             'Query' => null,
             'Versions' => DBField::create_field('Text', implode(', ', $this->versions)),
             'Modules' => DBField::create_field('Text', implode(', ', $this->modules)),
-            'Title' => _t('DocumentationSearch.SEARCHRESULTS', 'Search Results'),
+            'Title' => _t('SilverStripe\\DocsViewer\\DocumentationSearch.SEARCHRESULTS', 'Search Results'),
             'TotalResults' => null,
             'TotalPages' => null,
             'ThisPage' => null,
@@ -376,7 +376,7 @@ class DocumentationSearch
      */
     public function getTitle()
     {
-        return ($this->outputController) ? $this->outputController->Title : _t('DocumentationSearch.SEARCH', 'Search');
+        return ($this->outputController) ? $this->outputController->Title : _t('SilverStripe\\DocsViewer\\DocumentationSearch.SEARCH', 'Search');
     }
     
     /**
@@ -406,10 +406,10 @@ class DocumentationSearch
         $data = self::$meta_data;
         
         $defaults = array(
-            'Description' => _t('DocumentationViewer.OPENSEARCHDESC', 'Search the documentation'),
-            'Tags' => _t('DocumentationViewer.OPENSEARCHTAGS', 'documentation'),
+            'Description' => _t('SilverStripe\\DocsViewer\\Controllers\\DocumentationViewer.OPENSEARCHDESC', 'Search the documentation'),
+            'Tags' => _t('SilverStripe\\DocsViewer\\Controllers\\DocumentationViewer.OPENSEARCHTAGS', 'documentation'),
             'Contact' => Config::inst()->get(Email::class, 'admin_email'),
-            'ShortName' => _t('DocumentationViewer.OPENSEARCHNAME', 'Documentation Search'),
+            'ShortName' => _t('SilverStripe\\DocsViewer\\Controllers\\DocumentationViewer.OPENSEARCHNAME', 'Documentation Search'),
             'Author' => 'SilverStripe'
         );
         

@@ -1,0 +1,11 @@
+---
+Name: docsviewer_cache
+After:
+    - "#corecache"
+---
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.DocsViewerManifest:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: "DocsViewerManifest"
+      defaultLifetime: 0
