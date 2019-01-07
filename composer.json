@@ -14,7 +14,7 @@
         "irc": "irc://irc.freenode.org/silverstripe"
     },
 	"require": {
-        "silverstripe/recipe-core": "~4.3",
+        "silverstripe/framework": "~4.3",
         "erusev/parsedown-extra": "~0.7",
         "erusev/parsedown": "~1.7",
         "mnapoli/front-yaml": "^1.6"
@@ -32,5 +32,7 @@
         "branch-alias": {
             "dev-master": "3.x-dev"
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
