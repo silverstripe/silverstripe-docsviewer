@@ -3,14 +3,13 @@
 namespace SilverStripe\DocsViewer\Tests;
 
 
-use SilverStripe\Core\Config\Config;
-use SilverStripe\View\SSViewer;
-use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\Director;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\FunctionalTest;
-use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
 use SilverStripe\DocsViewer\DocumentationManifest;
-use DataModel;
+use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
+use SilverStripe\View\SSViewer;
 
 
 
@@ -164,7 +163,7 @@ class DocumentationViewerTest extends FunctionalTest
     {
         $v = new DocumentationViewer();
         // check with children
-        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.3/'), DataModel::inst());
+        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.3/'));
 
         $expected = array(
             Director::baseURL() . 'dev/docs/en/doc_test/2.3/sort/' => 'Sort',
@@ -176,7 +175,7 @@ class DocumentationViewerTest extends FunctionalTest
         $this->assertEquals($expected, $actual);
 
 
-        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.4/'), DataModel::inst());
+        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.4/'));
         $this->assertEquals('current', $v->getMenu()->first()->LinkingMode);
 
         // 2.4 stable release has 1 child page (not including index)
@@ -197,11 +196,11 @@ class DocumentationViewerTest extends FunctionalTest
     public function testGetLanguage()
     {
         $v = new DocumentationViewer();
-        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.3/'), DataModel::inst());
+        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.3/'));
 
         $this->assertEquals('en', $v->getLanguage());
 
-        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.3/subfolder/subsubfolder/subsubpage/'), DataModel::inst());
+        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.3/subfolder/subsubfolder/subsubpage/'));
         $this->assertEquals('en', $v->getLanguage());
     }
 
