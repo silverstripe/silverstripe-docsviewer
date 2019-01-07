@@ -10,7 +10,6 @@ use SilverStripe\DocsViewer\DocumentationParser;
 use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
 use SilverStripe\DocsViewer\Models\DocumentationEntity;
 use SilverStripe\DocsViewer\Models\DocumentationPage;
-use SilverStripe\ORM\DataObject;
 
 
 /**
@@ -41,7 +40,7 @@ class DocumentationParserTest extends SapphireTest
             'dev/docs/'
         );
 
-        $this->entity = new DocumentationEntity(DocumentationParserTest::class);
+        $this->entity = new DocumentationEntity('DocumentationParserTest');
         $this->entity->setPath(DOCSVIEWER_PATH . '/tests/docs/en/');
         $this->entity->setVersion('2.4');
         $this->entity->setLanguage('en');
@@ -310,10 +309,11 @@ HTML;
 
         $expected = Controller::join_links(
             Director::absoluteBaseURL(),
+            'resources',
             DOCSVIEWER_DIR,
             '/tests/docs/en/subfolder/_images/image.png'
         );
-
+        
         $this->assertContains(
             sprintf('[relative image link](%s)', $expected),
             $result
@@ -324,6 +324,7 @@ HTML;
                 '[parent image link](%s)',
                 Controller::join_links(
                     Director::absoluteBaseURL(),
+                    'resources',
                     DOCSVIEWER_DIR,
                     '/tests/docs/en/_images/image.png'
                 )
@@ -333,6 +334,7 @@ HTML;
 
         $expected = Controller::join_links(
             Director::absoluteBaseURL(),
+            'resources',
             DOCSVIEWER_DIR,
             '/tests/docs/en/_images/image.png'
         );
@@ -364,10 +366,10 @@ HTML;
             array('`[Title](api:DataObject)`','`[Title](api:DataObject)`'),
             array('`[Title](api:DataObject::$defaults)`','`[Title](api:DataObject::$defaults)`'),
             array('`[Title](api:DataObject::populateDefaults())`','`[Title](api:DataObject::populateDefaults())`'),
-            array('[api:DataObject]', sprintf($html_format, DataObject::class, DataObject::class)),
+            array('[api:DataObject]', sprintf($html_format, 'DataObject', 'DataObject')),
             array('[api:DataObject::$defaults]',sprintf($html_format, 'DataObject::$defaults', 'DataObject::$defaults')),
             array('[api:DataObject::populateDefaults()]',sprintf($html_format, 'DataObject::populateDefaults()', 'DataObject::populateDefaults()')),
-            array('[Title](api:DataObject)',sprintf($html_format, DataObject::class, 'Title')),
+            array('[Title](api:DataObject)',sprintf($html_format, 'DataObject', 'Title')),
             array('[Title](api:DataObject::$defaults)',sprintf($html_format, 'DataObject::$defaults', 'Title')),
             array('[Title](api:DataObject::populateDefaults())',sprintf($html_format, 'DataObject::populateDefaults()', 'Title'))
         );

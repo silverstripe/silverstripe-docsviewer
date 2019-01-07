@@ -72,6 +72,10 @@ class DocumentationViewerTest extends FunctionalTest
                     'Path' => DOCSVIEWER_PATH . "/tests/docs-parser/",
                     'Title' => 'DocumentationViewerAltModule1'
                 ),
+                array(
+                    'Path' => DOCSVIEWER_PATH . "/tests/docs-manifest/",
+                    'Title' => 'DocumentationViewerAltModule2'
+                )
             )
         );
 
@@ -173,12 +177,13 @@ class DocumentationViewerTest extends FunctionalTest
             Director::baseURL() . 'dev/docs/en/doc_test/2.3/test/' => 'Test'
         );
 
-        $actual = $v->getMenu()->first()->Children->map('Link', 'Title');
+        $actual = $v->getMenu()->first()->Children->map('Link', 'Title')->toArray();
         $this->assertEquals($expected, $actual);
 
 
         $request = new HTTPRequest('GET', 'en/doc_test/2.4/');
         $request->setSession($session);
+        $response = $v->handleRequest($request);
         $this->assertEquals('current', $v->getMenu()->first()->LinkingMode);
 
         // 2.4 stable release has 1 child page (not including index)
@@ -191,7 +196,7 @@ class DocumentationViewerTest extends FunctionalTest
             Director::baseURL() . 'dev/docs/en/documentationvieweraltmodule2/' => 'DocumentationViewerAltModule2'
         );
 
-        $this->assertEquals($expected, $v->getMenu()->map('Link', 'Title'));
+        $this->assertEquals($expected, $v->getMenu()->map('Link', 'Title')->toArray());
     }
 
 

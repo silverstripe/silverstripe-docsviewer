@@ -255,7 +255,7 @@ class DocumentationParser
                     $relativeUrl = DocumentationHelper::normalizePath(
                         str_replace(
                             BASE_PATH,
-                            '',
+                            'resources',
                             Controller::join_links(
                                 $page->getEntity()->getPath(),
                                 $url
@@ -263,7 +263,7 @@ class DocumentationParser
                         )
                     );
                 } else {
-                    $relativeUrl = 'resources/' . rtrim($baselink, '/') . '/' . ltrim($url, '/');
+                    $relativeUrl = 'resources' . rtrim($baselink, '/') . '/' . ltrim($url, '/');
                 }
 
                 // Resolve relative paths

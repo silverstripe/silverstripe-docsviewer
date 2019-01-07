@@ -15,6 +15,7 @@
     },
 	"require": {
         "silverstripe/framework": "~4.3",
+        "silverstripe/admin": "^1.3",
         "erusev/parsedown-extra": "~0.7",
         "erusev/parsedown": "~1.7",
         "mnapoli/front-yaml": "^1.6"
