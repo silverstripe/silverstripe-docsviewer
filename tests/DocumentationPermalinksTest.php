@@ -1,13 +1,12 @@
 <?php
-
 namespace SilverStripe\DocsViewer\Tests;
 
-
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\Session;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\DocsViewer\DocumentationPermalinks;
 use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
-
 
 
 /**
@@ -52,7 +51,9 @@ class DocumentationPermalinksTest extends FunctionalTest
         $this->autoFollowRedirection = false;
         
         $v = new DocumentationViewer();
-        $response = $v->handleRequest(new HTTPRequest('GET', 'foo'));
+        $request = new HTTPRequest('GET', 'foo');
+        $request->setSession(Injector::inst()->create(Session::class, array()));
+        $response = $v->handleRequest($request);
         
         $this->assertEquals('301', $response->getStatusCode());
         $this->assertContains('en/framework/subfolder/foo', $response->getHeader('Location'));

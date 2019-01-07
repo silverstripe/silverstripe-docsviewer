@@ -1,16 +1,15 @@
 <?php
-
 namespace SilverStripe\DocsViewer\Tests;
-
 
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\Session;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\DocsViewer\DocumentationManifest;
 use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
 use SilverStripe\View\SSViewer;
-
 
 
 /**
@@ -85,7 +84,7 @@ class DocumentationViewerTest extends FunctionalTest
     {
         parent::tearDown();
 
-        Config::unnest();
+        @Config::unnest();
     }
 
     /**
@@ -162,8 +161,11 @@ class DocumentationViewerTest extends FunctionalTest
     public function testGetMenu()
     {
         $v = new DocumentationViewer();
+        $session = Injector::inst()->create(Session::class, array());
         // check with children
-        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.3/'));
+        $request = new HTTPRequest('GET', 'en/doc_test/2.3/');
+        $request->setSession($session);
+        $response = $v->handleRequest($request);
 
         $expected = array(
             Director::baseURL() . 'dev/docs/en/doc_test/2.3/sort/' => 'Sort',
@@ -175,7 +177,8 @@ class DocumentationViewerTest extends FunctionalTest
         $this->assertEquals($expected, $actual);
 
 
-        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.4/'));
+        $request = new HTTPRequest('GET', 'en/doc_test/2.4/');
+        $request->setSession($session);
         $this->assertEquals('current', $v->getMenu()->first()->LinkingMode);
 
         // 2.4 stable release has 1 child page (not including index)
@@ -196,11 +199,16 @@ class DocumentationViewerTest extends FunctionalTest
     public function testGetLanguage()
     {
         $v = new DocumentationViewer();
-        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.3/'));
+        $session = Injector::inst()->create(Session::class, array());
+        $request = new HTTPRequest('GET', 'en/doc_test/2.3/');
+        $request->setSession($session);
+        $response = $v->handleRequest($request);
 
         $this->assertEquals('en', $v->getLanguage());
 
-        $response = $v->handleRequest(new HTTPRequest('GET', 'en/doc_test/2.3/subfolder/subsubfolder/subsubpage/'));
+        $request = new HTTPRequest('GET', 'en/doc_test/2.3/subfolder/subsubfolder/subsubpage/');
+        $request->setSession($session);
+        $response = $v->handleRequest($request);
         $this->assertEquals('en', $v->getLanguage());
     }
 

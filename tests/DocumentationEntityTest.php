@@ -1,12 +1,8 @@
 <?php
-
 namespace SilverStripe\DocsViewer\Tests;
-
 
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\DocsViewer\Models\DocumentationEntity;
-
-
 
 
 class DocumentationEntityTest extends SapphireTest

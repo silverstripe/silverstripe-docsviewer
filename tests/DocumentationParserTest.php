@@ -1,22 +1,16 @@
 <?php
-
 namespace SilverStripe\DocsViewer\Tests;
 
-
-use SilverStripe\Core\Config\Config;
-use SilverStripe\Control\Director;
 use SilverStripe\Control\Controller;
-use SilverStripe\ORM\DataObject;
+use SilverStripe\Control\Director;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\DocsViewer\DocumentationManifest;
+use SilverStripe\DocsViewer\DocumentationParser;
 use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
 use SilverStripe\DocsViewer\Models\DocumentationEntity;
 use SilverStripe\DocsViewer\Models\DocumentationPage;
-use SilverStripe\DocsViewer\DocumentationManifest;
-use SilverStripe\DocsViewer\DocumentationParser;
-use SilverStripe\DocsViewer\Tests\DocumentationParserTest;
-
-
-
+use SilverStripe\ORM\DataObject;
 
 
 /**
@@ -31,7 +25,7 @@ class DocumentationParserTest extends SapphireTest
     {
         parent::tearDown();
 
-        Config::unnest();
+        @Config::unnest();
     }
 
     public function setUp()

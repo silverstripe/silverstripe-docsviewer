@@ -1,14 +1,10 @@
 <?php
-
 namespace SilverStripe\DocsViewer\Tests;
-
 
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
 use SilverStripe\DocsViewer\DocumentationManifest;
-
-
+use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
 
 
 /**
