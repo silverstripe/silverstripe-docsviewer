@@ -74,10 +74,6 @@ class DocumentationViewerTest extends FunctionalTest
                     'Path' => DOCSVIEWER_PATH . "/tests/docs-parser/",
                     'Title' => 'DocumentationViewerAltModule1'
                 ),
-                array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-search/",
-                    'Title' => 'DocumentationViewerAltModule2'
-                )
             )
         );
 

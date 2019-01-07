@@ -5,4 +5,3 @@ After: framework/routes#coreroutes
 SilverStripe\Control\Director:
   rules:
     dev/docs//$Action/$ID/$OtherID: SilverStripe\DocsViewer\Controllers\DocumentationViewer
-    DocumentationOpenSearchController//$Action: SilverStripe\DocsViewer\Controllers\DocumentationOpenSearchController

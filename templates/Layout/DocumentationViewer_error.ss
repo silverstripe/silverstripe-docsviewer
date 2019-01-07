@@ -6,7 +6,6 @@
 			<h5>Perhaps you could&#8230;</h5>
 			<ul>
 				<li>Return to the <a href="$BaseHref">homepage</a></li> 
-				<li>Try searching for the page (see input box on the top right).</li>
 			</ul>
 		</div>
 	</div>

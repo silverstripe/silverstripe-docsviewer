@@ -10,10 +10,7 @@ use SilverStripe\Dev\SapphireTest;
 use SilverStripe\DocsViewer\DocumentationHelper;
 use SilverStripe\DocsViewer\DocumentationManifest;
 use SilverStripe\DocsViewer\DocumentationPermalinks;
-use SilverStripe\DocsViewer\DocumentationSearch;
-use SilverStripe\DocsViewer\Extensions\DocumentationSearchExtension;
 use SilverStripe\DocsViewer\Extensions\DocumentationViewerVersionWarning;
-use SilverStripe\DocsViewer\Forms\DocumentationSearchForm;
 use SilverStripe\DocsViewer\Models\DocumentationFolder;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\GroupedList;
@@ -46,7 +43,6 @@ class DocumentationViewer extends Controller implements PermissionProvider
      */
     private static $extensions = array(
         DocumentationViewerVersionWarning::class,
-        DocumentationSearchExtension::class
     );
 
     /**
@@ -666,21 +662,6 @@ class DocumentationViewer extends Controller implements PermissionProvider
     public function getAllVersionPages()
     {
         return $this->AllPages($this->getRequestedVersion());
-    }
-
-    /**
-     * Documentation Search Form. Allows filtering of the results by many entities
-     * and multiple versions.
-     *
-     * @return Form
-     */
-    public function DocumentationSearchForm()
-    {
-        if (!Config::inst()->get(DocumentationSearch::class, 'enabled')) {
-            return false;
-        }
-
-        return new DocumentationSearchForm($this);
     }
 
     /**
