@@ -335,6 +335,7 @@ class DocumentationPage extends ViewableData
         //
         // get the text up to the first empty line
         $extPattern = "/^(.+)\n\r*\n/Uis";
+        $block = [];
         $matches = preg_match($extPattern, $md, $block);
 
         if ($matches && $block[1]) {
