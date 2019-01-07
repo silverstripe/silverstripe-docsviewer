@@ -492,6 +492,7 @@ class DocumentationParser
                 if (preg_match('/_images/', $url)) {
                     $relativeUrl = Controller::join_links(
                         Director::absoluteBaseURL(),
+                        'resources',
                         $fileBaseLink,
                         $url
                     );

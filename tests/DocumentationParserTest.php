@@ -457,12 +457,12 @@ HTML;
         $parsed = DocumentationParser::parse($this->filePage);
 
         $this->assertContains(
-            DOCSVIEWER_DIR .'/tests/docs-parser/en/_images/external_link.png',
+            'resources/' . DOCSVIEWER_DIR .'/tests/docs-parser/en/_images/external_link.png',
             $parsed
         );
 
         $this->assertContains(
-            DOCSVIEWER_DIR .'/tests/docs-parser/en/_images/test.tar.gz',
+            'resources/' . DOCSVIEWER_DIR .'/tests/docs-parser/en/_images/test.tar.gz',
             $parsed
         );
     }
