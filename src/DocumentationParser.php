@@ -263,7 +263,7 @@ class DocumentationParser
                         )
                     );
                 } else {
-                    $relativeUrl = rtrim($baselink, '/') . '/' . ltrim($url, '/');
+                    $relativeUrl = 'resources/' . rtrim($baselink, '/') . '/' . ltrim($url, '/');
                 }
 
                 // Resolve relative paths
