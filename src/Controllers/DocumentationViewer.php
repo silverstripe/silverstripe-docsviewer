@@ -6,7 +6,7 @@ use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\Dev\SapphireTest;
+use SilverStripe\Dev\DevelopmentAdmin;
 use SilverStripe\DocsViewer\DocumentationHelper;
 use SilverStripe\DocsViewer\DocumentationManifest;
 use SilverStripe\DocsViewer\DocumentationPermalinks;
@@ -199,6 +199,10 @@ class DocumentationViewer extends Controller implements PermissionProvider
      */
     public function handleAction($request, $action)
     {
+        if ($request->param('Controller') == DevelopmentAdmin::class && $request->param('Action') == 'docs') {
+            $request->shiftAllParams();
+        }
+
         // if we submitted a form, let that pass
         if (!$request->isGET() && !$request->isHEAD()) {
             return parent::handleAction($request, $action);
@@ -258,7 +262,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
         // as we use it for generic interfaces and language selection. If
         // language is not set, redirects to 'en'
         //
-        $languages = i18n::get_common_languages();
+        $languages = i18n::getData()->getLanguages();
 
         if (!$lang = $request->param('Lang')) {
             $lang = $request->param('Action');
@@ -306,10 +310,10 @@ class DocumentationViewer extends Controller implements PermissionProvider
                 $this->record = $record;
                 $this->init();
 
-                $type = get_class($this->record);
+                $type = $this->record->getType();
                 $body = $this->renderWith(
                     array(
-                        "DocumentationViewer_{$type}",
+                        DocumentationViewer::class . "_{$type}",
                         DocumentationViewer::class
                     )
                 );
@@ -322,7 +326,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
             } elseif (!$url || $url == $lang) {
                 $body = $this->renderWith(
                     array(
-                        'DocumentationViewer_DocumentationFolder',
+                        DocumentationViewer::class . '_DocumentationFolder',
                         DocumentationViewer::class
                     )
                 );
@@ -362,7 +366,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
     public function getManifest()
     {
         if (!$this->manifest) {
-            $flush = SapphireTest::is_running_test() || (isset($_GET['flush']));
+            $flush = Director::isTest() || (isset($_GET['flush']));
 
             $this->manifest = new DocumentationManifest($flush);
         }
@@ -505,7 +509,7 @@ class DocumentationViewer extends Controller implements PermissionProvider
                     'Children' => $children
                 )
             )
-        )->renderWith('Includes/DocumentationPages');
+        )->renderWith('SilverStripe/DocsViewer/Controllers/Includes/DocumentationPages');
     }
 
     /**

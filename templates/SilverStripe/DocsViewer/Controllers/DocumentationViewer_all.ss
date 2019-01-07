@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <html>
-	<% include DocumentationHead %>
+	<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationHead %>
 
 	<div id="masthead" <% if Versions %>class="has_versions"<% end_if %>>
 		<div class="wrapper">
@@ -24,12 +24,12 @@
 
 				$Layout
 
-				<% include DocumentationFooter %>
+				<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationFooter %>
 
 		</div>
 	</div>
 
 
-	<% include DocumentationGA %>
-	<% include DocumentationEnd %>
+	<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationGA %>
+	<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationEnd %>
 </html>

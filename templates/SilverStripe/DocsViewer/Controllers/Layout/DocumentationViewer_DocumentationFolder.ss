@@ -9,21 +9,21 @@
 		</div>
 
 		<% if Breadcrumbs %>
-			<% include DocumentationBreadcrumbs %>
+			<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationBreadcrumbs %>
 		<% end_if %>
 	<% else %>
 		<% if Breadcrumbs %>
-			<% include DocumentationBreadcrumbs %>
+			<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationBreadcrumbs %>
 		<% end_if %>
 
 		<h1>$Title</h1>
 	<% end_if %>
 
 	<% if VersionWarning %>
-		<% include DocumentationVersion_warning %>
+		<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationVersion_warning %>
 	<% end_if %>
 
-	<% include DocumentationTableContents %>
+	<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationTableContents %>
 
 	<% if Children %>
 		<div class="documentation_children">
@@ -49,5 +49,5 @@
 		</div>
 	<% end_if %>
 
-	<% include DocumentationNextPrevious %>
+	<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationNextPrevious %>
 </div>

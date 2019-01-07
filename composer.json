@@ -23,6 +23,12 @@
         "silverstripe/staticpublisher": "Allows publishing documentation as HTML"
     },
     "extra": {
+        "expose": [
+            "css",
+            "javascript",
+            "images",
+            "thirdparty"
+        ],
         "branch-alias": {
             "dev-master": "3.x-dev"
         }

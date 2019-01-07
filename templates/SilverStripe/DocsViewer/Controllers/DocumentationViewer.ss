@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <html>
-	<% include DocumentationHead %>
+	<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationHead %>
 
 	<div id="masthead" <% if Versions %>class="has_versions"<% end_if %>>
 		<div class="wrapper">
@@ -13,7 +13,7 @@
 			</div>
 
 			<% if Breadcrumbs.count > 1 %>
-				<% include DocumentationBreadcrumbs %>
+				<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationBreadcrumbs %>
 			<% else_if Page.Title %>
 				<h1>$Page.Title</h1>
 			<% end_if %>
@@ -23,24 +23,24 @@
 				</div>
 			<% end_if %>
 
-			<% include DocumentationVersions %>
+			<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationVersions %>
 		</div>
 	</div>
 
 	<div class="wrapper">
 		<div id="layout" class="clearfix">
 
-			<% include DocumentationSidebar %>
+			<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationSidebar %>
 
 			<div id="content">
 				$Layout
 
-				<% include DocumentationFooter %>
+				<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationFooter %>
 			</div>
 		</div>
 	</div>
 
 
-	<% include DocumentationGA %>
-	<% include DocumentationEnd %>
+	<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationGA %>
+	<% include SilverStripe\\DocsViewer\\Controllers\\DocumentationEnd %>
 </html>

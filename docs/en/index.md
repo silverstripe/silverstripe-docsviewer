@@ -49,35 +49,6 @@ page.
 See [Writing Documentation](writing-documentation)
 for more information on how to write markdown files which are available here. 
 
-
-## Enabling Search
-
-The module provides automatic search functionality via [Lucene Search](http://lucene.apache.org/java/docs/index.html). 
-
-To enable search you need to add the following to your applications _config.php 
-file:
-
-	DocumentationSearch::enable();
-	
-After adding that line you will also need to build the indexes of the search. 
-
-You can do this either via your web browser by accessing
-
-	http://yoursite.com/dev/tasks/RebuildLuceneDocsIndex?flush=1
-	
-Or rebuild it via sake. You will want to set this up as a cron job if your 
-documentation search needs to be updated on the fly
-
-	sake dev/tasks/RebuildLuceneDocsIndex flush=1
-
-## Advanced Search
-
-Advanced Search is enabled by default on the searchresults page, allowing you to 
-extend your search over multiple modules and/or versions. Advanced search can 
-be disabled from your _config.php like this:
-
-	DocumentationSearch::enable_advanced_search(false);
-
 ## Using a URL other than /dev/docs/
 
 By default, the documentation is available in `dev/docs`. If you want it to 
