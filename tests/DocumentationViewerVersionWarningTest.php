@@ -47,20 +47,20 @@ class DocumentationViewerVersionWarningTest extends SapphireTest
             'register_entities',
             array(
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs/",
+                    'Path' => dirname(__FILE__) ."/docs/",
                     'Title' => 'Doc Test',
                     'Key' => 'testdocs',
                     'Version' => '2.3'
                 ),
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-v2.4/",
+                    'Path' => dirname(__FILE__) ."/docs-v2.4/",
                     'Title' => 'Doc Test',
                     'Version' => '2.4',
                     'Key' => 'testdocs',
                     'Stable' => true
                 ),
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-v3.0/",
+                    'Path' => dirname(__FILE__) ."/docs-v3.0/",
                     'Title' => 'Doc Test',
                     'Key' => 'testdocs',
                     'Version' => '3.0'

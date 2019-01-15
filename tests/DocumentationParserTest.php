@@ -41,50 +41,50 @@ class DocumentationParserTest extends SapphireTest
         );
 
         $this->entity = new DocumentationEntity('DocumentationParserTest');
-        $this->entity->setPath(DOCSVIEWER_PATH . '/tests/docs/en/');
+        $this->entity->setPath(dirname(__FILE__) .'/docs/en/');
         $this->entity->setVersion('2.4');
         $this->entity->setLanguage('en');
 
 
         $this->entityAlt = new DocumentationEntity('DocumentationParserParserTest');
-        $this->entityAlt->setPath(DOCSVIEWER_PATH . '/tests/docs-parser/en/');
+        $this->entityAlt->setPath(dirname(__FILE__) .'/docs-parser/en/');
         $this->entityAlt->setVersion('2.4');
         $this->entityAlt->setLanguage('en');
 
         $this->page = new DocumentationPage(
             $this->entity,
             'test.md',
-            DOCSVIEWER_PATH . '/tests/docs/en/test.md'
+            dirname(__FILE__) .'/docs/en/test.md'
         );
 
         $this->subPage = new DocumentationPage(
             $this->entity,
             'subpage.md',
-            DOCSVIEWER_PATH. '/tests/docs/en/subfolder/subpage.md'
+            dirname(__FILE__) .'/docs/en/subfolder/subpage.md'
         );
 
         $this->subSubPage = new DocumentationPage(
             $this->entity,
             'subsubpage.md',
-            DOCSVIEWER_PATH. '/tests/docs/en/subfolder/subsubfolder/subsubpage.md'
+            dirname(__FILE__) .'/docs/en/subfolder/subsubfolder/subsubpage.md'
         );
 
         $this->filePage =  new DocumentationPage(
             $this->entityAlt,
             'file-download.md',
-            DOCSVIEWER_PATH . '/tests/docs-parser/en/file-download.md'
+            dirname(__FILE__) .'/docs-parser/en/file-download.md'
         );
 
         $this->metaDataPage = new DocumentationPage(
             $this->entityAlt,
             'MetaDataTest.md',
-            DOCSVIEWER_PATH . '/tests/docs-parser/en/MetaDataTest.md'
+            dirname(__FILE__) .'/docs-parser/en/MetaDataTest.md'
         );
 
         $this->indexPage = new DocumentationPage(
             $this->entity,
             'index.md',
-            DOCSVIEWER_PATH. '/tests/docs/en/index.md'
+            dirname(__FILE__) .'/docs/en/index.md'
         );
 
         $manifest = new DocumentationManifest(true);
@@ -94,7 +94,7 @@ class DocumentationParserTest extends SapphireTest
         $codePage = new DocumentationPage(
             $this->entityAlt,
             'CodeSnippets.md',
-            DOCSVIEWER_PATH . '/tests/docs-parser/en/CodeSnippets.md'
+            dirname(__FILE__) .'/docs-parser/en/CodeSnippets.md'
         );
 
         $result = DocumentationParser::rewrite_code_blocks(
@@ -306,41 +306,27 @@ HTML;
             $this->subPage->getMarkdown(),
             $this->subPage
         );
-
-        $expected = Controller::join_links(
-            Director::absoluteBaseURL(),
-            'resources',
-            DOCSVIEWER_DIR,
-            '/tests/docs/en/subfolder/_images/image.png'
-        );
         
-        $this->assertContains(
-            sprintf('[relative image link](%s)', $expected),
+        $absoluteBaseURL = preg_quote(trim(Director::absoluteBaseURL(), '/'), '/');
+
+        $expected = $absoluteBaseURL .'\/resources\/((vendor\/silverstripe\/docsviewer\/)?)tests\/docs\/en\/subfolder\/_images\/image\.png';
+
+        $this->assertRegExp(
+            '/' . sprintf('\[relative image link\]\(%s\)', $expected) . '/',
             $result
         );
 
-        $this->assertContains(
-            sprintf(
-                '[parent image link](%s)',
-                Controller::join_links(
-                    Director::absoluteBaseURL(),
-                    'resources',
-                    DOCSVIEWER_DIR,
-                    '/tests/docs/en/_images/image.png'
-                )
-            ),
+        $expected = $absoluteBaseURL .'\/resources\/((vendor\/silverstripe\/docsviewer\/)?)tests\/docs\/en\/_images\/image\.png';
+
+        $this->assertRegExp(
+            '/' . sprintf('\[parent image link\]\(%s\)', $expected) . '/',
             $result
         );
 
-        $expected = Controller::join_links(
-            Director::absoluteBaseURL(),
-            'resources',
-            DOCSVIEWER_DIR,
-            '/tests/docs/en/_images/image.png'
-        );
+        $expected = $absoluteBaseURL .'\/resources\/((vendor\/silverstripe\/docsviewer\/)?)tests\/docs\/en\/_images\/image\.png';
 
-        $this->assertContains(
-            sprintf('[absolute image link](%s)', $expected),
+        $this->assertRegExp(
+            '/' . sprintf('\[absolute image link\]\(%s\)', $expected) . '/',
             $result
         );
     }
@@ -434,7 +420,7 @@ HTML;
         $page = new DocumentationPage(
             $this->entityAlt,
             'MetaDataYamlBlockTest.md',
-            DOCSVIEWER_PATH . '/tests/docs-parser/en/MetaDataYamlBlockTest.md'
+            dirname(__FILE__) .'/docs-parser/en/MetaDataYamlBlockTest.md'
         );
         $page->getMarkdown(true);
 
@@ -456,14 +442,10 @@ HTML;
     {
         $parsed = DocumentationParser::parse($this->filePage);
 
-        $this->assertContains(
-            'resources/' . DOCSVIEWER_DIR .'/tests/docs-parser/en/_images/external_link.png',
-            $parsed
-        );
+        $expected = '/resources\/((vendor\/silverstripe\/docsviewer\/)?)tests\/docs-parser\/en\/_images\/external_link\.png/';
+        $this->assertRegExp($expected, $parsed);
 
-        $this->assertContains(
-            'resources/' . DOCSVIEWER_DIR .'/tests/docs-parser/en/_images/test.tar.gz',
-            $parsed
-        );
+        $expected = '/resources\/((vendor\/silverstripe\/docsviewer\/)?)tests\/docs-parser\/en\/_images\/test\.tar\.gz/';
+        $this->assertRegExp($expected, $parsed);
     }
 }

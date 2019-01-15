@@ -42,26 +42,26 @@ class DocumentationManifestTests extends SapphireTest
             'register_entities',
             array(
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs/",
+                    'Path' => dirname(__FILE__) ."/docs/",
                     'Title' => 'Doc Test',
                     'Key' => 'testdocs',
                     'Version' => '2.3'
                 ),
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-v2.4/",
+                    'Path' => dirname(__FILE__) ."/docs-v2.4/",
                     'Title' => 'Doc Test',
                     'Version' => '2.4',
                     'Key' => 'testdocs',
                     'Stable' => true
                 ),
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-v3.0/",
+                    'Path' => dirname(__FILE__) ."/docs-v3.0/",
                     'Title' => 'Doc Test',
                     'Key' => 'testdocs',
                     'Version' => '3.0'
                 ),
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-manifest/",
+                    'Path' => dirname(__FILE__) ."/docs-manifest/",
                     'Title' => 'Manifest',
                     'Key' => 'manifest'
                 )
@@ -123,8 +123,8 @@ class DocumentationManifestTests extends SapphireTest
         $this->assertStringEndsWith(
             '2.3/test/',
             $this->manifest->getNextPage(
-                DOCSVIEWER_PATH . '/tests/docs/en/subfolder/subsubfolder/subsubpage.md',
-                DOCSVIEWER_PATH . '/tests/docs/en/'
+                dirname(__FILE__) .'/docs/en/subfolder/subsubfolder/subsubpage.md',
+                dirname(__FILE__) .'/docs/en/'
             )->Link
         );
 
@@ -132,8 +132,8 @@ class DocumentationManifestTests extends SapphireTest
         $this->assertContains(
             '/intermediate/',
             $this->manifest->getNextPage(
-                DOCSVIEWER_PATH . '/tests/docs/en/sort/01-basic.md',
-                DOCSVIEWER_PATH . '/tests/docs/en/'
+                dirname(__FILE__) .'/docs/en/sort/01-basic.md',
+                dirname(__FILE__) .'/docs/en/'
             )->Link
         );
 
@@ -142,8 +142,8 @@ class DocumentationManifestTests extends SapphireTest
         $this->assertContains(
             '/test/',
             $this->manifest->getNextPage(
-                DOCSVIEWER_PATH . '/tests/docs-v2.4/en/index.md',
-                DOCSVIEWER_PATH . '/tests/docs-v2.4/en/'
+                dirname(__FILE__) .'/docs-v2.4/en/index.md',
+                dirname(__FILE__) .'/docs-v2.4/en/'
             )->Link
         );
 
@@ -151,8 +151,8 @@ class DocumentationManifestTests extends SapphireTest
         // last folder in a entity does not leak
         $this->assertNull(
             $this->manifest->getNextPage(
-                DOCSVIEWER_PATH . '/tests/docs/en/test.md',
-                DOCSVIEWER_PATH . '/tests/docs/en/'
+                dirname(__FILE__) .'/docs/en/test.md',
+                dirname(__FILE__) .'/docs/en/'
             )
         );
     }
@@ -163,24 +163,24 @@ class DocumentationManifestTests extends SapphireTest
         $this->assertContains(
             'subfolder/subsubfolder/subsubpage',
             $this->manifest->getPreviousPage(
-                DOCSVIEWER_PATH . '/tests/docs/en/test.md',
-                DOCSVIEWER_PATH . '/tests/docs/en/'
+                dirname(__FILE__) .'/docs/en/test.md',
+                dirname(__FILE__) .'/docs/en/'
             )->Link
         );
 
         // does not leak between entities
         $this->assertNull(
             $this->manifest->getPreviousPage(
-                DOCSVIEWER_PATH . '/tests/docs/en/index.md',
-                DOCSVIEWER_PATH . '/tests/docs/en/'
+                dirname(__FILE__) .'/docs/en/index.md',
+                dirname(__FILE__) .'/docs/en/'
             )
         );
 
         // does not leak between entities
         $this->assertNull(
             $this->manifest->getPreviousPage(
-                DOCSVIEWER_PATH . '	/tests/docs/en/index.md',
-                DOCSVIEWER_PATH . '/tests/docs/en/'
+                dirname(__FILE__) . '/docs/en/index.md',
+                dirname(__FILE__) .'/docs/en/'
             )
         );
     }
@@ -204,7 +204,7 @@ class DocumentationManifestTests extends SapphireTest
         $this->assertDOSContains(
             $expected,
             $this->manifest->getChildrenFor(
-                DOCSVIEWER_PATH . '/tests/docs/en/'
+                dirname(__FILE__) .'/docs/en/'
             )
         );
 
@@ -217,8 +217,8 @@ class DocumentationManifestTests extends SapphireTest
         $this->assertDOSContains(
             $expected,
             $this->manifest->getChildrenFor(
-                DOCSVIEWER_PATH . '/tests/docs-v3.0/en/',
-                DOCSVIEWER_PATH . '/tests/docs-v3.0/en/ChangeLog.md'
+                dirname(__FILE__) .'/docs-v3.0/en/',
+                dirname(__FILE__) .'/docs-v3.0/en/ChangeLog.md'
             )
         );
     }

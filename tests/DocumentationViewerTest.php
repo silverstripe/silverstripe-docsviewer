@@ -53,27 +53,27 @@ class DocumentationViewerTest extends FunctionalTest
             'register_entities',
             array(
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs/",
+                    'Path' => dirname(__FILE__) ."/docs/",
                     'Title' => 'Doc Test',
                     'Version' => '2.3'
                 ),
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-v2.4/",
+                    'Path' => dirname(__FILE__) ."/docs-v2.4/",
                     'Title' => 'Doc Test',
                     'Version' => '2.4',
                     'Stable' => true
                 ),
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-v3.0/",
+                    'Path' => dirname(__FILE__) ."/docs-v3.0/",
                     'Title' => 'Doc Test',
                     'Version' => '3.0'
                 ),
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-parser/",
+                    'Path' => dirname(__FILE__) ."/docs-parser/",
                     'Title' => 'DocumentationViewerAltModule1'
                 ),
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-manifest/",
+                    'Path' => dirname(__FILE__) ."/docs-manifest/",
                     'Title' => 'DocumentationViewerAltModule2'
                 )
             )

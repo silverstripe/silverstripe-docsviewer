@@ -26,7 +26,7 @@ class DocumentationPageTest extends SapphireTest
         Config::nest();
 
         $this->entity = new DocumentationEntity('doctest');
-        $this->entity->setPath(DOCSVIEWER_PATH . '/tests/docs/en/');
+        $this->entity->setPath(dirname(__FILE__) .'/docs/en/');
         $this->entity->setVersion('2.4');
         $this->entity->setLanguage('en');
 
@@ -48,7 +48,7 @@ class DocumentationPageTest extends SapphireTest
         $page = new DocumentationPage(
             $this->entity,
             'test.md',
-            DOCSVIEWER_PATH . '/tests/docs/en/test.md'
+            dirname(__FILE__) .'/docs/en/test.md'
         );
 
         // single layer
@@ -61,7 +61,7 @@ class DocumentationPageTest extends SapphireTest
         $page = new DocumentationFolder(
             $this->entity,
             'sort',
-            DOCSVIEWER_PATH . '/tests/docs/en/sort/'
+            dirname(__FILE__) .'/docs/en/sort/'
         );
 
         $this->assertEquals(Director::baseURL() . 'dev/docs/en/doctest/2.4/sort/', $page->Link());
@@ -69,7 +69,7 @@ class DocumentationPageTest extends SapphireTest
         $page = new DocumentationFolder(
             $this->entity,
             '1-basic.md',
-            DOCSVIEWER_PATH . '/tests/docs/en/sort/1-basic.md'
+            dirname(__FILE__) .'/docs/en/sort/1-basic.md'
         );
 
         $this->assertEquals(Director::baseURL() . 'dev/docs/en/doctest/2.4/sort/basic/', $page->Link());
@@ -80,7 +80,7 @@ class DocumentationPageTest extends SapphireTest
         $page = new DocumentationPage(
             $this->entity,
             'test.md',
-            DOCSVIEWER_PATH . '/tests/docs/en/test.md'
+            dirname(__FILE__) .'/docs/en/test.md'
         );
 
         $this->assertEquals("Test - Doctest", $page->getBreadcrumbTitle());
@@ -88,7 +88,7 @@ class DocumentationPageTest extends SapphireTest
         $page = new DocumentationFolder(
             $this->entity,
             '1-basic.md',
-            DOCSVIEWER_PATH . '/tests/docs/en/sort/1-basic.md'
+            dirname(__FILE__) .'/docs/en/sort/1-basic.md'
         );
 
         $this->assertEquals('Basic - Sort - Doctest', $page->getBreadcrumbTitle());
@@ -96,7 +96,7 @@ class DocumentationPageTest extends SapphireTest
         $page = new DocumentationFolder(
             $this->entity,
             '',
-            DOCSVIEWER_PATH . '/tests/docs/en/sort/'
+            dirname(__FILE__) .'/docs/en/sort/'
         );
 
         $this->assertEquals('Sort - Doctest', $page->getBreadcrumbTitle());
@@ -107,7 +107,7 @@ class DocumentationPageTest extends SapphireTest
         $page = new DocumentationPage(
             $this->entity,
             'file.md',
-            DOCSVIEWER_PATH . '/tests/docs/en/test/file.md'
+            dirname(__FILE__) .'/docs/en/test/file.md'
         );
 
         $this->assertContains(
