@@ -213,7 +213,6 @@ class DocumentationViewer extends Controller implements PermissionProvider
                 ltrim($url, '/'),
                 strlen($base)
             );
-        } else {
         }
 
         //
@@ -276,6 +275,11 @@ class DocumentationViewer extends Controller implements PermissionProvider
             // 	return $redirect->redirect($cleaned, 302);
             // }
             if ($record = $this->getManifest()->getPage($url)) {
+                // In SS 3 offsetSet() isn't implemented for some reason... this is a workaround
+                $routeParams = $this->request->routeParams();
+                $routeParams['Lang'] = $lang;
+                $this->request->setRouteParams($routeParams);
+
                 $this->record = $record;
                 $this->init();
 
@@ -687,10 +691,13 @@ class DocumentationViewer extends Controller implements PermissionProvider
     /**
      * Returns an edit link to the current page (optional).
      *
-     * @return string
+     * @return string|false
      */
     public function getEditLink()
     {
+        $editLink = false;
+        $entity = null;
+
         $page = $this->getPage();
 
         if ($page) {
@@ -706,13 +713,13 @@ class DocumentationViewer extends Controller implements PermissionProvider
                 }
 
 
-                if ($version == 'trunk' && (isset($url['options']['rewritetrunktomaster']))) {
+                if ($version === 'trunk' && (isset($url['options']['rewritetrunktomaster']))) {
                     if ($url['options']['rewritetrunktomaster']) {
                         $version = "master";
                     }
                 }
 
-                return str_replace(
+                $editLink = str_replace(
                     array('%entity%', '%lang%', '%version%', '%path%'),
                     array(
                         $entity->title,
@@ -725,7 +732,9 @@ class DocumentationViewer extends Controller implements PermissionProvider
             }
         }
 
-        return false;
+        $this->extend('updateDocumentationEditLink', $editLink, $entity);
+
+        return $editLink;
     }
 
 
