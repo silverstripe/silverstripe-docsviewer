@@ -376,6 +376,8 @@ class DocumentationPage extends ViewableData
      */
     public function setCanonicalUrl($canonicalUrl)
     {
+        user_error("DocumentationPage::setCanonicalUrl() is deprecated; it won't affect DocumentationViewer", E_USER_WARNING);
+
         $this->canonicalUrl = $canonicalUrl;
         return $this;
     }
@@ -388,6 +390,11 @@ class DocumentationPage extends ViewableData
      */
     public function getCanonicalUrl()
     {
+        user_error(
+            "DocumentationPage::getCanonicalUrl() is deprecated; use DocumentationViewer::getCanonicalUrl() instead.",
+            E_USER_WARNING
+        );
+
         if (!$this->canonicalUrl) {
             $this->populateCanonicalUrl();
         }

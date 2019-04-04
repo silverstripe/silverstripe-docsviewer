@@ -90,22 +90,4 @@ class DocumentationPageTest extends SapphireTest
 
         $this->assertEquals('Sort - Doctest', $page->getBreadcrumbTitle());
     }
-
-    public function testGetCanonicalUrl()
-    {
-        $page = new DocumentationPage(
-            $this->entity,
-            'file.md',
-            DOCSVIEWER_PATH . '/tests/docs/en/test/file.md'
-        );
-
-        $this->assertContains(
-            'dev/docs/en/test/file/',
-            $page->getCanonicalUrl(),
-            'Canonical URL is determined, set and returned'
-        );
-
-        $page->setCanonicalUrl('some-other-url');
-        $this->assertSame('some-other-url', $page->getCanonicalUrl(), 'Canonical URL can be adjusted via public API');
-    }
 }

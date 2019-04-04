@@ -588,10 +588,26 @@ class DocumentationViewer extends Controller implements PermissionProvider
      */
     public function getCanonicalUrl()
     {
-        if (!$this->getPage()) {
+        $page = $this->getPage();
+
+        if (!$page) {
             return '';
         }
-        return $this->getPage()->getCanonicalUrl();
+
+        // Build the basic canoncial URL, relative to link_base as is mapped in the manifest
+        $url = Controller::join_links(
+            $page->getEntity()->getLanguage(),
+            $page->getRelativeLink()
+        );
+
+        // If the canoncial URL is, in fact, a redirect, post that directly - redirecting canoncials are a bad thing.
+        // See https://github.com/silverstripe/doc.silverstripe.org/issues/181 for discussion
+        if ($potentialRedirect = $this->manifest->getRedirect($url)) {
+            $url = $potentialRedirect;
+        }
+
+        // Turn into an absolute URL
+        return Director::absoluteUrl(Controller::join_links(self::getDocumentationBaseHref(), $url));
     }
 
     /**
