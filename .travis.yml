@@ -1,24 +1,23 @@
-# See https://github.com/silverstripe-labs/silverstripe-travis-support for setup details
-
 sudo: false
 
 language: php
 
 php:
-  - 5.4
-  - 5.5
   - 5.6
   - 7.1
 
 env:
-  - DB=MYSQL CORE_RELEASE=3
+  - DB=MYSQL CORE_RELEASE=4.3
 
 before_script:
-  - composer self-update || true
-  - git clone git://github.com/silverstripe-labs/silverstripe-travis-support.git ~/travis-support
-  - php ~/travis-support/travis_setup.php --source `pwd` --target ~/builds/ss
-  - cd ~/builds/ss
-  - composer install
+# Init PHP
+  - phpenv rehash
+  - phpenv config-rm xdebug.ini
+  - echo 'memory_limit = 2G' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+
+# Install composer dependencies
+  - composer validate
+  - composer install --prefer-dist --no-interaction --no-progress --no-suggest --optimize-autoloader --verbose --profile
 
 script:
-  - vendor/bin/phpunit docsviewer/tests
+  - vendor/bin/phpunit

@@ -1,7 +1,7 @@
 {
     "name": "silverstripe/docsviewer",
     "description": "Documentation viewer module for SilverStripe",
-    "type": "silverstripe-module",
+    "type": "silverstripe-vendormodule",
     "keywords": ["silverstripe", "documentation"],
     "license": "BSD-3-Clause",
     "authors": [{
@@ -14,17 +14,30 @@
         "irc": "irc://irc.freenode.org/silverstripe"
     },
 	"require": {
-        "silverstripe/framework": "~3.1",
-        "erusev/parsedown-extra": "~0.2",
-        "erusev/parsedown": "~1.1",
-        "mnapoli/front-yaml": "^1.5"
+        "silverstripe/framework": "~4.3",
+        "silverstripe/admin": "^1.3",
+        "erusev/parsedown-extra": "~0.7",
+        "erusev/parsedown": "~1.7",
+        "mnapoli/front-yaml": "^1.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7",
+        "squizlabs/php_codesniffer": "^3.0"
     },
     "suggest": {
         "silverstripe/staticpublisher": "Allows publishing documentation as HTML"
     },
     "extra": {
+        "expose": [
+            "css",
+            "javascript",
+            "images",
+            "thirdparty"
+        ],
         "branch-alias": {
             "dev-master": "3.x-dev"
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

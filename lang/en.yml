@@ -1,8 +1,8 @@
 en:
-  DocumentationSearch:
+  SilverStripe\DocsViewer\Search\DocumentationSearch:
     SEARCH: Search
     SEARCHRESULTS: 'Search Results'
-  DocumentationViewer:
+  SilverStripe\DocsViewer\Controllers\DocumentationViewer:
     CHANGE: Change
     KEYWORDS: Keywords
     LANGUAGE: Language

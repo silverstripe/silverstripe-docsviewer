@@ -1,4 +1,16 @@
 <?php
+namespace SilverStripe\DocsViewer\Tests;
+
+use SilverStripe\Control\Director;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\Session;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\FunctionalTest;
+use SilverStripe\DocsViewer\DocumentationManifest;
+use SilverStripe\DocsViewer\Controllers\DocumentationViewer;
+use SilverStripe\View\SSViewer;
+
 
 /**
  * Some of these tests are simply checking that pages load. They should not assume
@@ -22,52 +34,52 @@ class DocumentationViewerTest extends FunctionalTest
 
         // explicitly use dev/docs. Custom paths should be tested separately
         Config::inst()->update(
-            'DocumentationViewer',
+            DocumentationViewer::class,
             'link_base',
             'dev/docs/'
         );
 
         // disable automatic module registration so modules don't interfere.
         Config::inst()->update(
-            'DocumentationManifest',
+            DocumentationManifest::class,
             'automatic_registration',
             false
         );
 
-        Config::inst()->remove('DocumentationManifest', 'register_entities');
+        Config::inst()->remove(DocumentationManifest::class, 'register_entities');
 
         Config::inst()->update(
-            'DocumentationManifest',
+            DocumentationManifest::class,
             'register_entities',
             array(
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs/",
+                    'Path' => dirname(__FILE__) ."/docs/",
                     'Title' => 'Doc Test',
                     'Version' => '2.3'
                 ),
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-v2.4/",
+                    'Path' => dirname(__FILE__) ."/docs-v2.4/",
                     'Title' => 'Doc Test',
                     'Version' => '2.4',
                     'Stable' => true
                 ),
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-v3.0/",
+                    'Path' => dirname(__FILE__) ."/docs-v3.0/",
                     'Title' => 'Doc Test',
                     'Version' => '3.0'
                 ),
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-parser/",
+                    'Path' => dirname(__FILE__) ."/docs-parser/",
                     'Title' => 'DocumentationViewerAltModule1'
                 ),
                 array(
-                    'Path' => DOCSVIEWER_PATH . "/tests/docs-search/",
+                    'Path' => dirname(__FILE__) ."/docs-manifest/",
                     'Title' => 'DocumentationViewerAltModule2'
                 )
             )
         );
 
-        Config::inst()->update('SSViewer', 'theme_enabled', false);
+        Config::inst()->update(SSViewer::class, 'theme_enabled', false);
 
         $this->manifest = new DocumentationManifest(true);
     }
@@ -76,7 +88,7 @@ class DocumentationViewerTest extends FunctionalTest
     {
         parent::tearDown();
 
-        Config::unnest();
+        @Config::unnest();
     }
 
     /**
@@ -153,8 +165,11 @@ class DocumentationViewerTest extends FunctionalTest
     public function testGetMenu()
     {
         $v = new DocumentationViewer();
+        $session = Injector::inst()->create(Session::class, array());
         // check with children
-        $response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.3/'), DataModel::inst());
+        $request = new HTTPRequest('GET', 'en/doc_test/2.3/');
+        $request->setSession($session);
+        $response = $v->handleRequest($request);
 
         $expected = array(
             Director::baseURL() . 'dev/docs/en/doc_test/2.3/sort/' => 'Sort',
@@ -162,11 +177,13 @@ class DocumentationViewerTest extends FunctionalTest
             Director::baseURL() . 'dev/docs/en/doc_test/2.3/test/' => 'Test'
         );
 
-        $actual = $v->getMenu()->first()->Children->map('Link', 'Title');
+        $actual = $v->getMenu()->first()->Children->map('Link', 'Title')->toArray();
         $this->assertEquals($expected, $actual);
 
 
-        $response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.4/'), DataModel::inst());
+        $request = new HTTPRequest('GET', 'en/doc_test/2.4/');
+        $request->setSession($session);
+        $response = $v->handleRequest($request);
         $this->assertEquals('current', $v->getMenu()->first()->LinkingMode);
 
         // 2.4 stable release has 1 child page (not including index)
@@ -179,7 +196,7 @@ class DocumentationViewerTest extends FunctionalTest
             Director::baseURL() . 'dev/docs/en/documentationvieweraltmodule2/' => 'DocumentationViewerAltModule2'
         );
 
-        $this->assertEquals($expected, $v->getMenu()->map('Link', 'Title'));
+        $this->assertEquals($expected, $v->getMenu()->map('Link', 'Title')->toArray());
     }
 
 
@@ -187,11 +204,16 @@ class DocumentationViewerTest extends FunctionalTest
     public function testGetLanguage()
     {
         $v = new DocumentationViewer();
-        $response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.3/'), DataModel::inst());
+        $session = Injector::inst()->create(Session::class, array());
+        $request = new HTTPRequest('GET', 'en/doc_test/2.3/');
+        $request->setSession($session);
+        $response = $v->handleRequest($request);
 
         $this->assertEquals('en', $v->getLanguage());
 
-        $response = $v->handleRequest(new SS_HTTPRequest('GET', 'en/doc_test/2.3/subfolder/subsubfolder/subsubpage/'), DataModel::inst());
+        $request = new HTTPRequest('GET', 'en/doc_test/2.3/subfolder/subsubfolder/subsubpage/');
+        $request->setSession($session);
+        $response = $v->handleRequest($request);
         $this->assertEquals('en', $v->getLanguage());
     }
 
