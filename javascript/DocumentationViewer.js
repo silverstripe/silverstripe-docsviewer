@@ -55,7 +55,7 @@
                 }
             };
 
-            $(window).load(updateTables);
+            $(window).on('load', updateTables);
             $(window).on(
                 "redraw",function() {
                     switched = false;
