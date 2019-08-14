@@ -42,9 +42,9 @@ html {
     width: 72%;
 }
 
-    #content .box {
-        padding: 30px 5px;
-    }
+#content .box {
+    padding: 35px 0;
+}
 
 /*! sidebar */
 #sidebar {
@@ -295,7 +295,6 @@ html {
 /* Footer */
 #footer {
     margin: 20px auto;
-    padding: 0 30px;
 }
 
 /*! Pagination */
