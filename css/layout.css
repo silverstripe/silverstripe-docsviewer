@@ -522,23 +522,21 @@ form .message.error {
     .warningBoxBottom ul { margin: 0 0 0 40px; }
     .warningBoxBottom li { background: none; margin-bottom: 0; }
 
-.doc-breadcrumbs {}
+.doc-breadcrumbs h1 {
+    margin: 0 0 5px 0;
+    color: #999;
+    font-size: 38px;
+    font-weight: 200;
+}
 
-    .doc-breadcrumbs p {
-        margin: 0 0 5px 0;
-        color: #999;
-        font-size: 38px;
-    }
+.doc-breadcrumbs h1 a {
+    color: rgb(3, 91, 136);
+    text-decoration: none;
+}
 
-        .doc-breadcrumbs p a {
-            color: rgb(3, 91, 136);
-            text-decoration:none;
-            font-weight:200;
-        }
-
-        .doc-breadcrumbs p a.current {
-            color:#696868;
-        }
+.doc-breadcrumbs h1 a.current {
+    color:#696868;
+}
 
 .menu-open {
     display:none;
@@ -730,7 +728,7 @@ form .message.error {
         padding:20px 0;
     }
 
-    .doc-breadcrumbs p {
+    .doc-breadcrumbs h1 {
         font-size:18px;
     }
 
