@@ -270,6 +270,8 @@ class DocumentationPage extends ViewableData
 
     /**
      * Determine and set the canonical URL for the given record, for example: dev/docs/en/Path/To/Document
+     *
+     * @deprecated 2.1.0 This method is no longer used.
      */
     public function populateCanonicalUrl()
     {
@@ -371,11 +373,14 @@ class DocumentationPage extends ViewableData
     /**
      * Set the canonical URL to use for this page
      *
+     * @deprecated 2.1.0 This method is no longer used.
      * @param string $canonicalUrl
      * @return $this
      */
     public function setCanonicalUrl($canonicalUrl)
     {
+        user_error("DocumentationPage::setCanonicalUrl() is deprecated; it won't affect DocumentationViewer", E_USER_WARNING);
+
         $this->canonicalUrl = $canonicalUrl;
         return $this;
     }
@@ -384,10 +389,16 @@ class DocumentationPage extends ViewableData
      * Get the canonical URL to use for this page. Will trigger discovery
      * via {@link DocumentationPage::populateCanonicalUrl()} if none is already set.
      *
+     * @deprecated 2.1.0 This method is no longer used.
      * @return string
      */
     public function getCanonicalUrl()
     {
+        user_error(
+            "DocumentationPage::getCanonicalUrl() is deprecated; use DocumentationViewer::getCanonicalUrl() instead.",
+            E_USER_WARNING
+        );
+
         if (!$this->canonicalUrl) {
             $this->populateCanonicalUrl();
         }
