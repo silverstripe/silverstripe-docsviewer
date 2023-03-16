@@ -1,5 +1,9 @@
 # Documentation Viewer Module
 
+## ABANDONED
+
+This package is abandoned. See [silverstripe/doc.silverstripe.org](https://github.com/silverstripe/doc.silverstripe.org) instead.
+
 [![Build Status](https://secure.travis-ci.org/silverstripe/silverstripe-docsviewer.png?branch=master)](http://travis-ci.org/silverstripe/silverstripe-docsviewer)
 
 ## Maintainer Contact
